@@ -950,7 +950,67 @@
   cursor: pointer;
   justify-content: center;
 }
-</style></head>
+<style>
+  /* iOS 底部导航修正：更薄、更贴底，比例更接近电脑端 */
+
+  .wrap {
+    padding-bottom: 128px;
+  }
+
+  .tabs {
+    bottom: 6px;
+    width: min(692px, calc(100% - 20px));
+  }
+
+  @media (max-width: 480px) {
+    .wrap {
+      padding-left: 12px;
+      padding-right: 12px;
+      padding-bottom: 112px;
+    }
+
+    .tabs {
+      width: calc(100% - 14px);
+      bottom: 4px;
+      gap: 6px;
+      padding: 6px;
+      border-radius: 28px;
+      box-shadow:
+        0 12px 24px rgba(15, 23, 42, 0.10),
+        0 2px 6px rgba(15, 23, 42, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.92);
+    }
+
+    .tab {
+      height: 64px;
+      min-height: 64px;
+      padding: 8px 6px 6px;
+      gap: 5px;
+      font-size: 13px;
+      border-radius: 20px;
+    }
+
+    .tab::before {
+      font-size: 22px;
+    }
+
+    .tab.active {
+      box-shadow:
+        0 6px 14px rgba(15, 23, 42, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    }
+  }
+
+  /* 只有添加到主屏幕后，才启用 safe area 偏移 */
+  body.standalone .wrap {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 112px);
+  }
+
+  body.standalone .tabs {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 6px);
+  }
+</style>
+</head>
 <body>
   <div class="wrap">
     <div class="card hero">
