@@ -750,6 +750,16 @@
     <div class="footer-space"></div>
   </div>
 
+  <div id="timerDoneModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:999;align-items:center;justify-content:center;padding:20px;">
+    <div style="width:min(420px,100%);background:#fff;border-radius:24px;padding:22px;box-shadow:0 20px 50px rgba(15,23,42,.2);text-align:center;">
+      <div style="font-size:24px;font-weight:800;margin-bottom:10px;">倒计时结束</div>
+      <div style="font-size:14px;color:#64748b;line-height:1.7;margin-bottom:18px;">
+        铃声会持续响，直到你手动关闭。
+      </div>
+      <button id="stopAlarmBtn" class="btn" style="width:100%;">停止铃声</button>
+    </div>
+  </div>
+
   <script>
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const FORM_KEY = "gain-tracker-form";
@@ -885,6 +895,7 @@
 
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     let timerAudioCtx = null;
+    let timerAlarmLoop = null;
 
     function $(id){
       return document.getElementById(id);
@@ -921,7 +932,6 @@
         }))
       };
     }
-
     function getPlanTemplate(){
       try{
         const raw = JSON.parse(localStorage.getItem(PLAN_TEMPLATE_KEY) || "null");
@@ -1022,6 +1032,7 @@
       $("planItemsEdit").value = (day.items || []).join("\n");
       $("planProteinEdit").value = day.protein || "";
     }
+
     function togglePlanCheck(key){
       const checks = getPlanChecks();
       checks[key] = !checks[key];
@@ -1217,7 +1228,6 @@
         planSummary
       ].join("\n");
     }
-
     function updateSummary(){
       const data = getForm();
       const weights = [
@@ -1465,6 +1475,7 @@
       timerEndAt = 0;
       timerRunning = false;
       stopTimerInterval();
+      stopAlarmLoop();
 
       setForm(defaultForm);
       renderHistory();
@@ -1474,6 +1485,7 @@
       renderPlan();
       alert("已清空全部本地记录");
     }
+
     function renderCounter(){
       $("counterValue").textContent = String(counterValue);
       localStorage.setItem(COUNTER_KEY, String(counterValue));
@@ -1524,7 +1536,6 @@
         timerInterval = null;
       }
     }
-
     function unlockTimerAudio(){
       if(!AudioContextClass) return Promise.resolve(false);
 
@@ -1578,26 +1589,56 @@
       });
     }
 
-    function beepDone(){
-      try{
-        if(!timerAudioCtx || timerAudioCtx.state === "closed"){
-          if(!AudioContextClass) return;
-          timerAudioCtx = new AudioContextClass();
-        }
+    function stopAlarmLoop(){
+      if(timerAlarmLoop){
+        clearInterval(timerAlarmLoop);
+        timerAlarmLoop = null;
+      }
+      hideTimerDoneModal();
+    }
 
-        const play = () => {
-          playTimerBeepSequence();
-          if(navigator.vibrate){
-            navigator.vibrate([140, 80, 140]);
+    function startAlarmLoop(){
+      stopAlarmLoop();
+
+      const playOnce = () => {
+        try{
+          if(!timerAudioCtx || timerAudioCtx.state === "closed"){
+            if(!AudioContextClass) return;
+            timerAudioCtx = new AudioContextClass();
           }
-        };
 
-        if(timerAudioCtx.state === "suspended"){
-          timerAudioCtx.resume().then(play).catch(() => {});
-        }else{
-          play();
-        }
-      }catch(e){}
+          const play = () => {
+            playTimerBeepSequence();
+            if(navigator.vibrate){
+              navigator.vibrate([180, 100, 180]);
+            }
+          };
+
+          if(timerAudioCtx.state === "suspended"){
+            timerAudioCtx.resume().then(play).catch(() => {});
+          }else{
+            play();
+          }
+        }catch(e){}
+      };
+
+      playOnce();
+      timerAlarmLoop = setInterval(playOnce, 900);
+      showTimerDoneModal();
+    }
+
+    function showTimerDoneModal(){
+      const modal = $("timerDoneModal");
+      if(modal){
+        modal.style.display = "flex";
+      }
+    }
+
+    function hideTimerDoneModal(){
+      const modal = $("timerDoneModal");
+      if(modal){
+        modal.style.display = "none";
+      }
     }
 
     function tickTimer(){
@@ -1609,10 +1650,7 @@
         timerEndAt = 0;
         stopTimerInterval();
         renderTimer();
-        beepDone();
-        setTimeout(() => {
-          alert("倒计时结束");
-        }, 700);
+        startAlarmLoop();
       }
     }
 
@@ -1623,6 +1661,8 @@
     }
 
     function timerStart(){
+      stopAlarmLoop();
+
       if(!timerRunning){
         if(timerRemainingMs <= 0){
           timerRemainingMs = readTimerInputs();
@@ -1643,6 +1683,8 @@
     }
 
     function timerPause(){
+      stopAlarmLoop();
+
       if(timerRunning){
         timerRemainingMs = Math.max(0, timerEndAt - Date.now());
         timerRunning = false;
@@ -1653,6 +1695,7 @@
     }
 
     function timerReset(){
+      stopAlarmLoop();
       timerPause();
       timerInitialMs = readTimerInputs();
       if(timerInitialMs <= 0) timerInitialMs = 60000;
@@ -1676,7 +1719,6 @@
 
       syncTimerInputsFromInitial();
       renderTimer();
-
       installTimerAudioUnlock();
 
       $("counterAddBtn").onclick = counterAdd;
@@ -1750,6 +1792,8 @@
       if(file) importPlanTemplate(file);
       e.target.value = "";
     });
+
+    $("stopAlarmBtn").onclick = stopAlarmLoop;
 
     renderPlan();
     setForm(JSON.parse(localStorage.getItem(FORM_KEY) || JSON.stringify(defaultForm)));
