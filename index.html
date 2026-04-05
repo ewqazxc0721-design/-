@@ -883,6 +883,9 @@
     let timerEndAt = Number(localStorage.getItem(TIMER_END_AT_KEY) || "0");
     let timerRunning = localStorage.getItem(TIMER_RUNNING_KEY) === "1";
 
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    let timerAudioCtx = null;
+
     function $(id){
       return document.getElementById(id);
     }
@@ -1019,7 +1022,6 @@
       $("planItemsEdit").value = (day.items || []).join("\n");
       $("planProteinEdit").value = day.protein || "";
     }
-
     function togglePlanCheck(key){
       const checks = getPlanChecks();
       checks[key] = !checks[key];
@@ -1046,6 +1048,7 @@
       updateSummary();
       alert("已清空全部训练打卡");
     }
+
     function renderPlan(){
       const days = getPlanDays();
       const checks = getPlanChecks();
@@ -1522,21 +1525,78 @@
       }
     }
 
+    function unlockTimerAudio(){
+      if(!AudioContextClass) return Promise.resolve(false);
+
+      try{
+        if(!timerAudioCtx || timerAudioCtx.state === "closed"){
+          timerAudioCtx = new AudioContextClass();
+        }
+      }catch(e){
+        return Promise.resolve(false);
+      }
+
+      const resumeTask = typeof timerAudioCtx.resume === "function"
+        ? timerAudioCtx.resume()
+        : Promise.resolve();
+
+      return Promise.resolve(resumeTask).then(() => {
+        return timerAudioCtx && timerAudioCtx.state === "running";
+      }).catch(() => false);
+    }
+
+    function installTimerAudioUnlock(){
+      const unlock = () => { unlockTimerAudio(); };
+      document.addEventListener("touchend", unlock, { passive: true, once: true });
+      document.addEventListener("click", unlock, { passive: true, once: true });
+    }
+
+    function playTimerBeepSequence(){
+      if(!timerAudioCtx) return;
+
+      const startAt = timerAudioCtx.currentTime + 0.02;
+      [
+        { at: 0.00, freq: 880 },
+        { at: 0.22, freq: 1174 },
+        { at: 0.44, freq: 1318 }
+      ].forEach(({ at, freq }) => {
+        const osc = timerAudioCtx.createOscillator();
+        const gain = timerAudioCtx.createGain();
+        const t = startAt + at;
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, t);
+
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(0.12, t + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+
+        osc.connect(gain);
+        gain.connect(timerAudioCtx.destination);
+        osc.start(t);
+        osc.stop(t + 0.2);
+      });
+    }
+
     function beepDone(){
       try{
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = "sine";
-        osc.frequency.value = 880;
-        gain.gain.value = 0.05;
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
-        setTimeout(() => {
-          osc.stop();
-          ctx.close();
-        }, 250);
+        if(!timerAudioCtx || timerAudioCtx.state === "closed"){
+          if(!AudioContextClass) return;
+          timerAudioCtx = new AudioContextClass();
+        }
+
+        const play = () => {
+          playTimerBeepSequence();
+          if(navigator.vibrate){
+            navigator.vibrate([140, 80, 140]);
+          }
+        };
+
+        if(timerAudioCtx.state === "suspended"){
+          timerAudioCtx.resume().then(play).catch(() => {});
+        }else{
+          play();
+        }
       }catch(e){}
     }
 
@@ -1550,7 +1610,9 @@
         stopTimerInterval();
         renderTimer();
         beepDone();
-        alert("倒计时结束");
+        setTimeout(() => {
+          alert("倒计时结束");
+        }, 700);
       }
     }
 
@@ -1615,12 +1677,20 @@
       syncTimerInputsFromInitial();
       renderTimer();
 
+      installTimerAudioUnlock();
+
       $("counterAddBtn").onclick = counterAdd;
       $("counterResetBtn").onclick = counterReset;
 
-      $("timerStartBtn").onclick = timerStart;
+      $("timerStartBtn").onclick = () => {
+        unlockTimerAudio();
+        timerStart();
+      };
       $("timerPauseBtn").onclick = timerPause;
-      $("timerResetBtn").onclick = timerReset;
+      $("timerResetBtn").onclick = () => {
+        unlockTimerAudio();
+        timerReset();
+      };
 
       $("timerMinutes").oninput = () => {
         if(!timerRunning){
@@ -1647,7 +1717,6 @@
     function isStandaloneMode(){
       return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
     }
-
     document.querySelectorAll(".tab").forEach((btn) => {
       btn.onclick = () => switchTab(btn.dataset.tab);
     });
