@@ -1,0 +1,19 @@
+{
+  "name": "一周训练记录",
+  "short_name": "训练记录",
+  "description": "训练计划、打卡、周反馈、历史记录工具",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f8fb",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "./icons/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
