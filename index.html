@@ -772,6 +772,7 @@
     const TIMER_INITIAL_KEY = "portable-timer-initial-ms";
     const TIMER_END_AT_KEY = "portable-timer-end-at";
     const TIMER_RUNNING_KEY = "portable-timer-running";
+    const TIMER_ALARM_PENDING_KEY = "portable-timer-alarm-pending";
 
     const DEFAULT_PLAN_TEMPLATE = {
       version: 1,
@@ -896,6 +897,10 @@
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     let timerAudioCtx = null;
     let timerAlarmLoop = null;
+    let timerAlarmAudio = null;
+    let timerAlarmAudioUrl = "";
+    let timerAlarmActive = false;
+    let timerAlarmPending = localStorage.getItem(TIMER_ALARM_PENDING_KEY) === "1";
 
     function $(id){
       return document.getElementById(id);
@@ -932,6 +937,7 @@
         }))
       };
     }
+
     function getPlanTemplate(){
       try{
         const raw = JSON.parse(localStorage.getItem(PLAN_TEMPLATE_KEY) || "null");
@@ -1228,6 +1234,7 @@
         planSummary
       ].join("\n");
     }
+
     function updateSummary(){
       const data = getForm();
       const weights = [
@@ -1286,7 +1293,7 @@
         `周平均体重：${avgWeight || "-"} kg`,
         `平均睡眠：${entry.avgSleep || "-"}`,
         `最晚入睡时间：${entry.latestSleep || "-"}`,
-        `本周训练完成：${entry.trainingDays || "-"}`,
+        `本周训练完成：${entry.trainingDays || "-"} 天`,
         `俯卧撑最高一组：${entry.pushupBest || "-"}`,
         `引体向上最高一组：${entry.pullupBest || "-"}`,
         `本周引体总量：${entry.pullupTotal || "-"}`,
@@ -1467,6 +1474,7 @@
       localStorage.removeItem(TIMER_INITIAL_KEY);
       localStorage.removeItem(TIMER_END_AT_KEY);
       localStorage.removeItem(TIMER_RUNNING_KEY);
+      localStorage.removeItem(TIMER_ALARM_PENDING_KEY);
 
       activePlanDay = 0;
       counterValue = 0;
@@ -1474,6 +1482,9 @@
       timerInitialMs = 60000;
       timerEndAt = 0;
       timerRunning = false;
+      timerAlarmPending = false;
+      timerAlarmActive = false;
+
       stopTimerInterval();
       stopAlarmLoop();
 
@@ -1517,6 +1528,7 @@
       localStorage.setItem(TIMER_INITIAL_KEY, String(timerInitialMs));
       localStorage.setItem(TIMER_END_AT_KEY, String(timerEndAt));
       localStorage.setItem(TIMER_RUNNING_KEY, timerRunning ? "1" : "0");
+      localStorage.setItem(TIMER_ALARM_PENDING_KEY, timerAlarmPending ? "1" : "0");
     }
 
     function syncTimerInputsFromInitial(){
@@ -1536,43 +1548,164 @@
         timerInterval = null;
       }
     }
-    function unlockTimerAudio(){
-      if(!AudioContextClass) return Promise.resolve(false);
 
+    function ensureTimerAudioContext(){
+      if(!AudioContextClass) return null;
       try{
         if(!timerAudioCtx || timerAudioCtx.state === "closed"){
           timerAudioCtx = new AudioContextClass();
         }
       }catch(e){
-        return Promise.resolve(false);
+        return null;
+      }
+      return timerAudioCtx;
+    }
+
+    function createTimerAlarmAudioUrl(){
+      if(timerAlarmAudioUrl) return timerAlarmAudioUrl;
+
+      const sampleRate = 11025;
+      const durationSec = 1.05;
+      const totalSamples = Math.floor(sampleRate * durationSec);
+      const pcm = new Int16Array(totalSamples);
+
+      function writeTone(startSec, endSec, freq, amplitude = 0.35){
+        const start = Math.max(0, Math.floor(startSec * sampleRate));
+        const end = Math.min(totalSamples, Math.floor(endSec * sampleRate));
+
+        for(let i = start; i < end; i += 1){
+          const t = i / sampleRate;
+          const fadeIn = Math.min(1, (i - start) / (sampleRate * 0.01));
+          const fadeOut = Math.min(1, (end - i) / (sampleRate * 0.03));
+          const env = Math.max(0.0001, Math.min(fadeIn, fadeOut));
+          pcm[i] = Math.round(Math.sin(2 * Math.PI * freq * t) * 32767 * amplitude * env);
+        }
       }
 
-      const resumeTask = typeof timerAudioCtx.resume === "function"
-        ? timerAudioCtx.resume()
+      writeTone(0.00, 0.16, 880);
+      writeTone(0.30, 0.46, 1046);
+      writeTone(0.60, 0.80, 1318);
+
+      const buffer = new ArrayBuffer(44 + pcm.length * 2);
+      const view = new DataView(buffer);
+      let offset = 0;
+
+      const writeString = (text) => {
+        for(let i = 0; i < text.length; i += 1){
+          view.setUint8(offset, text.charCodeAt(i));
+          offset += 1;
+        }
+      };
+
+      writeString("RIFF");
+      view.setUint32(offset, 36 + pcm.length * 2, true); offset += 4;
+      writeString("WAVE");
+      writeString("fmt ");
+      view.setUint32(offset, 16, true); offset += 4;
+      view.setUint16(offset, 1, true); offset += 2;
+      view.setUint16(offset, 1, true); offset += 2;
+      view.setUint32(offset, sampleRate, true); offset += 4;
+      view.setUint32(offset, sampleRate * 2, true); offset += 4;
+      view.setUint16(offset, 2, true); offset += 2;
+      view.setUint16(offset, 16, true); offset += 2;
+      writeString("data");
+      view.setUint32(offset, pcm.length * 2, true); offset += 4;
+
+      for(let i = 0; i < pcm.length; i += 1){
+        view.setInt16(offset, pcm[i], true);
+        offset += 2;
+      }
+
+      timerAlarmAudioUrl = URL.createObjectURL(new Blob([buffer], { type: "audio/wav" }));
+      return timerAlarmAudioUrl;
+    }
+
+    function getOrCreateTimerAlarmAudio(){
+      if(!timerAlarmAudio){
+        timerAlarmAudio = new Audio(createTimerAlarmAudioUrl());
+        timerAlarmAudio.preload = "auto";
+        timerAlarmAudio.loop = true;
+        timerAlarmAudio.volume = 1;
+        timerAlarmAudio.playsInline = true;
+        timerAlarmAudio.setAttribute("playsinline", "");
+        timerAlarmAudio.setAttribute("webkit-playsinline", "");
+      }
+      return timerAlarmAudio;
+    }
+
+    function stopHtmlAlarm(){
+      if(!timerAlarmAudio) return;
+      try{
+        timerAlarmAudio.pause();
+        timerAlarmAudio.currentTime = 0;
+      }catch(e){}
+    }
+
+    function resumeTimerAudioContext(){
+      const ctx = ensureTimerAudioContext();
+      if(!ctx) return Promise.resolve(false);
+
+      const task = typeof ctx.resume === "function"
+        ? ctx.resume()
         : Promise.resolve();
 
-      return Promise.resolve(resumeTask).then(() => {
-        return timerAudioCtx && timerAudioCtx.state === "running";
-      }).catch(() => false);
+      return Promise.resolve(task)
+        .then(() => ctx.state === "running")
+        .catch(() => false);
+    }
+
+    function primeTimerAlarmAudio(){
+      const audio = getOrCreateTimerAlarmAudio();
+      audio.load();
+
+      const lastMuted = audio.muted;
+      audio.muted = true;
+
+      return Promise.resolve(audio.play()).then(() => {
+        audio.pause();
+        try{ audio.currentTime = 0; }catch(e){}
+        audio.muted = lastMuted;
+        return true;
+      }).catch(() => {
+        audio.muted = lastMuted;
+        return false;
+      });
+    }
+
+    function unlockTimerAudio(){
+      return Promise.all([
+        resumeTimerAudioContext(),
+        primeTimerAlarmAudio()
+      ]).then((results) => results.some(Boolean)).catch(() => false);
     }
 
     function installTimerAudioUnlock(){
-      const unlock = () => { unlockTimerAudio(); };
-      document.addEventListener("touchend", unlock, { passive: true, once: true });
-      document.addEventListener("click", unlock, { passive: true, once: true });
+      const unlock = () => {
+        unlockTimerAudio();
+        if(timerAlarmActive || timerAlarmPending){
+          ensureAlarmPlayback();
+        }
+      };
+
+      document.addEventListener("touchstart", unlock, { passive: true });
+      document.addEventListener("touchend", unlock, { passive: true });
+      document.addEventListener("click", unlock, { passive: true });
+      document.addEventListener("keydown", unlock);
     }
 
     function playTimerBeepSequence(){
-      if(!timerAudioCtx) return;
+      const ctx = ensureTimerAudioContext();
+      if(!ctx || ctx.state !== "running") return;
 
-      const startAt = timerAudioCtx.currentTime + 0.02;
+      const startAt = ctx.currentTime + 0.02;
+
       [
         { at: 0.00, freq: 880 },
         { at: 0.22, freq: 1174 },
         { at: 0.44, freq: 1318 }
       ].forEach(({ at, freq }) => {
-        const osc = timerAudioCtx.createOscillator();
-        const gain = timerAudioCtx.createGain();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
         const t = startAt + at;
 
         osc.type = "sine";
@@ -1583,48 +1716,48 @@
         gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
 
         osc.connect(gain);
-        gain.connect(timerAudioCtx.destination);
+        gain.connect(ctx.destination);
         osc.start(t);
         osc.stop(t + 0.2);
       });
     }
 
-    function stopAlarmLoop(){
-      if(timerAlarmLoop){
-        clearInterval(timerAlarmLoop);
-        timerAlarmLoop = null;
+    function ensureAlarmPlayback(){
+      const tasks = [];
+      const audio = getOrCreateTimerAlarmAudio();
+
+      if(audio.paused){
+        audio.muted = false;
+        try{ audio.currentTime = 0; }catch(e){}
+        tasks.push(
+          Promise.resolve(audio.play()).then(() => true).catch(() => false)
+        );
+      }else{
+        tasks.push(Promise.resolve(true));
       }
-      hideTimerDoneModal();
-    }
 
-    function startAlarmLoop(){
-      stopAlarmLoop();
-
-      const playOnce = () => {
-        try{
-          if(!timerAudioCtx || timerAudioCtx.state === "closed"){
-            if(!AudioContextClass) return;
-            timerAudioCtx = new AudioContextClass();
-          }
-
-          const play = () => {
+      tasks.push(
+        resumeTimerAudioContext().then((ok) => {
+          if(ok){
             playTimerBeepSequence();
-            if(navigator.vibrate){
-              navigator.vibrate([180, 100, 180]);
-            }
-          };
-
-          if(timerAudioCtx.state === "suspended"){
-            timerAudioCtx.resume().then(play).catch(() => {});
-          }else{
-            play();
+            return true;
           }
-        }catch(e){}
-      };
+          return false;
+        })
+      );
 
-      playOnce();
-      timerAlarmLoop = setInterval(playOnce, 900);
-      showTimerDoneModal();
+      if(navigator.vibrate){
+        navigator.vibrate([180, 100, 180]);
+      }
+
+      return Promise.all(tasks).then((results) => {
+        const ok = results.some(Boolean);
+        if(ok){
+          timerAlarmPending = false;
+          persistTimer();
+        }
+        return ok;
+      }).catch(() => false);
     }
 
     function showTimerDoneModal(){
@@ -1641,16 +1774,63 @@
       }
     }
 
+    function stopAlarmLoop(){
+      timerAlarmActive = false;
+      timerAlarmPending = false;
+
+      if(timerAlarmLoop){
+        clearInterval(timerAlarmLoop);
+        timerAlarmLoop = null;
+      }
+
+      stopHtmlAlarm();
+
+      if(navigator.vibrate){
+        navigator.vibrate(0);
+      }
+
+      hideTimerDoneModal();
+      persistTimer();
+    }
+
+    function startAlarmLoop(){
+      if(timerAlarmLoop){
+        clearInterval(timerAlarmLoop);
+        timerAlarmLoop = null;
+      }
+
+      stopHtmlAlarm();
+      timerAlarmActive = true;
+      timerAlarmPending = true;
+      showTimerDoneModal();
+      persistTimer();
+
+      const playOnce = () => {
+        if(!timerAlarmActive) return;
+        ensureAlarmPlayback();
+      };
+
+      playOnce();
+      timerAlarmLoop = setInterval(playOnce, 1200);
+    }
+
+    function finishTimerAndAlarm(){
+      timerRemainingMs = 0;
+      timerRunning = false;
+      timerEndAt = 0;
+      stopTimerInterval();
+      renderTimer();
+      startAlarmLoop();
+    }
+
     function tickTimer(){
       if(!timerRunning) return;
+
       timerRemainingMs = Math.max(0, timerEndAt - Date.now());
       renderTimer();
+
       if(timerRemainingMs <= 0){
-        timerRunning = false;
-        timerEndAt = 0;
-        stopTimerInterval();
-        renderTimer();
-        startAlarmLoop();
+        finishTimerAndAlarm();
       }
     }
 
@@ -1660,24 +1840,51 @@
       return (mins * 60 + secs) * 1000;
     }
 
+    function handleTimerWakeCheck(){
+      if(timerRunning && timerEndAt > 0){
+        timerRemainingMs = Math.max(0, timerEndAt - Date.now());
+
+        if(timerRemainingMs <= 0){
+          finishTimerAndAlarm();
+          return;
+        }
+
+        renderTimer();
+
+        if(!timerInterval){
+          timerInterval = setInterval(tickTimer, 250);
+        }
+        return;
+      }
+
+      if(timerAlarmPending || timerAlarmActive){
+        showTimerDoneModal();
+        ensureAlarmPlayback();
+      }
+    }
+
     function timerStart(){
       stopAlarmLoop();
+      unlockTimerAudio();
 
       if(!timerRunning){
         if(timerRemainingMs <= 0){
           timerRemainingMs = readTimerInputs();
           timerInitialMs = timerRemainingMs;
         }
+
         if(timerRemainingMs <= 0){
           timerRemainingMs = 60000;
           timerInitialMs = 60000;
           syncTimerInputsFromInitial();
         }
+
+        timerAlarmPending = false;
         timerEndAt = Date.now() + timerRemainingMs;
         timerRunning = true;
+
         stopTimerInterval();
         timerInterval = setInterval(tickTimer, 250);
-        persistTimer();
         renderTimer();
       }
     }
@@ -1696,9 +1903,15 @@
 
     function timerReset(){
       stopAlarmLoop();
-      timerPause();
+      stopTimerInterval();
+
+      timerRunning = false;
+      timerEndAt = 0;
+      timerAlarmPending = false;
+
       timerInitialMs = readTimerInputs();
       if(timerInitialMs <= 0) timerInitialMs = 60000;
+
       timerRemainingMs = timerInitialMs;
       renderTimer();
     }
@@ -1709,13 +1922,17 @@
       if(timerRunning && timerEndAt > 0){
         timerRemainingMs = Math.max(0, timerEndAt - Date.now());
         if(timerRemainingMs <= 0){
+          timerRemainingMs = 0;
           timerRunning = false;
           timerEndAt = 0;
+          timerAlarmPending = true;
         }
       }
 
       if(timerInitialMs <= 0) timerInitialMs = 60000;
-      if(timerRemainingMs <= 0 && !timerRunning) timerRemainingMs = timerInitialMs;
+      if(timerRemainingMs <= 0 && !timerRunning && !timerAlarmPending){
+        timerRemainingMs = timerInitialMs;
+      }
 
       syncTimerInputsFromInitial();
       renderTimer();
@@ -1724,20 +1941,15 @@
       $("counterAddBtn").onclick = counterAdd;
       $("counterResetBtn").onclick = counterReset;
 
-      $("timerStartBtn").onclick = () => {
-        unlockTimerAudio();
-        timerStart();
-      };
+      $("timerStartBtn").onclick = timerStart;
       $("timerPauseBtn").onclick = timerPause;
-      $("timerResetBtn").onclick = () => {
-        unlockTimerAudio();
-        timerReset();
-      };
+      $("timerResetBtn").onclick = timerReset;
 
       $("timerMinutes").oninput = () => {
         if(!timerRunning){
           timerInitialMs = readTimerInputs() || 60000;
           timerRemainingMs = timerInitialMs;
+          timerAlarmPending = false;
           renderTimer();
         }
       };
@@ -1746,6 +1958,7 @@
         if(!timerRunning){
           timerInitialMs = readTimerInputs() || 60000;
           timerRemainingMs = timerInitialMs;
+          timerAlarmPending = false;
           renderTimer();
         }
       };
@@ -1754,11 +1967,18 @@
         stopTimerInterval();
         timerInterval = setInterval(tickTimer, 250);
       }
+
+      if(timerAlarmPending){
+        showTimerDoneModal();
+      }
+
+      handleTimerWakeCheck();
     }
 
     function isStandaloneMode(){
       return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
     }
+
     document.querySelectorAll(".tab").forEach((btn) => {
       btn.onclick = () => switchTab(btn.dataset.tab);
     });
@@ -1813,8 +2033,13 @@
     document.addEventListener("visibilitychange", () => {
       if(document.visibilityState === "hidden"){
         updateSummary();
+      }else{
+        handleTimerWakeCheck();
       }
     });
+
+    window.addEventListener("pageshow", handleTimerWakeCheck);
+    window.addEventListener("focus", handleTimerWakeCheck);
 
     if("serviceWorker" in navigator){
       window.addEventListener("load", () => {
