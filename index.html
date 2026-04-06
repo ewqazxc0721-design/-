@@ -705,6 +705,13 @@
             <input id="timerSeconds" type="number" min="0" max="59" value="0" />
           </div>
         </div>
+
+        <div class="tool-row-3" style="margin-top:12px;">
+          <button class="btn-outline" type="button" data-timer-preset="30">30s</button>
+          <button class="btn-outline" type="button" data-timer-preset="60">60s</button>
+          <button class="btn-outline" type="button" data-timer-preset="120">120s</button>
+        </div>
+
         <div class="timer-value" id="timerDisplay">01:00</div>
         <div class="tool-row-3">
           <button class="btn" id="timerStartBtn">开始</button>
@@ -1840,6 +1847,28 @@
       return (mins * 60 + secs) * 1000;
     }
 
+    function applyTimerPreset(totalSeconds){
+      stopAlarmLoop();
+      stopTimerInterval();
+
+      timerRunning = false;
+      timerEndAt = 0;
+      timerAlarmPending = false;
+
+      const safeSeconds = Math.max(0, parseInt(totalSeconds || "0", 10));
+      const mins = Math.floor(safeSeconds / 60);
+      const secs = safeSeconds % 60;
+
+      $("timerMinutes").value = mins;
+      $("timerSeconds").value = secs;
+
+      timerInitialMs = safeSeconds * 1000;
+      if(timerInitialMs <= 0) timerInitialMs = 60000;
+
+      timerRemainingMs = timerInitialMs;
+      renderTimer();
+    }
+
     function handleTimerWakeCheck(){
       if(timerRunning && timerEndAt > 0){
         timerRemainingMs = Math.max(0, timerEndAt - Date.now());
@@ -1944,6 +1973,12 @@
       $("timerStartBtn").onclick = timerStart;
       $("timerPauseBtn").onclick = timerPause;
       $("timerResetBtn").onclick = timerReset;
+
+      document.querySelectorAll("[data-timer-preset]").forEach((btn) => {
+        btn.onclick = () => {
+          applyTimerPreset(Number(btn.getAttribute("data-timer-preset")));
+        };
+      });
 
       $("timerMinutes").oninput = () => {
         if(!timerRunning){
