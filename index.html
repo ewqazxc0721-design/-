@@ -910,6 +910,7 @@
     let timerAlarmPending = localStorage.getItem(TIMER_ALARM_PENDING_KEY) === "1";
     let timerAudioUnlocked = false;
     let timerFallbackBeepLoop = null;
+    let timerAlarmSession = 0;
 
     function $(id){
       return document.getElementById(id);
@@ -1494,6 +1495,7 @@
       timerAlarmPending = false;
       timerAlarmActive = false;
       timerAudioUnlocked = false;
+      timerAlarmSession = 0;
 
       stopTimerInterval();
       stopAlarmLoop();
@@ -1637,6 +1639,7 @@
         timerAlarmAudio.loop = true;
         timerAlarmAudio.volume = 1;
         timerAlarmAudio.playsInline = true;
+        timerAlarmAudio.muted = true;
         timerAlarmAudio.setAttribute("playsinline", "");
         timerAlarmAudio.setAttribute("webkit-playsinline", "");
       }
@@ -1648,6 +1651,7 @@
       try{
         timerAlarmAudio.pause();
         timerAlarmAudio.currentTime = 0;
+        timerAlarmAudio.muted = true;
       }catch(e){}
     }
 
@@ -1753,11 +1757,12 @@
       }
     }
 
-    function startFallbackBeepLoop(){
+    function startFallbackBeepLoop(sessionId = timerAlarmSession){
       if(timerFallbackBeepLoop) return;
 
       const playOnce = () => {
-        if(!timerAlarmActive) return;
+        if(sessionId !== timerAlarmSession) return;
+        if(!(timerAlarmActive || timerAlarmPending)) return;
         playTimerBeepSequence();
       };
 
@@ -1765,30 +1770,55 @@
       timerFallbackBeepLoop = setInterval(playOnce, 1200);
     }
 
-    function ensureAlarmPlayback(){
+    function ensureAlarmPlayback(sessionId = timerAlarmSession){
+      if(sessionId !== timerAlarmSession) return Promise.resolve(false);
+      if(!(timerAlarmActive || timerAlarmPending)) return Promise.resolve(false);
+
       const audio = getOrCreateTimerAlarmAudio();
 
       const htmlAudioTask = audio.paused
         ? (() => {
             audio.muted = false;
             try{ audio.currentTime = 0; }catch(e){}
-            return Promise.resolve(audio.play()).then(() => true).catch(() => false);
+
+            return Promise.resolve(audio.play()).then(() => {
+              if(sessionId !== timerAlarmSession || !(timerAlarmActive || timerAlarmPending)){
+                try{
+                  audio.pause();
+                  audio.currentTime = 0;
+                  audio.muted = true;
+                }catch(e){}
+                return false;
+              }
+              return true;
+            }).catch(() => false);
           })()
-        : Promise.resolve(true);
+        : Promise.resolve(
+            sessionId === timerAlarmSession && (timerAlarmActive || timerAlarmPending)
+          );
 
       const audioContextTask = resumeTimerAudioContext()
-        .then((ok) => !!ok)
+        .then((ok) => {
+          if(!ok) return false;
+          return sessionId === timerAlarmSession && (timerAlarmActive || timerAlarmPending);
+        })
         .catch(() => false);
 
-      if(navigator.vibrate){
+      if(navigator.vibrate && sessionId === timerAlarmSession && (timerAlarmActive || timerAlarmPending)){
         navigator.vibrate([180, 100, 180]);
       }
 
       return Promise.all([htmlAudioTask, audioContextTask]).then(([htmlOk, ctxOk]) => {
+        if(sessionId !== timerAlarmSession || !(timerAlarmActive || timerAlarmPending)){
+          stopFallbackBeepLoop();
+          stopHtmlAlarm();
+          return false;
+        }
+
         if(htmlOk){
           stopFallbackBeepLoop();
         }else if(ctxOk){
-          startFallbackBeepLoop();
+          startFallbackBeepLoop(sessionId);
         }
 
         const ok = htmlOk || ctxOk;
@@ -1815,6 +1845,7 @@
     }
 
     function stopAlarmLoop(){
+      timerAlarmSession += 1;
       timerAlarmActive = false;
       timerAlarmPending = false;
 
@@ -1842,14 +1873,19 @@
 
       stopFallbackBeepLoop();
       stopHtmlAlarm();
+
+      timerAlarmSession += 1;
+      const sessionId = timerAlarmSession;
+
       timerAlarmActive = true;
       timerAlarmPending = true;
       showTimerDoneModal();
       persistTimer();
 
       const playOnce = () => {
-        if(!timerAlarmActive) return;
-        ensureAlarmPlayback();
+        if(sessionId !== timerAlarmSession) return;
+        if(!(timerAlarmActive || timerAlarmPending)) return;
+        ensureAlarmPlayback(sessionId);
       };
 
       playOnce();
@@ -1921,9 +1957,14 @@
         return;
       }
 
-      if(timerAlarmPending || timerAlarmActive){
+      if(timerAlarmPending && !timerAlarmActive){
+        startAlarmLoop();
+        return;
+      }
+
+      if(timerAlarmActive){
         showTimerDoneModal();
-        ensureAlarmPlayback();
+        ensureAlarmPlayback(timerAlarmSession);
       }
     }
 
