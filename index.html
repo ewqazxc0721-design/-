@@ -908,6 +908,8 @@
     let timerAlarmAudioUrl = "";
     let timerAlarmActive = false;
     let timerAlarmPending = localStorage.getItem(TIMER_ALARM_PENDING_KEY) === "1";
+    let timerAudioUnlocked = false;
+    let timerFallbackBeepLoop = null;
 
     function $(id){
       return document.getElementById(id);
@@ -1491,6 +1493,7 @@
       timerRunning = false;
       timerAlarmPending = false;
       timerAlarmActive = false;
+      timerAudioUnlocked = false;
 
       stopTimerInterval();
       stopAlarmLoop();
@@ -1683,21 +1686,35 @@
       return Promise.all([
         resumeTimerAudioContext(),
         primeTimerAlarmAudio()
-      ]).then((results) => results.some(Boolean)).catch(() => false);
+      ]).then((results) => {
+        const ok = results.some(Boolean);
+        if(ok){
+          timerAudioUnlocked = true;
+        }
+        return ok;
+      }).catch(() => false);
     }
 
-    function installTimerAudioUnlock(){
-      const unlock = () => {
+    function bindTimerAudioWarmup(){
+      const targets = [
+        $("timerStartBtn"),
+        $("timerPauseBtn"),
+        $("timerResetBtn"),
+        $("timerMinutes"),
+        $("timerSeconds"),
+        ...Array.from(document.querySelectorAll("[data-timer-preset]"))
+      ].filter(Boolean);
+
+      const warmup = () => {
+        if(timerAudioUnlocked) return;
         unlockTimerAudio();
-        if(timerAlarmActive || timerAlarmPending){
-          ensureAlarmPlayback();
-        }
       };
 
-      document.addEventListener("touchstart", unlock, { passive: true });
-      document.addEventListener("touchend", unlock, { passive: true });
-      document.addEventListener("click", unlock, { passive: true });
-      document.addEventListener("keydown", unlock);
+      targets.forEach((node) => {
+        node.addEventListener("pointerdown", warmup, { passive: true });
+        node.addEventListener("touchstart", warmup, { passive: true });
+        node.addEventListener("click", warmup, { passive: true });
+      });
     }
 
     function playTimerBeepSequence(){
@@ -1729,36 +1746,52 @@
       });
     }
 
+    function stopFallbackBeepLoop(){
+      if(timerFallbackBeepLoop){
+        clearInterval(timerFallbackBeepLoop);
+        timerFallbackBeepLoop = null;
+      }
+    }
+
+    function startFallbackBeepLoop(){
+      if(timerFallbackBeepLoop) return;
+
+      const playOnce = () => {
+        if(!timerAlarmActive) return;
+        playTimerBeepSequence();
+      };
+
+      playOnce();
+      timerFallbackBeepLoop = setInterval(playOnce, 1200);
+    }
+
     function ensureAlarmPlayback(){
-      const tasks = [];
       const audio = getOrCreateTimerAlarmAudio();
 
-      if(audio.paused){
-        audio.muted = false;
-        try{ audio.currentTime = 0; }catch(e){}
-        tasks.push(
-          Promise.resolve(audio.play()).then(() => true).catch(() => false)
-        );
-      }else{
-        tasks.push(Promise.resolve(true));
-      }
+      const htmlAudioTask = audio.paused
+        ? (() => {
+            audio.muted = false;
+            try{ audio.currentTime = 0; }catch(e){}
+            return Promise.resolve(audio.play()).then(() => true).catch(() => false);
+          })()
+        : Promise.resolve(true);
 
-      tasks.push(
-        resumeTimerAudioContext().then((ok) => {
-          if(ok){
-            playTimerBeepSequence();
-            return true;
-          }
-          return false;
-        })
-      );
+      const audioContextTask = resumeTimerAudioContext()
+        .then((ok) => !!ok)
+        .catch(() => false);
 
       if(navigator.vibrate){
         navigator.vibrate([180, 100, 180]);
       }
 
-      return Promise.all(tasks).then((results) => {
-        const ok = results.some(Boolean);
+      return Promise.all([htmlAudioTask, audioContextTask]).then(([htmlOk, ctxOk]) => {
+        if(htmlOk){
+          stopFallbackBeepLoop();
+        }else if(ctxOk){
+          startFallbackBeepLoop();
+        }
+
+        const ok = htmlOk || ctxOk;
         if(ok){
           timerAlarmPending = false;
           persistTimer();
@@ -1790,6 +1823,7 @@
         timerAlarmLoop = null;
       }
 
+      stopFallbackBeepLoop();
       stopHtmlAlarm();
 
       if(navigator.vibrate){
@@ -1806,6 +1840,7 @@
         timerAlarmLoop = null;
       }
 
+      stopFallbackBeepLoop();
       stopHtmlAlarm();
       timerAlarmActive = true;
       timerAlarmPending = true;
@@ -1965,7 +2000,7 @@
 
       syncTimerInputsFromInitial();
       renderTimer();
-      installTimerAudioUnlock();
+      bindTimerAudioWarmup();
 
       $("counterAddBtn").onclick = counterAdd;
       $("counterResetBtn").onclick = counterReset;
