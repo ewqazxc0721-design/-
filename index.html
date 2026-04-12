@@ -724,11 +724,9 @@
 
       <div class="card">
         <h2>云同步（Supabase）</h2>
-        <div class="softbox">首次使用：输入邮箱，点“发送登录链接”；登录成功后，再点“立即同步到云端”。换设备时，可用“从云端恢复到本机”把记录拉回来。</div>
-        <label class="label" for="cloudEmail">登录邮箱</label>
-        <input id="cloudEmail" type="email" inputmode="email" autocomplete="email" placeholder="请输入常用邮箱" />
+        <div class="softbox">首次使用：点“使用 GitHub 登录”；登录成功后，再点“立即同步到云端”。换设备时，用同一个 GitHub 账号登录，再点“从云端恢复到本机”把记录拉回来。</div>
         <div class="tool-row" style="margin-top:12px;">
-          <button class="btn" id="cloudLoginBtn">发送登录链接</button>
+          <button class="btn" id="cloudLoginBtn">使用 GitHub 登录</button>
           <button class="btn-outline" id="cloudLogoutBtn">退出登录</button>
         </div>
         <div class="tool-row" style="margin-top:12px;">
@@ -968,6 +966,16 @@
       if($("cloudSyncHint")) $("cloudSyncHint").textContent = text;
     }
 
+    function getCloudUserLabel(user){
+      return (
+        user?.email ||
+        user?.user_metadata?.user_name ||
+        user?.user_metadata?.preferred_username ||
+        user?.user_metadata?.full_name ||
+        "当前账号"
+      );
+    }
+
     function setCloudBusy(isBusy){
       ["cloudLoginBtn","cloudLogoutBtn","cloudSyncBtn","cloudRestoreBtn"].forEach((id) => {
         const el = $(id);
@@ -1010,36 +1018,30 @@
     async function refreshCloudUi(){
       const user = await getCurrentUser();
       if(user){
-        $("cloudEmail").value = user.email || "";
-        setCloudStatus(`云端状态：已登录 ${user.email || ""}`.trim());
+        setCloudStatus(`云端状态：已登录 ${getCloudUserLabel(user)}`.trim());
         setCloudHint("现在可以同步到云端，或从云端恢复到本机。")
       }else{
         setCloudStatus("云端状态：未登录");
-        setCloudHint("首次使用：输入邮箱，收邮件后点登录链接，再回到网页同步。")
+        setCloudHint("首次使用：点“使用 GitHub 登录”，登录成功后再同步。")
       }
     }
 
-    async function sendMagicLink(){
-      const email = $("cloudEmail").value.trim();
-      if(!email){
-        alert("请先输入邮箱");
-        return;
-      }
+    async function signInWithGitHub(){
       setCloudBusy(true);
       try{
-        const { error } = await sb.auth.signInWithOtp({
-          email,
+        const { error } = await sb.auth.signInWithOAuth({
+          provider: "github",
           options: {
-            emailRedirectTo: window.location.origin + window.location.pathname
+            redirectTo: window.location.origin + window.location.pathname
           }
         });
         if(error) throw error;
-        setCloudStatus("云端状态：登录链接已发送，请去邮箱打开");
-        setCloudHint("打开邮件里的登录链接后，会自动回到当前网页。")
-        alert("登录链接已发送到你的邮箱，请去邮箱里打开。");
+        setCloudStatus("云端状态：正在跳转 GitHub 登录...");
+        setCloudHint("完成 GitHub 授权后，会自动回到当前网页。")
       }catch(err){
         console.error(err);
-        alert("发送登录链接失败：" + (err.message || "未知错误"));
+        alert("GitHub 登录失败：" + (err.message || "未知错误"));
+        setCloudStatus("云端状态：登录失败");
       }finally{
         setCloudBusy(false);
       }
@@ -1079,7 +1081,7 @@
           updated_at: new Date().toISOString()
         });
         if(error) throw error;
-        setCloudStatus(`云端状态：已同步到云端（${user.email || "当前账号"}）`);
+        setCloudStatus(`云端状态：已同步到云端（${getCloudUserLabel(user)}）`);
         setCloudHint("以后换设备登录同一个邮箱后，可以点“从云端恢复到本机”。");
         if(showAlert) alert("已同步到 Supabase 云端");
         return true;
@@ -1122,7 +1124,7 @@
           planChecks: data.plan_checks_json || {},
           planTemplate: data.plan_template_json || DEFAULT_PLAN_TEMPLATE
         });
-        setCloudStatus(`云端状态：已从云端恢复（${user.email || "当前账号"}）`);
+        setCloudStatus(`云端状态：已从云端恢复（${getCloudUserLabel(user)}）`);
         setCloudHint("本机记录已被云端覆盖。")
         alert("已从 Supabase 云端恢复到本机");
       }catch(err){
@@ -2330,7 +2332,7 @@
 
     $("stopAlarmBtn").onclick = stopAlarmLoop;
 
-    $("cloudLoginBtn").onclick = sendMagicLink;
+    $("cloudLoginBtn").onclick = signInWithGitHub;
     $("cloudLogoutBtn").onclick = signOutCloud;
     $("cloudSyncBtn").onclick = () => syncToCloud(true);
     $("cloudRestoreBtn").onclick = restoreFromCloud;
