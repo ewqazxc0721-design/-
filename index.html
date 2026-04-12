@@ -733,8 +733,12 @@
           <button class="btn" id="cloudSyncBtn">立即同步到云端</button>
           <button class="btn-outline" id="cloudRestoreBtn">从云端恢复到本机</button>
         </div>
+        <div class="tool-row" style="margin-top:12px;">
+          <button class="btn-outline" id="cloudAutoSyncBtn">自动同步：关闭</button>
+        </div>
         <div class="help" id="cloudStatusText">云端状态：未登录</div>
         <div class="help" id="cloudSyncHint">提示：本地导出 JSON 备份建议继续保留。</div>
+        <div class="help" id="cloudAutoSyncHint">自动同步关闭时，仍可手动同步；开启后，本机数据变化会在已登录状态下自动上传，不会自动从云端覆盖本机。</div>
       </div>
 
       <div class="card">
@@ -797,6 +801,7 @@
     const TIMER_END_AT_KEY = "portable-timer-end-at";
     const TIMER_RUNNING_KEY = "portable-timer-running";
     const TIMER_ALARM_PENDING_KEY = "portable-timer-alarm-pending";
+    const CLOUD_AUTO_SYNC_KEY = "supabase-auto-sync-enabled";
 
     const SUPABASE_URL = "https://bzzbdchqrvwdaenydoqm.supabase.co";
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_NshT086od8vjfXFIhGvrkw_DgqzzXAL";
@@ -977,10 +982,80 @@
     }
 
     function setCloudBusy(isBusy){
-      ["cloudLoginBtn","cloudLogoutBtn","cloudSyncBtn","cloudRestoreBtn"].forEach((id) => {
+      ["cloudLoginBtn","cloudLogoutBtn","cloudSyncBtn","cloudRestoreBtn","cloudAutoSyncBtn"].forEach((id) => {
         const el = $(id);
         if(el) el.disabled = !!isBusy;
       });
+    }
+
+    function isAutoSyncEnabled(){
+      return localStorage.getItem(CLOUD_AUTO_SYNC_KEY) === "1";
+    }
+
+    function setAutoSyncEnabled(enabled){
+      localStorage.setItem(CLOUD_AUTO_SYNC_KEY, enabled ? "1" : "0");
+      updateAutoSyncUi();
+    }
+
+    function updateAutoSyncUi(){
+      const btn = $("cloudAutoSyncBtn");
+      if(btn){
+        const on = isAutoSyncEnabled();
+        btn.textContent = `自动同步：${on ? "开启" : "关闭"}`;
+        btn.className = on ? "btn" : "btn-outline";
+      }
+      const hint = $("cloudAutoSyncHint");
+      if(hint){
+        hint.textContent = isAutoSyncEnabled()
+          ? "自动同步已开启：修改训练记录、打卡、模板后，会在已登录状态下自动上传到云端。"
+          : "自动同步已关闭：你仍然可以手动点“立即同步到云端”；开启后只会自动上传本机变化，不会自动从云端覆盖本机。";
+      }
+    }
+
+    let autoSyncTimer = null;
+    let autoSyncReason = "";
+    let autoSyncInFlight = false;
+
+    function queueAutoSync(reason = "本机数据变化"){
+      autoSyncReason = reason || autoSyncReason || "本机数据变化";
+      if(!isAutoSyncEnabled()) return;
+      clearTimeout(autoSyncTimer);
+      autoSyncTimer = setTimeout(() => {
+        runAutoSync().catch((err) => {
+          console.error("自动同步失败", err);
+        });
+      }, 1500);
+    }
+
+    async function runAutoSync(){
+      if(autoSyncInFlight || !isAutoSyncEnabled()) return false;
+      const user = await getCurrentUser();
+      if(!user){
+        setCloudHint("自动同步待命中：登录 GitHub 后，本机后续变更会自动上传。")
+        return false;
+      }
+      autoSyncInFlight = true;
+      setCloudStatus(`云端状态：正在自动同步（${autoSyncReason || "本机数据变化"}）...`);
+      try{
+        return await syncToCloud(false);
+      }finally{
+        autoSyncInFlight = false;
+      }
+    }
+
+    async function toggleAutoSync(){
+      const next = !isAutoSyncEnabled();
+      setAutoSyncEnabled(next);
+      if(next){
+        setCloudHint("自动同步已开启：后续本机数据变化会自动上传。首次建议先手动点一次“立即同步到云端”。")
+        const user = await getCurrentUser();
+        if(user){
+          queueAutoSync("开启自动同步后立即上传");
+        }
+      }else{
+        clearTimeout(autoSyncTimer);
+        setCloudHint("自动同步已关闭：后续请手动点“立即同步到云端”。")
+      }
     }
 
     function getLocalSnapshot(){
@@ -1019,11 +1094,16 @@
       const user = await getCurrentUser();
       if(user){
         setCloudStatus(`云端状态：已登录 ${getCloudUserLabel(user)}`.trim());
-        setCloudHint("现在可以同步到云端，或从云端恢复到本机。")
+        setCloudHint(isAutoSyncEnabled()
+          ? "自动同步已开启：本机变化会自动上传；你也可以手动同步或从云端恢复。"
+          : "现在可以手动同步到云端，或从云端恢复到本机。");
       }else{
         setCloudStatus("云端状态：未登录");
-        setCloudHint("首次使用：点“使用 GitHub 登录”，登录成功后再同步。")
+        setCloudHint(isAutoSyncEnabled()
+          ? "自动同步已开启，但当前未登录；请先使用 GitHub 登录。"
+          : "首次使用：点“使用 GitHub 登录”，登录成功后再同步。");
       }
+      updateAutoSyncUi();
     }
 
     async function signInWithGitHub(){
@@ -1082,7 +1162,7 @@
         });
         if(error) throw error;
         setCloudStatus(`云端状态：已同步到云端（${getCloudUserLabel(user)}）`);
-        setCloudHint("以后换设备登录同一个邮箱后，可以点“从云端恢复到本机”。");
+        setCloudHint(isAutoSyncEnabled() ? "自动同步已开启：后续本机变化会自动上传。换设备时，仍可点“从云端恢复到本机”。" : "以后换设备登录同一个 GitHub 账号后，可以点“从云端恢复到本机”。");
         if(showAlert) alert("已同步到 Supabase 云端");
         return true;
       }catch(err){
@@ -1163,6 +1243,7 @@
       if(clearChecks){
         localStorage.removeItem(PLAN_CHECKS_KEY);
       }
+      queueAutoSync(clearChecks ? "训练模板更新并重置打卡" : "训练模板更新");
     }
 
     function getPlanDays(){
@@ -1179,6 +1260,7 @@
 
     function setPlanChecks(data){
       localStorage.setItem(PLAN_CHECKS_KEY, JSON.stringify(data || {}));
+      queueAutoSync("训练打卡更新");
     }
 
     function countTotalPlanItems(days = getPlanDays()){
@@ -1272,6 +1354,7 @@
 
     function resetPlanChecks(){
       localStorage.removeItem(PLAN_CHECKS_KEY);
+      queueAutoSync("清空训练打卡");
       renderPlan();
       updateSummary();
       alert("已清空全部训练打卡");
@@ -1458,6 +1541,7 @@
       $("autoAvg").textContent = avg || "未填写";
       $("summaryPreview").textContent = buildCurrentSummary();
       localStorage.setItem(FORM_KEY, JSON.stringify(data));
+      queueAutoSync("表单内容更新");
     }
 
     function getHistory(){
@@ -1471,6 +1555,7 @@
     function setHistory(list){
       localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
       renderHistory();
+      queueAutoSync("历史记录更新");
     }
 
     function saveWeek(){
@@ -1712,6 +1797,7 @@
       syncTimerInputsFromInitial();
       renderTimer();
       renderPlan();
+      queueAutoSync("清空本地记录");
       alert("已清空全部本地记录");
     }
 
@@ -2336,9 +2422,13 @@
     $("cloudLogoutBtn").onclick = signOutCloud;
     $("cloudSyncBtn").onclick = () => syncToCloud(true);
     $("cloudRestoreBtn").onclick = restoreFromCloud;
+    $("cloudAutoSyncBtn").onclick = toggleAutoSync;
 
-    sb.auth.onAuthStateChange(() => {
+    sb.auth.onAuthStateChange((event) => {
       refreshCloudUi().catch(() => {});
+      if((event === "SIGNED_IN" || event === "TOKEN_REFRESHED") && isAutoSyncEnabled()){
+        queueAutoSync("登录后自动同步");
+      }
     });
 
     renderPlan();
