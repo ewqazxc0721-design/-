@@ -721,6 +721,24 @@
         <div class="help">建议组间休息可先设 60–90 秒，主力动作可设 90–120 秒。</div>
       </div>
 
+
+      <div class="card">
+        <h2>云同步（Supabase）</h2>
+        <div class="softbox">首次使用：输入邮箱，点“发送登录链接”；登录成功后，再点“立即同步到云端”。换设备时，可用“从云端恢复到本机”把记录拉回来。</div>
+        <label class="label" for="cloudEmail">登录邮箱</label>
+        <input id="cloudEmail" type="email" inputmode="email" autocomplete="email" placeholder="请输入常用邮箱" />
+        <div class="tool-row" style="margin-top:12px;">
+          <button class="btn" id="cloudLoginBtn">发送登录链接</button>
+          <button class="btn-outline" id="cloudLogoutBtn">退出登录</button>
+        </div>
+        <div class="tool-row" style="margin-top:12px;">
+          <button class="btn" id="cloudSyncBtn">立即同步到云端</button>
+          <button class="btn-outline" id="cloudRestoreBtn">从云端恢复到本机</button>
+        </div>
+        <div class="help" id="cloudStatusText">云端状态：未登录</div>
+        <div class="help" id="cloudSyncHint">提示：本地导出 JSON 备份建议继续保留。</div>
+      </div>
+
       <div class="card">
         <h2>工具</h2>
         <div class="softbox">这个网页是离线可用的单文件版本。首次打开后，后续也能继续在浏览器里使用。</div>
@@ -767,6 +785,7 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const FORM_KEY = "gain-tracker-form";
@@ -780,6 +799,12 @@
     const TIMER_END_AT_KEY = "portable-timer-end-at";
     const TIMER_RUNNING_KEY = "portable-timer-running";
     const TIMER_ALARM_PENDING_KEY = "portable-timer-alarm-pending";
+
+    const SUPABASE_URL = "https://bzzbdchqrvwdaenydoqm.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_NshT086od8vjfXFIhGvrkw_DgqzzXAL";
+    const SUPABASE_TABLE = "app_state";
+    const { createClient } = window.supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
     const DEFAULT_PLAN_TEMPLATE = {
       version: 1,
@@ -933,6 +958,180 @@
       a.download = filename;
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 500);
+    }
+
+    function setCloudStatus(text){
+      if($("cloudStatusText")) $("cloudStatusText").textContent = text;
+    }
+
+    function setCloudHint(text){
+      if($("cloudSyncHint")) $("cloudSyncHint").textContent = text;
+    }
+
+    function setCloudBusy(isBusy){
+      ["cloudLoginBtn","cloudLogoutBtn","cloudSyncBtn","cloudRestoreBtn"].forEach((id) => {
+        const el = $(id);
+        if(el) el.disabled = !!isBusy;
+      });
+    }
+
+    function getLocalSnapshot(){
+      return {
+        form: JSON.parse(localStorage.getItem(FORM_KEY) || "{}"),
+        history: getHistory(),
+        planChecks: getPlanChecks(),
+        planTemplate: getPlanTemplate()
+      };
+    }
+
+    function applyLocalSnapshot(payload){
+      const safeForm = payload && payload.form ? payload.form : defaultForm;
+      const safeHistory = payload && Array.isArray(payload.history) ? payload.history : [];
+      const safePlanChecks = payload && payload.planChecks ? payload.planChecks : {};
+      const safePlanTemplate = payload && payload.planTemplate ? normalizePlanTemplate(payload.planTemplate) : getPlanTemplate();
+
+      localStorage.setItem(FORM_KEY, JSON.stringify(safeForm));
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(safeHistory));
+      localStorage.setItem(PLAN_CHECKS_KEY, JSON.stringify(safePlanChecks));
+      localStorage.setItem(PLAN_TEMPLATE_KEY, JSON.stringify(safePlanTemplate));
+
+      setForm(safeForm);
+      renderHistory();
+      renderPlan();
+      updateSummary();
+    }
+
+    async function getCurrentUser(){
+      const { data, error } = await sb.auth.getUser();
+      if(error) return null;
+      return data.user || null;
+    }
+
+    async function refreshCloudUi(){
+      const user = await getCurrentUser();
+      if(user){
+        $("cloudEmail").value = user.email || "";
+        setCloudStatus(`云端状态：已登录 ${user.email || ""}`.trim());
+        setCloudHint("现在可以同步到云端，或从云端恢复到本机。")
+      }else{
+        setCloudStatus("云端状态：未登录");
+        setCloudHint("首次使用：输入邮箱，收邮件后点登录链接，再回到网页同步。")
+      }
+    }
+
+    async function sendMagicLink(){
+      const email = $("cloudEmail").value.trim();
+      if(!email){
+        alert("请先输入邮箱");
+        return;
+      }
+      setCloudBusy(true);
+      try{
+        const { error } = await sb.auth.signInWithOtp({
+          email,
+          options: {
+            emailRedirectTo: window.location.origin + window.location.pathname
+          }
+        });
+        if(error) throw error;
+        setCloudStatus("云端状态：登录链接已发送，请去邮箱打开");
+        setCloudHint("打开邮件里的登录链接后，会自动回到当前网页。")
+        alert("登录链接已发送到你的邮箱，请去邮箱里打开。");
+      }catch(err){
+        console.error(err);
+        alert("发送登录链接失败：" + (err.message || "未知错误"));
+      }finally{
+        setCloudBusy(false);
+      }
+    }
+
+    async function signOutCloud(){
+      setCloudBusy(true);
+      try{
+        const { error } = await sb.auth.signOut();
+        if(error) throw error;
+        await refreshCloudUi();
+        alert("已退出云端登录");
+      }catch(err){
+        console.error(err);
+        alert("退出登录失败：" + (err.message || "未知错误"));
+      }finally{
+        setCloudBusy(false);
+      }
+    }
+
+    async function syncToCloud(showAlert = true){
+      const user = await getCurrentUser();
+      if(!user){
+        alert("请先登录云端，再同步");
+        return false;
+      }
+      setCloudBusy(true);
+      setCloudStatus("云端状态：正在上传本机记录...");
+      try{
+        const snapshot = getLocalSnapshot();
+        const { error } = await sb.from(SUPABASE_TABLE).upsert({
+          user_id: user.id,
+          form_json: snapshot.form,
+          history_json: snapshot.history,
+          plan_checks_json: snapshot.planChecks,
+          plan_template_json: snapshot.planTemplate,
+          updated_at: new Date().toISOString()
+        });
+        if(error) throw error;
+        setCloudStatus(`云端状态：已同步到云端（${user.email || "当前账号"}）`);
+        setCloudHint("以后换设备登录同一个邮箱后，可以点“从云端恢复到本机”。");
+        if(showAlert) alert("已同步到 Supabase 云端");
+        return true;
+      }catch(err){
+        console.error(err);
+        setCloudStatus("云端状态：同步失败");
+        if(showAlert) alert("同步失败：" + (err.message || "未知错误"));
+        return false;
+      }finally{
+        setCloudBusy(false);
+      }
+    }
+
+    async function restoreFromCloud(){
+      const user = await getCurrentUser();
+      if(!user){
+        alert("请先登录云端，再恢复");
+        return;
+      }
+      const ok = confirm("确定用云端记录覆盖当前本机记录吗？建议先导出 JSON 备份。");
+      if(!ok) return;
+
+      setCloudBusy(true);
+      setCloudStatus("云端状态：正在读取云端记录...");
+      try{
+        const { data, error } = await sb
+          .from(SUPABASE_TABLE)
+          .select("form_json, history_json, plan_checks_json, plan_template_json")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if(error) throw error;
+        if(!data){
+          alert("云端还没有记录，请先在当前设备点一次“立即同步到云端”。");
+          setCloudStatus("云端状态：当前账号还没有云端记录");
+          return;
+        }
+        applyLocalSnapshot({
+          form: data.form_json || {},
+          history: Array.isArray(data.history_json) ? data.history_json : [],
+          planChecks: data.plan_checks_json || {},
+          planTemplate: data.plan_template_json || DEFAULT_PLAN_TEMPLATE
+        });
+        setCloudStatus(`云端状态：已从云端恢复（${user.email || "当前账号"}）`);
+        setCloudHint("本机记录已被云端覆盖。")
+        alert("已从 Supabase 云端恢复到本机");
+      }catch(err){
+        console.error(err);
+        setCloudStatus("云端状态：恢复失败");
+        alert("恢复失败：" + (err.message || "未知错误"));
+      }finally{
+        setCloudBusy(false);
+      }
     }
 
     function normalizePlanTemplate(raw){
@@ -1163,6 +1362,7 @@
       renderPlan();
       updateSummary();
       alert("已保存当前天设置，并清空旧打卡");
+      syncToCloud(false).catch(() => {});
     }
 
     function resetPlanTemplate(){
@@ -1174,6 +1374,7 @@
       renderPlan();
       updateSummary();
       alert("已恢复默认训练计划模板");
+      syncToCloud(false).catch(() => {});
     }
 
     function exportPlanTemplate(){
@@ -1191,6 +1392,7 @@
           renderPlan();
           updateSummary();
           alert("训练计划模板导入成功");
+          syncToCloud(false).catch(() => {});
         }catch(err){
           alert("导入失败，文件格式不对");
         }
@@ -1314,6 +1516,7 @@
         entry.planSummary
       ].join("\n");
       alert("已保存本周记录，并附带训练打卡摘要");
+      syncToCloud(false).catch(() => {});
     }
 
     function clearForm(){
@@ -1463,6 +1666,7 @@
           renderHistory();
           renderPlan();
           alert("导入成功");
+          syncToCloud(false).catch(() => {});
         }catch(err){
           alert("导入失败，文件格式不对");
         }
@@ -2126,12 +2330,22 @@
 
     $("stopAlarmBtn").onclick = stopAlarmLoop;
 
+    $("cloudLoginBtn").onclick = sendMagicLink;
+    $("cloudLogoutBtn").onclick = signOutCloud;
+    $("cloudSyncBtn").onclick = () => syncToCloud(true);
+    $("cloudRestoreBtn").onclick = restoreFromCloud;
+
+    sb.auth.onAuthStateChange(() => {
+      refreshCloudUi().catch(() => {});
+    });
+
     renderPlan();
     setForm(JSON.parse(localStorage.getItem(FORM_KEY) || JSON.stringify(defaultForm)));
     renderHistory();
     initPortableTools();
     switchTab("plan");
     updateSummary();
+    refreshCloudUi().catch(() => {});
 
     if(isStandaloneMode()){
       document.body.classList.add("standalone");
