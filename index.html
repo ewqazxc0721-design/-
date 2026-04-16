@@ -120,6 +120,8 @@
       --tab-height:78px;
       --indicator-scale:1.14514;
       --indicator-edge-gap:8px;
+      --drag-overflow:18px;
+      --drag-extra-scale:0.18;
       position:fixed;
       left:50%;
       bottom:max(6px, env(safe-area-inset-bottom,0px));
@@ -174,8 +176,28 @@
         inset 0 -1px 0 rgba(0,0,0,.18),
         0 8px 18px rgba(15,23,42,.16);
       pointer-events:none;
+      touch-action:none;
+      cursor:grab;
       z-index:1;
       transition:transform .28s cubic-bezier(.22,.61,.36,1), width .28s cubic-bezier(.22,.61,.36,1);
+    }
+
+    .tabs.dragging{
+      overflow:visible;
+      -webkit-mask-image:none;
+      z-index:70;
+    }
+
+    .tabs.dragging .tab-indicator{
+      top:-4px;
+      bottom:-4px;
+      border-radius:999px;
+      filter:drop-shadow(0 12px 24px rgba(15,23,42,.24));
+    }
+
+    .tab-indicator.dragging{
+      cursor:grabbing;
+      transition:none;
     }
 
     .tab{
@@ -1788,7 +1810,195 @@
       });
     }
 
+
+
+    const tabDrag = {
+      active:false,
+      moved:false,
+      startX:0,
+      startLeft:0,
+      minLeft:0,
+      maxLeft:0,
+      extraScale:0.18
+    };
+
+    function getTabMetrics(extraScale = 0){
+      const tabsEl = document.querySelector(".tabs");
+      const indicator = tabsEl ? tabsEl.querySelector(".tab-indicator") : null;
+      const buttons = tabsEl ? Array.from(tabsEl.querySelectorAll(".tab")) : [];
+      const activeTab = tabsEl ? tabsEl.querySelector(".tab.active") : null;
+      if(!tabsEl || !indicator || !buttons.length || !activeTab) return null;
+
+      const tabsRect = tabsEl.getBoundingClientRect();
+      const buttonRects = buttons.map((btn) => btn.getBoundingClientRect());
+      const activeRect = activeTab.getBoundingClientRect();
+      const styles = getComputedStyle(tabsEl);
+      const scale = (parseFloat(styles.getPropertyValue("--indicator-scale")) || 1.44) + extraScale;
+      const edgeGap = parseFloat(styles.getPropertyValue("--indicator-edge-gap")) || 0;
+      const width = activeRect.width * scale;
+      const maxLeft = Math.max(edgeGap, tabsRect.width - width - edgeGap);
+      const activeCenter = activeRect.left - tabsRect.left + activeRect.width / 2;
+      const activeLeft = Math.max(edgeGap, Math.min(activeCenter - width / 2, maxLeft));
+
+      const snapLefts = buttonRects.map((rect) => {
+        const center = rect.left - tabsRect.left + rect.width / 2;
+        const left = center - width / 2;
+        return Math.max(edgeGap, Math.min(left, maxLeft));
+      });
+
+      return { tabsEl, indicator, buttons, tabsRect, buttonRects, activeRect, width, edgeGap, maxLeft, activeLeft, snapLefts };
+    }
+
+    function getIndicatorLeft(indicator){
+      const transform = indicator.style.transform || getComputedStyle(indicator).transform;
+      if(!transform || transform === "none") return 0;
+      if(transform.startsWith("translateX(")){
+        return parseFloat(transform.replace("translateX(", "").replace("px)", "")) || 0;
+      }
+      try{
+        return new DOMMatrix(transform).m41 || 0;
+      }catch(err){
+        return 0;
+      }
+    }
+
+    function setIndicatorLeft(left){
+      const metrics = getTabMetrics(tabDrag.active ? tabDrag.extraScale : 0);
+      if(!metrics) return;
+      const clamped = Math.max(metrics.edgeGap, Math.min(left, metrics.maxLeft));
+      metrics.indicator.style.transform = `translateX(${clamped}px)`;
+    }
+
+    function snapToNearestTab(){
+      const metrics = getTabMetrics(tabDrag.extraScale);
+      if(!metrics) return;
+      const currentLeft = getIndicatorLeft(metrics.indicator);
+      let nearestIndex = 0;
+      let nearestDistance = Infinity;
+
+      metrics.snapLefts.forEach((snapLeft, index) => {
+        const distance = Math.abs(currentLeft - snapLeft);
+        if(distance < nearestDistance){
+          nearestDistance = distance;
+          nearestIndex = index;
+        }
+      });
+
+      switchTab(metrics.buttons[nearestIndex].dataset.tab);
+    }
+
+    function triggerBestEffortHaptic(duration = 8){
+      try{
+        if(typeof navigator !== "undefined" && typeof navigator.vibrate === "function"){
+          navigator.vibrate(duration);
+        }
+      }catch(err){}
+    }
+
+    function getDragExtraScale(){
+      const tabsEl = document.querySelector(".tabs");
+      if(!tabsEl) return tabDrag.extraScale;
+      return parseFloat(getComputedStyle(tabsEl).getPropertyValue("--drag-extra-scale")) || tabDrag.extraScale;
+    }
+
+    function getDragClientX(event){
+      if(event.touches && event.touches[0]) return event.touches[0].clientX;
+      if(event.changedTouches && event.changedTouches[0]) return event.changedTouches[0].clientX;
+      return event.clientX || 0;
+    }
+
+    function getDragClientY(event){
+      if(event.touches && event.touches[0]) return event.touches[0].clientY;
+      if(event.changedTouches && event.changedTouches[0]) return event.changedTouches[0].clientY;
+      return event.clientY || 0;
+    }
+
+    function startTabDrag(clientX){
+      tabDrag.extraScale = getDragExtraScale();
+      const metrics = getTabMetrics(tabDrag.extraScale);
+      if(!metrics) return;
+      const dragOverflow = parseFloat(getComputedStyle(metrics.tabsEl).getPropertyValue("--drag-overflow")) || 16;
+      tabDrag.active = true;
+      tabDrag.moved = false;
+      tabDrag.startX = clientX;
+      tabDrag.startLeft = metrics.activeLeft;
+      tabDrag.minLeft = -dragOverflow;
+      tabDrag.maxLeft = metrics.tabsRect.width - metrics.width + dragOverflow;
+      metrics.tabsEl.classList.add("dragging");
+      metrics.indicator.classList.add("dragging");
+      metrics.indicator.style.width = metrics.width + "px";
+      metrics.indicator.style.transform = `translateX(${metrics.activeLeft}px)`;
+      document.body.style.userSelect = "none";
+      triggerBestEffortHaptic(8);
+    }
+
+    function moveTabDrag(clientX){
+      if(!tabDrag.active) return;
+      const deltaX = clientX - tabDrag.startX;
+      if(Math.abs(deltaX) > 4) tabDrag.moved = true;
+      const next = Math.max(tabDrag.minLeft, Math.min(tabDrag.startLeft + deltaX, tabDrag.maxLeft));
+      const metrics = getTabMetrics(tabDrag.extraScale);
+      if(metrics) metrics.indicator.style.transform = `translateX(${next}px)`;
+    }
+
+    function endTabDrag(){
+      if(!tabDrag.active) return;
+      const metrics = getTabMetrics(tabDrag.extraScale);
+      if(metrics){
+        metrics.tabsEl.classList.remove("dragging");
+        metrics.indicator.classList.remove("dragging");
+      }
+      document.body.style.userSelect = "";
+
+      const moved = tabDrag.moved;
+      tabDrag.active = false;
+      tabDrag.moved = false;
+
+      if(moved){
+        snapToNearestTab();
+        triggerBestEffortHaptic(10);
+      }else{
+        updateTabIndicator();
+      }
+    }
+
+    function attachTabDrag(){
+      const metrics = getTabMetrics();
+      if(!metrics) return;
+      const tabsEl = metrics.tabsEl;
+      if(tabsEl.dataset.dragBound === "1") return;
+      tabsEl.dataset.dragBound = "1";
+
+      const handleStart = (event) => {
+        const liveMetrics = getTabMetrics();
+        if(!liveMetrics) return;
+        const indicatorRect = liveMetrics.indicator.getBoundingClientRect();
+        const x = getDragClientX(event);
+        const y = getDragClientY(event);
+        const inside = x >= indicatorRect.left && x <= indicatorRect.right && y >= indicatorRect.top && y <= indicatorRect.bottom;
+        if(!inside) return;
+        startTabDrag(x);
+        if(event.cancelable) event.preventDefault();
+      };
+
+      const handleMove = (event) => {
+        if(!tabDrag.active) return;
+        moveTabDrag(getDragClientX(event));
+        if(event.cancelable) event.preventDefault();
+      };
+
+      tabsEl.addEventListener("mousedown", handleStart);
+      tabsEl.addEventListener("touchstart", handleStart, { passive:false });
+      window.addEventListener("mousemove", handleMove);
+      window.addEventListener("touchmove", handleMove, { passive:false });
+      window.addEventListener("mouseup", endTabDrag);
+      window.addEventListener("touchend", endTabDrag);
+      window.addEventListener("touchcancel", endTabDrag);
+    }
+
     function updateTabIndicator(){
+
+
       const tabsEl = document.querySelector(".tabs");
       const indicator = tabsEl ? tabsEl.querySelector(".tab-indicator") : null;
       const activeTab = tabsEl ? tabsEl.querySelector(".tab.active") : null;
@@ -2499,10 +2709,15 @@
     }
 
     document.querySelectorAll(".tab").forEach((btn) => {
-      btn.onclick = () => switchTab(btn.dataset.tab);
+      btn.addEventListener("click", () => {
+        switchTab(btn.dataset.tab);
+      });
     });
 
-    window.addEventListener("resize", updateTabIndicator);
+    window.addEventListener("resize", () => {
+      updateTabIndicator();
+      attachTabDrag();
+    });
 
     formKeys.forEach((key) => {
       $(key).addEventListener("input", updateSummary);
@@ -2554,7 +2769,10 @@
     renderHistory();
     initPortableTools();
     switchTab("plan");
-    requestAnimationFrame(updateTabIndicator);
+    requestAnimationFrame(() => {
+      updateTabIndicator();
+      attachTabDrag();
+    });
     updateSummary();
     refreshCloudUi().catch(() => {});
 
