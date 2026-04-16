@@ -114,17 +114,20 @@
       font-size:13px;
     }
 
+
     .tabs{
-      --liquid-pill-overlap:32%;
+      --tab-side-padding:20px;
+      --tab-height:78px;
+      --indicator-scale:1.14514;
       position:fixed;
       left:50%;
       bottom:max(6px, env(safe-area-inset-bottom,0px));
       transform:translateX(-50%);
-      width:min(692px,calc(100% - 28px));
+      width:min(760px,calc(100% - 16px));
       display:flex;
       align-items:stretch;
       gap:0;
-      padding:8px;
+      padding:8px var(--tab-side-padding);
       z-index:60;
       border-radius:999px;
       background:linear-gradient(180deg,rgba(255,255,255,.78),rgba(255,255,255,.56));
@@ -137,7 +140,7 @@
       backdrop-filter:blur(28px) saturate(180%);
       -webkit-backdrop-filter:blur(28px) saturate(180%);
       isolation:isolate;
-      overflow:visible;
+      overflow:hidden;
       -webkit-mask-image:-webkit-radial-gradient(white, black);
     }
 
@@ -151,13 +154,27 @@
       z-index:0;
     }
 
-    .tabs::after{
-      display:none;
-    }
-
     .tabs > *{
       position:relative;
       z-index:1;
+    }
+
+    .tab-indicator{
+      position:absolute;
+      top:8px;
+      bottom:8px;
+      left:0;
+      width:0;
+      border-radius:999px;
+      background:linear-gradient(180deg,rgba(73,85,107,.98),rgba(22,28,39,.98));
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.22),
+        inset 0 -1px 0 rgba(0,0,0,.18),
+        0 8px 18px rgba(15,23,42,.16);
+      pointer-events:none;
+      z-index:1;
+      transition:transform .28s cubic-bezier(.22,.61,.36,1), width .28s cubic-bezier(.22,.61,.36,1);
     }
 
     .tab{
@@ -166,8 +183,8 @@
       min-width:0;
       border:none;
       background:transparent;
-      height:78px;
-      min-height:78px;
+      height:var(--tab-height);
+      min-height:var(--tab-height);
       padding:0;
       border-radius:999px;
       color:#334155;
@@ -175,32 +192,12 @@
       cursor:pointer;
       overflow:visible;
       isolation:isolate;
-      transition:transform .18s ease, color .18s ease, box-shadow .22s ease;
+      transition:transform .18s ease, color .18s ease;
       -webkit-mask-image:-webkit-radial-gradient(white, black);
-      z-index:1;
+      z-index:2;
     }
 
-    .tab::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      border-radius:999px;
-      background:transparent;
-      border:none;
-      box-shadow:none;
-      opacity:0;
-      transform:scale(.965);
-      transition:
-        inset .22s ease,
-        opacity .22s ease,
-        transform .22s ease,
-        background .22s ease,
-        box-shadow .22s ease,
-        border-color .22s ease;
-      z-index:0;
-      pointer-events:none;
-    }
-
+    .tab::before,
     .tab::after{
       display:none;
     }
@@ -253,37 +250,15 @@
     .tab.active{
       color:#ffffff;
       z-index:3;
-      box-shadow:0 12px 22px rgba(15,23,42,.14);
-    }
-
-    .tab.active::before{
-      inset:0 calc(var(--liquid-pill-overlap) * -1);
-      border-radius:999px;
-      background:linear-gradient(180deg,rgba(73,85,107,.98),rgba(29,36,49,.96));
-      border:1px solid rgba(255,255,255,.14);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.22),
-        inset 0 -1px 0 rgba(0,0,0,.18),
-        0 8px 18px rgba(15,23,42,.16);
-      opacity:1;
-      transform:scale(1);
-    }
-
-    .tab:first-child.active::before{inset:0 calc(var(--liquid-pill-overlap) * -1) 0 0;}
-    .tab:last-child.active::before{inset:0 0 0 calc(var(--liquid-pill-overlap) * -1);}
-
-    .tab.active::after{
-      display:none;
-    }
-
-    .tab.active .circle-overlay{
-      display:none;
+      box-shadow:none;
     }
 
     .tab.active .tab-icon,
     .tab.active .tab-label{
       color:#ffffff;
+      text-shadow:none;
     }
+
 
     .section{display:none;}
     .section.active{display:block;}
@@ -565,7 +540,7 @@
       }
 
       .tabs{
-        --liquid-pill-overlap:30%;
+        --liquid-pill-overlap:36%;
         width:calc(100% - 24px);
         bottom:max(4px, env(safe-area-inset-bottom,0px));
         gap:0;
@@ -592,12 +567,8 @@
       .tab-label{font-size:12px;}
 
       .tab.active{
-        box-shadow:0 6px 12px rgba(15,23,42,.14);
+        box-shadow:none;
       }
-
-      .tab.active::before{inset:0 calc(var(--liquid-pill-overlap) * -1);}
-      .tab:first-child.active::before{inset:0 calc(var(--liquid-pill-overlap) * -1) 0 0;}
-      .tab:last-child.active::before{inset:0 0 0 calc(var(--liquid-pill-overlap) * -1);}
     }
 
     @media (min-width:640px){
@@ -623,6 +594,7 @@
     </div>
 
     <div class="tabs">
+      <div class="tab-indicator" aria-hidden="true"></div>
       <button class="tab active" data-tab="plan" type="button">
         <div class="tab-content">
           <span class="tab-icon">⌂</span>
@@ -1807,6 +1779,26 @@
       });
     }
 
+    function updateTabIndicator(){
+      const tabsEl = document.querySelector(".tabs");
+      const indicator = tabsEl ? tabsEl.querySelector(".tab-indicator") : null;
+      const activeTab = tabsEl ? tabsEl.querySelector(".tab.active") : null;
+      if(!tabsEl || !indicator || !activeTab) return;
+
+      const tabsRect = tabsEl.getBoundingClientRect();
+      const activeRect = activeTab.getBoundingClientRect();
+      const scale = parseFloat(getComputedStyle(tabsEl).getPropertyValue("--indicator-scale")) || 1.44;
+      const width = activeRect.width * scale;
+      const center = activeRect.left - tabsRect.left + activeRect.width / 2;
+      let left = center - width / 2;
+      const minLeft = 0;
+      const maxLeft = tabsRect.width - width;
+      left = Math.max(minLeft, Math.min(left, maxLeft));
+
+      indicator.style.width = width + "px";
+      indicator.style.transform = `translateX(${left}px)`;
+    }
+
     function switchTab(name){
       document.querySelectorAll(".tab").forEach((btn) => {
         btn.classList.toggle("active", btn.dataset.tab === name);
@@ -1815,6 +1807,8 @@
       document.querySelectorAll(".section").forEach((sec) => {
         sec.classList.toggle("active", sec.id === name);
       });
+
+      updateTabIndicator();
     }
 
     function copySummary(){
@@ -2497,6 +2491,8 @@
       btn.onclick = () => switchTab(btn.dataset.tab);
     });
 
+    window.addEventListener("resize", updateTabIndicator);
+
     formKeys.forEach((key) => {
       $(key).addEventListener("input", updateSummary);
     });
@@ -2547,6 +2543,7 @@
     renderHistory();
     initPortableTools();
     switchTab("plan");
+    requestAnimationFrame(updateTabIndicator);
     updateSummary();
     refreshCloudUi().catch(() => {});
 
