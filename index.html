@@ -115,7 +115,7 @@
     }
 
     .tabs{
-      --liquid-pill-overlap: 18%;
+      --liquid-pill-overlap: 24%;
       position:fixed;
       left:50%;
       bottom:max(6px, env(safe-area-inset-bottom,0px));
@@ -185,10 +185,8 @@
       position:absolute;
       inset:4px 3px;
       border-radius:inherit;
-      background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.03));
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.34),
-        inset 0 0 0 1px rgba(255,255,255,.07);
+      background:transparent;
+      box-shadow:none;
       z-index:0;
       transition:transform .22s ease, box-shadow .22s ease, background .22s ease, inset .22s ease;
     }
@@ -196,13 +194,11 @@
     .tab::after{
       content:"";
       position:absolute;
-      top:7px;
-      left:16px;
-      right:16px;
-      height:12px;
-      border-radius:999px;
-      background:linear-gradient(180deg,rgba(255,255,255,.24),rgba(255,255,255,.02) 80%,transparent);
-      opacity:.32;
+      inset:4px 3px;
+      border-radius:inherit;
+      background:transparent;
+      box-shadow:none;
+      opacity:0;
       z-index:1;
       pointer-events:none;
       transition:opacity .22s ease, inset .22s ease, left .22s ease, right .22s ease, top .22s ease, height .22s ease;
@@ -267,9 +263,9 @@
       background:
         linear-gradient(180deg,rgba(86,97,115,.98),rgba(41,49,64,.97) 56%,rgba(30,37,50,.98));
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.24),
-        inset 0 -1px 0 rgba(0,0,0,.16),
-        inset 0 0 0 1px rgba(255,255,255,.08),
+        inset 0 1px 0 rgba(255,255,255,.10),
+        inset 0 -1px 0 rgba(0,0,0,.20),
+        inset 0 0 0 1px rgba(255,255,255,.05),
         0 10px 24px rgba(15,23,42,.14),
         0 2px 6px rgba(15,23,42,.10);
     }
@@ -285,10 +281,14 @@
     }
 
     .tab.active::after{
-      inset:4px calc(14px - var(--liquid-pill-overlap)) 38px;
+      inset:1px calc(10px - var(--liquid-pill-overlap)) 1px;
       border-radius:999px;
-      background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,.06) 68%,transparent);
-      opacity:.75;
+      background:transparent;
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.18),
+        inset 0 1px 0 rgba(255,255,255,.28),
+        inset 0 -1px 0 rgba(0,0,0,.18);
+      opacity:1;
     }
 
     .tab:first-child.active::after{
