@@ -32,6 +32,10 @@
       --shadow:0 8px 24px rgba(15,23,42,.08);
       --dock-radius:34px;
       --dock-item-radius:26px;
+      --liquid-pill-overlap:18%;
+      --tab-slot-width:0px;
+      --tab-highlight-width:0px;
+      --tab-highlight-overlap-width:0px;
     }
 
     *{
@@ -115,6 +119,7 @@
     }
 
     .tabs{
+      --liquid-pill-overlap:18%;
       position:fixed;
       left:50%;
       bottom:max(6px, env(safe-area-inset-bottom,0px));
@@ -127,17 +132,17 @@
       z-index:60;
       border-radius:999px;
       background:
-        linear-gradient(180deg,rgba(255,255,255,.74),rgba(255,255,255,.48)),
-        radial-gradient(120% 120% at 18% 0%,rgba(255,255,255,.56),transparent 46%),
-        radial-gradient(130% 170% at 84% 110%,rgba(148,163,184,.06),transparent 52%);
-      border:1px solid rgba(255,255,255,.56);
+        linear-gradient(180deg,rgba(255,255,255,.74),rgba(255,255,255,.52)),
+        radial-gradient(120% 95% at 18% 0%,rgba(255,255,255,.46),transparent 44%),
+        radial-gradient(130% 170% at 84% 110%,rgba(148,163,184,.08),transparent 52%);
+      border:1px solid rgba(255,255,255,.62);
       box-shadow:
         0 16px 32px rgba(15,23,42,.10),
         0 4px 10px rgba(15,23,42,.05),
-        inset 0 1px 0 rgba(255,255,255,.68),
-        inset 0 -1px 0 rgba(255,255,255,.10);
-      backdrop-filter:blur(28px) saturate(195%);
-      -webkit-backdrop-filter:blur(28px) saturate(195%);
+        inset 0 1px 0 rgba(255,255,255,.76),
+        inset 0 -1px 0 rgba(255,255,255,.08);
+      backdrop-filter:blur(28px) saturate(185%);
+      -webkit-backdrop-filter:blur(28px) saturate(185%);
       isolation:isolate;
       overflow:visible;
       -webkit-mask-image:-webkit-radial-gradient(white, black);
@@ -149,24 +154,18 @@
       inset:1px;
       border-radius:inherit;
       background:
-        linear-gradient(180deg,rgba(255,255,255,.24),rgba(255,255,255,.03)),
-        radial-gradient(90% 70% at 50% 0%,rgba(255,255,255,.30),transparent 65%);
+        linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,.04) 38%,rgba(255,255,255,0) 72%),
+        radial-gradient(90% 70% at 50% 0%,rgba(255,255,255,.24),transparent 65%);
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.16),
+        inset 0 1px 0 rgba(255,255,255,.46),
+        inset 0 -1px 0 rgba(148,163,184,.04);
       pointer-events:none;
       z-index:0;
     }
 
     .tabs::after{
-      content:"";
-      position:absolute;
-      width:220px;
-      height:220px;
-      right:-72px;
-      bottom:-148px;
-      border-radius:50%;
-      background:radial-gradient(circle,rgba(255,255,255,.14) 0%,rgba(255,255,255,.02) 42%,transparent 72%);
-      filter:blur(10px);
-      pointer-events:none;
-      z-index:0;
+      display:none;
     }
 
     .tabs > *{
@@ -196,24 +195,29 @@
     .tab::before{
       content:"";
       position:absolute;
-      inset:0;
+      inset:4px;
       border-radius:inherit;
-      background:transparent;
-      border:none;
-      box-shadow:none;
+      background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.03));
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.28),
+        inset 0 0 0 1px rgba(255,255,255,.08);
+      opacity:1;
       z-index:0;
+      transform:translateZ(0);
+      transition:inset .24s ease, background .24s ease, box-shadow .24s ease, opacity .24s ease, transform .24s ease;
     }
 
     .tab::after{
       content:"";
       position:absolute;
-      inset:0;
-      border-radius:inherit;
-      background:transparent;
-      opacity:0;
+      inset:6px 10px 34px;
+      border-radius:999px;
+      background:linear-gradient(180deg,rgba(255,255,255,.30),transparent 85%);
+      opacity:.12;
       z-index:1;
       pointer-events:none;
-      transition:opacity .22s ease;
+      filter:blur(.2px);
+      transition:inset .24s ease, opacity .24s ease, transform .24s ease;
     }
 
     .tab-content{
@@ -226,6 +230,8 @@
       justify-content:center;
       gap:7px;
       padding:10px 8px 8px;
+      transform:translateZ(0);
+      pointer-events:none;
     }
 
     .tab-icon{
@@ -234,6 +240,7 @@
       line-height:1;
       font-weight:700;
       text-shadow:0 1px 0 rgba(255,255,255,.42);
+      transform:translateZ(0);
     }
 
     .tab-label{
@@ -242,26 +249,19 @@
       line-height:1.1;
       font-weight:700;
       letter-spacing:.01em;
+      transform:translateZ(0);
     }
 
     .tab .circle-overlay{
-      position:absolute;
-      width:112px;
-      height:112px;
-      right:-34px;
-      top:-42px;
-      border-radius:50%;
-      background:
-        radial-gradient(circle at 34% 32%,rgba(255,255,255,.96),rgba(255,255,255,.34) 26%,rgba(255,255,255,.12) 48%,transparent 72%);
-      filter:blur(4px);
-      opacity:0;
-      z-index:1;
-      pointer-events:none;
-      transition:opacity .22s ease, transform .22s ease;
+      display:none;
     }
 
     .tab:hover{
       transform:translateY(-1px);
+    }
+
+    .tab:hover .circle-overlay{
+      display:none;
     }
 
     .tab:active{
@@ -276,31 +276,42 @@
     .tab.active{
       color:#ffffff;
       z-index:2;
-      box-shadow:0 12px 22px rgba(15,23,42,.14);
+      box-shadow:none;
     }
 
     .tab.active::before{
-      inset:0 -10px;
+      top:0;
+      bottom:0;
+      left:calc(var(--liquid-pill-overlap) * -1);
+      right:calc(var(--liquid-pill-overlap) * -1);
       border-radius:999px;
-      background:linear-gradient(180deg,rgba(17,24,39,.98),rgba(17,24,39,.94));
-      border:1px solid rgba(17,24,39,.96);
+      background:
+        linear-gradient(180deg,rgba(67,76,91,.98),rgba(29,35,45,.96));
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.04),
-        inset 0 -1px 0 rgba(0,0,0,.12),
-        0 8px 18px rgba(15,23,42,.16);
+        inset 0 1px 0 rgba(255,255,255,.22),
+        inset 0 0 0 1px rgba(255,255,255,.10),
+        0 8px 18px rgba(15,23,42,.14);
+      opacity:1;
     }
 
-    .tab:first-child.active::before{inset:0 -10px 0 0;}
-    .tab:last-child.active::before{inset:0 0 0 -10px;}
+    .tab:first-child.active::before{
+      left:0;
+      right:calc(var(--liquid-pill-overlap) * -1);
+    }
+
+    .tab:last-child.active::before{
+      left:calc(var(--liquid-pill-overlap) * -1);
+      right:0;
+    }
 
     .tab.active::after{
-      background:transparent;
-      opacity:0;
+      inset:2px 12px 34px;
+      background:linear-gradient(180deg,rgba(255,255,255,.24),transparent 90%);
+      opacity:.22;
     }
 
     .tab.active .circle-overlay{
-      opacity:0;
-      transform:none;
+      display:none;
     }
 
     .tab.active .tab-icon,
@@ -588,15 +599,18 @@
       }
 
       .tabs{
+        --liquid-pill-overlap:25%;
         width:calc(100% - 24px);
         bottom:max(4px, env(safe-area-inset-bottom,0px));
         gap:0;
-        padding:8px;
+        padding:7px;
         border-radius:999px;
         box-shadow:
           0 14px 28px rgba(15,23,42,.10),
           0 3px 8px rgba(15,23,42,.05),
           inset 0 1px 0 rgba(255,255,255,.92);
+        backdrop-filter:blur(26px) saturate(185%);
+        -webkit-backdrop-filter:blur(26px) saturate(185%);
       }
 
       .tab{
@@ -605,21 +619,34 @@
         border-radius:999px;
       }
 
-      .tab-content{
-        gap:5px;
-        padding:8px 6px 6px;
+      .tab::before{
+        inset:4px;
       }
 
-      .tab-icon{font-size:21px;}
+      .tab::after{
+        inset:4px 10px 26px;
+      }
+
+      .tab-content{
+        gap:4px;
+        padding:8px 4px 6px;
+      }
+
+      .tab-icon{font-size:20px;}
       .tab-label{font-size:12px;}
 
-      .tab.active{
-        box-shadow:0 6px 12px rgba(15,23,42,.14);
+      .tab.active::before{
+        top:0;
+        bottom:0;
       }
 
-      .tab.active::before{inset:0 -12px;}
-      .tab:first-child.active::before{inset:0 -12px 0 0;}
-      .tab:last-child.active::before{inset:0 0 0 -12px;}
+      .tab.active::after{
+        inset:2px 12px 24px;
+      }
+
+      .tab .circle-overlay{
+        display:none;
+      }
     }
 
     @media (min-width:640px){
@@ -1829,6 +1856,36 @@
       });
     }
 
+    function updateLiquidGlassMetrics(){
+      const dock = document.querySelector(".tabs");
+      const tabs = Array.from(document.querySelectorAll(".tabs .tab"));
+      if(!dock || !tabs.length) return null;
+
+      const slotWidth = tabs[0].getBoundingClientRect().width;
+      const compactMode = window.matchMedia("(max-width: 480px)").matches;
+      const highlightScale = compactMode ? 1.5 : 1.38;
+      const highlightWidth = slotWidth * highlightScale;
+      const overlapWidth = compactMode ? (highlightWidth / 3) : (highlightWidth * 0.28);
+
+      document.documentElement.style.setProperty("--tab-slot-width", `${slotWidth.toFixed(2)}px`);
+      document.documentElement.style.setProperty("--tab-highlight-width", `${highlightWidth.toFixed(2)}px`);
+      document.documentElement.style.setProperty("--tab-highlight-overlap-width", `${overlapWidth.toFixed(2)}px`);
+
+      dock.dataset.slotWidth = slotWidth.toFixed(2);
+      dock.dataset.highlightWidth = highlightWidth.toFixed(2);
+      dock.dataset.overlapWidth = overlapWidth.toFixed(2);
+      dock.dataset.highlightMode = compactMode ? "ios" : "desktop";
+
+      return {
+        mode: compactMode ? "ios" : "desktop",
+        slotWidth,
+        highlightWidth,
+        overlapWidth
+      };
+    }
+
+    window.getLiquidGlassTabMetrics = updateLiquidGlassMetrics;
+
     function switchTab(name){
       document.querySelectorAll(".tab").forEach((btn) => {
         btn.classList.toggle("active", btn.dataset.tab === name);
@@ -1837,6 +1894,8 @@
       document.querySelectorAll(".section").forEach((sec) => {
         sec.classList.toggle("active", sec.id === name);
       });
+
+      requestAnimationFrame(updateLiquidGlassMetrics);
     }
 
     function copySummary(){
@@ -2569,12 +2628,21 @@
     renderHistory();
     initPortableTools();
     switchTab("plan");
+    updateLiquidGlassMetrics();
     updateSummary();
     refreshCloudUi().catch(() => {});
 
     if(isStandaloneMode()){
       document.body.classList.add("standalone");
     }
+
+    window.addEventListener("resize", () => {
+      requestAnimationFrame(updateLiquidGlassMetrics);
+    }, { passive:true });
+
+    window.addEventListener("orientationchange", () => {
+      setTimeout(updateLiquidGlassMetrics, 80);
+    });
 
     window.addEventListener("pagehide", () => {
       updateSummary();
