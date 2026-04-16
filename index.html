@@ -209,17 +209,7 @@
     }
 
     .tab::after{
-      content:"";
-      position:absolute;
-      left:10px;
-      right:10px;
-      top:8px;
-      height:36%;
-      border-radius:999px;
-      background:linear-gradient(180deg,rgba(255,255,255,.58),rgba(255,255,255,0));
-      opacity:.78;
-      z-index:1;
-      pointer-events:none;
+      content:none;
     }
 
     .tab-content{
@@ -251,19 +241,7 @@
     }
 
     .tab .circle-overlay{
-      position:absolute;
-      width:112px;
-      height:112px;
-      right:-34px;
-      top:-42px;
-      border-radius:50%;
-      background:
-        radial-gradient(circle at 34% 32%,rgba(255,255,255,.96),rgba(255,255,255,.34) 26%,rgba(255,255,255,.12) 48%,transparent 72%);
-      filter:blur(4px);
-      opacity:.56;
-      z-index:1;
-      pointer-events:none;
-      transition:opacity .22s ease, transform .22s ease;
+      display:none;
     }
 
     .tab:hover{
@@ -280,24 +258,32 @@
     }
 
     .tab.active{
-      color:#0f172a;
-      box-shadow:0 14px 28px rgba(15,23,42,.12);
+      color:#ffffff;
+      box-shadow:0 12px 22px rgba(15,23,42,.14);
     }
 
     .tab.active::before{
       background:
-        linear-gradient(180deg,rgba(255,255,255,.72),rgba(255,255,255,.28)),
-        linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,.06));
-      border:1px solid rgba(255,255,255,.72);
+        linear-gradient(180deg,rgba(17,24,39,.98),rgba(17,24,39,.94)),
+        linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,0));
+      border:1px solid rgba(17,24,39,.96);
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.88),
-        inset 0 -1px 0 rgba(255,255,255,.16),
-        0 10px 24px rgba(255,255,255,.10);
+        inset 0 1px 0 rgba(255,255,255,.10),
+        inset 0 -1px 0 rgba(0,0,0,.18),
+        0 8px 18px rgba(15,23,42,.16);
+    }
+
+    .tab.active::after{
+      content:none;
     }
 
     .tab.active .circle-overlay{
-      opacity:.82;
-      transform:scale(1.06);
+      display:none;
+    }
+
+    .tab.active .tab-icon,
+    .tab.active .tab-label{
+      color:#ffffff;
     }
 
     .section{display:none;}
@@ -606,7 +592,7 @@
       .tab-label{font-size:12px;}
 
       .tab.active{
-        box-shadow:0 8px 16px rgba(15,23,42,.14);
+        box-shadow:0 6px 12px rgba(15,23,42,.14);
       }
     }
 
