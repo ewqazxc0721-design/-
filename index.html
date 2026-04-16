@@ -117,23 +117,27 @@
     .tabs{
       position:fixed;
       left:50%;
-      bottom:6px;
+      bottom:max(6px, env(safe-area-inset-bottom,0px));
       transform:translateX(-50%);
-      width:min(692px,calc(100% - 20px));
+      width:min(692px,calc(100% - 18px));
       display:grid;
       grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:8px;
-      padding:9px;
+      gap:10px;
+      padding:10px;
       z-index:60;
-      border-radius:var(--dock-radius);
-      background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(255,255,255,.72));
-      border:1px solid rgba(255,255,255,.9);
+      border-radius:50px;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.42),rgba(255,255,255,.16)),
+        radial-gradient(120% 120% at 18% 0%,rgba(255,255,255,.82),transparent 46%),
+        radial-gradient(130% 170% at 84% 110%,rgba(148,163,184,.18),transparent 52%);
+      border:1px solid rgba(255,255,255,.58);
       box-shadow:
-        0 16px 32px rgba(15,23,42,.12),
-        0 2px 8px rgba(15,23,42,.06),
-        inset 0 1px 0 rgba(255,255,255,.95);
-      backdrop-filter:blur(22px) saturate(180%);
-      -webkit-backdrop-filter:blur(22px) saturate(180%);
+        0 20px 44px rgba(15,23,42,.14),
+        0 6px 16px rgba(15,23,42,.08),
+        inset 0 1px 0 rgba(255,255,255,.85),
+        inset 0 -1px 0 rgba(255,255,255,.12);
+      backdrop-filter:blur(28px) saturate(195%);
+      -webkit-backdrop-filter:blur(28px) saturate(195%);
       isolation:isolate;
       overflow:hidden;
     }
@@ -143,8 +147,25 @@
       position:absolute;
       inset:1px;
       border-radius:inherit;
-      background:linear-gradient(180deg,rgba(255,255,255,.4),rgba(255,255,255,.06));
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.42),rgba(255,255,255,.05)),
+        radial-gradient(90% 70% at 50% 0%,rgba(255,255,255,.52),transparent 65%);
       pointer-events:none;
+      z-index:0;
+    }
+
+    .tabs::after{
+      content:"";
+      position:absolute;
+      width:220px;
+      height:220px;
+      right:-72px;
+      bottom:-148px;
+      border-radius:50%;
+      background:radial-gradient(circle,rgba(255,255,255,.34) 0%,rgba(255,255,255,.08) 42%,transparent 72%);
+      filter:blur(10px);
+      pointer-events:none;
+      z-index:0;
     }
 
     .tabs > *{
@@ -153,39 +174,96 @@
     }
 
     .tab{
+      position:relative;
       border:none;
       background:transparent;
       height:78px;
       min-height:78px;
-      padding:10px 8px 8px;
-      border-radius:var(--dock-item-radius);
-      font-size:14px;
-      line-height:1.1;
-      color:#111827;
+      padding:0;
+      border-radius:38px;
+      color:#334155;
       font-weight:700;
       cursor:pointer;
+      overflow:hidden;
+      isolation:isolate;
+      transition:transform .18s ease, color .18s ease, box-shadow .22s ease;
+    }
+
+    .tab::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:inherit;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,.12)),
+        linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.04));
+      border:1px solid rgba(255,255,255,.40);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.65),
+        inset 0 -1px 0 rgba(255,255,255,.08);
+      z-index:0;
+    }
+
+    .tab::after{
+      content:"";
+      position:absolute;
+      left:10px;
+      right:10px;
+      top:8px;
+      height:36%;
+      border-radius:999px;
+      background:linear-gradient(180deg,rgba(255,255,255,.58),rgba(255,255,255,0));
+      opacity:.78;
+      z-index:1;
+      pointer-events:none;
+    }
+
+    .tab-content{
+      position:relative;
+      z-index:2;
+      height:100%;
       display:flex;
       flex-direction:column;
       align-items:center;
       justify-content:center;
       gap:7px;
-      transition:transform .15s ease,background .18s ease,color .18s ease,box-shadow .18s ease;
+      padding:10px 8px 8px;
     }
 
-    .tab::before{
+    .tab-icon{
       display:block;
-      font-size:26px;
+      font-size:24px;
       line-height:1;
-      font-weight:600;
+      font-weight:700;
+      text-shadow:0 1px 0 rgba(255,255,255,.42);
     }
 
-    .tab[data-tab="plan"]::before{content:"⌂";}
-    .tab[data-tab="record"]::before{content:"✎";}
-    .tab[data-tab="history"]::before{content:"◴";}
-    .tab[data-tab="tools"]::before{content:"◫";}
+    .tab-label{
+      display:block;
+      font-size:13px;
+      line-height:1.1;
+      font-weight:700;
+      letter-spacing:.01em;
+    }
+
+    .tab .circle-overlay{
+      position:absolute;
+      width:112px;
+      height:112px;
+      right:-34px;
+      top:-42px;
+      border-radius:50%;
+      background:
+        radial-gradient(circle at 34% 32%,rgba(255,255,255,.96),rgba(255,255,255,.34) 26%,rgba(255,255,255,.12) 48%,transparent 72%);
+      filter:blur(4px);
+      opacity:.56;
+      z-index:1;
+      pointer-events:none;
+      transition:opacity .22s ease, transform .22s ease;
+    }
 
     .tab:hover{
-      background:rgba(148,163,184,.12);
+      transform:translateY(-1px);
     }
 
     .tab:active{
@@ -193,20 +271,34 @@
     }
 
     .tab:focus-visible{
-      outline:2px solid rgba(15,23,42,.2);
+      outline:2px solid rgba(148,163,184,.45);
       outline-offset:2px;
     }
 
     .tab.active{
-      background:linear-gradient(180deg,rgba(30,41,59,.96),rgba(15,23,42,.94));
-      color:#fff;
+      color:#0f172a;
+      box-shadow:0 14px 28px rgba(15,23,42,.12);
+    }
+
+    .tab.active::before{
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.72),rgba(255,255,255,.28)),
+        linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,.06));
+      border:1px solid rgba(255,255,255,.72);
       box-shadow:
-        0 10px 22px rgba(15,23,42,.22),
-        inset 0 1px 0 rgba(255,255,255,.12);
+        inset 0 1px 0 rgba(255,255,255,.88),
+        inset 0 -1px 0 rgba(255,255,255,.16),
+        0 10px 24px rgba(255,255,255,.10);
+    }
+
+    .tab.active .circle-overlay{
+      opacity:.82;
+      transform:scale(1.06);
     }
 
     .section{display:none;}
     .section.active{display:block;}
+
 
     h2{
       margin:0 0 12px;
@@ -484,32 +576,33 @@
       }
 
       .tabs{
-        width:calc(100% - 14px);
-        bottom:4px;
+        width:calc(100% - 12px);
+        bottom:max(4px, env(safe-area-inset-bottom,0px));
         gap:6px;
-        padding:6px;
-        border-radius:28px;
+        padding:7px;
+        border-radius:42px;
         box-shadow:
-          0 12px 24px rgba(15,23,42,.10),
-          0 2px 6px rgba(15,23,42,.05),
+          0 14px 28px rgba(15,23,42,.10),
+          0 3px 8px rgba(15,23,42,.05),
           inset 0 1px 0 rgba(255,255,255,.92);
       }
 
       .tab{
         height:64px;
         min-height:64px;
-        padding:8px 6px 6px;
-        gap:5px;
-        font-size:13px;
-        border-radius:20px;
+        border-radius:32px;
       }
 
-      .tab::before{font-size:22px;}
+      .tab-content{
+        gap:5px;
+        padding:8px 6px 6px;
+      }
+
+      .tab-icon{font-size:21px;}
+      .tab-label{font-size:12px;}
 
       .tab.active{
-        box-shadow:
-          0 6px 14px rgba(15,23,42,.18),
-          inset 0 1px 0 rgba(255,255,255,.10);
+        box-shadow:0 8px 16px rgba(15,23,42,.14);
       }
     }
 
@@ -536,10 +629,34 @@
     </div>
 
     <div class="tabs">
-      <button class="tab active" data-tab="plan">计划</button>
-      <button class="tab" data-tab="record">记录</button>
-      <button class="tab" data-tab="history">历史</button>
-      <button class="tab" data-tab="tools">工具</button>
+      <button class="tab active" data-tab="plan" type="button">
+        <div class="tab-content">
+          <span class="tab-icon">⌂</span>
+          <span class="tab-label">计划</span>
+        </div>
+        <div class="circle-overlay"></div>
+      </button>
+      <button class="tab" data-tab="record" type="button">
+        <div class="tab-content">
+          <span class="tab-icon">✎</span>
+          <span class="tab-label">记录</span>
+        </div>
+        <div class="circle-overlay"></div>
+      </button>
+      <button class="tab" data-tab="history" type="button">
+        <div class="tab-content">
+          <span class="tab-icon">◴</span>
+          <span class="tab-label">历史</span>
+        </div>
+        <div class="circle-overlay"></div>
+      </button>
+      <button class="tab" data-tab="tools" type="button">
+        <div class="tab-content">
+          <span class="tab-icon">◫</span>
+          <span class="tab-label">工具</span>
+        </div>
+        <div class="circle-overlay"></div>
+      </button>
     </div>
 
     <section id="plan" class="section active">
