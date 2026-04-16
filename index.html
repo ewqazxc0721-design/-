@@ -115,7 +115,7 @@
     }
 
     .tabs{
-      --liquid-pill-overlap:25%;
+      --liquid-pill-overlap:32%;
       position:fixed;
       left:50%;
       bottom:max(6px, env(safe-area-inset-bottom,0px));
@@ -183,20 +183,23 @@
     .tab::before{
       content:"";
       position:absolute;
-      inset:0 calc(var(--liquid-pill-overlap) * -1);
+      inset:0;
       border-radius:999px;
       background:transparent;
-      border:1px solid rgba(255,255,255,.60);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.52),
-        inset 0 0 0 1px rgba(255,255,255,.08),
-        0 1px 1px rgba(15,23,42,.02);
+      border:none;
+      box-shadow:none;
+      opacity:0;
+      transform:scale(.965);
+      transition:
+        inset .22s ease,
+        opacity .22s ease,
+        transform .22s ease,
+        background .22s ease,
+        box-shadow .22s ease,
+        border-color .22s ease;
       z-index:0;
       pointer-events:none;
     }
-
-    .tab:first-child::before{inset:0 calc(var(--liquid-pill-overlap) * -1) 0 0;}
-    .tab:last-child::before{inset:0 0 0 calc(var(--liquid-pill-overlap) * -1);}
 
     .tab::after{
       display:none;
@@ -257,11 +260,13 @@
       inset:0 calc(var(--liquid-pill-overlap) * -1);
       border-radius:999px;
       background:linear-gradient(180deg,rgba(73,85,107,.98),rgba(29,36,49,.96));
-      border:1px solid rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.14);
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,.22),
         inset 0 -1px 0 rgba(0,0,0,.18),
         0 8px 18px rgba(15,23,42,.16);
+      opacity:1;
+      transform:scale(1);
     }
 
     .tab:first-child.active::before{inset:0 calc(var(--liquid-pill-overlap) * -1) 0 0;}
@@ -560,7 +565,7 @@
       }
 
       .tabs{
-        --liquid-pill-overlap:25%;
+        --liquid-pill-overlap:30%;
         width:calc(100% - 24px);
         bottom:max(4px, env(safe-area-inset-bottom,0px));
         gap:0;
@@ -577,12 +582,6 @@
         min-height:64px;
         border-radius:999px;
       }
-
-      .tab::before{
-        inset:0 calc(var(--liquid-pill-overlap) * -1);
-      }
-      .tab:first-child::before{inset:0 calc(var(--liquid-pill-overlap) * -1) 0 0;}
-      .tab:last-child::before{inset:0 0 0 calc(var(--liquid-pill-overlap) * -1);}
 
       .tab-content{
         gap:5px;
