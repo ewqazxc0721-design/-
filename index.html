@@ -122,10 +122,11 @@
       --indicator-edge-gap:8px;
       --drag-overflow:18px;
       --drag-extra-scale:0.18;
+      --dock-active-scale:1.018;
       position:fixed;
       left:50%;
       bottom:max(6px, env(safe-area-inset-bottom,0px));
-      transform:translateX(-50%);
+      transform:translateX(-50%) translateZ(0) scale(1);
       width:min(760px,calc(100% - 16px));
       display:flex;
       align-items:stretch;
@@ -144,7 +145,11 @@
       -webkit-backdrop-filter:blur(28px) saturate(180%);
       isolation:isolate;
       overflow:hidden;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
       -webkit-mask-image:-webkit-radial-gradient(white, black);
+      transform-origin:center bottom;
+      transition:transform .22s cubic-bezier(.22,.61,.36,1), box-shadow .22s ease, padding .22s ease;
     }
 
     .tabs::before{
@@ -160,6 +165,17 @@
     .tabs > *{
       position:relative;
       z-index:1;
+    }
+
+    .tabs.pressing,
+    .tabs.dragging,
+    .tabs.bump{
+      transform:translateX(-50%) translateZ(0) scale(var(--dock-active-scale));
+      box-shadow:
+        0 18px 36px rgba(15,23,42,.12),
+        0 5px 12px rgba(15,23,42,.06),
+        inset 0 1px 0 rgba(255,255,255,.82),
+        inset 0 -1px 0 rgba(255,255,255,.10);
     }
 
     .tab-indicator{
@@ -179,7 +195,10 @@
       touch-action:none;
       cursor:grab;
       z-index:1;
-      transition:transform .28s cubic-bezier(.22,.61,.36,1), width .28s cubic-bezier(.22,.61,.36,1);
+      will-change:transform, width;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+      transition:transform .28s cubic-bezier(.22,.61,.36,1), width .28s cubic-bezier(.22,.61,.36,1), top .18s ease, bottom .18s ease, box-shadow .18s ease;
     }
 
     .tabs.dragging{
@@ -192,7 +211,12 @@
       top:-4px;
       bottom:-4px;
       border-radius:999px;
-      filter:drop-shadow(0 12px 24px rgba(15,23,42,.24));
+      filter:none;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.24),
+        inset 0 -1px 0 rgba(0,0,0,.18),
+        0 12px 24px rgba(15,23,42,.20),
+        0 3px 10px rgba(15,23,42,.10);
     }
 
     .tab-indicator.dragging{
@@ -228,11 +252,13 @@
     .tab-content{
       position:relative;
       z-index:2;
+      width:100%;
       height:100%;
       display:flex;
       flex-direction:column;
       align-items:center;
       justify-content:center;
+      text-align:center;
       gap:7px;
       padding:10px 8px 8px;
     }
@@ -1129,6 +1155,7 @@
     let autoSyncTimer = null;
     let autoSyncReason = "";
     let autoSyncInFlight = false;
+    let tabDockPulseTimer = null;
 
     function queueAutoSync(reason = "本机数据变化"){
       autoSyncReason = reason || autoSyncReason || "本机数据变化";
@@ -1830,23 +1857,22 @@
       if(!tabsEl || !indicator || !buttons.length || !activeTab) return null;
 
       const tabsRect = tabsEl.getBoundingClientRect();
-      const buttonRects = buttons.map((btn) => btn.getBoundingClientRect());
-      const activeRect = activeTab.getBoundingClientRect();
+      const containerWidth = tabsEl.clientWidth;
       const styles = getComputedStyle(tabsEl);
       const scale = (parseFloat(styles.getPropertyValue("--indicator-scale")) || 1.44) + extraScale;
       const edgeGap = parseFloat(styles.getPropertyValue("--indicator-edge-gap")) || 0;
-      const width = activeRect.width * scale;
-      const maxLeft = Math.max(edgeGap, tabsRect.width - width - edgeGap);
-      const activeCenter = activeRect.left - tabsRect.left + activeRect.width / 2;
+      const width = activeTab.offsetWidth * scale;
+      const maxLeft = Math.max(edgeGap, containerWidth - width - edgeGap);
+      const activeCenter = activeTab.offsetLeft + activeTab.offsetWidth / 2;
       const activeLeft = Math.max(edgeGap, Math.min(activeCenter - width / 2, maxLeft));
 
-      const snapLefts = buttonRects.map((rect) => {
-        const center = rect.left - tabsRect.left + rect.width / 2;
+      const snapLefts = buttons.map((btn) => {
+        const center = btn.offsetLeft + btn.offsetWidth / 2;
         const left = center - width / 2;
         return Math.max(edgeGap, Math.min(left, maxLeft));
       });
 
-      return { tabsEl, indicator, buttons, tabsRect, buttonRects, activeRect, width, edgeGap, maxLeft, activeLeft, snapLefts };
+      return { tabsEl, indicator, buttons, tabsRect, containerWidth, width, edgeGap, maxLeft, activeLeft, snapLefts };
     }
 
     function getIndicatorLeft(indicator){
@@ -1923,8 +1949,9 @@
       tabDrag.startX = clientX;
       tabDrag.startLeft = metrics.activeLeft;
       tabDrag.minLeft = -dragOverflow;
-      tabDrag.maxLeft = metrics.tabsRect.width - metrics.width + dragOverflow;
+      tabDrag.maxLeft = metrics.containerWidth - metrics.width + dragOverflow;
       metrics.tabsEl.classList.add("dragging");
+      metrics.tabsEl.classList.add("pressing");
       metrics.indicator.classList.add("dragging");
       metrics.indicator.style.width = metrics.width + "px";
       metrics.indicator.style.transform = `translateX(${metrics.activeLeft}px)`;
@@ -1946,6 +1973,7 @@
       const metrics = getTabMetrics(tabDrag.extraScale);
       if(metrics){
         metrics.tabsEl.classList.remove("dragging");
+        metrics.tabsEl.classList.remove("pressing");
         metrics.indicator.classList.remove("dragging");
       }
       document.body.style.userSelect = "";
@@ -1960,6 +1988,32 @@
       }else{
         updateTabIndicator();
       }
+    }
+
+    function attachTabPress(){
+      const tabsEl = document.querySelector(".tabs");
+      if(!tabsEl || tabsEl.dataset.pressBound === "1") return;
+      tabsEl.dataset.pressBound = "1";
+
+      const pressStart = (event) => {
+        const target = event.target;
+        if(!(target instanceof Element)) return;
+        if(!target.closest(".tab") && !target.closest(".tab-indicator")) return;
+        setTabsPressed(true);
+      };
+
+      const pressEnd = () => {
+        if(tabDrag.active) return;
+        setTabsPressed(false);
+        requestAnimationFrame(updateTabIndicator);
+      };
+
+      tabsEl.addEventListener("mousedown", pressStart);
+      tabsEl.addEventListener("touchstart", pressStart, { passive:true });
+      window.addEventListener("mouseup", pressEnd);
+      window.addEventListener("touchend", pressEnd);
+      window.addEventListener("touchcancel", pressEnd);
+      tabsEl.addEventListener("mouseleave", pressEnd);
     }
 
     function attachTabDrag(){
@@ -1996,6 +2050,25 @@
       window.addEventListener("touchcancel", endTabDrag);
     }
 
+    function setTabsPressed(pressed){
+      const tabsEl = document.querySelector(".tabs");
+      if(!tabsEl) return;
+      tabsEl.classList.toggle("pressing", !!pressed);
+    }
+
+    function pulseTabsDock(){
+      const tabsEl = document.querySelector(".tabs");
+      if(!tabsEl) return;
+      tabsEl.classList.remove("bump");
+      void tabsEl.offsetWidth;
+      tabsEl.classList.add("bump");
+      clearTimeout(tabDockPulseTimer);
+      tabDockPulseTimer = setTimeout(() => {
+        tabsEl.classList.remove("bump");
+        updateTabIndicator();
+      }, 170);
+    }
+
     function updateTabIndicator(){
 
 
@@ -2004,23 +2077,23 @@
       const activeTab = tabsEl ? tabsEl.querySelector(".tab.active") : null;
       if(!tabsEl || !indicator || !activeTab) return;
 
-      const tabsRect = tabsEl.getBoundingClientRect();
-      const activeRect = activeTab.getBoundingClientRect();
       const styles = getComputedStyle(tabsEl);
+      const containerWidth = tabsEl.clientWidth;
       const scale = parseFloat(styles.getPropertyValue("--indicator-scale")) || 1.44;
       const edgeGap = parseFloat(styles.getPropertyValue("--indicator-edge-gap")) || 0;
-      const width = activeRect.width * scale;
-      const center = activeRect.left - tabsRect.left + activeRect.width / 2;
+      const width = activeTab.offsetWidth * scale;
+      const center = activeTab.offsetLeft + activeTab.offsetWidth / 2;
       let left = center - width / 2;
       const minLeft = edgeGap;
-      const maxLeft = tabsRect.width - width - edgeGap;
+      const maxLeft = containerWidth - width - edgeGap;
       left = Math.max(minLeft, Math.min(left, maxLeft));
 
       indicator.style.width = width + "px";
       indicator.style.transform = `translateX(${left}px)`;
     }
 
-    function switchTab(name){
+    function switchTab(name, shouldPulse = true){
+      if(shouldPulse) pulseTabsDock();
       document.querySelectorAll(".tab").forEach((btn) => {
         btn.classList.toggle("active", btn.dataset.tab === name);
       });
@@ -2716,6 +2789,7 @@
 
     window.addEventListener("resize", () => {
       updateTabIndicator();
+      attachTabPress();
       attachTabDrag();
     });
 
@@ -2768,7 +2842,7 @@
     setForm(JSON.parse(localStorage.getItem(FORM_KEY) || JSON.stringify(defaultForm)));
     renderHistory();
     initPortableTools();
-    switchTab("plan");
+    switchTab("plan", false);
     requestAnimationFrame(() => {
       updateTabIndicator();
       attachTabDrag();
