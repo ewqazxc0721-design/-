@@ -119,6 +119,7 @@
       --tab-side-padding:20px;
       --tab-height:78px;
       --indicator-scale:1.14514;
+      --indicator-edge-gap:8px;
       position:fixed;
       left:50%;
       bottom:max(6px, env(safe-area-inset-bottom,0px));
@@ -541,11 +542,13 @@
 
       .tabs{
         --liquid-pill-overlap:36%;
-        width:calc(100% - 24px);
+        --tab-height:60px;
+        --indicator-edge-gap:5px;
+        width:calc(100% - 15px);
         bottom:max(4px, env(safe-area-inset-bottom,0px));
         gap:0;
-        padding:8px;
-        border-radius:999px;
+        padding:3px 11px;
+        border-radius:33px;
         box-shadow:
           0 14px 28px rgba(15,23,42,.10),
           0 3px 8px rgba(15,23,42,.05),
@@ -553,9 +556,15 @@
       }
 
       .tab{
-        height:64px;
-        min-height:64px;
-        border-radius:999px;
+        height:60px;
+        min-height:60px;
+        border-radius:28px;
+      }
+
+      .tab-indicator{
+        top:5px;
+        bottom:5px;
+        border-radius:28px;
       }
 
       .tab-content{
@@ -1787,12 +1796,14 @@
 
       const tabsRect = tabsEl.getBoundingClientRect();
       const activeRect = activeTab.getBoundingClientRect();
-      const scale = parseFloat(getComputedStyle(tabsEl).getPropertyValue("--indicator-scale")) || 1.44;
+      const styles = getComputedStyle(tabsEl);
+      const scale = parseFloat(styles.getPropertyValue("--indicator-scale")) || 1.44;
+      const edgeGap = parseFloat(styles.getPropertyValue("--indicator-edge-gap")) || 0;
       const width = activeRect.width * scale;
       const center = activeRect.left - tabsRect.left + activeRect.width / 2;
       let left = center - width / 2;
-      const minLeft = 0;
-      const maxLeft = tabsRect.width - width;
+      const minLeft = edgeGap;
+      const maxLeft = tabsRect.width - width - edgeGap;
       left = Math.max(minLeft, Math.min(left, maxLeft));
 
       indicator.style.width = width + "px";
