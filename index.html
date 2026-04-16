@@ -289,6 +289,22 @@
       text-shadow:0 1px 0 rgba(255,255,255,.42);
     }
 
+    .tab-icon svg{
+      display:block;
+      width:1.18em;
+      height:1.18em;
+      margin:0 auto;
+      overflow:visible;
+    }
+
+    .tab-icon-home,
+    .tab-icon-record,
+    .tab-icon-history,
+    .tab-icon-tools{
+      color:#334155;
+      text-shadow:none;
+    }
+
     .tab-label{
       display:block;
       font-size:13px;
@@ -322,6 +338,28 @@
 
     .tab.active .tab-icon,
     .tab.active .tab-label{
+      color:#ffffff;
+      text-shadow:none;
+    }
+
+    .tabs.dragging .tab.active{
+      color:#334155;
+      z-index:2;
+    }
+
+    .tabs.dragging .tab.active .tab-icon,
+    .tabs.dragging .tab.active .tab-label{
+      color:#334155;
+      text-shadow:none;
+    }
+
+    .tabs.dragging .tab.drag-active{
+      color:#ffffff;
+      z-index:3;
+    }
+
+    .tabs.dragging .tab.drag-active .tab-icon,
+    .tabs.dragging .tab.drag-active .tab-label{
       color:#ffffff;
       text-shadow:none;
     }
@@ -672,28 +710,67 @@
       <div class="tab-indicator" aria-hidden="true"></div>
       <button class="tab active" data-tab="plan" type="button">
         <div class="tab-content">
-          <span class="tab-icon">⌂</span>
+          <span class="tab-icon tab-icon-home" aria-hidden="true">
+            <svg viewBox="0 0 64 64" width="26" height="26" role="img" focusable="false">
+              <rect x="12" y="7" width="40" height="50" rx="7" ry="7"
+                    fill="none" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round"></rect>
+              <line x1="22.75" y1="18" x2="39.25" y2="18"
+                    stroke="currentColor" stroke-width="3.5" stroke-linecap="round"></line>
+              <line x1="22.75" y1="28" x2="33.25" y2="28"
+                    stroke="currentColor" stroke-width="3.5" stroke-linecap="round"></line>
+              <rect x="21" y="35" width="21.5" height="15" rx="3" ry="3"
+                    fill="currentColor" stroke="none"></rect>
+            </svg>
+          </span>
           <span class="tab-label">计划</span>
         </div>
         <div class="circle-overlay"></div>
       </button>
       <button class="tab" data-tab="record" type="button">
         <div class="tab-content">
-          <span class="tab-icon">✎</span>
+          <span class="tab-icon tab-icon-record" aria-hidden="true">
+            <svg viewBox="0 0 64 64" width="26" height="26" role="img" focusable="false">
+              <g fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M32 10.5 48 19.5 48 40.5 32 49.5 16 40.5 16 19.5Z"></path>
+                <path d="M32 10.5 16 19.5"></path>
+                <path d="M32 10.5 48 19.5"></path>
+                <path d="M32 29.5 16 19.5"></path>
+                <path d="M32 29.5 48 19.5"></path>
+                <path d="M32 29.5 32 49.5"></path>
+              </g>
+            </svg>
+          </span>
           <span class="tab-label">记录</span>
         </div>
         <div class="circle-overlay"></div>
       </button>
       <button class="tab" data-tab="history" type="button">
         <div class="tab-content">
-          <span class="tab-icon">◴</span>
+          <span class="tab-icon tab-icon-history" aria-hidden="true">
+            <svg viewBox="0 0 64 64" width="26" height="26" role="img" focusable="false">
+              <g fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="32" cy="32" r="22"></circle>
+                <line x1="32" y1="32" x2="32" y2="19"></line>
+                <line x1="32" y1="32" x2="22" y2="32"></line>
+              </g>
+            </svg>
+          </span>
           <span class="tab-label">历史</span>
         </div>
         <div class="circle-overlay"></div>
       </button>
       <button class="tab" data-tab="tools" type="button">
         <div class="tab-content">
-          <span class="tab-icon">◫</span>
+          <span class="tab-icon tab-icon-tools" aria-hidden="true">
+            <svg viewBox="0 0 64 64" width="26" height="26" role="img" focusable="false">
+              <g fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="11" y="20" width="42" height="27" rx="4" ry="4"></rect>
+                <path d="M27 20v-4c0-2.2 1.8-4 4-4h2c2.2 0 4 1.8 4 4v4"></path>
+                <line x1="11" y1="31" x2="53" y2="31"></line>
+                <rect x="28.5" y="28.5" width="7" height="5" rx="1.5" ry="1.5"></rect>
+              </g>
+            </svg>
+          </span>
           <span class="tab-label">工具</span>
         </div>
         <div class="circle-overlay"></div>
@@ -1913,6 +1990,37 @@
       metrics.indicator.style.transform = `translateX(${clamped}px)`;
     }
 
+    function clearDragActiveTab(){
+      document.querySelectorAll(".tab.drag-active").forEach((btn) => {
+        btn.classList.remove("drag-active");
+      });
+    }
+
+    function updateDraggedTabHighlight(indicatorLeft){
+      const metrics = getTabMetrics(tabDrag.extraScale);
+      if(!metrics) return;
+
+      const pillStart = indicatorLeft;
+      const pillEnd = indicatorLeft + metrics.width;
+      let bestButton = metrics.buttons[0] || null;
+      let bestOverlap = -1;
+
+      metrics.buttons.forEach((btn) => {
+        const btnStart = btn.offsetLeft;
+        const btnEnd = btnStart + btn.offsetWidth;
+        const overlap = Math.max(0, Math.min(pillEnd, btnEnd) - Math.max(pillStart, btnStart));
+        if(overlap > bestOverlap){
+          bestOverlap = overlap;
+          bestButton = btn;
+        }
+      });
+
+      clearDragActiveTab();
+      if(bestButton){
+        bestButton.classList.add("drag-active");
+      }
+    }
+
     function snapToNearestTab(){
       const metrics = getTabMetrics(tabDrag.extraScale);
       if(!metrics) return;
@@ -1973,6 +2081,7 @@
       metrics.indicator.classList.add("dragging");
       metrics.indicator.style.width = metrics.width + "px";
       metrics.indicator.style.transform = `translateX(${metrics.activeLeft}px)`;
+      updateDraggedTabHighlight(metrics.activeLeft);
       document.body.style.userSelect = "none";
       triggerBestEffortHaptic(8);
     }
@@ -1983,7 +2092,10 @@
       if(Math.abs(deltaX) > 4) tabDrag.moved = true;
       const next = Math.max(tabDrag.minLeft, Math.min(tabDrag.startLeft + deltaX, tabDrag.maxLeft));
       const metrics = getTabMetrics(tabDrag.extraScale);
-      if(metrics) metrics.indicator.style.transform = `translateX(${next}px)`;
+      if(metrics){
+        metrics.indicator.style.transform = `translateX(${next}px)`;
+        updateDraggedTabHighlight(next);
+      }
     }
 
     function endTabDrag(){
@@ -1994,6 +2106,7 @@
         metrics.tabsEl.classList.remove("pressing");
         metrics.indicator.classList.remove("dragging");
       }
+      clearDragActiveTab();
       document.body.style.userSelect = "";
 
       const moved = tabDrag.moved;
@@ -2040,6 +2153,25 @@
       tabsEl.addEventListener("mouseleave", () => pressEnd(true));
     }
 
+    function setTabsPressed(pressed){
+      const tabsEl = document.querySelector(".tabs");
+      if(!tabsEl) return;
+      tabsEl.classList.toggle("pressing", !!pressed);
+    }
+
+    function pulseTabsDock(){
+      const tabsEl = document.querySelector(".tabs");
+      if(!tabsEl) return;
+      tabsEl.classList.remove("bump");
+      void tabsEl.offsetWidth;
+      tabsEl.classList.add("bump");
+      tabsEl.classList.remove("pressing");
+      clearTimeout(tabDockPulseTimer);
+      tabDockPulseTimer = setTimeout(() => {
+        tabsEl.classList.remove("bump");
+      }, 170);
+    }
+
     function attachTabDrag(){
       const metrics = getTabMetrics();
       if(!metrics) return;
@@ -2074,28 +2206,7 @@
       window.addEventListener("touchcancel", endTabDrag);
     }
 
-    function setTabsPressed(pressed){
-      const tabsEl = document.querySelector(".tabs");
-      if(!tabsEl) return;
-      tabsEl.classList.toggle("pressing", !!pressed);
-    }
-
-    function pulseTabsDock(){
-      const tabsEl = document.querySelector(".tabs");
-      if(!tabsEl) return;
-      tabsEl.classList.remove("bump");
-      void tabsEl.offsetWidth;
-      tabsEl.classList.add("bump");
-      tabsEl.classList.remove("pressing");
-      clearTimeout(tabDockPulseTimer);
-      tabDockPulseTimer = setTimeout(() => {
-        tabsEl.classList.remove("bump");
-      }, 170);
-    }
-
     function updateTabIndicator(){
-
-
       const tabsEl = document.querySelector(".tabs");
       const indicator = tabsEl ? tabsEl.querySelector(".tab-indicator") : null;
       const activeTab = tabsEl ? tabsEl.querySelector(".tab.active") : null;
@@ -2117,6 +2228,7 @@
     }
 
     function switchTab(name, shouldPulse = true){
+      clearDragActiveTab();
       if(shouldPulse) pulseTabsDock();
       document.querySelectorAll(".tab").forEach((btn) => {
         btn.classList.toggle("active", btn.dataset.tab === name);
@@ -2869,6 +2981,7 @@
     switchTab("plan", false);
     requestAnimationFrame(() => {
       updateTabIndicator();
+      attachTabPress();
       attachTabDrag();
     });
     updateSummary();
