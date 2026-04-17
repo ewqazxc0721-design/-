@@ -563,7 +563,7 @@
     }
 
     .btn-danger{
-      color:var(--text);
+      color:var(--danger);
       background:
         linear-gradient(180deg,rgba(255,255,255,.90),rgba(255,255,255,.70));
       border-color:rgba(220,38,38,.12);
@@ -2061,6 +2061,19 @@
       extraScale:0.18
     };
 
+    const tabHold = {
+      active:false,
+      activated:false,
+      targetButton:null,
+      targetName:"",
+      startX:0,
+      startY:0,
+      timer:0
+    };
+
+    let suppressTabClickUntil = 0;
+    let suppressTabClickName = "";
+
     function getTabMetrics(extraScale = 0){
       const tabsEl = document.querySelector(".tabs");
       const indicator = tabsEl ? tabsEl.querySelector(".tab-indicator") : null;
@@ -2098,6 +2111,74 @@
       }catch(err){
         return 0;
       }
+    }
+
+    function clearTabPreviewState(){
+      const tabsEl = document.querySelector(".tabs");
+      const indicator = tabsEl ? tabsEl.querySelector(".tab-indicator") : null;
+      if(!tabsEl || !indicator) return;
+      tabsEl.classList.remove("dragging");
+      tabsEl.classList.remove("pressing");
+      indicator.classList.remove("dragging");
+      clearDragActiveTab();
+    }
+
+    function getButtonSnapState(button, extraScale = 0){
+      const metrics = getTabMetrics(extraScale);
+      if(!metrics || !button) return null;
+      const index = metrics.buttons.indexOf(button);
+      if(index < 0) return null;
+      return {
+        metrics,
+        button,
+        index,
+        left: metrics.snapLefts[index]
+      };
+    }
+
+    function previewIndicatorAtButton(button){
+      const extraScale = getDragExtraScale();
+      const state = getButtonSnapState(button, extraScale);
+      if(!state) return;
+      const { metrics, left } = state;
+      metrics.tabsEl.classList.add("pressing");
+      metrics.tabsEl.classList.add("dragging");
+      metrics.indicator.classList.remove("dragging");
+      metrics.indicator.style.width = metrics.width + "px";
+      metrics.indicator.style.transform = `translateX(${left}px)`;
+      clearDragActiveTab();
+      button.classList.add("drag-active");
+    }
+
+    function clearTabHoldTimer(){
+      clearTimeout(tabHold.timer);
+      tabHold.timer = 0;
+    }
+
+    function resetTabHold(){
+      clearTabHoldTimer();
+      tabHold.active = false;
+      tabHold.activated = false;
+      tabHold.targetButton = null;
+      tabHold.targetName = "";
+      tabHold.startX = 0;
+      tabHold.startY = 0;
+    }
+
+    function cancelTabHold(restoreIndicator = true){
+      const wasActivated = tabHold.activated;
+      resetTabHold();
+      if(restoreIndicator && wasActivated && !tabDrag.active){
+        clearTabPreviewState();
+        updateTabIndicator();
+      }
+    }
+
+    function activateTabHold(){
+      if(!tabHold.active || tabHold.activated || !tabHold.targetButton) return;
+      tabHold.activated = true;
+      previewIndicatorAtButton(tabHold.targetButton);
+      triggerBestEffortHaptic(8);
     }
 
     function setIndicatorLeft(left){
@@ -2182,7 +2263,7 @@
       return event.clientY || 0;
     }
 
-    function startTabDrag(clientX){
+    function startTabDrag(clientX, startLeftOverride = null){
       tabDrag.extraScale = getDragExtraScale();
       const metrics = getTabMetrics(tabDrag.extraScale);
       if(!metrics) return;
@@ -2190,15 +2271,15 @@
       tabDrag.active = true;
       tabDrag.moved = false;
       tabDrag.startX = clientX;
-      tabDrag.startLeft = metrics.activeLeft;
+      tabDrag.startLeft = typeof startLeftOverride === "number" ? startLeftOverride : metrics.activeLeft;
       tabDrag.minLeft = -dragOverflow;
       tabDrag.maxLeft = metrics.containerWidth - metrics.width + dragOverflow;
       metrics.tabsEl.classList.add("dragging");
       metrics.tabsEl.classList.add("pressing");
       metrics.indicator.classList.add("dragging");
       metrics.indicator.style.width = metrics.width + "px";
-      metrics.indicator.style.transform = `translateX(${metrics.activeLeft}px)`;
-      updateDraggedTabHighlight(metrics.activeLeft);
+      metrics.indicator.style.transform = `translateX(${tabDrag.startLeft}px)`;
+      updateDraggedTabHighlight(tabDrag.startLeft);
       document.body.style.userSelect = "none";
       triggerBestEffortHaptic(8);
     }
@@ -2289,6 +2370,81 @@
       }, 170);
     }
 
+    function attachTabHold(){
+      const tabsEl = document.querySelector(".tabs");
+      if(!tabsEl || tabsEl.dataset.holdBound === "1") return;
+      tabsEl.dataset.holdBound = "1";
+
+      const handleStart = (event) => {
+        if(tabDrag.active) return;
+        const target = event.target;
+        if(!(target instanceof Element)) return;
+        const button = target.closest(".tab");
+        if(!button) return;
+
+        resetTabHold();
+        tabHold.active = true;
+        tabHold.targetButton = button;
+        tabHold.targetName = button.dataset.tab || "";
+        tabHold.startX = getDragClientX(event);
+        tabHold.startY = getDragClientY(event);
+        setTabsPressed(true);
+        clearTabHoldTimer();
+        tabHold.timer = setTimeout(() => {
+          activateTabHold();
+        }, 140);
+      };
+
+      const handleMove = (event) => {
+        if(!tabHold.active || tabDrag.active) return;
+        const clientX = getDragClientX(event);
+        const clientY = getDragClientY(event);
+        const deltaX = clientX - tabHold.startX;
+        const deltaY = clientY - tabHold.startY;
+
+        if(!tabHold.activated){
+          if(Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10){
+            cancelTabHold(false);
+          }
+          return;
+        }
+
+        if(Math.abs(deltaX) > 4){
+          const state = getButtonSnapState(tabHold.targetButton, getDragExtraScale());
+          const currentLeft = state ? getIndicatorLeft(state.metrics.indicator) : 0;
+          resetTabHold();
+          startTabDrag(clientX, currentLeft);
+          moveTabDrag(clientX);
+        }
+
+        if(event.cancelable) event.preventDefault();
+      };
+
+      const handleEnd = () => {
+        if(tabDrag.active || !tabHold.active) return;
+        const activated = tabHold.activated;
+        const targetName = tabHold.targetName;
+        resetTabHold();
+
+        if(activated && targetName){
+          suppressTabClickUntil = Date.now() + 500;
+          suppressTabClickName = targetName;
+          clearTabPreviewState();
+          switchTab(targetName);
+          triggerBestEffortHaptic(10);
+        }
+      };
+
+      tabsEl.addEventListener("mousedown", handleStart);
+      tabsEl.addEventListener("touchstart", handleStart, { passive:true });
+      window.addEventListener("mousemove", handleMove);
+      window.addEventListener("touchmove", handleMove, { passive:false });
+      window.addEventListener("mouseup", handleEnd);
+      window.addEventListener("touchend", handleEnd);
+      window.addEventListener("touchcancel", () => cancelTabHold(true));
+      window.addEventListener("scroll", () => cancelTabHold(true), { passive:true });
+    }
+
     function attachTabDrag(){
       const metrics = getTabMetrics();
       if(!metrics) return;
@@ -2345,7 +2501,7 @@
     }
 
     function switchTab(name, shouldPulse = true){
-      clearDragActiveTab();
+      clearTabPreviewState();
       if(shouldPulse) pulseTabsDock();
       document.querySelectorAll(".tab").forEach((btn) => {
         btn.classList.toggle("active", btn.dataset.tab === name);
@@ -3035,7 +3191,12 @@
     }
 
     document.querySelectorAll(".tab").forEach((btn) => {
-      btn.addEventListener("click", () => {
+      btn.addEventListener("click", (event) => {
+        if(Date.now() < suppressTabClickUntil && suppressTabClickName === btn.dataset.tab){
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          return;
+        }
         switchTab(btn.dataset.tab);
       });
     });
@@ -3043,6 +3204,7 @@
     window.addEventListener("resize", () => {
       updateTabIndicator();
       attachTabPress();
+      attachTabHold();
       attachTabDrag();
     });
 
@@ -3099,6 +3261,7 @@
     requestAnimationFrame(() => {
       updateTabIndicator();
       attachTabPress();
+      attachTabHold();
       attachTabDrag();
     });
     updateSummary();
