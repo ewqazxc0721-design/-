@@ -189,6 +189,13 @@
       z-index:1;
     }
 
+    .tabs,
+    .tabs *{
+      user-select:none;
+      -webkit-user-select:none;
+      -webkit-touch-callout:none;
+    }
+
     .tabs.pressing,
     .tabs.dragging,
     .tabs.bump{
@@ -260,6 +267,7 @@
       transition:transform .18s ease, color .18s ease;
       -webkit-mask-image:-webkit-radial-gradient(white, black);
       z-index:2;
+      touch-action:manipulation;
     }
 
     .tab::before,
@@ -2168,6 +2176,9 @@
     function cancelTabHold(restoreIndicator = true){
       const wasActivated = tabHold.activated;
       resetTabHold();
+      if(!tabDrag.active){
+        setTabsPressed(false);
+      }
       if(restoreIndicator && wasActivated && !tabDrag.active){
         clearTabPreviewState();
         updateTabIndicator();
@@ -2332,10 +2343,10 @@
       };
 
       const pressEnd = (immediate = false) => {
-        if(tabDrag.active) return;
+        if(tabDrag.active || tabHold.active) return;
         const clearPress = () => {
           const liveTabs = document.querySelector(".tabs");
-          if(!liveTabs || tabDrag.active || liveTabs.classList.contains("bump")) return;
+          if(!liveTabs || tabDrag.active || tabHold.active) return;
           setTabsPressed(false);
         };
 
@@ -2401,15 +2412,27 @@
         const clientY = getDragClientY(event);
         const deltaX = clientX - tabHold.startX;
         const deltaY = clientY - tabHold.startY;
+        const absX = Math.abs(deltaX);
+        const absY = Math.abs(deltaY);
 
         if(!tabHold.activated){
-          if(Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10){
+          if(absX > 6 && absX >= absY){
+            const state = getButtonSnapState(tabHold.targetButton, getDragExtraScale());
+            const startLeft = state ? state.left : 0;
+            resetTabHold();
+            startTabDrag(clientX, startLeft);
+            moveTabDrag(clientX);
+            if(event.cancelable) event.preventDefault();
+            return;
+          }
+
+          if(absY > 10){
             cancelTabHold(false);
           }
           return;
         }
 
-        if(Math.abs(deltaX) > 4){
+        if(absX > 4){
           const state = getButtonSnapState(tabHold.targetButton, getDragExtraScale());
           const currentLeft = state ? getIndicatorLeft(state.metrics.indicator) : 0;
           resetTabHold();
@@ -2425,6 +2448,7 @@
         const activated = tabHold.activated;
         const targetName = tabHold.targetName;
         resetTabHold();
+        setTabsPressed(false);
 
         if(activated && targetName){
           suppressTabClickUntil = Date.now() + 500;
@@ -2452,26 +2476,12 @@
       if(tabsEl.dataset.dragBound === "1") return;
       tabsEl.dataset.dragBound = "1";
 
-      const handleStart = (event) => {
-        const liveMetrics = getTabMetrics();
-        if(!liveMetrics) return;
-        const indicatorRect = liveMetrics.indicator.getBoundingClientRect();
-        const x = getDragClientX(event);
-        const y = getDragClientY(event);
-        const inside = x >= indicatorRect.left && x <= indicatorRect.right && y >= indicatorRect.top && y <= indicatorRect.bottom;
-        if(!inside) return;
-        startTabDrag(x);
-        if(event.cancelable) event.preventDefault();
-      };
-
       const handleMove = (event) => {
         if(!tabDrag.active) return;
         moveTabDrag(getDragClientX(event));
         if(event.cancelable) event.preventDefault();
       };
 
-      tabsEl.addEventListener("mousedown", handleStart);
-      tabsEl.addEventListener("touchstart", handleStart, { passive:false });
       window.addEventListener("mousemove", handleMove);
       window.addEventListener("touchmove", handleMove, { passive:false });
       window.addEventListener("mouseup", endTabDrag);
