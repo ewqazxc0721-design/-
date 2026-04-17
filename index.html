@@ -413,11 +413,20 @@
     }
 
     .check-btn{
-      width:34px;
-      height:34px;
+      width:36px;
+      height:36px;
       border-radius:999px;
-      border:1.5px solid #cbd5e1;
-      background:#fff;
+      border:1px solid rgba(148,163,184,.28);
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.88),rgba(255,255,255,.68));
+      box-shadow:
+        0 10px 22px rgba(15,23,42,.10),
+        0 3px 8px rgba(15,23,42,.05),
+        inset 0 1px 0 rgba(255,255,255,.96),
+        inset 0 -1px 0 rgba(148,163,184,.16),
+        0 0 0 1px rgba(255,255,255,.35);
+      backdrop-filter:blur(20px) saturate(180%);
+      -webkit-backdrop-filter:blur(20px) saturate(180%);
       color:#94a3b8;
       font-size:18px;
       font-weight:700;
@@ -426,13 +435,19 @@
       justify-content:center;
       cursor:pointer;
       flex-shrink:0;
-      transition:.15s ease;
+      transition:transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
+      isolation:isolate;
+      -webkit-mask-image:-webkit-radial-gradient(white, black);
     }
 
     .check-btn.done{
-      background:#16a34a;
-      border-color:#16a34a;
+      background:linear-gradient(180deg,rgba(73,85,107,.98),rgba(22,28,39,.98));
+      border-color:rgba(255,255,255,.10);
       color:#fff;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.22),
+        inset 0 -1px 0 rgba(0,0,0,.18),
+        0 10px 22px rgba(15,23,42,.16);
       transform:scale(1.02);
     }
 
@@ -489,28 +504,96 @@
     }
 
     .btn,.btn-outline,.btn-danger{
+      position:relative;
+      overflow:hidden;
       border:none;
-      border-radius:18px;
+      border-radius:20px;
       padding:14px 14px;
       font-size:15px;
       font-weight:700;
       cursor:pointer;
+      border:1px solid rgba(148,163,184,.28);
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.88),rgba(255,255,255,.68));
+      box-shadow:
+        0 12px 28px rgba(15,23,42,.10),
+        0 4px 12px rgba(15,23,42,.06),
+        inset 0 1px 0 rgba(255,255,255,.96),
+        inset 0 -1px 0 rgba(148,163,184,.16),
+        0 0 0 1px rgba(255,255,255,.35);
+      backdrop-filter:blur(20px) saturate(180%);
+      -webkit-backdrop-filter:blur(20px) saturate(180%);
+      color:#334155;
+      transition:transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
+      isolation:isolate;
+      -webkit-mask-image:-webkit-radial-gradient(white, black);
+    }
+
+    .btn::before,.btn-outline::before,.btn-danger::before{
+      content:"";
+      position:absolute;
+      inset:1px;
+      border-radius:inherit;
+      background:linear-gradient(180deg,rgba(255,255,255,.32),rgba(255,255,255,.10));
+      pointer-events:none;
+      z-index:0;
+    }
+
+    .btn > *,.btn-outline > *,.btn-danger > *{
+      position:relative;
+      z-index:1;
     }
 
     .btn{
-      background:var(--btn);
+      background:linear-gradient(180deg,rgba(73,85,107,.98),rgba(22,28,39,.98));
+      border-color:rgba(255,255,255,.10);
       color:#fff;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.22),
+        inset 0 -1px 0 rgba(0,0,0,.18),
+        0 10px 22px rgba(15,23,42,.16);
+    }
+
+    .btn::before{
+      background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.04));
     }
 
     .btn-outline{
-      background:#fff;
-      border:1px solid var(--line);
-      color:var(--text);
+      color:#334155;
     }
 
     .btn-danger{
-      background:#fee2e2;
       color:#991b1b;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.90),rgba(255,255,255,.70));
+      border-color:rgba(220,38,38,.12);
+      box-shadow:
+        0 12px 28px rgba(15,23,42,.10),
+        0 4px 12px rgba(15,23,42,.06),
+        inset 0 1px 0 rgba(255,255,255,.96),
+        inset 0 -1px 0 rgba(239,68,68,.12),
+        0 0 0 1px rgba(255,255,255,.35);
+    }
+
+    .btn:hover,.btn-outline:hover,.btn-danger:hover{
+      transform:translateY(-1px);
+      border-color:rgba(100,116,139,.34);
+      box-shadow:
+        0 14px 30px rgba(15,23,42,.12),
+        0 4px 12px rgba(15,23,42,.06),
+        inset 0 1px 0 rgba(255,255,255,.98),
+        inset 0 -1px 0 rgba(148,163,184,.18),
+        0 0 0 1px rgba(255,255,255,.4);
+    }
+
+    .btn:active,.btn-outline:active,.btn-danger:active{
+      transform:scale(.985);
+    }
+
+    .btn:disabled,.btn-outline:disabled,.btn-danger:disabled{
+      opacity:.65;
+      cursor:not-allowed;
+      transform:none;
     }
 
     .full{
@@ -577,19 +660,53 @@
     }
 
     .day-tab{
+      position:relative;
+      overflow:hidden;
       border:none;
-      background:var(--soft);
-      color:var(--muted);
+      border-radius:16px;
       padding:10px 6px;
-      border-radius:14px;
       font-size:13px;
       font-weight:700;
       cursor:pointer;
+      border:1px solid rgba(148,163,184,.28);
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.88),rgba(255,255,255,.68));
+      box-shadow:
+        0 10px 22px rgba(15,23,42,.10),
+        0 3px 8px rgba(15,23,42,.05),
+        inset 0 1px 0 rgba(255,255,255,.96),
+        inset 0 -1px 0 rgba(148,163,184,.16),
+        0 0 0 1px rgba(255,255,255,.35);
+      backdrop-filter:blur(20px) saturate(180%);
+      -webkit-backdrop-filter:blur(20px) saturate(180%);
+      color:#64748b;
+      transition:transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
+      isolation:isolate;
+      -webkit-mask-image:-webkit-radial-gradient(white, black);
+    }
+
+    .day-tab::before{
+      content:"";
+      position:absolute;
+      inset:1px;
+      border-radius:inherit;
+      background:linear-gradient(180deg,rgba(255,255,255,.32),rgba(255,255,255,.10));
+      pointer-events:none;
+      z-index:0;
     }
 
     .day-tab.active{
-      background:var(--primary);
+      background:linear-gradient(180deg,rgba(73,85,107,.98),rgba(22,28,39,.98));
+      border-color:rgba(255,255,255,.10);
       color:#fff;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.22),
+        inset 0 -1px 0 rgba(0,0,0,.18),
+        0 10px 22px rgba(15,23,42,.16);
+    }
+
+    .day-tab.active::before{
+      background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.04));
     }
 
     .day-panel{display:none;}
@@ -627,7 +744,6 @@
     }
 
     .footer-space{height:12px;}
-
     body.standalone .wrap{
       padding-top:calc(env(safe-area-inset-top,0px) + 12px);
       padding-bottom:calc(env(safe-area-inset-bottom,0px) + 112px);
