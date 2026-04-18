@@ -25,6 +25,7 @@
       --line:#e2e8f0;
       --soft:#f1f5f9;
       --primary:#0f172a;
+      --solid-dark:#0f172a;
       --accent:#ecfdf5;
       --accent-text:#065f46;
       --btn:#111827;
@@ -60,11 +61,33 @@
     }
 
     .card{
+      position:relative;
+      overflow:hidden;
       background:var(--card);
       border-radius:28px;
-      box-shadow:var(--shadow);
+      border:1px solid rgba(148,163,184,.18);
+      box-shadow:
+        var(--shadow),
+        0 0 0 1px rgba(255,255,255,.20);
       padding:18px;
       margin-bottom:14px;
+    }
+
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:inherit;
+      pointer-events:none;
+      background:transparent;
+      border:1px solid rgba(255,255,255,.24);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.20);
+      z-index:0;
+    }
+
+    .card > *{
+      position:relative;
+      z-index:1;
     }
 
     .hero h1{
@@ -210,11 +233,13 @@
       left:0;
       width:0;
       border-radius:999px;
-      background:linear-gradient(180deg,rgba(73,85,107,.98),rgba(22,28,39,.98));
-      border:1px solid rgba(255,255,255,.12);
+      background:var(--solid-dark);
+      border:1px solid rgba(255,255,255,.16);
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.22),
+        inset 0 1px 0 rgba(255,255,255,.26),
+        inset 0 0 0 1px rgba(255,255,255,.08),
         inset 0 -1px 0 rgba(0,0,0,.18),
+        0 0 0 1px rgba(255,255,255,.06),
         0 8px 18px rgba(15,23,42,.16);
       pointer-events:none;
       touch-action:none;
@@ -238,8 +263,10 @@
       border-radius:999px;
       filter:none;
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.24),
+        inset 0 1px 0 rgba(255,255,255,.28),
+        inset 0 0 0 1px rgba(255,255,255,.09),
         inset 0 -1px 0 rgba(0,0,0,.18),
+        0 0 0 1px rgba(255,255,255,.08),
         0 12px 24px rgba(15,23,42,.20),
         0 3px 10px rgba(15,23,42,.10);
     }
@@ -424,15 +451,15 @@
       width:36px;
       height:36px;
       border-radius:999px;
-      border:1px solid rgba(148,163,184,.28);
+      border:1px solid rgba(148,163,184,.24);
       background:
         linear-gradient(180deg,rgba(255,255,255,.88),rgba(255,255,255,.68));
       box-shadow:
         0 10px 22px rgba(15,23,42,.10),
         0 3px 8px rgba(15,23,42,.05),
-        inset 0 1px 0 rgba(255,255,255,.96),
-        inset 0 -1px 0 rgba(148,163,184,.16),
-        0 0 0 1px rgba(255,255,255,.35);
+        0 0 0 1px rgba(255,255,255,.24),
+        inset 0 1px 0 rgba(255,255,255,.82),
+        inset 0 -1px 0 rgba(148,163,184,.12),
       backdrop-filter:blur(20px) saturate(180%);
       -webkit-backdrop-filter:blur(20px) saturate(180%);
       color:var(--text);
@@ -449,7 +476,7 @@
     }
 
     .check-btn.done{
-      background:linear-gradient(180deg,rgba(73,85,107,.98),rgba(22,28,39,.98));
+      background:var(--solid-dark);
       border-color:rgba(255,255,255,.10);
       color:#fff;
       box-shadow:
@@ -520,15 +547,15 @@
       font-size:15px;
       font-weight:700;
       cursor:pointer;
-      border:1px solid rgba(148,163,184,.28);
+      border:1px solid rgba(148,163,184,.24);
       background:
         linear-gradient(180deg,rgba(255,255,255,.88),rgba(255,255,255,.68));
       box-shadow:
         0 12px 28px rgba(15,23,42,.10),
         0 4px 12px rgba(15,23,42,.06),
-        inset 0 1px 0 rgba(255,255,255,.96),
-        inset 0 -1px 0 rgba(148,163,184,.16),
-        0 0 0 1px rgba(255,255,255,.35);
+        0 0 0 1px rgba(255,255,255,.24),
+        inset 0 1px 0 rgba(255,255,255,.84),
+        inset 0 -1px 0 rgba(148,163,184,.12),
       backdrop-filter:blur(20px) saturate(180%);
       -webkit-backdrop-filter:blur(20px) saturate(180%);
       color:var(--text);
@@ -540,9 +567,13 @@
     .btn::before,.btn-outline::before,.btn-danger::before{
       content:"";
       position:absolute;
-      inset:1px;
+      inset:0;
       border-radius:inherit;
-      background:linear-gradient(180deg,rgba(255,255,255,.32),rgba(255,255,255,.10));
+      background:transparent;
+      border:1px solid rgba(255,255,255,.22);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.22),
+        0 0 0 1px rgba(255,255,255,.06);
       pointer-events:none;
       z-index:0;
     }
@@ -553,7 +584,7 @@
     }
 
     .btn{
-      background:linear-gradient(180deg,rgba(73,85,107,.98),rgba(22,28,39,.98));
+      background:var(--solid-dark);
       border-color:rgba(255,255,255,.10);
       color:#fff;
       box-shadow:
@@ -563,7 +594,13 @@
     }
 
     .btn::before{
-      background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.04));
+      display:block;
+      inset:0;
+      background:transparent;
+      border:1px solid rgba(255,255,255,.16);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.18),
+        0 0 0 1px rgba(255,255,255,.05);
     }
 
     .btn-outline{
@@ -574,13 +611,13 @@
       color:var(--danger);
       background:
         linear-gradient(180deg,rgba(255,255,255,.90),rgba(255,255,255,.70));
-      border-color:rgba(220,38,38,.12);
+      border-color:rgba(148,163,184,.22);
       box-shadow:
         0 12px 28px rgba(15,23,42,.10),
         0 4px 12px rgba(15,23,42,.06),
-        inset 0 1px 0 rgba(255,255,255,.96),
-        inset 0 -1px 0 rgba(239,68,68,.12),
-        0 0 0 1px rgba(255,255,255,.35);
+        0 0 0 1px rgba(255,255,255,.24),
+        inset 0 1px 0 rgba(255,255,255,.84),
+        inset 0 -1px 0 rgba(239,68,68,.10);
     }
 
     .btn:hover,.btn-outline:hover,.btn-danger:hover{
@@ -676,15 +713,15 @@
       font-size:13px;
       font-weight:700;
       cursor:pointer;
-      border:1px solid rgba(148,163,184,.28);
+      border:1px solid rgba(148,163,184,.24);
       background:
         linear-gradient(180deg,rgba(255,255,255,.88),rgba(255,255,255,.68));
       box-shadow:
         0 10px 22px rgba(15,23,42,.10),
         0 3px 8px rgba(15,23,42,.05),
-        inset 0 1px 0 rgba(255,255,255,.96),
-        inset 0 -1px 0 rgba(148,163,184,.16),
-        0 0 0 1px rgba(255,255,255,.35);
+        0 0 0 1px rgba(255,255,255,.24),
+        inset 0 1px 0 rgba(255,255,255,.84),
+        inset 0 -1px 0 rgba(148,163,184,.12),
       backdrop-filter:blur(20px) saturate(180%);
       -webkit-backdrop-filter:blur(20px) saturate(180%);
       color:var(--text);
@@ -696,15 +733,19 @@
     .day-tab::before{
       content:"";
       position:absolute;
-      inset:1px;
+      inset:0;
       border-radius:inherit;
-      background:linear-gradient(180deg,rgba(255,255,255,.32),rgba(255,255,255,.10));
+      background:transparent;
+      border:1px solid rgba(255,255,255,.22);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.22),
+        0 0 0 1px rgba(255,255,255,.06);
       pointer-events:none;
       z-index:0;
     }
 
     .day-tab.active{
-      background:linear-gradient(180deg,rgba(73,85,107,.98),rgba(22,28,39,.98));
+      background:var(--solid-dark);
       border-color:rgba(255,255,255,.10);
       color:#fff;
       box-shadow:
@@ -714,7 +755,13 @@
     }
 
     .day-tab.active::before{
-      background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.04));
+      display:block;
+      inset:0;
+      background:transparent;
+      border:1px solid rgba(255,255,255,.16);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.18),
+        0 0 0 1px rgba(255,255,255,.05);
     }
 
     .day-panel{display:none;}
@@ -1162,6 +1209,7 @@
     const TIMER_RUNNING_KEY = "portable-timer-running";
     const TIMER_ALARM_PENDING_KEY = "portable-timer-alarm-pending";
     const CLOUD_AUTO_SYNC_KEY = "supabase-auto-sync-enabled";
+    const LOCAL_STATE_META_KEY = "gain-local-state-meta";
 
     const SUPABASE_URL = "https://bzzbdchqrvwdaenydoqm.supabase.co";
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_NshT086od8vjfXFIhGvrkw_DgqzzXAL";
@@ -1376,9 +1424,50 @@
     let autoSyncReason = "";
     let autoSyncInFlight = false;
     let tabDockPulseTimer = null;
+    let suppressAutoSync = false;
+
+    function parseTimeMs(value){
+      const ms = Date.parse(value || "");
+      return Number.isFinite(ms) ? ms : 0;
+    }
+
+    function getLocalStateMeta(){
+      try{
+        return JSON.parse(localStorage.getItem(LOCAL_STATE_META_KEY) || "{}");
+      }catch(e){
+        return {};
+      }
+    }
+
+    function inferLegacyLocalUpdatedAt(){
+      const history = getHistory();
+      const historyMs = history.reduce((maxMs, entry) => {
+        const ts = typeof entry?.id === "number" ? entry.id : 0;
+        return Math.max(maxMs, ts);
+      }, 0);
+      return historyMs ? new Date(historyMs).toISOString() : "";
+    }
+
+    function getLocalUpdatedAt(){
+      const meta = getLocalStateMeta();
+      return meta.updated_at || inferLegacyLocalUpdatedAt() || "";
+    }
+
+    function setLocalStateMeta(meta){
+      localStorage.setItem(LOCAL_STATE_META_KEY, JSON.stringify(meta || {}));
+    }
+
+    function markLocalStateChanged(reason = "本机数据变化", updatedAt = new Date().toISOString()){
+      setLocalStateMeta({
+        updated_at: updatedAt,
+        reason: reason || "本机数据变化"
+      });
+    }
 
     function queueAutoSync(reason = "本机数据变化"){
       autoSyncReason = reason || autoSyncReason || "本机数据变化";
+      if(suppressAutoSync) return;
+      markLocalStateChanged(autoSyncReason);
       if(!isAutoSyncEnabled()) return;
       clearTimeout(autoSyncTimer);
       autoSyncTimer = setTimeout(() => {
@@ -1388,30 +1477,134 @@
       }, 1500);
     }
 
-    async function runAutoSync(){
-      if(autoSyncInFlight || !isAutoSyncEnabled()) return false;
+    async function fetchCloudSnapshot(userId){
+      const { data, error } = await sb
+        .from(SUPABASE_TABLE)
+        .select("form_json, history_json, plan_checks_json, plan_template_json, updated_at")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if(error) throw error;
+      return data || null;
+    }
+
+    async function syncToCloud(showAlert = true, options = {}){
+      const { skipVersionCheck = false } = options || {};
       const user = await getCurrentUser();
       if(!user){
-        setCloudHint("自动同步待命中：登录 GitHub 后，本机后续变更会自动上传。")
+        if(showAlert) alert("请先登录云端，再同步");
         return false;
       }
-      autoSyncInFlight = true;
-      setCloudStatus(`云端状态：正在自动同步（${autoSyncReason || "本机数据变化"}）...`);
+
+      if(!skipVersionCheck){
+        const cloud = await fetchCloudSnapshot(user.id).catch(() => null);
+        const localMs = parseTimeMs(getLocalUpdatedAt());
+        const cloudMs = parseTimeMs(cloud?.updated_at);
+        if(cloud && cloudMs > localMs + 1000){
+          setCloudStatus("云端状态：检测到云端版本更新");
+          setCloudHint("已阻止旧设备把云端较新的进度覆盖掉。请先点“从云端恢复到本机”，再继续编辑。");
+          if(showAlert){
+            alert("检测到云端版本比当前设备更新。为了避免旧版本覆盖新进度，这次没有上传。请先点“从云端恢复到本机”。");
+          }
+          return false;
+        }
+      }
+
+      setCloudBusy(true);
+      setCloudStatus("云端状态：正在上传本机记录...");
       try{
-        return await syncToCloud(false);
+        const snapshot = getLocalSnapshot();
+        const uploadUpdatedAt = new Date().toISOString();
+        const { error } = await sb.from(SUPABASE_TABLE).upsert({
+          user_id: user.id,
+          form_json: snapshot.form,
+          history_json: snapshot.history,
+          plan_checks_json: snapshot.planChecks,
+          plan_template_json: snapshot.planTemplate,
+          updated_at: uploadUpdatedAt
+        });
+        if(error) throw error;
+        markLocalStateChanged("已同步到云端", uploadUpdatedAt);
+        setCloudStatus(`云端状态：已同步到云端（${getCloudUserLabel(user)}）`);
+        setCloudHint(isAutoSyncEnabled() ? "自动同步已开启：现在会先比较版本新旧，再决定上传还是恢复，避免进度回滚。" : "以后换设备登录同一个 GitHub 账号后，可以点“从云端恢复到本机”。");
+        if(showAlert) alert("已同步到 Supabase 云端");
+        return true;
+      }catch(err){
+        console.error(err);
+        setCloudStatus("云端状态：同步失败");
+        if(showAlert) alert("同步失败：" + (err.message || "未知错误"));
+        return false;
+      }finally{
+        setCloudBusy(false);
+      }
+    }
+
+    async function resolveAutoSyncState(reason = "自动同步检查"){
+      if(autoSyncInFlight) return false;
+      const user = await getCurrentUser();
+      if(!user){
+        setCloudHint("自动同步待命中：登录 GitHub 后，会先检查云端版本，再决定上传还是恢复。");
+        return false;
+      }
+
+      autoSyncInFlight = true;
+      setCloudStatus(`云端状态：正在检查版本（${reason}）...`);
+      try{
+        const cloud = await fetchCloudSnapshot(user.id);
+        const localUpdatedAt = getLocalUpdatedAt();
+        const localMs = parseTimeMs(localUpdatedAt);
+        const cloudMs = parseTimeMs(cloud?.updated_at);
+
+        if(!cloud){
+          setCloudHint("云端还没有记录，已准备上传当前设备内容。");
+          return await syncToCloud(false, { skipVersionCheck: true });
+        }
+
+        if(cloudMs > localMs + 1000 || !localMs){
+          applyLocalSnapshot({
+            form: cloud.form_json || {},
+            history: Array.isArray(cloud.history_json) ? cloud.history_json : [],
+            planChecks: cloud.plan_checks_json || {},
+            planTemplate: cloud.plan_template_json || DEFAULT_PLAN_TEMPLATE,
+            updatedAt: cloud.updated_at || new Date().toISOString()
+          });
+          setCloudStatus(`云端状态：已自动恢复较新的云端版本（${getCloudUserLabel(user)}）`);
+          setCloudHint("已优先保留云端新版本，避免旧设备登录后把进度回滚。");
+          return true;
+        }
+
+        if(localMs > cloudMs + 1000){
+          setCloudHint("当前设备版本更新，已自动上传到云端。");
+          return await syncToCloud(false, { skipVersionCheck: true });
+        }
+
+        setCloudStatus(`云端状态：已登录 ${getCloudUserLabel(user)}`.trim());
+        setCloudHint("本机与云端版本一致，无需自动同步。");
+        return true;
+      }catch(err){
+        console.error(err);
+        setCloudStatus("云端状态：版本检查失败");
+        setCloudHint("自动同步已暂停。你仍然可以手动同步或从云端恢复。");
+        return false;
       }finally{
         autoSyncInFlight = false;
       }
+    }
+
+    async function runAutoSync(){
+      if(!isAutoSyncEnabled()) return false;
+      return await resolveAutoSyncState(autoSyncReason || "本机数据变化");
     }
 
     async function toggleAutoSync(){
       const next = !isAutoSyncEnabled();
       setAutoSyncEnabled(next);
       if(next){
-        setCloudHint("自动同步已开启：后续本机数据变化会自动上传。首次建议先手动点一次“立即同步到云端”。")
+        setCloudHint("自动同步已开启：以后会先比较本机和云端版本，再决定上传还是恢复。")
         const user = await getCurrentUser();
         if(user){
-          queueAutoSync("开启自动同步后立即上传");
+          resolveAutoSyncState("开启自动同步后检查版本").catch((err) => {
+            console.error("开启自动同步后检查失败", err);
+          });
         }
       }else{
         clearTimeout(autoSyncTimer);
@@ -1424,7 +1617,8 @@
         form: JSON.parse(localStorage.getItem(FORM_KEY) || "{}"),
         history: getHistory(),
         planChecks: getPlanChecks(),
-        planTemplate: getPlanTemplate()
+        planTemplate: getPlanTemplate(),
+        updatedAt: getLocalUpdatedAt()
       };
     }
 
@@ -1433,16 +1627,23 @@
       const safeHistory = payload && Array.isArray(payload.history) ? payload.history : [];
       const safePlanChecks = payload && payload.planChecks ? payload.planChecks : {};
       const safePlanTemplate = payload && payload.planTemplate ? normalizePlanTemplate(payload.planTemplate) : getPlanTemplate();
+      const updatedAt = payload && payload.updatedAt ? payload.updatedAt : new Date().toISOString();
 
-      localStorage.setItem(FORM_KEY, JSON.stringify(safeForm));
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(safeHistory));
-      localStorage.setItem(PLAN_CHECKS_KEY, JSON.stringify(safePlanChecks));
-      localStorage.setItem(PLAN_TEMPLATE_KEY, JSON.stringify(safePlanTemplate));
+      suppressAutoSync = true;
+      try{
+        localStorage.setItem(FORM_KEY, JSON.stringify(safeForm));
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(safeHistory));
+        localStorage.setItem(PLAN_CHECKS_KEY, JSON.stringify(safePlanChecks));
+        localStorage.setItem(PLAN_TEMPLATE_KEY, JSON.stringify(safePlanTemplate));
+        markLocalStateChanged("从云端恢复到本机", updatedAt);
 
-      setForm(safeForm);
-      renderHistory();
-      renderPlan();
-      updateSummary();
+        setForm(safeForm);
+        renderHistory();
+        renderPlan();
+        updateSummary();
+      }finally{
+        suppressAutoSync = false;
+      }
     }
 
     async function getCurrentUser(){
@@ -1503,39 +1704,6 @@
       }
     }
 
-    async function syncToCloud(showAlert = true){
-      const user = await getCurrentUser();
-      if(!user){
-        alert("请先登录云端，再同步");
-        return false;
-      }
-      setCloudBusy(true);
-      setCloudStatus("云端状态：正在上传本机记录...");
-      try{
-        const snapshot = getLocalSnapshot();
-        const { error } = await sb.from(SUPABASE_TABLE).upsert({
-          user_id: user.id,
-          form_json: snapshot.form,
-          history_json: snapshot.history,
-          plan_checks_json: snapshot.planChecks,
-          plan_template_json: snapshot.planTemplate,
-          updated_at: new Date().toISOString()
-        });
-        if(error) throw error;
-        setCloudStatus(`云端状态：已同步到云端（${getCloudUserLabel(user)}）`);
-        setCloudHint(isAutoSyncEnabled() ? "自动同步已开启：后续本机变化会自动上传。换设备时，仍可点“从云端恢复到本机”。" : "以后换设备登录同一个 GitHub 账号后，可以点“从云端恢复到本机”。");
-        if(showAlert) alert("已同步到 Supabase 云端");
-        return true;
-      }catch(err){
-        console.error(err);
-        setCloudStatus("云端状态：同步失败");
-        if(showAlert) alert("同步失败：" + (err.message || "未知错误"));
-        return false;
-      }finally{
-        setCloudBusy(false);
-      }
-    }
-
     async function restoreFromCloud(){
       const user = await getCurrentUser();
       if(!user){
@@ -1548,12 +1716,7 @@
       setCloudBusy(true);
       setCloudStatus("云端状态：正在读取云端记录...");
       try{
-        const { data, error } = await sb
-          .from(SUPABASE_TABLE)
-          .select("form_json, history_json, plan_checks_json, plan_template_json")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        if(error) throw error;
+        const data = await fetchCloudSnapshot(user.id);
         if(!data){
           alert("云端还没有记录，请先在当前设备点一次“立即同步到云端”。");
           setCloudStatus("云端状态：当前账号还没有云端记录");
@@ -1563,10 +1726,11 @@
           form: data.form_json || {},
           history: Array.isArray(data.history_json) ? data.history_json : [],
           planChecks: data.plan_checks_json || {},
-          planTemplate: data.plan_template_json || DEFAULT_PLAN_TEMPLATE
+          planTemplate: data.plan_template_json || DEFAULT_PLAN_TEMPLATE,
+          updatedAt: data.updated_at || new Date().toISOString()
         });
         setCloudStatus(`云端状态：已从云端恢复（${getCloudUserLabel(user)}）`);
-        setCloudHint("本机记录已被云端覆盖。")
+        setCloudHint("本机记录已被云端较新版本覆盖。")
         alert("已从 Supabase 云端恢复到本机");
       }catch(err){
         console.error(err);
@@ -1902,7 +2066,6 @@
       $("autoAvg").textContent = avg || "未填写";
       $("summaryPreview").textContent = buildCurrentSummary();
       localStorage.setItem(FORM_KEY, JSON.stringify(data));
-      queueAutoSync("表单内容更新");
     }
 
     function getHistory(){
@@ -2570,6 +2733,7 @@
           setForm(JSON.parse(localStorage.getItem(FORM_KEY) || JSON.stringify(defaultForm)));
           renderHistory();
           renderPlan();
+          markLocalStateChanged("导入本地备份");
           alert("导入成功");
           syncToCloud(false).catch(() => {});
         }catch(err){
@@ -2594,6 +2758,7 @@
       localStorage.removeItem(TIMER_END_AT_KEY);
       localStorage.removeItem(TIMER_RUNNING_KEY);
       localStorage.removeItem(TIMER_ALARM_PENDING_KEY);
+      localStorage.removeItem(LOCAL_STATE_META_KEY);
 
       activePlanDay = 0;
       counterValue = 0;
@@ -3219,7 +3384,10 @@
     });
 
     formKeys.forEach((key) => {
-      $(key).addEventListener("input", updateSummary);
+      $(key).addEventListener("input", () => {
+        updateSummary();
+        queueAutoSync("表单内容更新");
+      });
     });
 
     $("saveBtn").onclick = saveWeek;
@@ -3258,8 +3426,10 @@
 
     sb.auth.onAuthStateChange((event) => {
       refreshCloudUi().catch(() => {});
-      if((event === "SIGNED_IN" || event === "TOKEN_REFRESHED") && isAutoSyncEnabled()){
-        queueAutoSync("登录后自动同步");
+      if((event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") && isAutoSyncEnabled()){
+        resolveAutoSyncState("登录后检查云端版本").catch((err) => {
+          console.error("登录后检查云端版本失败", err);
+        });
       }
     });
 
