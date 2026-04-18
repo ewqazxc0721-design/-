@@ -26,6 +26,7 @@
       --soft:#f1f5f9;
       --primary:#0f172a;
       --solid-dark:#0f172a;
+      --solid-dark-translucent:rgba(15,23,42,.84);
       --accent:#ecfdf5;
       --accent-text:#065f46;
       --btn:#111827;
@@ -47,6 +48,7 @@
 
     body{
       margin:0;
+      position:relative;
       font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Hiragino Sans GB","Noto Sans CJK SC","Microsoft YaHei",sans-serif;
       background:var(--bg);
       color:var(--text);
@@ -54,7 +56,32 @@
       overscroll-behavior-y:contain;
     }
 
+    #pageBgLayer{
+      position:fixed;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+      opacity:0;
+      background-position:center;
+      background-repeat:no-repeat;
+      background-size:cover;
+      transition:opacity .24s ease;
+    }
+
+    #pageBgLayer::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(180deg, rgba(246,248,251,.78), rgba(246,248,251,.72));
+    }
+
+    body.has-custom-bg #pageBgLayer{
+      opacity:.92;
+    }
+
     .wrap{
+      position:relative;
+      z-index:1;
       max-width:720px;
       margin:0 auto;
       padding:18px 14px 128px;
@@ -233,7 +260,7 @@
       left:0;
       width:0;
       border-radius:999px;
-      background:var(--solid-dark);
+      background:var(--solid-dark-translucent);
       border:1px solid rgba(255,255,255,.16);
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,.26),
@@ -476,7 +503,7 @@
     }
 
     .check-btn.done{
-      background:var(--solid-dark);
+      background:var(--solid-dark-translucent);
       border-color:rgba(255,255,255,.10);
       color:#fff;
       box-shadow:
@@ -584,7 +611,7 @@
     }
 
     .btn{
-      background:var(--solid-dark);
+      background:var(--solid-dark-translucent);
       border-color:rgba(255,255,255,.10);
       color:#fff;
       box-shadow:
@@ -745,7 +772,7 @@
     }
 
     .day-tab.active{
-      background:var(--solid-dark);
+      background:var(--solid-dark-translucent);
       border-color:rgba(255,255,255,.10);
       color:#fff;
       box-shadow:
@@ -862,6 +889,7 @@
   </style>
 </head>
 <body>
+  <div id="pageBgLayer" aria-hidden="true"></div>
   <div class="wrap">
     <div class="card hero">
       <div class="topline">
@@ -1149,6 +1177,17 @@
       </div>
 
       <div class="card">
+        <h2>网页背景</h2>
+        <div class="softbox">支持上传一张图片作为网页背景。背景会保存在当前浏览器，并会随导出备份一起保存；开启自动同步后，也会跟随记录一起同步。</div>
+        <div class="tool-row" style="margin-top:12px;">
+          <button class="btn" id="uploadBgBtn">上传背景</button>
+          <button class="btn-outline" id="clearBgBtn">移除背景</button>
+        </div>
+        <input type="file" id="bgFileInput" accept="image/*" style="display:none" />
+        <div class="help" id="bgStatusText">当前背景：未设置</div>
+      </div>
+
+      <div class="card">
         <h2>工具</h2>
         <div class="softbox">这个网页是离线可用的单文件版本。首次打开后，后续也能继续在浏览器里使用。</div>
         <button class="btn full" id="exportBtn">导出所有记录（JSON）</button>
@@ -1202,6 +1241,7 @@
     const PLAN_CHECKS_KEY = "gain-plan-checks";
     const ACTIVE_PLAN_DAY_KEY = "active-plan-day";
 
+    const PAGE_BG_KEY = "gain-page-bg-data";
     const COUNTER_KEY = "portable-counter-value";
     const TIMER_REMAINING_KEY = "portable-timer-remaining-ms";
     const TIMER_INITIAL_KEY = "portable-timer-initial-ms";
@@ -1369,6 +1409,85 @@
       a.download = filename;
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 500);
+    }
+
+    function getPageBackgroundData(){
+      return localStorage.getItem(PAGE_BG_KEY) || "";
+    }
+
+    function updateBackgroundStatus(){
+      const status = $("bgStatusText");
+      if(!status) return;
+      status.textContent = getPageBackgroundData() ? "当前背景：已设置" : "当前背景：未设置";
+    }
+
+    function applyPageBackground(dataUrl){
+      const layer = $("pageBgLayer");
+      const value = String(dataUrl || "").trim();
+      if(layer){
+        layer.style.backgroundImage = value ? `url("${value}")` : "none";
+      }
+      if(value){
+        localStorage.setItem(PAGE_BG_KEY, value);
+        document.body.classList.add("has-custom-bg");
+      }else{
+        localStorage.removeItem(PAGE_BG_KEY);
+        document.body.classList.remove("has-custom-bg");
+      }
+      updateBackgroundStatus();
+    }
+
+    function compressImageFileToDataUrl(file){
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const maxSide = 1600;
+            const scale = Math.min(1, maxSide / Math.max(img.width || 1, img.height || 1));
+            const width = Math.max(1, Math.round((img.width || 1) * scale));
+            const height = Math.max(1, Math.round((img.height || 1) * scale));
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            if(!ctx){
+              reject(new Error("无法处理图片"));
+              return;
+            }
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL("image/jpeg", 0.82));
+          };
+          img.onerror = () => reject(new Error("图片读取失败"));
+          img.src = e.target.result;
+        };
+        reader.onerror = () => reject(new Error("文件读取失败"));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function handleBackgroundUpload(file){
+      if(!file) return;
+      try{
+        updateBackgroundStatus();
+        const dataUrl = await compressImageFileToDataUrl(file);
+        applyPageBackground(dataUrl);
+        queueAutoSync("网页背景更新");
+        alert("网页背景已更新");
+      }catch(err){
+        console.error(err);
+        alert("背景上传失败：" + (err.message || "未知错误"));
+      }
+    }
+
+    function clearBackground(){
+      if(!getPageBackgroundData()){
+        updateBackgroundStatus();
+        return;
+      }
+      applyPageBackground("");
+      queueAutoSync("移除网页背景");
+      alert("已移除网页背景");
     }
 
     function setCloudStatus(text){
@@ -1613,8 +1732,12 @@
     }
 
     function getLocalSnapshot(){
+      const rawForm = JSON.parse(localStorage.getItem(FORM_KEY) || "{}");
       return {
-        form: JSON.parse(localStorage.getItem(FORM_KEY) || "{}"),
+        form: {
+          ...rawForm,
+          __pageBackground: getPageBackgroundData()
+        },
         history: getHistory(),
         planChecks: getPlanChecks(),
         planTemplate: getPlanTemplate(),
@@ -1623,7 +1746,11 @@
     }
 
     function applyLocalSnapshot(payload){
-      const safeForm = payload && payload.form ? payload.form : defaultForm;
+      const rawForm = payload && payload.form ? payload.form : defaultForm;
+      const safeForm = { ...(rawForm || {}) };
+      const pageBackground = String((payload && payload.pageBackground) || safeForm.__pageBackground || "").trim();
+      delete safeForm.__pageBackground;
+
       const safeHistory = payload && Array.isArray(payload.history) ? payload.history : [];
       const safePlanChecks = payload && payload.planChecks ? payload.planChecks : {};
       const safePlanTemplate = payload && payload.planTemplate ? normalizePlanTemplate(payload.planTemplate) : getPlanTemplate();
@@ -1635,6 +1762,7 @@
         localStorage.setItem(HISTORY_KEY, JSON.stringify(safeHistory));
         localStorage.setItem(PLAN_CHECKS_KEY, JSON.stringify(safePlanChecks));
         localStorage.setItem(PLAN_TEMPLATE_KEY, JSON.stringify(safePlanTemplate));
+        applyPageBackground(pageBackground);
         markLocalStateChanged("从云端恢复到本机", updatedAt);
 
         setForm(safeForm);
@@ -2705,7 +2833,8 @@
         form: JSON.parse(localStorage.getItem(FORM_KEY) || "{}"),
         history: getHistory(),
         planChecks: getPlanChecks(),
-        planTemplate: getPlanTemplate()
+        planTemplate: getPlanTemplate(),
+        pageBackground: getPageBackgroundData()
       };
       const date = new Date().toISOString().slice(0, 10);
       downloadJson(`增肌记录备份_${date}.json`, payload);
@@ -2718,7 +2847,12 @@
           const payload = JSON.parse(e.target.result);
 
           if(payload.form){
-            localStorage.setItem(FORM_KEY, JSON.stringify(payload.form));
+            const nextForm = { ...(payload.form || {}) };
+            if(nextForm.__pageBackground && !payload.pageBackground){
+              payload.pageBackground = nextForm.__pageBackground;
+            }
+            delete nextForm.__pageBackground;
+            localStorage.setItem(FORM_KEY, JSON.stringify(nextForm));
           }
           if(Array.isArray(payload.history)){
             localStorage.setItem(HISTORY_KEY, JSON.stringify(payload.history));
@@ -2729,6 +2863,7 @@
           if(payload.planChecks){
             localStorage.setItem(PLAN_CHECKS_KEY, JSON.stringify(payload.planChecks));
           }
+          applyPageBackground(payload.pageBackground || "");
 
           setForm(JSON.parse(localStorage.getItem(FORM_KEY) || JSON.stringify(defaultForm)));
           renderHistory();
@@ -2759,6 +2894,7 @@
       localStorage.removeItem(TIMER_RUNNING_KEY);
       localStorage.removeItem(TIMER_ALARM_PENDING_KEY);
       localStorage.removeItem(LOCAL_STATE_META_KEY);
+      localStorage.removeItem(PAGE_BG_KEY);
 
       activePlanDay = 0;
       counterValue = 0;
@@ -2780,6 +2916,7 @@
       syncTimerInputsFromInitial();
       renderTimer();
       renderPlan();
+      applyPageBackground("");
       queueAutoSync("清空本地记录");
       alert("已清空全部本地记录");
     }
@@ -3418,6 +3555,14 @@
 
     $("stopAlarmBtn").onclick = stopAlarmLoop;
 
+    $("uploadBgBtn").onclick = () => $("bgFileInput").click();
+    $("clearBgBtn").onclick = clearBackground;
+    $("bgFileInput").addEventListener("change", (e) => {
+      const file = e.target.files && e.target.files[0];
+      if(file) handleBackgroundUpload(file);
+      e.target.value = "";
+    });
+
     $("cloudLoginBtn").onclick = signInWithGitHub;
     $("cloudLogoutBtn").onclick = signOutCloud;
     $("cloudSyncBtn").onclick = () => syncToCloud(true);
@@ -3433,6 +3578,7 @@
       }
     });
 
+    applyPageBackground(getPageBackgroundData());
     renderPlan();
     setForm(JSON.parse(localStorage.getItem(FORM_KEY) || JSON.stringify(defaultForm)));
     renderHistory();
