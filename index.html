@@ -165,7 +165,9 @@
     }
 
     .stat{
-      background:var(--soft);
+      background:rgba(241,245,249,.94);
+      border:1px solid rgba(148,163,184,.18);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.30);
       border-radius:20px;
       padding:14px 10px;
       text-align:center;
@@ -447,7 +449,9 @@
     .muted{color:var(--muted);}
 
     .softbox{
-      background:var(--soft);
+      background:rgba(241,245,249,.94);
+      border:1px solid rgba(148,163,184,.18);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.30);
       border-radius:18px;
       padding:12px 14px;
       font-size:14px;
@@ -456,8 +460,10 @@
     }
 
     .greenbox{
-      background:var(--accent);
+      background:rgba(236,253,245,.95);
       color:var(--accent-text);
+      border:1px solid rgba(16,185,129,.16);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.28);
       border-radius:18px;
       padding:12px 14px;
       font-size:14px;
@@ -522,6 +528,95 @@
     }
 
     .day-row.done{background:#ecfdf5;}
+
+    .day-row.search-hit{
+      outline:2px solid rgba(59,130,246,.20);
+      box-shadow:0 8px 18px rgba(59,130,246,.08);
+      background:#eff6ff;
+    }
+
+    .day-row.guide-active{
+      outline:2px solid rgba(16,185,129,.18);
+      box-shadow:0 8px 18px rgba(16,185,129,.08);
+      background:#ecfdf5;
+    }
+
+    .day-row.guide-clickable{
+      cursor:pointer;
+    }
+
+    .guide-result{
+      background:rgba(255,255,255,.62);
+      border:1px solid rgba(148,163,184,.16);
+      border-radius:20px;
+      padding:14px;
+      margin-top:10px;
+    }
+
+    .guide-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .guide-title{
+      font-size:18px;
+      font-weight:800;
+      line-height:1.2;
+    }
+
+    .guide-meta{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
+      margin-top:6px;
+    }
+
+    .guide-diagram{
+      margin-top:10px;
+      background:rgba(241,245,249,.88);
+      border-radius:16px;
+      padding:12px 14px;
+      font-size:13px;
+      line-height:1.7;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+
+    .guide-list{
+      margin:10px 0 0;
+      padding-left:18px;
+      font-size:14px;
+      line-height:1.7;
+    }
+
+    .guide-list li + li{
+      margin-top:4px;
+    }
+
+    .guide-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:12px;
+    }
+
+    .mini-btn{
+      border:none;
+      border-radius:999px;
+      padding:9px 12px;
+      font-size:12px;
+      font-weight:700;
+      cursor:pointer;
+      background:rgba(255,255,255,.78);
+      border:1px solid rgba(148,163,184,.18);
+      color:var(--text);
+      box-shadow:
+        0 6px 14px rgba(15,23,42,.06),
+        inset 0 1px 0 rgba(255,255,255,.85);
+    }
 
     .plan-actions{
       display:grid;
@@ -718,7 +813,9 @@
     }
 
     .mini{
-      background:#fff;
+      background:rgba(255,255,255,.92);
+      border:1px solid rgba(148,163,184,.16);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.32);
       border-radius:14px;
       padding:8px 10px;
       font-size:12px;
@@ -987,17 +1084,18 @@
 
     <section id="plan" class="section active">
       <div class="card">
+        <h2>每周计划切换</h2>
+        <div class="day-tabs" id="dayTabs"></div>
+        <div id="planContainer"></div>
+        <div id="inlinePlanGuidePanel" class="help" style="margin-top:12px;">点一下上面的训练动作，会弹出查看图解、发力重点和注意事项。</div>
+      </div>
+
+      <div class="card">
         <h2>睡眠与恢复建议</h2>
         <div class="softbox">推荐目标：平均睡眠尽量拉到 <b>7.5小时以上</b>。</div>
         <div class="softbox">推荐入睡：尽量稳定在 <b>01:00–01:30</b>，再慢慢提前。</div>
         <div class="softbox">前一晚睡少于 6 小时：当天别做高强度主力训练，改轻量泵感、核心或恢复。</div>
         <div class="softbox">保存本周记录时，会把当前计划里已打勾的训练动作一并写进周反馈摘要。</div>
-      </div>
-
-      <div class="card">
-        <h2>每周计划切换</h2>
-        <div class="day-tabs" id="dayTabs"></div>
-        <div id="planContainer"></div>
       </div>
 
       <div class="card">
@@ -1231,6 +1329,15 @@
     <div class="footer-space"></div>
   </div>
 
+  <div id="planGuideModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:998;align-items:center;justify-content:center;padding:20px;">
+    <div style="width:min(560px,100%);max-height:min(80vh,760px);overflow:auto;background:rgba(255,255,255,.92);backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);border-radius:24px;padding:22px;box-shadow:0 20px 50px rgba(15,23,42,.2);">
+      <div id="planGuideModalContent"></div>
+      <div style="display:flex;justify-content:center;margin-top:14px;">
+        <button id="closePlanGuideModalBtn" class="btn-outline" style="min-width:140px;">关闭</button>
+      </div>
+    </div>
+  </div>
+
   <div id="timerDoneModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:999;align-items:center;justify-content:center;padding:20px;">
     <div style="width:min(420px,100%);background:#fff;border-radius:24px;padding:22px;box-shadow:0 20px 50px rgba(15,23,42,.2);text-align:center;">
       <div style="font-size:24px;font-weight:800;margin-bottom:10px;">倒计时结束</div>
@@ -1377,6 +1484,197 @@
 
     const defaultForm = Object.fromEntries(formKeys.map((key) => [key, ""]));
 
+    const EXERCISE_GUIDES = [
+      {
+        id:"decline-pushup",
+        title:"下斜俯卧撑",
+        keywords:["下斜俯卧撑","脚抬高俯卧撑"],
+        focus:["上胸","前三角","肱三头"],
+        diagram:"起始：双手撑地，脚放高处，身体成一直线\n下降：屈肘下放，胸口朝两手中间\n底部：胸接近地面，核心收紧\n推起：掌根发力，推回起始位",
+        cautions:["腰不要塌，臀不要翘","肘别完全外张，约30–45°更稳","脚抬太高会让肩前侧压力变大"]
+      },
+      {
+        id:"wide-pushup",
+        title:"宽距俯卧撑",
+        keywords:["宽距俯卧撑","宽距"],
+        focus:["胸大肌外侧感受","前三角","肱三头辅助"],
+        diagram:"起始：手距略宽于肩\n下降：胸主动找地面，肩胛自然回收\n推起：手掌均匀发力，把身体整体推起",
+        cautions:["不要耸肩","下放时别只点头，胸和髋一起下","肩不舒服时不要过度加宽手距"]
+      },
+      {
+        id:"pushup",
+        title:"俯卧撑 / 窄距俯卧撑 / 机械递减俯卧撑",
+        keywords:["俯卧撑","窄距俯卧撑","机械递减俯卧撑"],
+        focus:["胸","三头","核心稳定"],
+        diagram:"标准：手在肩下或略宽\n窄距：双手更靠近，肘更贴身体\n机械递减：高难度做到接近力竭，再切到更容易的版本继续",
+        cautions:["全程身体一条线","窄距更吃肘腕，手腕不适先减量","机械递减不要追求动作变形后的数量"]
+      },
+      {
+        id:"db-floor-press",
+        title:"哑铃地板卧推",
+        keywords:["哑铃地板卧推","地板卧推","卧推"],
+        focus:["胸","前三角","肱三头"],
+        diagram:"起始：仰卧屈膝，哑铃在胸两侧\n推起：向上推到手臂接近伸直\n下降：控制下放，直到大臂轻触地面再推起",
+        cautions:["下背自然即可，不要硬拱桥","手腕保持中立","触地后别弹起借力"]
+      },
+      {
+        id:"db-fly",
+        title:"哑铃飞鸟",
+        keywords:["哑铃飞鸟","飞鸟"],
+        focus:["胸部拉伸位感受","胸部夹紧收缩"],
+        diagram:"起始：双手在胸上方，肘微屈\n展开：像抱大树一样向两侧打开\n合拢：沿弧线回到胸前上方",
+        cautions:["肘角度固定，不要做成卧推","下放不用太深，肩前侧不舒服就收一点","重量宁轻勿重"]
+      },
+      {
+        id:"db-shoulder-press",
+        title:"哑铃肩推",
+        keywords:["哑铃肩推","肩推"],
+        focus:["肩前束","肩中束","肱三头"],
+        diagram:"起始：哑铃在耳朵两侧\n推起：向上略向内推\n顶端：不过度耸肩\n下放：控制回到耳侧",
+        cautions:["腰不要过度后仰","下巴微收，避免头前伸","肩痛时缩短活动范围"]
+      },
+      {
+        id:"lateral-raise",
+        title:"侧平举",
+        keywords:["侧平举"],
+        focus:["肩中束"],
+        diagram:"起始：双手在身体两侧，肘微屈\n抬起：向身体两侧抬到接近肩高\n下放：慢慢回到起始位",
+        cautions:["不要借摆动甩上去","手肘略高于手腕更容易找肩","不必刻意抬太高，肩高附近即可"]
+      },
+      {
+        id:"front-raise",
+        title:"前平举",
+        keywords:["前平举"],
+        focus:["肩前束"],
+        diagram:"起始：哑铃在大腿前\n抬起：沿身体前方举到肩高附近\n下放：控制回位",
+        cautions:["避免惯性甩重","肩前侧紧张时减重量","不要抬到头顶"]
+      },
+      {
+        id:"leg-raise-core",
+        title:"仰卧举腿 / 反向卷腹",
+        keywords:["仰卧举腿","反向卷腹"],
+        focus:["下腹控制","骨盆后倾"],
+        diagram:"仰卧举腿：双腿伸直上抬，再慢慢下放\n反向卷腹：膝向胸收，小幅度卷起骨盆",
+        cautions:["腰离地太多就降低幅度","重点是腹部卷动，不是甩腿","下放越慢越有效"]
+      },
+      {
+        id:"plank-side-plank-deadbug-crunch",
+        title:"平板支撑 / 侧桥 / 死虫 / 卷腹 / 俄罗斯转体",
+        keywords:["平板支撑","侧桥","死虫","卷腹","俄罗斯转体"],
+        focus:["核心稳定","抗伸展 / 抗旋转"],
+        diagram:"平板：前臂撑地，身体一线\n侧桥：侧撑保持身体成直线\n死虫：对侧手脚交替伸展\n卷腹：上背卷起\n俄罗斯转体：躯干微后仰，左右转体",
+        cautions:["核心动作宁慢勿快","腰部不适时先减幅度","俄罗斯转体别完全靠手臂甩动"]
+      },
+      {
+        id:"pullup",
+        title:"引体向上 / 离心引体向上",
+        keywords:["引体向上","离心引体向上"],
+        focus:["背阔肌","圆肌","肱二头"],
+        diagram:"起始：肩胛下沉，身体稳定\n上拉：胸口主动找杠\n顶端：下巴过杠或接近杠\n离心：缓慢控制下降 3–5 秒",
+        cautions:["先做肩胛下沉，不要耸肩硬拉","避免大幅摆腿","离心阶段别突然掉下去"]
+      },
+      {
+        id:"row",
+        title:"单臂哑铃划船 / 俯身双哑铃划船 / 弹力绳划船",
+        keywords:["单臂哑铃划船","俯身双哑铃划船","弹力绳划船","划船"],
+        focus:["背阔肌","中下斜方肌","菱形肌"],
+        diagram:"起始：髋折叠，胸口打开，脊柱中立\n拉起：肘向后向髋方向带\n顶端：背部夹紧\n下放：肩胛前伸，受控回位",
+        cautions:["不要耸肩拉","不要只用手臂弯举","下背不稳时先减重量或扶支撑"]
+      },
+      {
+        id:"lat-pulldown-band",
+        title:"弹力绳高位下拉",
+        keywords:["弹力绳高位下拉","高位下拉"],
+        focus:["背阔肌","肩胛下沉"],
+        diagram:"起始：绳固定高处，双手抓绳\n下拉：肘向下向后带，拉向锁骨或上胸\n回位：慢慢放回",
+        cautions:["别用腰猛后仰借力","先想肩胛下沉再拉肘","回位别松掉张力"]
+      },
+      {
+        id:"facepull",
+        title:"弹力绳面拉 / 俯身反向飞鸟",
+        keywords:["弹力绳面拉","俯身反向飞鸟","面拉","反向飞鸟"],
+        focus:["后束","中下斜方肌","肩胛稳定"],
+        diagram:"面拉：手向脸两侧拉开，肘外展\n反飞鸟：俯身后双臂向两侧打开",
+        cautions:["不要耸肩","注意肩胛后缩而不是下背代偿","重量过大容易变成摆动"]
+      },
+      {
+        id:"curl",
+        title:"哑铃弯举 / 锤式弯举",
+        keywords:["哑铃弯举","锤式弯举","弯举"],
+        focus:["肱二头","肱肌","肱桡肌"],
+        diagram:"弯举：掌心向上卷起\n锤式：掌心相对卷起\n全程上臂尽量固定",
+        cautions:["不要摆腰借力","手腕别后折","顶端停顿一下会更容易找到发力"]
+      },
+      {
+        id:"triceps-overhead",
+        title:"过顶哑铃臂屈伸",
+        keywords:["过顶哑铃臂屈伸","臂屈伸"],
+        focus:["肱三头长头"],
+        diagram:"起始：哑铃举过头顶，肘朝前\n下放：前臂向后折叠\n推起：伸肘回到头顶",
+        cautions:["肘尽量别外张太开","核心收紧避免下背代偿","肩不舒服时先减重"]
+      },
+      {
+        id:"goblet-squat",
+        title:"哑铃杯式深蹲",
+        keywords:["哑铃杯式深蹲","杯式深蹲","深蹲"],
+        focus:["股四头","臀","核心"],
+        diagram:"起始：哑铃抱胸前，脚略宽于肩\n下蹲：臀向后下坐，膝盖跟脚尖同向\n站起：全脚掌发力站回",
+        cautions:["不要塌腰含胸","膝盖不要内扣","蹲不深先保证稳定和中立位"]
+      },
+      {
+        id:"rdl",
+        title:"哑铃罗马尼亚硬拉",
+        keywords:["哑铃罗马尼亚硬拉","罗马尼亚硬拉","硬拉"],
+        focus:["腘绳肌","臀","下背等长稳定"],
+        diagram:"起始：双手持铃站立\n下放：髋向后折叠，哑铃贴近大腿向下\n底部：感到大腿后侧拉伸\n起身：夹臀伸髋站起",
+        cautions:["重点是髋折叠，不是弯腰找地","背部保持中立","下放到拉伸明显即可，不必强求更低"]
+      },
+      {
+        id:"walk-stretch",
+        title:"快走 / 散步 / 拉伸",
+        keywords:["快走","散步","拉伸"],
+        focus:["恢复","循环","活动度"],
+        diagram:"快走/散步：保持轻微气喘但能说话\n拉伸：缓慢进入拉伸位，保持呼吸稳定",
+        cautions:["恢复日不要做成高强度有氧","拉伸不要弹震","有疼痛而不是拉伸感时立即停"]
+      }
+    ];
+
+    const EXERCISE_GIF_MAP = {
+      "下斜俯卧撑": { gif:"0279.gif", label:"下斜俯卧撑", note:"" },
+      "宽距俯卧撑": { gif:"1311.gif", label:"宽距俯卧撑", note:"" },
+      "俯卧撑": { gif:"0662.gif", label:"标准俯卧撑", note:"" },
+      "窄距俯卧撑": { gif:"0259.gif", label:"窄距俯卧撑", note:"" },
+      "机械递减俯卧撑": { gif:"3211.gif", label:"机械递减参考：跪姿俯卧撑", note:"用于演示力竭后切到更容易版本的思路。" },
+      "哑铃地板卧推": { gif:"0289.gif", label:"近似替代图示：哑铃卧推", note:"源库未收录同名 floor press GIF，已用最接近的哑铃卧推动作替代。" },
+      "哑铃飞鸟": { gif:"0308.gif", label:"哑铃飞鸟", note:"" },
+      "哑铃肩推": { gif:"0405.gif", label:"哑铃肩推", note:"演示为坐姿版本。" },
+      "侧平举": { gif:"0334.gif", label:"侧平举", note:"" },
+      "前平举": { gif:"0310.gif", label:"前平举", note:"" },
+      "仰卧举腿": { gif:"0620.gif", label:"仰卧举腿", note:"" },
+      "反向卷腹": { gif:"0872.gif", label:"反向卷腹", note:"" },
+      "平板支撑": { gif:"2135.gif", label:"近似替代图示：平板支撑", note:"源库仅提供加重版平板支撑 GIF，可作为动作姿势参考。" },
+      "侧桥": { gif:"0705.gif", label:"侧桥", note:"" },
+      "死虫": { gif:"0276.gif", label:"死虫", note:"" },
+      "卷腹": { gif:"0274.gif", label:"卷腹", note:"" },
+      "俄罗斯转体": { gif:"0687.gif", label:"俄罗斯转体", note:"" },
+      "引体向上": { gif:"0652.gif", label:"引体向上", note:"" },
+      "离心引体向上": { gif:"0652.gif", label:"离心引体向上说明", note:"使用同一动作轨迹参考：可借助跳起到顶点，然后用 3–5 秒慢慢下放。" },
+      "单臂哑铃划船": { gif:"1330.gif", label:"近似替代图示：单臂哑铃划船", note:"源库为单臂哑铃划船变式。" },
+      "俯身双哑铃划船": { gif:"0293.gif", label:"俯身双哑铃划船", note:"" },
+      "弹力绳划船": { gif:"0988.gif", label:"弹力绳划船", note:"" },
+      "弹力绳高位下拉": { gif:"0983.gif", label:"弹力绳高位下拉", note:"演示为跪姿单臂高位下拉。" },
+      "弹力绳面拉": { gif:"1022.gif", label:"近似替代图示：弹力绳面拉", note:"源库未收录同名面拉 GIF，已用最接近的后束划船型动作替代。" },
+      "俯身反向飞鸟": { gif:"0383.gif", label:"俯身反向飞鸟", note:"" },
+      "哑铃弯举": { gif:"1677.gif", label:"近似替代图示：哑铃弯举", note:"演示为坐姿弯举。" },
+      "锤式弯举": { gif:"0313.gif", label:"锤式弯举", note:"" },
+      "过顶哑铃臂屈伸": { gif:"0430.gif", label:"过顶哑铃臂屈伸", note:"演示为站姿版本。" },
+      "哑铃杯式深蹲": { gif:"1760.gif", label:"哑铃杯式深蹲", note:"" },
+      "哑铃罗马尼亚硬拉": { gif:"1459.gif", label:"哑铃罗马尼亚硬拉", note:"" }
+    };
+
+    let planGuideQuery = "";
+    let activeGuideItemText = "";
+    let activeGuideDayName = "";
     let activePlanDay = Number(localStorage.getItem(ACTIVE_PLAN_DAY_KEY) || "0");
     let counterValue = Number(localStorage.getItem(COUNTER_KEY) || "0");
     let timerInterval = null;
@@ -1973,6 +2271,196 @@
       return lines.join("\n");
     }
 
+    function normalizeGuideQuery(text){
+      return String(text || "").trim().toLowerCase();
+    }
+
+    function findGuideByItem(itemText){
+      const text = String(itemText || "");
+      const guide = EXERCISE_GUIDES.find((entry) => entry.keywords.some((keyword) => text.includes(keyword))) || null;
+      if(!guide) return null;
+      const matchedKeyword = guide.keywords.find((keyword) => text.includes(keyword)) || guide.title;
+      return {
+        ...guide,
+        title: matchedKeyword
+      };
+    }
+
+    function findGifByItem(itemText){
+      const text = String(itemText || "");
+      const matchedKey = Object.keys(EXERCISE_GIF_MAP).find((keyword) => text.includes(keyword));
+      if(!matchedKey) return null;
+      return {
+        keyword: matchedKey,
+        ...EXERCISE_GIF_MAP[matchedKey]
+      };
+    }
+
+    function doesGuideMatchQuery(itemText, keyword){
+      const query = normalizeGuideQuery(keyword);
+      if(!query) return false;
+      const item = String(itemText || "").toLowerCase();
+      const guide = findGuideByItem(itemText);
+      if(item.includes(query)) return true;
+      if(!guide) return false;
+      return [guide.title, ...(guide.keywords || []), ...(guide.focus || [])]
+        .map((v) => String(v || "").toLowerCase())
+        .some((v) => v.includes(query));
+    }
+
+    function renderInlinePlanGuidePanel(){
+      const box = $("inlinePlanGuidePanel");
+      if(!box) return;
+      box.className = "help";
+      box.textContent = "点一下上面的训练动作，会弹出查看图解、发力重点和注意事项。";
+    }
+
+    function renderPlanGuideModal(){
+      const content = $("planGuideModalContent");
+      if(!content) return;
+
+      if(!activeGuideItemText){
+        content.innerHTML = `
+          <div style="font-size:22px;font-weight:800;margin-bottom:10px;">训练动作图解</div>
+          <div class="softbox">点一下训练动作后，这里会显示对应图解和注意事项。</div>
+        `;
+        return;
+      }
+
+      const guide = findGuideByItem(activeGuideItemText);
+      const gifInfo = findGifByItem(activeGuideItemText);
+      const focus = guide?.focus?.length ? guide.focus.join("、") : "按计划动作执行";
+      const cautions = guide?.cautions?.length
+        ? guide.cautions.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
+        : `<li>先用你能稳定控制的重量和幅度。</li><li>有明显关节疼痛时立即停下。</li>`;
+
+      const gifBlock = gifInfo ? `
+        <div style="margin-top:14px;border-radius:18px;overflow:hidden;border:1px solid rgba(148,163,184,.16);background:rgba(255,255,255,.62);">
+          <img src="gifs/${gifInfo.gif}" alt="${escapeHtml(gifInfo.label)} 动图" style="display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#0f1115;" />
+          <div style="padding:12px 14px;">
+            <div style="font-size:14px;font-weight:700;line-height:1.5;">${escapeHtml(gifInfo.label)}</div>
+            <div class="guide-meta" style="margin-top:6px;">${escapeHtml(gifInfo.note || "本地 GIF 动作轨迹演示。")}</div>
+          </div>
+        </div>
+      ` : `
+        <div class="softbox" style="margin-top:14px;">当前这个动作没有匹配到本地 GIF，先显示文字图解和注意事项。</div>
+      `;
+
+      content.innerHTML = `
+        <div class="guide-result" style="margin-top:0;background:transparent;border:none;padding:0;">
+          <div class="guide-top">
+            <div>
+              <div class="guide-title">${escapeHtml(guide?.title || activeGuideItemText)}</div>
+              <div class="guide-meta">来自：${escapeHtml(activeGuideDayName || "当前训练日")}</div>
+              <div class="guide-meta">计划动作：${escapeHtml(activeGuideItemText)}</div>
+              <div class="guide-meta">发力重点：${escapeHtml(focus)}</div>
+            </div>
+          </div>
+          ${gifBlock}
+          <div class="guide-diagram">${escapeHtml(guide?.diagram || "当前只找到计划中的动作名称，暂时没有内置图解。")}</div>
+          <ul class="guide-list">${cautions}</ul>
+        </div>
+      `;
+    }
+
+    function closePlanGuideModal(){
+      const modal = $("planGuideModal");
+      if(modal) modal.style.display = "none";
+    }
+
+    function renderPlanGuideSearchResults(){
+      const box = $("planGuideSearchResults");
+      if(!box) return;
+      if(!box) return;
+
+      const query = normalizeGuideQuery(planGuideQuery);
+      if(!query){
+        box.className = "softbox";
+        box.textContent = "输入关键词后，这里会显示动作图解、发力重点和注意事项。";
+        return;
+      }
+
+      const days = getPlanDays();
+      const groups = new Map();
+
+      days.forEach((day, dayIndex) => {
+        (day.items || []).forEach((item, itemIndex) => {
+          if(!doesGuideMatchQuery(item, query)) return;
+          const guide = findGuideByItem(item);
+          const key = guide ? guide.id : `${dayIndex}-${itemIndex}`;
+          if(!groups.has(key)){
+            groups.set(key, {
+              guide,
+              title: guide ? guide.title : item,
+              items: [],
+              days: []
+            });
+          }
+          const target = groups.get(key);
+          target.items.push(item);
+          target.days.push({ dayIndex, dayName: day.day, item });
+        });
+      });
+
+      if(!groups.size){
+        box.className = "softbox";
+        box.textContent = "当前计划里没有搜到这个动作关键词。可以试试更短的词，比如“划船”“飞鸟”“肩推”。";
+        return;
+      }
+
+      box.className = "";
+      box.innerHTML = Array.from(groups.values()).map((entry, index) => {
+        const guide = entry.guide;
+        const focus = guide?.focus?.length ? guide.focus.join("、") : "按计划动作执行";
+        const cautions = guide?.cautions?.length
+          ? guide.cautions.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
+          : `<li>先用你能稳定控制的重量和幅度。</li><li>有明显关节疼痛时立即停下。</li>`;
+        const dayNames = Array.from(new Set(entry.days.map((x) => x.dayName)));
+        const jumpButtons = entry.days.map((x, btnIndex) => {
+          return `<button class="mini-btn" data-guide-jump="${x.dayIndex}">${escapeHtml(x.dayName)}</button>`;
+        }).join("");
+
+        return `
+          <div class="guide-result">
+            <div class="guide-top">
+              <div>
+                <div class="guide-title">${escapeHtml(entry.title)}</div>
+                <div class="guide-meta">出现于：${escapeHtml(dayNames.join("、"))}</div>
+                <div class="guide-meta">发力重点：${escapeHtml(focus)}</div>
+              </div>
+            </div>
+            <div class="guide-diagram">${escapeHtml(guide?.diagram || "当前只找到计划中的动作名称，暂时没有内置图解。")}</div>
+            <ul class="guide-list">${cautions}</ul>
+            <div class="guide-actions">${jumpButtons}</div>
+          </div>
+        `;
+      }).join("");
+
+      box.querySelectorAll("[data-guide-jump]").forEach((btn) => {
+        btn.onclick = () => {
+          const dayIndex = Number(btn.getAttribute("data-guide-jump"));
+          setActivePlanDay(dayIndex);
+          switchTab("plan");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        };
+      });
+    }
+
+    function setPlanGuideQuery(value){
+      planGuideQuery = String(value || "");
+      renderPlanGuideSearchResults();
+      renderPlan();
+    }
+
+    function openInlineGuide(dayName, itemText){
+      activeGuideDayName = String(dayName || "");
+      activeGuideItemText = String(itemText || "");
+      renderPlanGuideModal();
+      const modal = $("planGuideModal");
+      if(modal) modal.style.display = "flex";
+      renderPlan();
+    }
+
     function setActivePlanDay(dayIndex){
       const days = getPlanDays();
       if(!days.length){
@@ -2048,8 +2536,10 @@
         const itemsHtml = d.items.map((item, itemIndex) => {
           const key = `d${dayIndex}_i${itemIndex}`;
           const done = !!checks[key];
+          const hit = doesGuideMatchQuery(item, planGuideQuery);
+          const guideActive = activeGuideItemText && item === activeGuideItemText && d.day === activeGuideDayName;
           return `
-            <div class="day-row ${done ? "done" : ""}">
+            <div class="day-row guide-clickable ${done ? "done" : ""} ${hit ? "search-hit" : ""} ${guideActive ? "guide-active" : ""}" data-guide-open="${dayIndex}" data-guide-item="${escapeHtml(item)}" data-guide-day="${escapeHtml(d.day)}">
               <div class="day-item">${escapeHtml(item)}</div>
               <button class="check-btn ${done ? "done" : ""}" data-check="${key}" aria-label="完成打卡">${done ? "✓" : ""}</button>
             </div>
@@ -2074,7 +2564,17 @@
       });
 
       container.querySelectorAll("[data-check]").forEach((btn) => {
-        btn.onclick = () => togglePlanCheck(btn.getAttribute("data-check"));
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          togglePlanCheck(btn.getAttribute("data-check"));
+        };
+      });
+
+      container.querySelectorAll("[data-guide-open]").forEach((row) => {
+        row.onclick = (e) => {
+          if(e.target.closest(".check-btn")) return;
+          openInlineGuide(row.getAttribute("data-guide-day"), row.getAttribute("data-guide-item"));
+        };
       });
 
       container.querySelectorAll("[data-day-complete]").forEach((btn) => {
@@ -2082,6 +2582,8 @@
       });
 
       fillPlanEditorFromActiveDay();
+      renderInlinePlanGuidePanel();
+      renderPlanGuideSearchResults();
     }
 
     function saveCurrentPlanDay(){
@@ -3564,6 +4066,33 @@
     });
 
     $("stopAlarmBtn").onclick = stopAlarmLoop;
+
+    const planGuideModal = $("planGuideModal");
+    const closePlanGuideModalBtn = $("closePlanGuideModalBtn");
+    if(closePlanGuideModalBtn){
+      closePlanGuideModalBtn.onclick = closePlanGuideModal;
+    }
+    if(planGuideModal){
+      planGuideModal.onclick = (e) => {
+        if(e.target === planGuideModal){
+          closePlanGuideModal();
+        }
+      };
+    }
+
+    const planGuideSearchInput = $("planGuideSearchInput");
+    const clearPlanGuideSearchBtn = $("clearPlanGuideSearchBtn");
+    if(planGuideSearchInput){
+      planGuideSearchInput.addEventListener("input", (e) => {
+        setPlanGuideQuery(e.target.value || "");
+      });
+    }
+    if(clearPlanGuideSearchBtn && planGuideSearchInput){
+      clearPlanGuideSearchBtn.onclick = () => {
+        planGuideSearchInput.value = "";
+        setPlanGuideQuery("");
+      };
+    }
 
     $("uploadBgBtn").onclick = () => $("bgFileInput").click();
     $("clearBgBtn").onclick = clearBackground;
