@@ -449,12 +449,13 @@
     }
 
     .check-btn.done{
-      background:#ecfdf5;
-      border-color:#bbf7d0;
-      color:#065f46;
+      background:linear-gradient(180deg,rgba(73,85,107,.98),rgba(22,28,39,.98));
+      border-color:rgba(255,255,255,.10);
+      color:#fff;
       box-shadow:
-        0 6px 14px rgba(16,185,129,.15),
-        inset 0 1px 0 rgba(255,255,255,.9);
+        inset 0 1px 0 rgba(255,255,255,.22),
+        inset 0 -1px 0 rgba(0,0,0,.18),
+        0 10px 22px rgba(15,23,42,.16);
       transform:scale(1.02);
     }
 
@@ -552,16 +553,17 @@
     }
 
     .btn{
-      background:rgba(255,255,255,.9);
-      border-color:rgba(148,163,184,.25);
-      color:var(--text);
+      background:linear-gradient(180deg,rgba(73,85,107,.98),rgba(22,28,39,.98));
+      border-color:rgba(255,255,255,.10);
+      color:#fff;
       box-shadow:
-        0 10px 24px rgba(15,23,42,.08),
-        inset 0 1px 0 rgba(255,255,255,.9);
+        inset 0 1px 0 rgba(255,255,255,.22),
+        inset 0 -1px 0 rgba(0,0,0,.18),
+        0 10px 22px rgba(15,23,42,.16);
     }
 
     .btn::before{
-      background:linear-gradient(180deg,rgba(255,255,255,.4),rgba(255,255,255,.14));
+      background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.04));
     }
 
     .btn-outline{
@@ -570,11 +572,15 @@
 
     .btn-danger{
       color:var(--danger);
-      background:#fff;
-      border-color:#fecaca;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.90),rgba(255,255,255,.70));
+      border-color:rgba(220,38,38,.12);
       box-shadow:
-        0 10px 24px rgba(15,23,42,.06),
-        inset 0 1px 0 rgba(255,255,255,.95);
+        0 12px 28px rgba(15,23,42,.10),
+        0 4px 12px rgba(15,23,42,.06),
+        inset 0 1px 0 rgba(255,255,255,.96),
+        inset 0 -1px 0 rgba(239,68,68,.12),
+        0 0 0 1px rgba(255,255,255,.35);
     }
 
     .btn:hover,.btn-outline:hover,.btn-danger:hover{
@@ -698,16 +704,17 @@
     }
 
     .day-tab.active{
-      background:#0f172a;
-      border-color:#0f172a;
+      background:linear-gradient(180deg,rgba(73,85,107,.98),rgba(22,28,39,.98));
+      border-color:rgba(255,255,255,.10);
       color:#fff;
       box-shadow:
-        0 10px 22px rgba(15,23,42,.14),
-        inset 0 1px 0 rgba(255,255,255,.12);
+        inset 0 1px 0 rgba(255,255,255,.22),
+        inset 0 -1px 0 rgba(0,0,0,.18),
+        0 10px 22px rgba(15,23,42,.16);
     }
 
     .day-tab.active::before{
-      background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.02));
+      background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.04));
     }
 
     .day-panel{display:none;}
@@ -805,62 +812,10 @@
     @media (min-width:640px){
       .grid7{grid-template-columns:repeat(4,1fr);}
     }
-  
-    .sync-banner{
-      display:none;
-      position:sticky;
-      top:10px;
-      z-index:80;
-      margin:0 0 12px;
-      padding:12px 14px;
-      border-radius:18px;
-      border:1px solid rgba(148,163,184,.18);
-      background:rgba(255,255,255,.92);
-      box-shadow:0 10px 24px rgba(15,23,42,.08);
-      backdrop-filter:blur(14px) saturate(160%);
-      -webkit-backdrop-filter:blur(14px) saturate(160%);
-    }
-
-    .sync-banner.show{
-      display:block;
-    }
-
-    .sync-banner-title{
-      font-size:14px;
-      font-weight:800;
-      margin-bottom:4px;
-      color:var(--text);
-    }
-
-    .sync-banner-text{
-      font-size:13px;
-      line-height:1.6;
-      color:var(--muted);
-    }
-
-    .sync-banner.success{
-      border-color:#bbf7d0;
-      background:rgba(236,253,245,.95);
-    }
-
-    .sync-banner.warn{
-      border-color:#fde68a;
-      background:rgba(255,251,235,.96);
-    }
-
-    .sync-banner.info{
-      border-color:#bfdbfe;
-      background:rgba(239,246,255,.96);
-    }
-
   </style>
-<link rel="stylesheet" href="/Static/css/Global.css"/><link rel="stylesheet" href="/Web/css/Global.css"/><link rel="stylesheet" href="/Web/css/SoruxGPT.css"/></head>
+</head>
 <body>
   <div class="wrap">
-    <div id="syncBanner" class="sync-banner" aria-live="polite">
-      <div class="sync-banner-title" id="syncBannerTitle"></div>
-      <div class="sync-banner-text" id="syncBannerText"></div>
-    </div>
     <div class="card hero">
       <div class="topline">
         <div>
@@ -1207,8 +1162,6 @@
     const TIMER_RUNNING_KEY = "portable-timer-running";
     const TIMER_ALARM_PENDING_KEY = "portable-timer-alarm-pending";
     const CLOUD_AUTO_SYNC_KEY = "supabase-auto-sync-enabled";
-    const LOCAL_STATE_UPDATED_AT_KEY = "gain-local-state-updated-at";
-    const LAST_SYNCED_AT_KEY = "gain-last-synced-at";
 
     const SUPABASE_URL = "https://bzzbdchqrvwdaenydoqm.supabase.co";
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_NshT086od8vjfXFIhGvrkw_DgqzzXAL";
@@ -1347,10 +1300,6 @@
     let timerFallbackBeepLoop = null;
     let timerAlarmSession = 0;
 
-    if(!localStorage.getItem(LOCAL_STATE_UPDATED_AT_KEY)){
-      localStorage.setItem(LOCAL_STATE_UPDATED_AT_KEY, new Date().toISOString());
-    }
-
     function $(id){
       return document.getElementById(id);
     }
@@ -1380,33 +1329,6 @@
 
     function setCloudHint(text){
       if($("cloudSyncHint")) $("cloudSyncHint").textContent = text;
-    }
-
-    let syncBannerTimer = null;
-
-    function showSyncBanner(type, title, text, autoHideMs = 0){
-      const banner = $("syncBanner");
-      const titleEl = $("syncBannerTitle");
-      const textEl = $("syncBannerText");
-      if(!banner || !titleEl || !textEl) return;
-      banner.className = `sync-banner show ${type || "info"}`;
-      titleEl.textContent = title || "同步提示";
-      textEl.textContent = text || "";
-      if(syncBannerTimer){
-        clearTimeout(syncBannerTimer);
-        syncBannerTimer = null;
-      }
-      if(autoHideMs > 0){
-        syncBannerTimer = setTimeout(() => {
-          hideSyncBanner();
-        }, autoHideMs);
-      }
-    }
-
-    function hideSyncBanner(){
-      const banner = $("syncBanner");
-      if(!banner) return;
-      banner.className = "sync-banner";
     }
 
     function getCloudUserLabel(user){
@@ -1445,62 +1367,9 @@
       const hint = $("cloudAutoSyncHint");
       if(hint){
         hint.textContent = isAutoSyncEnabled()
-          ? "自动同步已开启：修改训练记录、打卡、模板后，会先比对新旧，再上传到云端。"
-          : "自动同步已关闭：你仍然可以手动点“立即同步到云端”；同步时会先比对新旧，避免进度倒退。";
+          ? "自动同步已开启：修改训练记录、打卡、模板后，会在已登录状态下自动上传到云端。"
+          : "自动同步已关闭：你仍然可以手动点“立即同步到云端”；开启后只会自动上传本机变化，不会自动从云端覆盖本机。";
       }
-    }
-
-    function nowIso(){
-      return new Date().toISOString();
-    }
-
-    function getLocalStateUpdatedAt(){
-      return localStorage.getItem(LOCAL_STATE_UPDATED_AT_KEY) || "";
-    }
-
-    function setLocalStateUpdatedAt(value){
-      const v = value || nowIso();
-      localStorage.setItem(LOCAL_STATE_UPDATED_AT_KEY, v);
-      return v;
-    }
-
-    function touchLocalState(reason = ""){
-      return setLocalStateUpdatedAt(nowIso());
-    }
-
-    function getLastSyncedAt(){
-      return localStorage.getItem(LAST_SYNCED_AT_KEY) || "";
-    }
-
-    function setLastSyncedAt(value){
-      if(value){
-        localStorage.setItem(LAST_SYNCED_AT_KEY, value);
-      }
-    }
-
-    function parseTimeValue(value){
-      const t = Date.parse(value || "");
-      return Number.isFinite(t) ? t : 0;
-    }
-
-    function compareIsoTime(a, b){
-      return parseTimeValue(a) - parseTimeValue(b);
-    }
-
-    function isMeaningfulSnapshot(snapshot){
-      if(!snapshot) return false;
-      const form = snapshot.form || {};
-      const history = Array.isArray(snapshot.history) ? snapshot.history : [];
-      const checks = snapshot.planChecks || {};
-      const templateDays = snapshot.planTemplate && Array.isArray(snapshot.planTemplate.days) ? snapshot.planTemplate.days : [];
-      const formHasContent = Object.values(form).some((v) => String(v || "").trim() !== "");
-      const checksHasContent = Object.keys(checks).some((k) => !!checks[k]);
-      return formHasContent || history.length > 0 || checksHasContent || templateDays.length > 0;
-    }
-
-    function getSnapshotUpdatedAt(snapshot){
-      if(!snapshot) return "";
-      return snapshot.localUpdatedAt || snapshot.updated_at || "";
     }
 
     let autoSyncTimer = null;
@@ -1510,7 +1379,6 @@
 
     function queueAutoSync(reason = "本机数据变化"){
       autoSyncReason = reason || autoSyncReason || "本机数据变化";
-      touchLocalState(reason);
       if(!isAutoSyncEnabled()) return;
       clearTimeout(autoSyncTimer);
       autoSyncTimer = setTimeout(() => {
@@ -1541,7 +1409,6 @@
       setAutoSyncEnabled(next);
       if(next){
         setCloudHint("自动同步已开启：后续本机数据变化会自动上传。首次建议先手动点一次“立即同步到云端”。")
-        showSyncBanner("info", "自动同步已开启", "之后每次修改都会先比对本机和云端新旧，再决定上传或拉取。", 5000)
         const user = await getCurrentUser();
         if(user){
           queueAutoSync("开启自动同步后立即上传");
@@ -1557,9 +1424,7 @@
         form: JSON.parse(localStorage.getItem(FORM_KEY) || "{}"),
         history: getHistory(),
         planChecks: getPlanChecks(),
-        planTemplate: getPlanTemplate(),
-        localUpdatedAt: getLocalStateUpdatedAt(),
-        lastSyncedAt: getLastSyncedAt()
+        planTemplate: getPlanTemplate()
       };
     }
 
@@ -1568,16 +1433,11 @@
       const safeHistory = payload && Array.isArray(payload.history) ? payload.history : [];
       const safePlanChecks = payload && payload.planChecks ? payload.planChecks : {};
       const safePlanTemplate = payload && payload.planTemplate ? normalizePlanTemplate(payload.planTemplate) : getPlanTemplate();
-      const updatedAt = getSnapshotUpdatedAt(payload) || nowIso();
 
       localStorage.setItem(FORM_KEY, JSON.stringify(safeForm));
       localStorage.setItem(HISTORY_KEY, JSON.stringify(safeHistory));
       localStorage.setItem(PLAN_CHECKS_KEY, JSON.stringify(safePlanChecks));
       localStorage.setItem(PLAN_TEMPLATE_KEY, JSON.stringify(safePlanTemplate));
-      setLocalStateUpdatedAt(updatedAt);
-      if(payload && payload.updated_at){
-        setLastSyncedAt(payload.updated_at);
-      }
 
       setForm(safeForm);
       renderHistory();
@@ -1605,64 +1465,6 @@
           : "首次使用：点“使用 GitHub 登录”，登录成功后再同步。");
       }
       updateAutoSyncUi();
-    }
-
-    async function bootstrapCloudState(preferAlert = false){
-      const user = await getCurrentUser();
-      if(!user) return false;
-
-      const localSnapshot = getLocalSnapshot();
-      const localUpdatedAt = localSnapshot.localUpdatedAt || getLocalStateUpdatedAt() || "";
-      const hasLocalData = isMeaningfulSnapshot(localSnapshot);
-
-      const { data, error } = await sb
-        .from(SUPABASE_TABLE)
-        .select("form_json, history_json, plan_checks_json, plan_template_json, updated_at, local_updated_at")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if(error) throw error;
-
-      if(!data){
-        if(hasLocalData){
-          return await syncToCloud(false, { skipRemoteCheck: true, allowOverwrite: true });
-        }
-        return false;
-      }
-
-      const remoteSnapshot = {
-        form: data.form_json || {},
-        history: Array.isArray(data.history_json) ? data.history_json : [],
-        planChecks: data.plan_checks_json || {},
-        planTemplate: data.plan_template_json || DEFAULT_PLAN_TEMPLATE,
-        updated_at: data.updated_at || "",
-        localUpdatedAt: data.local_updated_at || data.updated_at || ""
-      };
-      const remoteUpdatedAt = getSnapshotUpdatedAt(remoteSnapshot);
-      const hasRemoteData = isMeaningfulSnapshot(remoteSnapshot);
-
-      if(!hasLocalData && hasRemoteData){
-        applyLocalSnapshot(remoteSnapshot);
-        setCloudStatus(`云端状态：已加载云端最新进度（${getCloudUserLabel(user)}）`);
-        setCloudHint("打开网页时已自动拉取最新云端记录。");
-        showSyncBanner("info", "已加载云端最新进度", "当前设备本地没有有效记录，已自动读取云端最新进度。", 7000);
-        return true;
-      }
-
-      if(compareIsoTime(remoteUpdatedAt, localUpdatedAt) > 0){
-        applyLocalSnapshot(remoteSnapshot);
-        setCloudStatus(`云端状态：已加载云端最新进度（${getCloudUserLabel(user)}）`);
-        setCloudHint("已优先采用云端较新的记录，避免旧设备覆盖进度。");
-        showSyncBanner("warn", "检测到两端进度不一致", "云端记录比当前设备更新，系统已自动采用云端较新的进度，避免进度倒退。", 9000);
-        return true;
-      }
-
-      if(compareIsoTime(localUpdatedAt, remoteUpdatedAt) > 0 && hasLocalData){
-        showSyncBanner("warn", "检测到两端进度不一致", "当前设备记录比云端更新，系统将上传本机较新的进度到云端。", 7000);
-        return await syncToCloud(false, { skipRemoteCheck: true, allowOverwrite: true });
-      }
-
-      return false;
     }
 
     async function signInWithGitHub(){
@@ -1701,67 +1503,27 @@
       }
     }
 
-    async function syncToCloud(showAlert = true, options = {}){
-      const {
-        skipRemoteCheck = false,
-        allowOverwrite = false
-      } = options || {};
+    async function syncToCloud(showAlert = true){
       const user = await getCurrentUser();
       if(!user){
-        if(showAlert) alert("请先登录云端，再同步");
+        alert("请先登录云端，再同步");
         return false;
       }
       setCloudBusy(true);
       setCloudStatus("云端状态：正在上传本机记录...");
       try{
         const snapshot = getLocalSnapshot();
-        const localUpdatedAt = snapshot.localUpdatedAt || getLocalStateUpdatedAt() || nowIso();
-
-        if(!skipRemoteCheck){
-          const { data: remoteData, error: remoteError } = await sb
-            .from(SUPABASE_TABLE)
-            .select("form_json, history_json, plan_checks_json, plan_template_json, updated_at, local_updated_at")
-            .eq("user_id", user.id)
-            .maybeSingle();
-
-          if(remoteError) throw remoteError;
-
-          if(remoteData){
-            const remoteSnapshot = {
-              form: remoteData.form_json || {},
-              history: Array.isArray(remoteData.history_json) ? remoteData.history_json : [],
-              planChecks: remoteData.plan_checks_json || {},
-              planTemplate: remoteData.plan_template_json || DEFAULT_PLAN_TEMPLATE,
-              updated_at: remoteData.updated_at || "",
-              localUpdatedAt: remoteData.local_updated_at || remoteData.updated_at || ""
-            };
-            const remoteUpdatedAt = getSnapshotUpdatedAt(remoteSnapshot);
-            if(!allowOverwrite && compareIsoTime(remoteUpdatedAt, localUpdatedAt) > 0){
-              applyLocalSnapshot(remoteSnapshot);
-              setCloudStatus(`云端状态：检测到云端更新，已自动拉取最新进度（${getCloudUserLabel(user)}）`);
-              setCloudHint("为避免旧设备覆盖新进度，已优先保留云端较新的记录。");
-              showSyncBanner("warn", "检测到同步冲突，已保留较新的云端进度", "当前设备和云端都存在记录，但云端更新时间更近。系统已自动拉取云端最新进度，避免旧设备覆盖新进度。", 9000);
-              if(showAlert) alert("云端记录比当前设备更新，已自动恢复最新进度到本机。");
-              return true;
-            }
-          }
-        }
-
-        const writeUpdatedAt = nowIso();
         const { error } = await sb.from(SUPABASE_TABLE).upsert({
           user_id: user.id,
           form_json: snapshot.form,
           history_json: snapshot.history,
           plan_checks_json: snapshot.planChecks,
           plan_template_json: snapshot.planTemplate,
-          local_updated_at: localUpdatedAt,
-          updated_at: writeUpdatedAt
+          updated_at: new Date().toISOString()
         });
         if(error) throw error;
-        setLastSyncedAt(writeUpdatedAt);
         setCloudStatus(`云端状态：已同步到云端（${getCloudUserLabel(user)}）`);
-        setCloudHint(isAutoSyncEnabled() ? "自动同步已开启：会先比对新旧，再上传，避免旧设备覆盖较新的进度。" : "手动同步也会先比对云端和本机时间，避免进度倒退。");
-        showSyncBanner("success", "已同步最新进度到云端", "本机记录较新，系统已安全上传当前进度。", 5000);
+        setCloudHint(isAutoSyncEnabled() ? "自动同步已开启：后续本机变化会自动上传。换设备时，仍可点“从云端恢复到本机”。" : "以后换设备登录同一个 GitHub 账号后，可以点“从云端恢复到本机”。");
         if(showAlert) alert("已同步到 Supabase 云端");
         return true;
       }catch(err){
@@ -1788,7 +1550,7 @@
       try{
         const { data, error } = await sb
           .from(SUPABASE_TABLE)
-          .select("form_json, history_json, plan_checks_json, plan_template_json, updated_at, local_updated_at")
+          .select("form_json, history_json, plan_checks_json, plan_template_json")
           .eq("user_id", user.id)
           .maybeSingle();
         if(error) throw error;
@@ -1801,13 +1563,10 @@
           form: data.form_json || {},
           history: Array.isArray(data.history_json) ? data.history_json : [],
           planChecks: data.plan_checks_json || {},
-          planTemplate: data.plan_template_json || DEFAULT_PLAN_TEMPLATE,
-          updated_at: data.updated_at || "",
-          localUpdatedAt: data.local_updated_at || data.updated_at || ""
+          planTemplate: data.plan_template_json || DEFAULT_PLAN_TEMPLATE
         });
         setCloudStatus(`云端状态：已从云端恢复（${getCloudUserLabel(user)}）`);
         setCloudHint("本机记录已被云端覆盖。")
-        showSyncBanner("info", "已从云端恢复进度", "当前设备已加载云端保存的最新记录。", 6000);
         alert("已从 Supabase 云端恢复到本机");
       }catch(err){
         console.error(err);
@@ -3499,13 +3258,8 @@
 
     sb.auth.onAuthStateChange((event) => {
       refreshCloudUi().catch(() => {});
-    bootstrapCloudState(false).catch((err) => {
-      console.error("初始化云端状态失败", err);
-    });
-      if(event === "SIGNED_IN" || event === "TOKEN_REFRESHED"){
-        bootstrapCloudState(false).catch((err) => {
-          console.error("初始化云端状态失败", err);
-        });
+      if((event === "SIGNED_IN" || event === "TOKEN_REFRESHED") && isAutoSyncEnabled()){
+        queueAutoSync("登录后自动同步");
       }
     });
 
@@ -3548,5 +3302,5 @@
       });
     }
   </script>
-<script src="/Static/js/jquery.js"></script><script src="/Static/js/Global.js"></script><script src="/Web/js/Global.js"></script><script src="/Web/js/SoruxGPT.js"></script></body>
+</body>
 </html>
