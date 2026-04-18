@@ -1352,7 +1352,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.04.19-23";
+    const APP_VERSION = "v2026.04.19-24";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const FORM_KEY = "gain-tracker-form";
     const HISTORY_KEY = "gain-tracker-history";
@@ -1643,6 +1643,13 @@
     ];
 
     const EXERCISE_GIF_MAP = {
+      "肩胛引体/沉肩悬垂": { gif:"custom_scapular_pull.gif", label:"肩胛引体 / 沉肩悬垂（简化示意 GIF）", note:"依据聊天记录描述制作的简化线稿示意，重点展示肩胛下沉与手臂保持伸直。" },
+      "肩胛引体": { gif:"custom_scapular_pull.gif", label:"肩胛引体 / 沉肩悬垂（简化示意 GIF）", note:"依据聊天记录描述制作的简化线稿示意，重点展示肩胛下沉与手臂保持伸直。" },
+      "沉肩悬垂": { gif:"custom_scapular_pull.gif", label:"肩胛引体 / 沉肩悬垂（简化示意 GIF）", note:"依据聊天记录描述制作的简化线稿示意，重点展示肩胛下沉与手臂保持伸直。" },
+      "弹力绳直臂下拉": { gif:"custom_band_straight_arm_pulldown.gif", label:"弹力绳直臂下拉（简化示意 GIF）", note:"依据聊天记录描述制作的简化线稿示意，重点展示直臂轨迹与背阔发力。" },
+      "保加利亚分腿蹲": { gif:"custom_bulgarian_split_squat.gif", label:"保加利亚分腿蹲（简化示意 GIF）", note:"依据聊天记录描述制作的简化线稿示意，重点展示前腿主力与后脚抬高。"},
+      "哑铃提踵": { gif:"custom_dumbbell_calf_raise.gif", label:"哑铃提踵（简化示意 GIF）", note:"依据聊天记录描述制作的简化线稿示意，重点展示脚跟抬起与顶峰停顿。"},
+
       "下斜俯卧撑": { gif:"0279.gif", label:"下斜俯卧撑", note:"" },
       "宽距俯卧撑": { gif:"1311.gif", label:"宽距俯卧撑", note:"" },
       "俯卧撑": { gif:"0662.gif", label:"标准俯卧撑", note:"" },
