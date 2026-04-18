@@ -1324,6 +1324,8 @@
           6. 点“复制给教练”，把内容直接发给我。
         </div>
       </div>
+
+      <div class="help" id="appVersionText" style="text-align:center;margin-top:6px;">当前版本：-</div>
     </section>
 
     <div class="footer-space"></div>
@@ -1350,6 +1352,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    const APP_VERSION = "v2026.04.19-23";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const FORM_KEY = "gain-tracker-form";
     const HISTORY_KEY = "gain-tracker-history";
@@ -2336,7 +2339,7 @@
 
       const gifBlock = gifInfo ? `
         <div style="margin-top:14px;border-radius:18px;overflow:hidden;border:1px solid rgba(148,163,184,.16);background:rgba(255,255,255,.62);">
-          <img src="gifs/${gifInfo.gif}" alt="${escapeHtml(gifInfo.label)} 动图" style="display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#0f1115;" />
+          <img src="gifs/${gifInfo.gif}" alt="${escapeHtml(gifInfo.label)} 动图" style="display:block;width:100%;max-height:min(42vh,360px);object-fit:contain;background:#ffffff;padding:8px;" />
           <div style="padding:12px 14px;">
             <div style="font-size:14px;font-weight:700;line-height:1.5;">${escapeHtml(gifInfo.label)}</div>
             <div class="guide-meta" style="margin-top:6px;">${escapeHtml(gifInfo.note || "本地 GIF 动作轨迹演示。")}</div>
@@ -4131,6 +4134,9 @@
     });
     updateSummary();
     refreshCloudUi().catch(() => {});
+    if($("appVersionText")){
+      $("appVersionText").textContent = `当前版本：${APP_VERSION}`;
+    }
 
     if(isStandaloneMode()){
       document.body.classList.add("standalone");
