@@ -785,6 +785,110 @@
       line-height:1.65;
     }
 
+    .calendar-toolbar{
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      gap:10px;
+      align-items:center;
+      margin-top:12px;
+    }
+
+    .calendar-weekdays,
+    .calendar-grid{
+      display:grid;
+      grid-template-columns:repeat(7, minmax(0,1fr));
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .calendar-weekday{
+      text-align:center;
+      font-size:12px;
+      color:var(--muted);
+      font-weight:700;
+      padding:6px 0;
+    }
+
+    .calendar-cell{
+      min-height:92px;
+      border-radius:18px;
+      padding:10px 8px;
+      border:1px solid rgba(148,163,184,.16);
+      background:rgba(255,255,255,.72);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.24);
+      cursor:pointer;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .calendar-cell.empty{
+      cursor:default;
+      background:rgba(255,255,255,.36);
+      opacity:.5;
+    }
+
+    .calendar-cell.has-log{
+      background:rgba(239,246,255,.94);
+      border-color:rgba(96,165,250,.24);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.30),
+        0 8px 18px rgba(59,130,246,.06);
+    }
+
+    .calendar-cell.selected{
+      outline:2px solid rgba(59,130,246,.28);
+    }
+
+    .calendar-cell.today .calendar-day-num{
+      color:#2563eb;
+    }
+
+    .calendar-day-num{
+      font-size:14px;
+      font-weight:800;
+      line-height:1;
+    }
+
+    .calendar-day-tag{
+      font-size:11px;
+      line-height:1.35;
+      color:#0f172a;
+      background:rgba(255,255,255,.72);
+      border-radius:999px;
+      padding:4px 8px;
+      align-self:flex-start;
+      border:1px solid rgba(148,163,184,.16);
+    }
+
+    .calendar-day-sub{
+      font-size:11px;
+      color:var(--muted);
+      line-height:1.35;
+    }
+
+    .calendar-detail-card{
+      margin-top:14px;
+      background:rgba(255,255,255,.82);
+      border:1px solid rgba(148,163,184,.16);
+      border-radius:20px;
+      padding:14px;
+    }
+
+    .calendar-detail-actions{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .calendar-items{
+      margin:10px 0 0;
+      padding-left:18px;
+      line-height:1.7;
+      font-size:14px;
+    }
+
     .history-card{
       background:var(--soft);
       border-radius:18px;
@@ -1217,6 +1321,27 @@
 
     <section id="history" class="section">
       <div class="card">
+        <h2>训练日历</h2>
+        <div class="softbox">按月查看每天训练了什么。点击某一天可以查看完成动作、填写体重 / 睡眠 / 备注，并保存在本地与云端同步。</div>
+        <div class="calendar-toolbar">
+          <button class="btn-outline" id="calendarPrevBtn">上月</button>
+          <div class="badge" id="calendarMonthLabel">-</div>
+          <button class="btn-outline" id="calendarNextBtn">下月</button>
+        </div>
+        <div class="calendar-weekdays">
+          <div class="calendar-weekday">一</div>
+          <div class="calendar-weekday">二</div>
+          <div class="calendar-weekday">三</div>
+          <div class="calendar-weekday">四</div>
+          <div class="calendar-weekday">五</div>
+          <div class="calendar-weekday">六</div>
+          <div class="calendar-weekday">日</div>
+        </div>
+        <div id="calendarGrid" class="calendar-grid"></div>
+        <div id="calendarDetail" class="calendar-detail-card">点击某一天查看训练详情。</div>
+      </div>
+
+      <div class="card">
         <h2>已保存周记录</h2>
         <div id="historyList" class="muted">还没有保存记录。先去“记录”页填完并保存。</div>
       </div>
@@ -1352,8 +1477,10 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.04.19-24";
+    const APP_VERSION = "v2026.04.19-25";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
+    const DAILY_LOGS_KEY = "gain-daily-logs";
+    const LAST_CLOUD_SYNC_AT_KEY = "gain-last-cloud-sync-at";
     const FORM_KEY = "gain-tracker-form";
     const HISTORY_KEY = "gain-tracker-history";
     const PLAN_CHECKS_KEY = "gain-plan-checks";
@@ -1686,6 +1813,14 @@
     let activeGuideItemText = "";
     let activeGuideDayName = "";
     let activePlanDay = Number(localStorage.getItem(ACTIVE_PLAN_DAY_KEY) || "0");
+    let calendarCursor = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    let selectedCalendarDate = (() => {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, "0");
+      const d = String(now.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    })();
     let counterValue = Number(localStorage.getItem(COUNTER_KEY) || "0");
     let timerInterval = null;
     let timerRemainingMs = Number(localStorage.getItem(TIMER_REMAINING_KEY) || "60000");
@@ -1917,7 +2052,7 @@
     async function fetchCloudSnapshot(userId){
       const { data, error } = await sb
         .from(SUPABASE_TABLE)
-        .select("form_json, history_json, plan_checks_json, plan_template_json, updated_at")
+.select("form_json, history_json, daily_logs_json, plan_checks_json, plan_template_json, updated_at")
         .eq("user_id", userId)
         .maybeSingle();
       if(error) throw error;
@@ -1955,12 +2090,14 @@
           user_id: user.id,
           form_json: snapshot.form,
           history_json: snapshot.history,
+          daily_logs_json: snapshot.dailyLogs,
           plan_checks_json: snapshot.planChecks,
           plan_template_json: snapshot.planTemplate,
           updated_at: uploadUpdatedAt
         });
         if(error) throw error;
         markLocalStateChanged("已同步到云端", uploadUpdatedAt);
+        setLastCloudSyncAt(uploadUpdatedAt);
         setCloudStatus(`云端状态：已同步到云端（${getCloudUserLabel(user)}）`);
         setCloudHint(isAutoSyncEnabled() ? "自动同步已开启：现在会先比较版本新旧，再决定上传还是恢复，避免进度回滚。" : "以后换设备登录同一个 GitHub 账号后，可以点“从云端恢复到本机”。");
         if(showAlert) alert("已同步到 Supabase 云端");
@@ -2000,6 +2137,8 @@
           applyLocalSnapshot({
             form: cloud.form_json || {},
             history: Array.isArray(cloud.history_json) ? cloud.history_json : [],
+            dailyLogs: cloud.daily_logs_json || {},
+            lastCloudSyncAt: cloud.updated_at || new Date().toISOString(),
             planChecks: cloud.plan_checks_json || {},
             planTemplate: cloud.plan_template_json || DEFAULT_PLAN_TEMPLATE,
             updatedAt: cloud.updated_at || new Date().toISOString()
@@ -2057,6 +2196,8 @@
           __pageBackground: getPageBackgroundData()
         },
         history: getHistory(),
+        dailyLogs: getDailyLogs(),
+        lastCloudSyncAt: getLastCloudSyncAt(),
         planChecks: getPlanChecks(),
         planTemplate: getPlanTemplate(),
         updatedAt: getLocalUpdatedAt()
@@ -2070,6 +2211,7 @@
       delete safeForm.__pageBackground;
 
       const safeHistory = payload && Array.isArray(payload.history) ? payload.history : [];
+      const safeDailyLogs = payload && payload.dailyLogs ? payload.dailyLogs : {};
       const safePlanChecks = payload && payload.planChecks ? payload.planChecks : {};
       const safePlanTemplate = payload && payload.planTemplate ? normalizePlanTemplate(payload.planTemplate) : getPlanTemplate();
       const updatedAt = payload && payload.updatedAt ? payload.updatedAt : new Date().toISOString();
@@ -2078,8 +2220,10 @@
       try{
         localStorage.setItem(FORM_KEY, JSON.stringify(safeForm));
         localStorage.setItem(HISTORY_KEY, JSON.stringify(safeHistory));
+        localStorage.setItem(DAILY_LOGS_KEY, JSON.stringify(safeDailyLogs));
         localStorage.setItem(PLAN_CHECKS_KEY, JSON.stringify(safePlanChecks));
         localStorage.setItem(PLAN_TEMPLATE_KEY, JSON.stringify(safePlanTemplate));
+        setLastCloudSyncAt(payload?.lastCloudSyncAt || updatedAt);
         applyPageBackground(pageBackground);
         markLocalStateChanged("从云端恢复到本机", updatedAt);
 
@@ -2171,6 +2315,8 @@
         applyLocalSnapshot({
           form: data.form_json || {},
           history: Array.isArray(data.history_json) ? data.history_json : [],
+          dailyLogs: data.daily_logs_json || {},
+          lastCloudSyncAt: data.updated_at || new Date().toISOString(),
           planChecks: data.plan_checks_json || {},
           planTemplate: data.plan_template_json || DEFAULT_PLAN_TEMPLATE,
           updatedAt: data.updated_at || new Date().toISOString()
@@ -2564,6 +2710,7 @@
             <div class="greenbox"><b>蛋白粉安排：</b>${escapeHtml(d.protein || "暂无")}</div>
             <div class="plan-actions">
               <button class="btn-outline" data-day-complete="${dayIndex}">一键完成今天</button>
+              <button class="btn-outline" data-record-daily-log="${dayIndex}">记录到今天</button>
             </div>
           </div>
         `;
@@ -2589,6 +2736,10 @@
 
       container.querySelectorAll("[data-day-complete]").forEach((btn) => {
         btn.onclick = () => completeDay(Number(btn.getAttribute("data-day-complete")));
+      });
+
+      container.querySelectorAll("[data-record-daily-log]").forEach((btn) => {
+        btn.onclick = () => recordPlanDayToToday(Number(btn.getAttribute("data-record-daily-log")));
       });
 
       fillPlanEditorFromActiveDay();
@@ -2718,6 +2869,211 @@
       localStorage.setItem(FORM_KEY, JSON.stringify(data));
     }
 
+    function formatDateKey(date){
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    function formatMonthLabel(date){
+      return `${date.getFullYear()}年${date.getMonth() + 1}月`;
+    }
+
+    function getDailyLogs(){
+      try{
+        return JSON.parse(localStorage.getItem(DAILY_LOGS_KEY) || "{}");
+      }catch(e){
+        return {};
+      }
+    }
+
+    function setDailyLogs(logs){
+      localStorage.setItem(DAILY_LOGS_KEY, JSON.stringify(logs || {}));
+      renderHistory();
+      queueAutoSync("日历日志更新");
+    }
+
+    function getLastCloudSyncAt(){
+      return localStorage.getItem(LAST_CLOUD_SYNC_AT_KEY) || "";
+    }
+
+    function setLastCloudSyncAt(value){
+      if(value){
+        localStorage.setItem(LAST_CLOUD_SYNC_AT_KEY, value);
+      }else{
+        localStorage.removeItem(LAST_CLOUD_SYNC_AT_KEY);
+      }
+    }
+
+    function getDayTypeLabel(focus){
+      const text = String(focus || "");
+      if(text.includes("恢复")) return "恢复";
+      if(text.includes("休息")) return "休息";
+      if(text.includes("下肢") || text.includes("腿")) return "腿";
+      if(text.includes("背")) return "背";
+      if(text.includes("胸")) return "胸";
+      if(text.includes("肩")) return "肩";
+      if(text.includes("核心")) return "核心";
+      return "训练";
+    }
+
+    function getDailyLogCloudStatus(log){
+      const lastSync = Date.parse(getLastCloudSyncAt() || "");
+      const updated = Date.parse(log?.updatedAtIso || "");
+      if(lastSync && updated && lastSync >= updated){
+        return `已同步（${new Date(lastSync).toLocaleString("zh-CN")}）`;
+      }
+      return "未确认同步";
+    }
+
+    function renderCalendar(){
+      const grid = $("calendarGrid");
+      const monthLabel = $("calendarMonthLabel");
+      if(!grid || !monthLabel) return;
+
+      const logs = getDailyLogs();
+      const year = calendarCursor.getFullYear();
+      const month = calendarCursor.getMonth();
+      monthLabel.textContent = formatMonthLabel(calendarCursor);
+
+      const firstDay = new Date(year, month, 1);
+      const firstWeekday = (firstDay.getDay() + 6) % 7;
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const todayKey = formatDateKey(new Date());
+
+      const cells = [];
+      for(let i = 0; i < firstWeekday; i += 1){
+        cells.push(`<div class="calendar-cell empty"></div>`);
+      }
+
+      for(let day = 1; day <= daysInMonth; day += 1){
+        const date = new Date(year, month, day);
+        const key = formatDateKey(date);
+        const log = logs[key];
+        const label = log ? getDayTypeLabel(log.focus || log.planDay || "") : "";
+        const completedText = log ? `${log.completedCount || 0}/${log.totalItems || 0}` : "";
+        cells.push(`
+          <div class="calendar-cell ${log ? "has-log" : ""} ${key === selectedCalendarDate ? "selected" : ""} ${key === todayKey ? "today" : ""}" data-calendar-date="${key}">
+            <div class="calendar-day-num">${day}</div>
+            ${label ? `<div class="calendar-day-tag">${escapeHtml(label)}</div>` : ``}
+            ${completedText ? `<div class="calendar-day-sub">完成 ${escapeHtml(completedText)}</div>` : ``}
+          </div>
+        `);
+      }
+
+      grid.innerHTML = cells.join("");
+      grid.querySelectorAll("[data-calendar-date]").forEach((cell) => {
+        cell.onclick = () => {
+          selectedCalendarDate = cell.getAttribute("data-calendar-date");
+          renderCalendar();
+          renderCalendarDetail();
+        };
+      });
+    }
+
+    function renderCalendarDetail(){
+      const box = $("calendarDetail");
+      if(!box) return;
+      const logs = getDailyLogs();
+      const log = logs[selectedCalendarDate];
+
+      if(!log){
+        box.innerHTML = `
+          <div style="font-weight:800;font-size:18px;">${escapeHtml(selectedCalendarDate)}</div>
+          <div class="help" style="margin-top:8px;">这一天还没有训练日志。先去“计划”页点“记录到今天”，再回来这里补体重、睡眠和备注。</div>
+        `;
+        return;
+      }
+
+      const completedItems = Array.isArray(log.completedItems) ? log.completedItems : [];
+      const allItems = Array.isArray(log.allItems) ? log.allItems : [];
+      const displayItems = completedItems.length ? completedItems : allItems;
+
+      box.innerHTML = `
+        <div style="font-weight:800;font-size:18px;">${escapeHtml(selectedCalendarDate)} · ${escapeHtml(log.planDay || "")}</div>
+        <div class="help" style="margin-top:6px;">训练重点：${escapeHtml(log.focus || "-")}</div>
+        <div class="mini-grid" style="margin-top:12px;">
+          <div class="mini">完成项：${escapeHtml(String(log.completedCount || 0))}/${escapeHtml(String(log.totalItems || 0))}</div>
+          <div class="mini">云端：${escapeHtml(getDailyLogCloudStatus(log))}</div>
+        </div>
+
+        <div class="label">当天完成动作</div>
+        <ul class="calendar-items">${displayItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("") || "<li>暂无记录</li>"}</ul>
+
+        <div class="grid2" style="margin-top:12px;">
+          <div>
+            <label class="label">体重（kg）</label>
+            <input id="calendarWeightInput" value="${escapeHtml(log.weight || "")}" placeholder="例如：53.8" />
+          </div>
+          <div>
+            <label class="label">睡眠</label>
+            <input id="calendarSleepInput" value="${escapeHtml(log.sleep || "")}" placeholder="例如：7小时20分" />
+          </div>
+        </div>
+
+        <label class="label">备注</label>
+        <textarea id="calendarNoteInput" placeholder="记录这一天的状态、动作感受、饮食等">${escapeHtml(log.note || "")}</textarea>
+
+        <div class="calendar-detail-actions">
+          <button class="btn" id="saveCalendarDetailBtn">保存当天日志</button>
+          <button class="btn-danger" id="deleteCalendarDetailBtn">删除当天日志</button>
+        </div>
+      `;
+
+      $("saveCalendarDetailBtn").onclick = () => {
+        const nextLogs = getDailyLogs();
+        const current = nextLogs[selectedCalendarDate];
+        if(!current) return;
+        current.weight = $("calendarWeightInput").value.trim();
+        current.sleep = $("calendarSleepInput").value.trim();
+        current.note = $("calendarNoteInput").value.trim();
+        current.updatedAtIso = new Date().toISOString();
+        current.updatedAt = new Date().toLocaleString("zh-CN");
+        nextLogs[selectedCalendarDate] = current;
+        setDailyLogs(nextLogs);
+      };
+
+      $("deleteCalendarDetailBtn").onclick = () => {
+        const ok = confirm("确定删除这一天的训练日志吗？");
+        if(!ok) return;
+        const nextLogs = getDailyLogs();
+        delete nextLogs[selectedCalendarDate];
+        setDailyLogs(nextLogs);
+      };
+    }
+
+    function recordPlanDayToToday(dayIndex){
+      const days = getPlanDays();
+      const day = days[dayIndex];
+      if(!day) return;
+      const checks = getPlanChecks();
+      const completedItems = (day.items || []).filter((_, itemIndex) => checks[`d${dayIndex}_i${itemIndex}`]);
+      const dateKey = formatDateKey(new Date());
+      const logs = getDailyLogs();
+
+      logs[dateKey] = {
+        date: dateKey,
+        planDay: day.day,
+        focus: day.focus,
+        allItems: day.items || [],
+        completedItems,
+        completedCount: completedItems.length,
+        totalItems: (day.items || []).length,
+        weight: logs[dateKey]?.weight || "",
+        sleep: logs[dateKey]?.sleep || "",
+        note: logs[dateKey]?.note || "",
+        createdAt: logs[dateKey]?.createdAt || new Date().toLocaleString("zh-CN"),
+        updatedAt: new Date().toLocaleString("zh-CN"),
+        updatedAtIso: new Date().toISOString()
+      };
+
+      selectedCalendarDate = dateKey;
+      setDailyLogs(logs);
+      switchTab("history");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
     function getHistory(){
       try{
         return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
@@ -2785,6 +3141,9 @@
     }
 
     function renderHistory(){
+      renderCalendar();
+      renderCalendarDetail();
+
       const list = getHistory();
       const box = $("historyList");
 
@@ -3354,6 +3713,8 @@
       const payload = {
         form: JSON.parse(localStorage.getItem(FORM_KEY) || "{}"),
         history: getHistory(),
+        dailyLogs: getDailyLogs(),
+        lastCloudSyncAt: getLastCloudSyncAt(),
         planChecks: getPlanChecks(),
         planTemplate: getPlanTemplate(),
         pageBackground: getPageBackgroundData()
@@ -3378,6 +3739,12 @@
           }
           if(Array.isArray(payload.history)){
             localStorage.setItem(HISTORY_KEY, JSON.stringify(payload.history));
+          }
+          if(payload.dailyLogs){
+            localStorage.setItem(DAILY_LOGS_KEY, JSON.stringify(payload.dailyLogs));
+          }
+          if(payload.lastCloudSyncAt){
+            setLastCloudSyncAt(payload.lastCloudSyncAt);
           }
           if(payload.planTemplate){
             localStorage.setItem(PLAN_TEMPLATE_KEY, JSON.stringify(normalizePlanTemplate(payload.planTemplate)));
@@ -3417,6 +3784,8 @@
       localStorage.removeItem(TIMER_ALARM_PENDING_KEY);
       localStorage.removeItem(LOCAL_STATE_META_KEY);
       localStorage.removeItem(PAGE_BG_KEY);
+      localStorage.removeItem(DAILY_LOGS_KEY);
+      localStorage.removeItem(LAST_CLOUD_SYNC_AT_KEY);
 
       activePlanDay = 0;
       counterValue = 0;
@@ -4076,6 +4445,15 @@
     });
 
     $("stopAlarmBtn").onclick = stopAlarmLoop;
+
+    $("calendarPrevBtn").onclick = () => {
+      calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() - 1, 1);
+      renderHistory();
+    };
+    $("calendarNextBtn").onclick = () => {
+      calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() + 1, 1);
+      renderHistory();
+    };
 
     const planGuideModal = $("planGuideModal");
     const closePlanGuideModalBtn = $("closePlanGuideModalBtn");
