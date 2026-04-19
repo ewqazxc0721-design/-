@@ -196,15 +196,15 @@
       padding:8px var(--tab-side-padding);
       z-index:60;
       border-radius:999px;
-      background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.5));
-      border:1px solid rgba(255,255,255,.64);
+      background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.09));
+      border:1px solid rgba(255,255,255,.22);
       box-shadow:
-        0 16px 32px rgba(15,23,42,.08),
-        0 4px 10px rgba(15,23,42,.04),
-        inset 0 1px 0 rgba(255,255,255,.68),
-        inset 0 -1px 0 rgba(255,255,255,.08);
-      backdrop-filter:blur(16px) saturate(170%);
-      -webkit-backdrop-filter:blur(16px) saturate(170%);
+        0 12px 24px rgba(15,23,42,.04),
+        0 4px 10px rgba(15,23,42,.018),
+        inset 0 1px 0 rgba(255,255,255,.20),
+        inset 0 -1px 0 rgba(255,255,255,.015);
+      backdrop-filter:blur(5px) saturate(180%) brightness(1.04);
+      -webkit-backdrop-filter:blur(5px) saturate(180%) brightness(1.04);
       isolation:isolate;
       overflow:hidden;
       backface-visibility:hidden;
@@ -219,7 +219,10 @@
       position:absolute;
       inset:1px;
       border-radius:inherit;
-      background:linear-gradient(180deg,rgba(255,255,255,.8),rgba(255,255,255,.01));
+      background:
+        radial-gradient(115% 92% at 14% 0%, rgba(255,255,255,.36) 0%, rgba(255,255,255,.10) 22%, rgba(255,255,255,0) 48%),
+        radial-gradient(85% 70% at 88% 10%, rgba(255,255,255,.12) 0%, rgba(255,255,255,0) 42%),
+        linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.008) 42%, rgba(255,255,255,.025) 100%);
       pointer-events:none;
       z-index:0;
     }
@@ -229,13 +232,15 @@
       position:absolute;
       inset:-1px;
       border-radius:inherit;
-      background:linear-gradient(180deg,rgba(255,255,255,.30),rgba(255,255,255,.15));
-      border:1px solid rgba(255,255,255,.62);
+      background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));
+      border:1px solid rgba(255,255,255,.20);
       box-shadow:
-        0 18px 36px rgba(15,23,42,.10),
-        0 5px 12px rgba(15,23,42,.05),
-        inset 0 1px 0 rgba(255,255,255,.72),
-        inset 0 -1px 0 rgba(255,255,255,.08);
+        0 10px 20px rgba(15,23,42,.04),
+        0 4px 10px rgba(15,23,42,.015),
+        inset 0 1px 0 rgba(255,255,255,.22),
+        inset 0 -1px 0 rgba(255,255,255,.015),
+        inset 1px 0 0 rgba(255,255,255,.06),
+        inset -1px 0 0 rgba(255,255,255,.05);
       transform:scale(var(--dock-shell-scale));
       transform-origin:center bottom;
       opacity:var(--dock-shell-opacity);
@@ -270,13 +275,15 @@
       left:0;
       width:0;
       border-radius:999px;
-      background:var(--solid-dark-translucent);
+      background:rgba(15,23,42,.76);
       border:1px solid rgba(255,255,255,.16);
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.26),
-        inset 0 0 0 1px rgba(255,255,255,.08),
-        inset 0 -1px 0 rgba(0,0,0,.18),
-        0 0 0 1px rgba(255,255,255,.06),
+        inset 0 1px 0 rgba(255,255,255,.20),
+        inset 0 0 0 1px rgba(255,255,255,.05),
+        inset 0 -1px 0 rgba(0,0,0,.22),
+        inset 1px 0 0 rgba(255,255,255,.06),
+        inset -1px 0 0 rgba(255,255,255,.05),
+        0 0 0 1px rgba(255,255,255,.03),
         0 8px 18px rgba(15,23,42,.16);
       pointer-events:none;
       touch-action:none;
@@ -300,12 +307,14 @@
       border-radius:999px;
       filter:none;
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.28),
-        inset 0 0 0 1px rgba(255,255,255,.09),
-        inset 0 -1px 0 rgba(0,0,0,.18),
-        0 0 0 1px rgba(255,255,255,.08),
-        0 12px 24px rgba(15,23,42,.20),
-        0 3px 10px rgba(15,23,42,.10);
+        inset 0 1px 0 rgba(255,255,255,.22),
+        inset 0 0 0 1px rgba(255,255,255,.06),
+        inset 0 -1px 0 rgba(0,0,0,.22),
+        inset 1px 0 0 rgba(255,255,255,.06),
+        inset -1px 0 0 rgba(255,255,255,.05),
+        0 0 0 1px rgba(255,255,255,.05),
+        0 12px 24px rgba(15,23,42,.18),
+        0 3px 10px rgba(15,23,42,.09);
     }
 
     .tab-indicator.dragging{
@@ -1062,9 +1071,9 @@
         padding:3px 11px;
         border-radius:33px;
         box-shadow:
-          0 14px 28px rgba(15,23,42,.10),
-          0 3px 8px rgba(15,23,42,.05),
-          inset 0 1px 0 rgba(255,255,255,.88);
+          0 8px 18px rgba(15,23,42,.05),
+          0 3px 8px rgba(15,23,42,.025),
+          inset 0 1px 0 rgba(255,255,255,.22);
       }
 
       .tab{
@@ -1477,7 +1486,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.04.19-25";
+    const APP_VERSION = "v2026.04.19-31";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const DAILY_LOGS_KEY = "gain-daily-logs";
     const LAST_CLOUD_SYNC_AT_KEY = "gain-last-cloud-sync-at";
