@@ -1486,7 +1486,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.04.19-31";
+    const APP_VERSION = "v2026.04.19-34-cloud-basic-schema";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const DAILY_LOGS_KEY = "gain-daily-logs";
     const LAST_CLOUD_SYNC_AT_KEY = "gain-last-cloud-sync-at";
@@ -2058,14 +2058,75 @@
       }, 1500);
     }
 
-    async function fetchCloudSnapshot(userId){
-      const { data, error } = await sb
+    function getCloudErrorMessage(err){
+      if(!err) return "未知错误";
+      const parts = [err.code, err.message, err.details, err.hint]
+        .filter(Boolean)
+        .map((x) => String(x).trim())
+        .filter(Boolean);
+      return parts.length ? parts.join(" · ") : String(err);
+    }
+
+    function isMissingColumnError(err){
+      const msg = getCloudErrorMessage(err).toLowerCase();
+      return /column|schema|42703|pgrst204|does not exist/.test(msg);
+    }
+
+    function normalizeCloudSnapshot(row){
+      if(!row) return null;
+      const rawForm = row.form_json && typeof row.form_json === "object" ? row.form_json : {};
+      const history = Array.isArray(row.history_json) ? row.history_json : [];
+      return {
+        id: row.id || row.uuid || row.row_id || null,
+        user_id: row.user_id || "",
+        form_json: rawForm,
+        history_json: history,
+        daily_logs_json: rawForm.__dailyLogs && typeof rawForm.__dailyLogs === "object" ? rawForm.__dailyLogs : {},
+        plan_checks_json: rawForm.__planChecks && typeof rawForm.__planChecks === "object" ? rawForm.__planChecks : {},
+        plan_template_json: rawForm.__planTemplate && typeof rawForm.__planTemplate === "object" ? rawForm.__planTemplate : DEFAULT_PLAN_TEMPLATE,
+        updated_at: rawForm.__updatedAt || row.updated_at || row.modified_at || row.created_at || ""
+      };
+    }
+
+    async function fetchCloudRows(userId){
+      // 只依赖最基础字段，避免旧 Supabase 表缺少 daily_logs_json 等字段时报错。
+      let res = await sb
         .from(SUPABASE_TABLE)
-.select("form_json, history_json, daily_logs_json, plan_checks_json, plan_template_json, updated_at")
+        .select("id,user_id,form_json,history_json")
         .eq("user_id", userId)
-        .maybeSingle();
-      if(error) throw error;
-      return data || null;
+        .limit(20);
+
+      if(res.error && isMissingColumnError(res.error)){
+        res = await sb
+          .from(SUPABASE_TABLE)
+          .select("user_id,form_json,history_json")
+          .eq("user_id", userId)
+          .limit(20);
+      }
+
+      if(res.error && isMissingColumnError(res.error)){
+        res = await sb
+          .from(SUPABASE_TABLE)
+          .select("user_id,form_json")
+          .eq("user_id", userId)
+          .limit(20);
+      }
+
+      if(res.error) throw res.error;
+      return Array.isArray(res.data) ? res.data : [];
+    }
+
+    async function fetchCloudSnapshot(userId){
+      const rows = await fetchCloudRows(userId);
+      const normalized = rows.map(normalizeCloudSnapshot).filter(Boolean);
+      normalized.sort((a, b) => {
+        const diff = parseTimeMs(b.updated_at) - parseTimeMs(a.updated_at);
+        if(diff) return diff;
+        const aLast = Array.isArray(a.history_json) ? Math.max(0, ...a.history_json.map((x) => Number(x && x.id) || 0)) : 0;
+        const bLast = Array.isArray(b.history_json) ? Math.max(0, ...b.history_json.map((x) => Number(x && x.id) || 0)) : 0;
+        return bLast - aLast;
+      });
+      return normalized[0] || null;
     }
 
     async function syncToCloud(showAlert = true, options = {}){
@@ -2079,7 +2140,7 @@
       if(!skipVersionCheck){
         const cloud = await fetchCloudSnapshot(user.id).catch(() => null);
         const localMs = parseTimeMs(getLocalUpdatedAt());
-        const cloudMs = parseTimeMs(cloud?.updated_at);
+        const cloudMs = parseTimeMs(cloud && cloud.updated_at);
         if(cloud && cloudMs > localMs + 1000){
           setCloudStatus("云端状态：检测到云端版本更新");
           setCloudHint("已阻止旧设备把云端较新的进度覆盖掉。请先点“从云端恢复到本机”，再继续编辑。");
@@ -2095,26 +2156,55 @@
       try{
         const snapshot = getLocalSnapshot();
         const uploadUpdatedAt = new Date().toISOString();
-        const { error } = await sb.from(SUPABASE_TABLE).upsert({
+        const richForm = {
+          ...snapshot.form,
+          __dailyLogs: snapshot.dailyLogs,
+          __planChecks: snapshot.planChecks,
+          __planTemplate: snapshot.planTemplate,
+          __pageBackground: getPageBackgroundData(),
+          __lastCloudSyncAt: uploadUpdatedAt,
+          __updatedAt: uploadUpdatedAt
+        };
+
+        const cloud = await fetchCloudSnapshot(user.id).catch(() => null);
+        const rowWithHistory = {
           user_id: user.id,
-          form_json: snapshot.form,
-          history_json: snapshot.history,
-          daily_logs_json: snapshot.dailyLogs,
-          plan_checks_json: snapshot.planChecks,
-          plan_template_json: snapshot.planTemplate,
-          updated_at: uploadUpdatedAt
-        });
-        if(error) throw error;
+          form_json: richForm,
+          history_json: snapshot.history
+        };
+        const rowMinimal = {
+          user_id: user.id,
+          form_json: richForm
+        };
+
+        async function writeRow(row){
+          if(cloud && cloud.id){
+            return await sb.from(SUPABASE_TABLE).update(row).eq("id", cloud.id);
+          }
+          if(cloud){
+            return await sb.from(SUPABASE_TABLE).update(row).eq("user_id", user.id);
+          }
+          return await sb.from(SUPABASE_TABLE).insert(row);
+        }
+
+        let writeRes = await writeRow(rowWithHistory);
+        if(writeRes.error && isMissingColumnError(writeRes.error)){
+          writeRes = await writeRow(rowMinimal);
+        }
+        if(writeRes.error) throw writeRes.error;
+
         markLocalStateChanged("已同步到云端", uploadUpdatedAt);
         setLastCloudSyncAt(uploadUpdatedAt);
         setCloudStatus(`云端状态：已同步到云端（${getCloudUserLabel(user)}）`);
-        setCloudHint(isAutoSyncEnabled() ? "自动同步已开启：现在会先比较版本新旧，再决定上传还是恢复，避免进度回滚。" : "以后换设备登录同一个 GitHub 账号后，可以点“从云端恢复到本机”。");
+        setCloudHint(isAutoSyncEnabled() ? "自动同步已开启：已使用基础表结构同步，兼容旧 Supabase 表。" : "以后换设备登录同一个 GitHub 账号后，可以点“从云端恢复到本机”。");
         if(showAlert) alert("已同步到 Supabase 云端");
         return true;
       }catch(err){
         console.error(err);
+        const msg = getCloudErrorMessage(err);
         setCloudStatus("云端状态：同步失败");
-        if(showAlert) alert("同步失败：" + (err.message || "未知错误"));
+        setCloudHint("同步失败：" + msg);
+        if(showAlert) alert("同步失败：" + msg);
         return false;
       }finally{
         setCloudBusy(false);
@@ -2135,7 +2225,7 @@
         const cloud = await fetchCloudSnapshot(user.id);
         const localUpdatedAt = getLocalUpdatedAt();
         const localMs = parseTimeMs(localUpdatedAt);
-        const cloudMs = parseTimeMs(cloud?.updated_at);
+        const cloudMs = parseTimeMs(cloud && cloud.updated_at);
 
         if(!cloud){
           setCloudHint("云端还没有记录，已准备上传当前设备内容。");
@@ -2168,7 +2258,7 @@
       }catch(err){
         console.error(err);
         setCloudStatus("云端状态：版本检查失败");
-        setCloudHint("自动同步已暂停。你仍然可以手动同步或从云端恢复。");
+        setCloudHint("自动同步已暂停：" + getCloudErrorMessage(err) + "。你仍然可以手动同步或从云端恢复。");
         return false;
       }finally{
         autoSyncInFlight = false;
@@ -2217,13 +2307,24 @@
       const rawForm = payload && payload.form ? payload.form : defaultForm;
       const safeForm = { ...(rawForm || {}) };
       const pageBackground = String((payload && payload.pageBackground) || safeForm.__pageBackground || "").trim();
+      const embeddedDailyLogs = safeForm.__dailyLogs;
+      const embeddedPlanChecks = safeForm.__planChecks;
+      const embeddedPlanTemplate = safeForm.__planTemplate;
+      const embeddedLastCloudSyncAt = safeForm.__lastCloudSyncAt;
+      const embeddedUpdatedAt = safeForm.__updatedAt;
       delete safeForm.__pageBackground;
+      delete safeForm.__dailyLogs;
+      delete safeForm.__planChecks;
+      delete safeForm.__planTemplate;
+      delete safeForm.__lastCloudSyncAt;
+      delete safeForm.__updatedAt;
 
       const safeHistory = payload && Array.isArray(payload.history) ? payload.history : [];
-      const safeDailyLogs = payload && payload.dailyLogs ? payload.dailyLogs : {};
-      const safePlanChecks = payload && payload.planChecks ? payload.planChecks : {};
-      const safePlanTemplate = payload && payload.planTemplate ? normalizePlanTemplate(payload.planTemplate) : getPlanTemplate();
-      const updatedAt = payload && payload.updatedAt ? payload.updatedAt : new Date().toISOString();
+      const safeDailyLogs = payload && payload.dailyLogs ? payload.dailyLogs : (embeddedDailyLogs && typeof embeddedDailyLogs === "object" ? embeddedDailyLogs : {});
+      const safePlanChecks = payload && payload.planChecks ? payload.planChecks : (embeddedPlanChecks && typeof embeddedPlanChecks === "object" ? embeddedPlanChecks : {});
+      const planTemplateSource = payload && payload.planTemplate ? payload.planTemplate : (embeddedPlanTemplate && typeof embeddedPlanTemplate === "object" ? embeddedPlanTemplate : getPlanTemplate());
+      const safePlanTemplate = normalizePlanTemplate(planTemplateSource);
+      const updatedAt = (payload && payload.updatedAt) || embeddedUpdatedAt || new Date().toISOString();
 
       suppressAutoSync = true;
       try{
@@ -2232,7 +2333,7 @@
         localStorage.setItem(DAILY_LOGS_KEY, JSON.stringify(safeDailyLogs));
         localStorage.setItem(PLAN_CHECKS_KEY, JSON.stringify(safePlanChecks));
         localStorage.setItem(PLAN_TEMPLATE_KEY, JSON.stringify(safePlanTemplate));
-        setLastCloudSyncAt(payload?.lastCloudSyncAt || updatedAt);
+        setLastCloudSyncAt((payload && payload.lastCloudSyncAt) || embeddedLastCloudSyncAt || updatedAt);
         applyPageBackground(pageBackground);
         markLocalStateChanged("从云端恢复到本机", updatedAt);
 
@@ -2331,12 +2432,14 @@
           updatedAt: data.updated_at || new Date().toISOString()
         });
         setCloudStatus(`云端状态：已从云端恢复（${getCloudUserLabel(user)}）`);
-        setCloudHint("本机记录已被云端较新版本覆盖。")
+        setCloudHint("本机记录已被云端版本覆盖。")
         alert("已从 Supabase 云端恢复到本机");
       }catch(err){
         console.error(err);
+        const msg = getCloudErrorMessage(err);
         setCloudStatus("云端状态：恢复失败");
-        alert("恢复失败：" + (err.message || "未知错误"));
+        setCloudHint("恢复失败：" + msg);
+        alert("恢复失败：" + msg);
       }finally{
         setCloudBusy(false);
       }
@@ -4553,7 +4656,14 @@
 
     if("serviceWorker" in navigator){
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js").catch(() => {});
+        navigator.serviceWorker.getRegistrations()
+          .then((regs) => Promise.all(regs.map((reg) => reg.unregister())))
+          .catch(() => {});
+        if(window.caches){
+          caches.keys()
+            .then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
+            .catch(() => {});
+        }
       });
     }
   </script>
