@@ -34,6 +34,13 @@
       --shadow:0 8px 24px rgba(15,23,42,.08);
       --dock-radius:34px;
       --dock-item-radius:26px;
+      --glass-tint:rgba(255,255,255,.62);
+      --glass-tint-strong:rgba(255,255,255,.76);
+      --glass-edge:rgba(255,255,255,.58);
+      --glass-line:rgba(148,163,184,.20);
+      --glass-shadow:0 16px 42px rgba(15,23,42,.12), 0 4px 12px rgba(15,23,42,.06);
+      --glass-shadow-pressed:0 8px 22px rgba(15,23,42,.11), 0 2px 8px rgba(15,23,42,.05);
+      --glass-spring:cubic-bezier(.18,.82,.28,1);
     }
 
     *{
@@ -178,11 +185,11 @@
     .tabs{
       --tab-side-padding:20px;
       --tab-height:78px;
-      --indicator-scale:1.14514;
+      --indicator-scale:1.13;
       --indicator-edge-gap:8px;
-      --drag-overflow:18px;
-      --drag-extra-scale:0.18;
-      --dock-active-scale:1.018;
+      --drag-overflow:28px;
+      --drag-extra-scale:0.23;
+      --dock-active-scale:1.025;
       --dock-shell-scale:1;
       --dock-shell-opacity:0;
       position:fixed;
@@ -196,22 +203,24 @@
       padding:8px var(--tab-side-padding);
       z-index:60;
       border-radius:999px;
-      background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.09));
-      border:1px solid rgba(255,255,255,.22);
+      background:rgba(255,255,255,.28);
+      border:1px solid rgba(255,255,255,.46);
       box-shadow:
-        0 12px 24px rgba(15,23,42,.04),
-        0 4px 10px rgba(15,23,42,.018),
-        inset 0 1px 0 rgba(255,255,255,.20),
-        inset 0 -1px 0 rgba(255,255,255,.015);
-      backdrop-filter:blur(5px) saturate(180%) brightness(1.04);
-      -webkit-backdrop-filter:blur(5px) saturate(180%) brightness(1.04);
+        0 22px 60px rgba(15,23,42,.16),
+        0 8px 22px rgba(15,23,42,.08),
+        inset 0 1px 0 rgba(255,255,255,.76),
+        inset 0 -1px 0 rgba(15,23,42,.06),
+        inset 1px 0 0 rgba(255,255,255,.28),
+        inset -1px 0 0 rgba(255,255,255,.24);
+      backdrop-filter:blur(28px) saturate(190%) brightness(1.08);
+      -webkit-backdrop-filter:blur(28px) saturate(190%) brightness(1.08);
       isolation:isolate;
       overflow:hidden;
       backface-visibility:hidden;
       -webkit-backface-visibility:hidden;
       -webkit-mask-image:-webkit-radial-gradient(white, black);
       transform-origin:center bottom;
-      transition:box-shadow .22s ease, padding .22s ease;
+      transition:box-shadow .24s var(--glass-spring), padding .24s var(--glass-spring), transform .24s var(--glass-spring);
     }
 
     .tabs::before{
@@ -219,10 +228,7 @@
       position:absolute;
       inset:1px;
       border-radius:inherit;
-      background:
-        radial-gradient(115% 92% at 14% 0%, rgba(255,255,255,.36) 0%, rgba(255,255,255,.10) 22%, rgba(255,255,255,0) 48%),
-        radial-gradient(85% 70% at 88% 10%, rgba(255,255,255,.12) 0%, rgba(255,255,255,0) 42%),
-        linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.008) 42%, rgba(255,255,255,.025) 100%);
+      background:rgba(255,255,255,.08);
       pointer-events:none;
       z-index:0;
     }
@@ -232,19 +238,19 @@
       position:absolute;
       inset:-1px;
       border-radius:inherit;
-      background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));
-      border:1px solid rgba(255,255,255,.20);
+      background:rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.38);
       box-shadow:
-        0 10px 20px rgba(15,23,42,.04),
-        0 4px 10px rgba(15,23,42,.015),
-        inset 0 1px 0 rgba(255,255,255,.22),
-        inset 0 -1px 0 rgba(255,255,255,.015),
-        inset 1px 0 0 rgba(255,255,255,.06),
-        inset -1px 0 0 rgba(255,255,255,.05);
+        0 16px 34px rgba(15,23,42,.12),
+        0 5px 14px rgba(15,23,42,.05),
+        inset 0 1px 0 rgba(255,255,255,.72),
+        inset 0 -1px 0 rgba(15,23,42,.055),
+        inset 1px 0 0 rgba(255,255,255,.20),
+        inset -1px 0 0 rgba(255,255,255,.18);
       transform:scale(var(--dock-shell-scale));
       transform-origin:center bottom;
       opacity:var(--dock-shell-opacity);
-      transition:transform .22s cubic-bezier(.22,.61,.36,1), opacity .22s ease, box-shadow .22s ease;
+      transition:transform .24s var(--glass-spring), opacity .24s ease, box-shadow .24s var(--glass-spring);
       pointer-events:none;
       z-index:0;
     }
@@ -275,16 +281,17 @@
       left:0;
       width:0;
       border-radius:999px;
-      background:rgba(15,23,42,.76);
-      border:1px solid rgba(255,255,255,.16);
+      background:rgba(31,41,55,.86);
+      border:1px solid rgba(255,255,255,.24);
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.20),
-        inset 0 0 0 1px rgba(255,255,255,.05),
+        inset 0 1px 0 rgba(255,255,255,.28),
+        inset 0 0 0 1px rgba(255,255,255,.08),
         inset 0 -1px 0 rgba(0,0,0,.22),
-        inset 1px 0 0 rgba(255,255,255,.06),
-        inset -1px 0 0 rgba(255,255,255,.05),
-        0 0 0 1px rgba(255,255,255,.03),
-        0 8px 18px rgba(15,23,42,.16);
+        inset 1px 0 0 rgba(255,255,255,.10),
+        inset -1px 0 0 rgba(255,255,255,.08),
+        0 0 0 1px rgba(255,255,255,.08),
+        0 11px 24px rgba(15,23,42,.22),
+        0 3px 9px rgba(15,23,42,.12);
       pointer-events:none;
       touch-action:none;
       cursor:grab;
@@ -292,7 +299,7 @@
       will-change:transform, width;
       backface-visibility:hidden;
       -webkit-backface-visibility:hidden;
-      transition:transform .28s cubic-bezier(.22,.61,.36,1), width .28s cubic-bezier(.22,.61,.36,1), top .18s ease, bottom .18s ease, box-shadow .18s ease;
+      transition:transform .34s var(--glass-spring), width .34s var(--glass-spring), top .2s var(--glass-spring), bottom .2s var(--glass-spring), box-shadow .2s ease, filter .2s ease;
     }
 
     .tabs.dragging{
@@ -305,16 +312,16 @@
       top:-4px;
       bottom:-4px;
       border-radius:999px;
-      filter:none;
+      filter:brightness(1.06) saturate(1.1);
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.22),
-        inset 0 0 0 1px rgba(255,255,255,.06),
+        inset 0 1px 0 rgba(255,255,255,.30),
+        inset 0 0 0 1px rgba(255,255,255,.10),
         inset 0 -1px 0 rgba(0,0,0,.22),
-        inset 1px 0 0 rgba(255,255,255,.06),
-        inset -1px 0 0 rgba(255,255,255,.05),
-        0 0 0 1px rgba(255,255,255,.05),
-        0 12px 24px rgba(15,23,42,.18),
-        0 3px 10px rgba(15,23,42,.09);
+        inset 1px 0 0 rgba(255,255,255,.10),
+        inset -1px 0 0 rgba(255,255,255,.08),
+        0 0 0 1px rgba(255,255,255,.10),
+        0 17px 34px rgba(15,23,42,.24),
+        0 4px 12px rgba(15,23,42,.12);
     }
 
     .tab-indicator.dragging{
@@ -337,7 +344,7 @@
       cursor:pointer;
       overflow:visible;
       isolation:isolate;
-      transition:transform .18s ease, color .18s ease;
+      transition:transform .2s var(--glass-spring), color .2s ease, filter .2s ease;
       -webkit-mask-image:-webkit-radial-gradient(white, black);
       z-index:2;
       touch-action:manipulation;
@@ -402,8 +409,9 @@
       transform:translateY(-1px);
     }
 
-    .tab:active{
-      transform:scale(.985);
+    .tab:active,
+    .tab.glass-pressing{
+      transform:scale(.975) translateY(1px);
     }
 
     .tab:focus-visible{
@@ -501,17 +509,16 @@
       width:36px;
       height:36px;
       border-radius:999px;
-      border:1px solid rgba(148,163,184,.24);
-      background:
-        linear-gradient(180deg,rgba(255,255,255,.88),rgba(255,255,255,.68));
+      border:1px solid var(--glass-line);
+      background:rgba(255,255,255,.66);
       box-shadow:
-        0 10px 22px rgba(15,23,42,.10),
-        0 3px 8px rgba(15,23,42,.05),
-        0 0 0 1px rgba(255,255,255,.24),
-        inset 0 1px 0 rgba(255,255,255,.82),
-        inset 0 -1px 0 rgba(148,163,184,.12),
-      backdrop-filter:blur(20px) saturate(180%);
-      -webkit-backdrop-filter:blur(20px) saturate(180%);
+        0 12px 26px rgba(15,23,42,.12),
+        0 3px 9px rgba(15,23,42,.06),
+        0 0 0 1px rgba(255,255,255,.30),
+        inset 0 1px 0 rgba(255,255,255,.88),
+        inset 0 -1px 0 rgba(15,23,42,.08);
+      backdrop-filter:blur(24px) saturate(190%) brightness(1.05);
+      -webkit-backdrop-filter:blur(24px) saturate(190%) brightness(1.05);
       color:var(--text);
       font-size:18px;
       font-weight:700;
@@ -520,13 +527,23 @@
       justify-content:center;
       cursor:pointer;
       flex-shrink:0;
-      transition:transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
+      transition:transform .22s var(--glass-spring), box-shadow .22s var(--glass-spring), background .18s ease, color .18s ease, border-color .18s ease, filter .18s ease;
       isolation:isolate;
       -webkit-mask-image:-webkit-radial-gradient(white, black);
     }
 
+    .check-btn::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:inherit;
+      background:transparent;
+      opacity:.68;
+      pointer-events:none;
+    }
+
     .check-btn.done{
-      background:var(--solid-dark-translucent);
+      background:rgba(31,41,55,.86);
       border-color:rgba(255,255,255,.10);
       color:#fff;
       box-shadow:
@@ -534,6 +551,12 @@
         inset 0 -1px 0 rgba(0,0,0,.18),
         0 10px 22px rgba(15,23,42,.16);
       transform:scale(1.02);
+    }
+
+    .check-btn:active,
+    .check-btn.glass-pressing{
+      transform:scale(.92) translateY(1px);
+      box-shadow:var(--glass-shadow-pressed), inset 0 1px 0 rgba(255,255,255,.76);
     }
 
     .day-row.done{background:#ecfdf5;}
@@ -623,18 +646,30 @@
     }
 
     .mini-btn{
+      position:relative;
+      overflow:hidden;
       border:none;
       border-radius:999px;
       padding:9px 12px;
       font-size:12px;
       font-weight:700;
       cursor:pointer;
-      background:rgba(255,255,255,.78);
-      border:1px solid rgba(148,163,184,.18);
+      background:rgba(255,255,255,.68);
+      border:1px solid var(--glass-line);
       color:var(--text);
       box-shadow:
-        0 6px 14px rgba(15,23,42,.06),
-        inset 0 1px 0 rgba(255,255,255,.85);
+        0 8px 18px rgba(15,23,42,.08),
+        inset 0 1px 0 rgba(255,255,255,.88),
+        inset 0 -1px 0 rgba(15,23,42,.06);
+      backdrop-filter:blur(18px) saturate(180%);
+      -webkit-backdrop-filter:blur(18px) saturate(180%);
+      transition:transform .22s var(--glass-spring), box-shadow .22s var(--glass-spring), border-color .18s ease;
+    }
+
+    .mini-btn:active,
+    .mini-btn.glass-pressing{
+      transform:scale(.965) translateY(1px);
+      box-shadow:var(--glass-shadow-pressed), inset 0 1px 0 rgba(255,255,255,.76);
     }
 
     .plan-actions{
@@ -691,26 +726,25 @@
       position:relative;
       overflow:hidden;
       border:none;
-      border-radius:20px;
-      padding:14px 14px;
+      border-radius:22px;
+      padding:14px 15px;
       font-size:15px;
       font-weight:700;
       cursor:pointer;
-      border:1px solid rgba(148,163,184,.24);
-      background:
-        linear-gradient(180deg,rgba(255,255,255,.88),rgba(255,255,255,.68));
+      border:1px solid var(--glass-line);
+      background:rgba(255,255,255,.66);
       box-shadow:
-        0 12px 28px rgba(15,23,42,.10),
-        0 4px 12px rgba(15,23,42,.06),
-        0 0 0 1px rgba(255,255,255,.24),
-        inset 0 1px 0 rgba(255,255,255,.84),
-        inset 0 -1px 0 rgba(148,163,184,.12),
-      backdrop-filter:blur(20px) saturate(180%);
-      -webkit-backdrop-filter:blur(20px) saturate(180%);
+        var(--glass-shadow),
+        0 0 0 1px rgba(255,255,255,.28),
+        inset 0 1px 0 rgba(255,255,255,.88),
+        inset 0 -1px 0 rgba(15,23,42,.07);
+      backdrop-filter:blur(26px) saturate(190%) brightness(1.05);
+      -webkit-backdrop-filter:blur(26px) saturate(190%) brightness(1.05);
       color:var(--text);
-      transition:transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
+      transition:transform .22s var(--glass-spring), box-shadow .22s var(--glass-spring), background .18s ease, color .18s ease, border-color .18s ease, filter .18s ease;
       isolation:isolate;
       -webkit-mask-image:-webkit-radial-gradient(white, black);
+      transform:translate3d(0,0,0) scale(1);
     }
 
     .btn::before,.btn-outline::before,.btn-danger::before{
@@ -719,11 +753,25 @@
       inset:0;
       border-radius:inherit;
       background:transparent;
-      border:1px solid rgba(255,255,255,.22);
+      border:1px solid rgba(255,255,255,.34);
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.22),
-        0 0 0 1px rgba(255,255,255,.06);
+        inset 0 1px 0 rgba(255,255,255,.56),
+        0 0 0 1px rgba(255,255,255,.10);
       pointer-events:none;
+      z-index:0;
+      opacity:.82;
+      transition:opacity .18s ease, transform .22s var(--glass-spring);
+    }
+
+    .btn::after,.btn-outline::after,.btn-danger::after{
+      content:"";
+      position:absolute;
+      inset:-40% -20%;
+      background:transparent;
+      transform:translateX(-38%) rotate(2deg);
+      opacity:.42;
+      pointer-events:none;
+      transition:transform .4s var(--glass-spring), opacity .2s ease;
       z-index:0;
     }
 
@@ -733,23 +781,23 @@
     }
 
     .btn{
-      background:var(--solid-dark-translucent);
-      border-color:rgba(255,255,255,.10);
+      background:rgba(31,41,55,.86);
+      border-color:rgba(255,255,255,.18);
       color:#fff;
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.22),
-        inset 0 -1px 0 rgba(0,0,0,.18),
-        0 10px 22px rgba(15,23,42,.16);
+        0 16px 34px rgba(15,23,42,.18),
+        0 4px 12px rgba(15,23,42,.10),
+        inset 0 1px 0 rgba(255,255,255,.24),
+        inset 0 -1px 0 rgba(0,0,0,.22);
     }
 
     .btn::before{
       display:block;
       inset:0;
-      background:transparent;
       border:1px solid rgba(255,255,255,.16);
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.18),
-        0 0 0 1px rgba(255,255,255,.05);
+        inset 0 1px 0 rgba(255,255,255,.26),
+        0 0 0 1px rgba(255,255,255,.08);
     }
 
     .btn-outline{
@@ -758,30 +806,49 @@
 
     .btn-danger{
       color:var(--danger);
-      background:
-        linear-gradient(180deg,rgba(255,255,255,.90),rgba(255,255,255,.70));
-      border-color:rgba(148,163,184,.22);
+      background:rgba(255,255,255,.68);
+      border-color:rgba(239,68,68,.20);
       box-shadow:
-        0 12px 28px rgba(15,23,42,.10),
-        0 4px 12px rgba(15,23,42,.06),
-        0 0 0 1px rgba(255,255,255,.24),
-        inset 0 1px 0 rgba(255,255,255,.84),
-        inset 0 -1px 0 rgba(239,68,68,.10);
+        var(--glass-shadow),
+        0 0 0 1px rgba(255,255,255,.28),
+        inset 0 1px 0 rgba(255,255,255,.86),
+        inset 0 -1px 0 rgba(239,68,68,.12);
     }
 
     .btn:hover,.btn-outline:hover,.btn-danger:hover{
       transform:translateY(-1px);
       border-color:rgba(100,116,139,.34);
       box-shadow:
-        0 14px 30px rgba(15,23,42,.12),
-        0 4px 12px rgba(15,23,42,.06),
+        0 18px 38px rgba(15,23,42,.14),
+        0 5px 14px rgba(15,23,42,.07),
         inset 0 1px 0 rgba(255,255,255,.98),
         inset 0 -1px 0 rgba(148,163,184,.18),
         0 0 0 1px rgba(255,255,255,.4);
     }
 
-    .btn:active,.btn-outline:active,.btn-danger:active{
-      transform:scale(.985);
+    .btn:hover::after,.btn-outline:hover::after,.btn-danger:hover::after{
+      transform:translateX(10%) rotate(2deg);
+      opacity:.54;
+    }
+
+    .btn:active,.btn-outline:active,.btn-danger:active,
+    .btn.glass-pressing,.btn-outline.glass-pressing,.btn-danger.glass-pressing{
+      transform:translateY(1px) scale(.975);
+      box-shadow:
+        var(--glass-shadow-pressed),
+        inset 0 1px 0 rgba(255,255,255,.76),
+        inset 0 -1px 0 rgba(15,23,42,.08);
+      filter:saturate(1.04) brightness(.99);
+    }
+
+    .btn.glass-pressing::before,.btn-outline.glass-pressing::before,.btn-danger.glass-pressing::before{
+      opacity:1;
+      transform:scale(1.03);
+    }
+
+    .btn.glass-pressing::after,.btn-outline.glass-pressing::after,.btn-danger.glass-pressing::after{
+      transform:translateX(16%) rotate(2deg);
+      opacity:.62;
     }
 
     .btn:disabled,.btn-outline:disabled,.btn-danger:disabled{
@@ -950,6 +1017,11 @@
       color:var(--muted);
       margin-top:8px;
       line-height:1.55;
+      padding-left:12px;
+    }
+
+    #appVersionText{
+      padding-left:0;
     }
 
     .day-tabs{
@@ -963,24 +1035,23 @@
       position:relative;
       overflow:hidden;
       border:none;
-      border-radius:16px;
+      border-radius:18px;
       padding:10px 6px;
       font-size:13px;
       font-weight:700;
       cursor:pointer;
-      border:1px solid rgba(148,163,184,.24);
-      background:
-        linear-gradient(180deg,rgba(255,255,255,.88),rgba(255,255,255,.68));
+      border:1px solid var(--glass-line);
+      background:rgba(255,255,255,.68);
       box-shadow:
         0 10px 22px rgba(15,23,42,.10),
         0 3px 8px rgba(15,23,42,.05),
-        0 0 0 1px rgba(255,255,255,.24),
-        inset 0 1px 0 rgba(255,255,255,.84),
-        inset 0 -1px 0 rgba(148,163,184,.12),
-      backdrop-filter:blur(20px) saturate(180%);
-      -webkit-backdrop-filter:blur(20px) saturate(180%);
+        0 0 0 1px rgba(255,255,255,.26),
+        inset 0 1px 0 rgba(255,255,255,.86),
+        inset 0 -1px 0 rgba(15,23,42,.07);
+      backdrop-filter:blur(22px) saturate(185%) brightness(1.04);
+      -webkit-backdrop-filter:blur(22px) saturate(185%) brightness(1.04);
       color:var(--text);
-      transition:transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
+      transition:transform .22s var(--glass-spring), box-shadow .22s var(--glass-spring), background .18s ease, color .18s ease, border-color .18s ease;
       isolation:isolate;
       -webkit-mask-image:-webkit-radial-gradient(white, black);
     }
@@ -991,22 +1062,22 @@
       inset:0;
       border-radius:inherit;
       background:transparent;
-      border:1px solid rgba(255,255,255,.22);
+      border:1px solid rgba(255,255,255,.30);
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.22),
-        0 0 0 1px rgba(255,255,255,.06);
+        inset 0 1px 0 rgba(255,255,255,.48),
+        0 0 0 1px rgba(255,255,255,.08);
       pointer-events:none;
       z-index:0;
     }
 
     .day-tab.active{
-      background:var(--solid-dark-translucent);
-      border-color:rgba(255,255,255,.10);
+      background:rgba(31,41,55,.86);
+      border-color:rgba(255,255,255,.18);
       color:#fff;
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.22),
-        inset 0 -1px 0 rgba(0,0,0,.18),
-        0 10px 22px rgba(15,23,42,.16);
+        0 12px 25px rgba(15,23,42,.16),
+        inset 0 1px 0 rgba(255,255,255,.24),
+        inset 0 -1px 0 rgba(0,0,0,.20);
     }
 
     .day-tab.active::before{
@@ -1017,6 +1088,15 @@
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,.18),
         0 0 0 1px rgba(255,255,255,.05);
+    }
+
+    .day-tab:active,
+    .day-tab.glass-pressing{
+      transform:translateY(1px) scale(.975);
+      box-shadow:
+        var(--glass-shadow-pressed),
+        inset 0 1px 0 rgba(255,255,255,.76),
+        inset 0 -1px 0 rgba(15,23,42,.08);
     }
 
     .day-panel{display:none;}
@@ -1051,6 +1131,167 @@
       grid-template-columns:1fr 1fr 1fr;
       gap:10px;
       margin-top:10px;
+    }
+
+
+
+    select{
+      width:100%;
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--text);
+      border-radius:16px;
+      padding:13px 14px;
+      font-size:16px;
+      outline:none;
+    }
+
+    .timer-adjust-row{
+      display:grid;
+      grid-template-columns:56px 1fr 56px;
+      align-items:center;
+      gap:10px;
+      margin:12px 0 14px;
+    }
+
+    .timer-adjust-row .timer-value{
+      margin:0;
+    }
+
+    .timer-adjust-btn{
+      width:56px;
+      height:56px;
+      border:none;
+      border-radius:999px;
+      background:rgba(255,255,255,.68);
+      border:1px solid var(--glass-line);
+      color:var(--text);
+      font-size:28px;
+      font-weight:800;
+      cursor:pointer;
+      box-shadow:0 12px 26px rgba(15,23,42,.10), inset 0 1px 0 rgba(255,255,255,.86);
+      backdrop-filter:blur(22px) saturate(185%) brightness(1.04);
+      -webkit-backdrop-filter:blur(22px) saturate(185%) brightness(1.04);
+      transition:transform .22s var(--glass-spring), box-shadow .22s var(--glass-spring);
+    }
+
+    .timer-adjust-btn:active,
+    .timer-adjust-btn.glass-pressing{
+      transform:translateY(1px) scale(.94);
+      box-shadow:0 6px 16px rgba(15,23,42,.11), 0 1px 4px rgba(15,23,42,.05);
+    }
+
+    .day-tabs{
+      display:flex;
+      gap:8px;
+      overflow-x:auto;
+      overflow-y:hidden;
+      scroll-snap-type:x mandatory;
+      -webkit-overflow-scrolling:touch;
+      padding:4px 2px 10px;
+      margin-bottom:14px;
+      scrollbar-width:none;
+    }
+
+    .day-tabs::-webkit-scrollbar{display:none;}
+
+    .day-tab{
+      flex:0 0 auto;
+      min-width:76px;
+      height:44px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      scroll-snap-align:center;
+    }
+
+    #planContainer{
+      transition:opacity .18s ease, transform .18s ease;
+      touch-action:pan-y;
+    }
+
+    #planContainer.plan-switching{
+      opacity:.5;
+      transform:translateY(4px);
+    }
+
+    .ai-coach-pet{
+      position:fixed;
+      right:14px;
+      bottom:calc(94px + env(safe-area-inset-bottom, 0px));
+      z-index:80;
+      display:none;
+    }
+
+    .ai-coach-pet.show{display:block;}
+
+    .ai-coach-avatar{
+      width:56px;
+      height:56px;
+      border:none;
+      border-radius:999px;
+      background:rgba(31,41,55,.88);
+      color:#fff;
+      box-shadow:0 16px 34px rgba(15,23,42,.20), inset 0 1px 0 rgba(255,255,255,.25);
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:27px;
+      animation:aiPetBreathe 2.4s ease-in-out infinite;
+    }
+
+    .ai-coach-bubble{
+      position:absolute;
+      right:64px;
+      bottom:8px;
+      max-width:min(260px, calc(100vw - 100px));
+      padding:10px 12px;
+      border-radius:18px;
+      background:rgba(255,255,255,.92);
+      color:var(--text);
+      border:1px solid rgba(148,163,184,.22);
+      box-shadow:0 14px 34px rgba(15,23,42,.14);
+      backdrop-filter:blur(18px) saturate(160%);
+      -webkit-backdrop-filter:blur(18px) saturate(160%);
+      font-size:13px;
+      line-height:1.55;
+      word-break:break-word;
+      opacity:0;
+      transform:translateY(6px) scale(.98);
+      pointer-events:none;
+      transition:opacity .22s ease, transform .22s var(--glass-spring);
+    }
+
+    .ai-coach-bubble.show{
+      opacity:1;
+      transform:translateY(0) scale(1);
+    }
+
+    .ai-coach-pet.talking .ai-coach-avatar{
+      animation:aiPetTalk .42s ease-in-out 2;
+    }
+
+    @keyframes aiPetBreathe{0%,100%{transform:translateY(0);}50%{transform:translateY(-2px);}}
+    @keyframes aiPetTalk{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+
+    @media (min-width:640px){
+      .day-tabs{
+        display:grid;
+        grid-template-columns:repeat(7,1fr);
+        overflow:visible;
+      }
+      .day-tab{
+        width:auto;
+        min-width:0;
+      }
+      .ai-coach-avatar{
+        width:64px;
+        height:64px;
+      }
+      .ai-coach-bubble{
+        right:72px;
+      }
     }
 
     .footer-space{height:12px;}
@@ -1109,11 +1350,1595 @@
       .tab.active{
         box-shadow:none;
       }
+
+      .calendar-toolbar{
+        grid-template-columns:64px minmax(0,1fr) 64px;
+        gap:8px;
+        margin-top:12px;
+      }
+
+      .calendar-toolbar .btn-outline{
+        min-height:48px;
+        padding:0 10px;
+        border-radius:18px;
+        font-size:16px;
+      }
+
+      .calendar-toolbar .badge{
+        min-height:48px;
+        justify-content:center;
+        border-radius:18px;
+        padding:0 10px;
+        font-size:14px;
+      }
+
+      .calendar-weekdays,
+      .calendar-grid{
+        gap:6px;
+        margin-top:8px;
+      }
+
+      .calendar-weekday{
+        padding:4px 0;
+        font-size:12px;
+      }
+
+      .calendar-cell{
+        min-height:0;
+        aspect-ratio:1 / 1.08;
+        border-radius:14px;
+        padding:7px 6px;
+        gap:4px;
+      }
+
+      .calendar-day-num{
+        font-size:14px;
+        line-height:1;
+      }
+
+      .calendar-day-tag{
+        max-width:100%;
+        padding:2px 5px;
+        font-size:10px;
+        line-height:1.2;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+      }
+
+      .calendar-day-sub{
+        display:none;
+      }
+
+      .calendar-detail-card{
+        margin-top:12px;
+        border-radius:18px;
+        padding:14px;
+      }
     }
 
     @media (min-width:640px){
       .grid7{grid-template-columns:repeat(4,1fr);}
     }
+
+    /* Keep controls to one painted edge; iOS Safari otherwise stacks rounded highlight layers. */
+    .tabs,
+    .tab,
+    .tab-indicator,
+    .check-btn,
+    .mini-btn,
+    .btn,
+    .btn-outline,
+    .btn-danger,
+    .day-tab{
+      -webkit-appearance:none;
+      appearance:none;
+      -webkit-mask-image:none;
+      mask-image:none;
+    }
+
+    button,
+    .tab,
+    .tab-indicator,
+    .check-btn,
+    .mini-btn,
+    .btn,
+    .btn-outline,
+    .btn-danger,
+    .day-tab{
+      border-radius:9999px;
+      background-clip:border-box;
+      -webkit-background-clip:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    .btn,
+    .btn-outline,
+    .btn-danger,
+    .day-tab{
+      min-height:48px;
+    }
+
+    .tabs::before,
+    .tabs::after,
+    .check-btn::before,
+    .btn::before,
+    .btn-outline::before,
+    .btn-danger::before,
+    .btn::after,
+    .btn-outline::after,
+    .btn-danger::after,
+    .day-tab::before,
+    .day-tab.active::before{
+      display:none !important;
+      content:none;
+    }
+
+    .tabs{
+      border-color:rgba(148,163,184,.20);
+      box-shadow:
+        0 14px 34px rgba(15,23,42,.10),
+        0 4px 12px rgba(15,23,42,.045);
+    }
+
+    .tabs.pressing,
+    .tabs.dragging,
+    .tabs.bump{
+      --dock-shell-opacity:0;
+    }
+
+    .tab-indicator{
+      border-color:rgba(31,41,55,.86);
+      box-shadow:
+        0 12px 26px rgba(15,23,42,.22),
+        0 3px 9px rgba(15,23,42,.10);
+    }
+
+    .tabs.dragging .tab-indicator{
+      box-shadow:
+        0 16px 32px rgba(15,23,42,.24),
+        0 4px 12px rgba(15,23,42,.10);
+    }
+
+    .check-btn{
+      border-color:rgba(148,163,184,.22);
+      box-shadow:
+        0 10px 22px rgba(15,23,42,.10),
+        0 2px 6px rgba(15,23,42,.045);
+    }
+
+    .check-btn.done{
+      border-color:rgba(31,41,55,.86);
+      box-shadow:0 10px 22px rgba(15,23,42,.15);
+    }
+
+    .check-btn:active,
+    .check-btn.glass-pressing{
+      box-shadow:
+        0 6px 16px rgba(15,23,42,.11),
+        0 1px 4px rgba(15,23,42,.05);
+    }
+
+    .mini-btn{
+      box-shadow:
+        0 8px 18px rgba(15,23,42,.075),
+        0 1px 4px rgba(15,23,42,.035);
+    }
+
+    .mini-btn:active,
+    .mini-btn.glass-pressing{
+      box-shadow:
+        0 5px 14px rgba(15,23,42,.09),
+        0 1px 4px rgba(15,23,42,.04);
+    }
+
+    .btn,
+    .btn-outline,
+    .btn-danger{
+      border-color:rgba(148,163,184,.22);
+      box-shadow:
+        0 12px 30px rgba(15,23,42,.095),
+        0 3px 10px rgba(15,23,42,.045);
+    }
+
+    .btn{
+      border-color:rgba(31,41,55,.86);
+      box-shadow:
+        0 14px 30px rgba(15,23,42,.16),
+        0 3px 10px rgba(15,23,42,.08);
+    }
+
+    .btn-danger{
+      border-color:rgba(239,68,68,.18);
+      box-shadow:
+        0 12px 28px rgba(239,68,68,.08),
+        0 3px 10px rgba(15,23,42,.04);
+    }
+
+    .btn:hover,
+    .btn-outline:hover,
+    .btn-danger:hover{
+      box-shadow:
+        0 14px 32px rgba(15,23,42,.105),
+        0 4px 12px rgba(15,23,42,.05);
+    }
+
+    .btn:hover,
+    .btn:active,
+    .btn.glass-pressing{
+      border-color:rgba(31,41,55,.88);
+    }
+
+    .btn:active,
+    .btn-outline:active,
+    .btn-danger:active,
+    .btn.glass-pressing,
+    .btn-outline.glass-pressing,
+    .btn-danger.glass-pressing{
+      box-shadow:
+        0 7px 18px rgba(15,23,42,.11),
+        0 2px 6px rgba(15,23,42,.045);
+    }
+
+    .day-tab{
+      border-color:rgba(148,163,184,.22);
+      box-shadow:
+        0 10px 22px rgba(15,23,42,.085),
+        0 2px 7px rgba(15,23,42,.04);
+    }
+
+    .day-tab.active{
+      border-color:rgba(31,41,55,.86);
+      box-shadow:
+        0 12px 25px rgba(15,23,42,.16),
+        0 3px 9px rgba(15,23,42,.08);
+    }
+
+    .day-tab:active,
+    .day-tab.glass-pressing{
+      box-shadow:
+        0 6px 16px rgba(15,23,42,.11),
+        0 1px 5px rgba(15,23,42,.045);
+    }
+
+    @media (max-width:480px){
+      .tabs{
+        box-shadow:
+          0 8px 18px rgba(15,23,42,.055),
+          0 3px 8px rgba(15,23,42,.025);
+      }
+
+      .tab-indicator{
+        box-shadow:
+          0 10px 22px rgba(15,23,42,.20),
+          0 2px 7px rgba(15,23,42,.09);
+      }
+    }
+
+    :root{
+      --dark-glass-surface:rgba(31,41,55,.88);
+      --dark-glass-surface-pressed:rgba(24,33,47,.90);
+      --dark-glass-edge:rgba(71,85,105,.34);
+      --dark-glass-edge-pressed:rgba(55,65,81,.38);
+    }
+
+    .btn,
+    .tab-indicator,
+    .check-btn.done,
+    .day-tab.active{
+      background:var(--dark-glass-surface);
+      border-color:var(--dark-glass-edge);
+      backdrop-filter:blur(26px) saturate(180%) brightness(1.02);
+      -webkit-backdrop-filter:blur(26px) saturate(180%) brightness(1.02);
+      box-shadow:
+        0 15px 34px rgba(15,23,42,.18),
+        0 4px 12px rgba(15,23,42,.08),
+        inset 0 1px 0 rgba(255,255,255,.055),
+        inset 0 -1px 0 rgba(15,23,42,.16);
+    }
+
+    .tab-indicator{
+      box-shadow:
+        0 12px 26px rgba(15,23,42,.22),
+        0 3px 9px rgba(15,23,42,.10),
+        inset 0 1px 0 rgba(255,255,255,.05),
+        inset 0 -1px 0 rgba(15,23,42,.15);
+    }
+
+    .tabs.dragging .tab-indicator{
+      background:var(--dark-glass-surface);
+      border-color:var(--dark-glass-edge);
+      box-shadow:
+        0 16px 32px rgba(15,23,42,.24),
+        0 4px 12px rgba(15,23,42,.11),
+        inset 0 1px 0 rgba(255,255,255,.05),
+        inset 0 -1px 0 rgba(15,23,42,.15);
+    }
+
+    .btn:hover,
+    .btn:active,
+    .btn.glass-pressing,
+    .check-btn.done:active,
+    .check-btn.done.glass-pressing,
+    .day-tab.active:active,
+    .day-tab.active.glass-pressing{
+      background:var(--dark-glass-surface-pressed);
+      border-color:var(--dark-glass-edge-pressed);
+    }
+
+    .btn:active,
+    .btn.glass-pressing,
+    .check-btn.done:active,
+    .check-btn.done.glass-pressing,
+    .day-tab.active:active,
+    .day-tab.active.glass-pressing{
+      box-shadow:
+        0 8px 20px rgba(15,23,42,.16),
+        0 2px 6px rgba(15,23,42,.07),
+        inset 0 1px 0 rgba(255,255,255,.045),
+        inset 0 -1px 0 rgba(15,23,42,.14);
+    }
+
+    /* --- Patch: cloud sync placement, timer spacing, liquid day dock --- */
+    .timer-adjust-row{
+      grid-template-columns:52px 1fr 52px;
+      gap:6px;
+      margin:10px 0 14px;
+    }
+
+    .timer-adjust-btn{
+      width:52px;
+      height:52px;
+      padding:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      line-height:1;
+      text-align:center;
+      font-size:26px;
+    }
+
+    #timerMinus10Btn{
+      font-size:30px;
+      padding-bottom:2px;
+    }
+
+    .day-tabs{
+      --day-tab-height:58px;
+      --day-tab-side-padding:10px;
+      --day-tab-indicator-scale:1.12;
+      --day-tab-indicator-edge-gap:6px;
+      position:relative;
+      display:flex !important;
+      align-items:stretch;
+      gap:0;
+      padding:6px var(--day-tab-side-padding);
+      margin-bottom:14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.28);
+      border:1px solid rgba(255,255,255,.46);
+      box-shadow:
+        0 18px 42px rgba(15,23,42,.12),
+        0 5px 14px rgba(15,23,42,.05),
+        inset 0 1px 0 rgba(255,255,255,.72),
+        inset 0 -1px 0 rgba(15,23,42,.05);
+      backdrop-filter:blur(24px) saturate(180%) brightness(1.05);
+      -webkit-backdrop-filter:blur(24px) saturate(180%) brightness(1.05);
+      overflow-x:auto;
+      overflow-y:hidden;
+      scrollbar-width:none;
+      scroll-snap-type:x proximity;
+      -webkit-overflow-scrolling:touch;
+    }
+
+    .day-tabs::-webkit-scrollbar{ display:none; }
+    .day-tabs > *{ position:relative; z-index:1; }
+
+    .day-tab-indicator{
+      position:absolute;
+      top:6px;
+      bottom:6px;
+      left:0;
+      width:0;
+      border-radius:999px;
+      background:var(--dark-glass-surface);
+      border:1px solid var(--dark-glass-edge);
+      box-shadow:
+        0 12px 26px rgba(15,23,42,.20),
+        0 3px 9px rgba(15,23,42,.10),
+        inset 0 1px 0 rgba(255,255,255,.05),
+        inset 0 -1px 0 rgba(15,23,42,.15);
+      pointer-events:none;
+      transition:transform .32s var(--glass-spring), width .32s var(--glass-spring);
+      z-index:0;
+    }
+
+    .day-tab{
+      flex:1 0 auto;
+      min-width:84px;
+      height:var(--day-tab-height);
+      min-height:var(--day-tab-height);
+      padding:0 16px;
+      border:none;
+      background:transparent;
+      box-shadow:none !important;
+      color:#334155;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      white-space:nowrap;
+      text-align:center;
+      scroll-snap-align:center;
+      transition:transform .2s var(--glass-spring), color .2s ease, filter .2s ease;
+    }
+
+    .day-tab:hover{ transform:translateY(-1px); }
+
+    .day-tab.active,
+    .day-tab.drag-active{
+      background:transparent;
+      color:#ffffff;
+      border-color:transparent;
+      box-shadow:none !important;
+    }
+
+    .day-tab:active,
+    .day-tab.glass-pressing{
+      transform:scale(.975) translateY(1px);
+      box-shadow:none !important;
+    }
+
+    @media (min-width:640px){
+      .day-tabs{
+        overflow-x:auto;
+      }
+      .day-tab{
+        flex:1 1 0;
+        min-width:0;
+      }
+    }
+
+    @media (max-width:480px){
+      .timer-adjust-row{
+        grid-template-columns:48px 1fr 48px;
+        gap:4px;
+      }
+      .timer-adjust-btn{
+        width:48px;
+        height:48px;
+        font-size:24px;
+      }
+      #timerMinus10Btn{ font-size:28px; }
+      .day-tabs{
+        --day-tab-height:52px;
+        padding:5px 8px;
+      }
+      .day-tab-indicator{
+        top:5px;
+        bottom:5px;
+      }
+      .day-tab{
+        min-width:78px;
+        padding:0 14px;
+        font-size:13px;
+      }
+    }
+
+
+    /* --- Patch v3: make day switch dock match bottom navigation --- */
+    .day-tabs{
+      --day-tab-side-padding:14px;
+      --day-tab-height:74px;
+      --day-tab-indicator-scale:1.12;
+      --day-tab-indicator-edge-gap:8px;
+      --day-tab-drag-overflow:24px;
+      position:relative;
+      left:auto;
+      bottom:auto;
+      transform:none;
+      width:100%;
+      display:flex !important;
+      align-items:stretch;
+      gap:0;
+      padding:8px var(--day-tab-side-padding);
+      z-index:1;
+      border-radius:999px;
+      background:rgba(255,255,255,.28);
+      border:1px solid rgba(255,255,255,.46);
+      box-shadow:
+        0 22px 60px rgba(15,23,42,.16),
+        0 8px 22px rgba(15,23,42,.08),
+        inset 0 1px 0 rgba(255,255,255,.76),
+        inset 0 -1px 0 rgba(15,23,42,.06),
+        inset 1px 0 0 rgba(255,255,255,.28),
+        inset -1px 0 0 rgba(255,255,255,.24);
+      backdrop-filter:blur(28px) saturate(190%) brightness(1.08);
+      -webkit-backdrop-filter:blur(28px) saturate(190%) brightness(1.08);
+      isolation:isolate;
+      overflow-x:auto;
+      overflow-y:hidden;
+      -webkit-mask-image:-webkit-radial-gradient(white, black);
+      transform-origin:center center;
+      transition:box-shadow .24s var(--glass-spring), padding .24s var(--glass-spring), transform .24s var(--glass-spring);
+      user-select:none;
+      -webkit-user-select:none;
+      -webkit-touch-callout:none;
+      scrollbar-width:none;
+      scroll-snap-type:x mandatory;
+    }
+
+    .day-tabs::before{
+      content:"";
+      position:absolute;
+      inset:1px;
+      border-radius:inherit;
+      background:rgba(255,255,255,.08);
+      pointer-events:none;
+      z-index:0;
+    }
+
+    .day-tabs::-webkit-scrollbar{display:none;}
+    .day-tabs > *{position:relative; z-index:1;}
+
+    .day-tab-indicator{
+      position:absolute;
+      top:8px;
+      bottom:8px;
+      left:0;
+      width:0;
+      border-radius:999px;
+      background:rgba(31,41,55,.86);
+      border:1px solid rgba(255,255,255,.24);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.28),
+        inset 0 0 0 1px rgba(255,255,255,.08),
+        inset 0 -1px 0 rgba(0,0,0,.22),
+        inset 1px 0 0 rgba(255,255,255,.10),
+        inset -1px 0 0 rgba(255,255,255,.08),
+        0 0 0 1px rgba(255,255,255,.08),
+        0 11px 24px rgba(15,23,42,.22),
+        0 3px 9px rgba(15,23,42,.12);
+      pointer-events:none;
+      z-index:1;
+      will-change:transform, width;
+      transition:transform .34s var(--glass-spring), width .34s var(--glass-spring), top .2s var(--glass-spring), bottom .2s var(--glass-spring), box-shadow .2s ease, filter .2s ease;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+    }
+
+    .day-tabs.dragging .day-tab-indicator{
+      top:4px;
+      bottom:4px;
+      filter:brightness(1.06) saturate(1.1);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.30),
+        inset 0 0 0 1px rgba(255,255,255,.10),
+        inset 0 -1px 0 rgba(0,0,0,.22),
+        inset 1px 0 0 rgba(255,255,255,.10),
+        inset -1px 0 0 rgba(255,255,255,.08),
+        0 0 0 1px rgba(255,255,255,.10),
+        0 17px 34px rgba(15,23,42,.24),
+        0 4px 12px rgba(15,23,42,.12);
+    }
+
+    .day-tab{
+      position:relative;
+      flex:1 1 0;
+      min-width:86px;
+      min-height:var(--day-tab-height);
+      height:var(--day-tab-height);
+      padding:0 10px;
+      border:none;
+      background:transparent;
+      color:#334155;
+      font-weight:700;
+      cursor:pointer;
+      overflow:visible;
+      isolation:isolate;
+      transition:transform .2s var(--glass-spring), color .2s ease, filter .2s ease;
+      z-index:2;
+      scroll-snap-align:center;
+      box-shadow:none !important;
+      text-align:center;
+    }
+
+    .day-tab:hover{ transform:translateY(-1px); }
+
+    .day-tab.active,
+    .day-tab.drag-active{
+      color:#ffffff;
+      background:transparent;
+      border-color:transparent;
+      box-shadow:none !important;
+    }
+
+    .day-tabs.dragging .day-tab.active{
+      color:#334155;
+    }
+
+    .day-tabs.dragging .day-tab.drag-active{
+      color:#ffffff;
+    }
+
+    .day-tab:active,
+    .day-tab.glass-pressing{
+      transform:scale(.975) translateY(1px);
+      box-shadow:none !important;
+    }
+
+    @media (min-width:640px){
+      .day-tabs{
+        width:100%;
+        overflow-x:auto;
+      }
+      .day-tab{
+        min-width:0;
+      }
+    }
+
+    @media (max-width:480px){
+      .day-tabs{
+        --day-tab-height:58px;
+        --day-tab-indicator-edge-gap:5px;
+        padding:4px 10px;
+        border-radius:33px;
+        box-shadow:
+          0 8px 18px rgba(15,23,42,.05),
+          0 3px 8px rgba(15,23,42,.025),
+          inset 0 1px 0 rgba(255,255,255,.22);
+      }
+      .day-tab{
+        min-height:58px;
+        height:58px;
+        min-width:78px;
+        font-size:12px;
+      }
+      .day-tab-indicator{
+        top:5px;
+        bottom:5px;
+        border-radius:28px;
+      }
+    }
+
+
+    .ai-coach-avatar{
+      overflow:hidden;
+    }
+
+    .ai-coach-face{
+      width:100%;
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:27px;
+      line-height:1;
+      border-radius:inherit;
+      overflow:hidden;
+    }
+
+    .ai-coach-face.has-image{
+      font-size:0;
+    }
+
+    .ai-coach-face img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+      border-radius:inherit;
+    }
+
+    .tool-card-help{
+      padding-left:12px;
+    }
+
+
+    /* --- Patch v7: stable 4-slot day navigation dock --- */
+    .day-tabs{
+      position:relative;
+      display:flex !important;
+      flex-wrap:nowrap;
+      gap:0;
+      padding:6px;
+      overflow-x:auto;
+      overflow-y:hidden;
+      scroll-snap-type:x mandatory;
+      scrollbar-width:none;
+    }
+
+    .day-tabs::-webkit-scrollbar{ display:none; }
+
+    .day-tabs.ready .day-tab-indicator{ opacity:1; }
+
+    .day-tab-indicator{
+      opacity:0;
+      top:6px;
+      bottom:6px;
+      left:0;
+      width:0;
+      border-radius:999px;
+      transition:transform .24s var(--glass-spring), opacity .12s ease;
+      will-change:transform;
+    }
+
+    .day-tab{
+      flex:0 0 25%;
+      width:25%;
+      min-width:25%;
+      max-width:25%;
+      min-height:58px;
+      height:58px;
+      padding:0 8px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      scroll-snap-align:start;
+      box-sizing:border-box;
+    }
+
+    .day-tab.active,
+    .day-tab.drag-active{
+      color:#fff;
+    }
+
+    .day-tabs.dragging,
+    .day-tabs.pressing,
+    .day-tabs.dragging .day-tab,
+    .day-tabs.dragging .day-tab-indicator{
+      transition:none !important;
+    }
+
+
+    /* --- Patch v8: robust day dock scroll + no left flash --- */
+    .day-tabs{
+      position:relative;
+      display:flex !important;
+      flex-wrap:nowrap;
+      align-items:stretch;
+      gap:0;
+      padding:6px;
+      overflow-x:auto;
+      overflow-y:hidden;
+      scrollbar-width:none;
+      -webkit-overflow-scrolling:touch;
+      scroll-snap-type:x mandatory;
+      scroll-behavior:smooth;
+      touch-action:pan-x;
+      overscroll-behavior-x:contain;
+    }
+
+    .day-tabs::-webkit-scrollbar{display:none;}
+
+    .day-tab-indicator{
+      position:absolute;
+      left:6px;
+      top:6px;
+      bottom:6px;
+      width:calc(25% - 0px);
+      opacity:0;
+      border-radius:999px;
+      pointer-events:none;
+      will-change:transform,width,opacity;
+      transition:transform .24s var(--glass-spring), width .24s var(--glass-spring), opacity .12s ease;
+    }
+
+    .day-tabs.ready .day-tab-indicator{
+      opacity:1;
+    }
+
+    .day-tab{
+      flex:0 0 25%;
+      width:25%;
+      min-width:25%;
+      max-width:25%;
+      box-sizing:border-box;
+      min-height:58px;
+      height:58px;
+      padding:0 8px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      scroll-snap-align:start;
+      position:relative;
+      z-index:2;
+    }
+
+    .day-tab.active,
+    .day-tab.drag-active{
+      color:#fff;
+    }
+
+    .day-tabs.dragging,
+    .day-tabs.pressing,
+    .day-tabs.dragging .day-tab,
+    .day-tabs.dragging .day-tab-indicator{
+      transition:none !important;
+    }
+
+
+    /* --- Patch v9: day dock matches bottom navigation --- */
+    .day-tabs{
+      --day-tab-side-padding:20px;
+      --day-tab-height:78px;
+      --day-indicator-scale:1.13;
+      --day-indicator-edge-gap:8px;
+      --day-drag-overflow:28px;
+      --day-drag-extra-scale:0.23;
+      --day-dock-active-scale:1.025;
+      --day-dock-shell-scale:1;
+      --day-dock-shell-opacity:0;
+      position:relative;
+      width:100%;
+      display:flex !important;
+      align-items:stretch;
+      gap:0;
+      padding:8px var(--day-tab-side-padding);
+      margin-bottom:14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.28);
+      border:1px solid rgba(255,255,255,.46);
+      box-shadow:
+        0 22px 60px rgba(15,23,42,.16),
+        0 8px 22px rgba(15,23,42,.08),
+        inset 0 1px 0 rgba(255,255,255,.76),
+        inset 0 -1px 0 rgba(15,23,42,.06),
+        inset 1px 0 0 rgba(255,255,255,.28),
+        inset -1px 0 0 rgba(255,255,255,.24);
+      backdrop-filter:blur(28px) saturate(190%) brightness(1.08);
+      -webkit-backdrop-filter:blur(28px) saturate(190%) brightness(1.08);
+      isolation:isolate;
+      overflow-x:auto;
+      overflow-y:visible;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+      -webkit-mask-image:-webkit-radial-gradient(white, black);
+      transform-origin:center center;
+      transition:box-shadow .24s var(--glass-spring), padding .24s var(--glass-spring), transform .24s var(--glass-spring);
+      scrollbar-width:none;
+      scroll-snap-type:x mandatory;
+      scroll-behavior:smooth;
+      touch-action:pan-x;
+      overscroll-behavior-x:contain;
+    }
+
+    .day-tabs::-webkit-scrollbar{ display:none; }
+
+    .day-tabs::before{
+      content:"";
+      position:absolute;
+      inset:1px;
+      border-radius:inherit;
+      background:rgba(255,255,255,.08);
+      pointer-events:none;
+      z-index:0;
+    }
+
+    .day-tabs::after{
+      content:"";
+      position:absolute;
+      inset:-1px;
+      border-radius:inherit;
+      background:rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.38);
+      box-shadow:
+        0 16px 34px rgba(15,23,42,.12),
+        0 5px 14px rgba(15,23,42,.05),
+        inset 0 1px 0 rgba(255,255,255,.72),
+        inset 0 -1px 0 rgba(15,23,42,.055),
+        inset 1px 0 0 rgba(255,255,255,.20),
+        inset -1px 0 0 rgba(255,255,255,.18);
+      transform:scale(var(--day-dock-shell-scale));
+      transform-origin:center center;
+      opacity:var(--day-dock-shell-opacity);
+      transition:transform .24s var(--glass-spring), opacity .24s ease, box-shadow .24s var(--glass-spring);
+      pointer-events:none;
+      z-index:0;
+    }
+
+    .day-tabs > *{
+      position:relative;
+      z-index:1;
+    }
+
+    .day-tabs,
+    .day-tabs *{
+      user-select:none;
+      -webkit-user-select:none;
+      -webkit-touch-callout:none;
+    }
+
+    .day-tabs.pressing,
+    .day-tabs.dragging,
+    .day-tabs.bump{
+      --day-dock-shell-scale:var(--day-dock-active-scale);
+      --day-dock-shell-opacity:1;
+    }
+
+    .day-tab-indicator{
+      position:absolute;
+      top:8px;
+      bottom:8px;
+      left:0;
+      width:0;
+      border-radius:999px;
+      background:rgba(31,41,55,.86);
+      border:1px solid rgba(255,255,255,.24);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.28),
+        inset 0 0 0 1px rgba(255,255,255,.08),
+        inset 0 -1px 0 rgba(0,0,0,.22),
+        inset 1px 0 0 rgba(255,255,255,.10),
+        inset -1px 0 0 rgba(255,255,255,.08),
+        0 0 0 1px rgba(255,255,255,.08),
+        0 11px 24px rgba(15,23,42,.22),
+        0 3px 9px rgba(15,23,42,.12);
+      pointer-events:none;
+      z-index:1;
+      opacity:0;
+      will-change:transform, width;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+      transition:transform .34s var(--glass-spring), width .34s var(--glass-spring), top .2s var(--glass-spring), bottom .2s var(--glass-spring), box-shadow .2s ease, filter .2s ease, opacity .12s ease;
+    }
+
+    .day-tabs.ready .day-tab-indicator{
+      opacity:1;
+    }
+
+    .day-tabs.dragging{
+      overflow:visible;
+      -webkit-mask-image:none;
+      z-index:10;
+    }
+
+    .day-tabs.dragging .day-tab-indicator{
+      top:-4px;
+      bottom:-4px;
+      border-radius:999px;
+      filter:brightness(1.06) saturate(1.1);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.30),
+        inset 0 0 0 1px rgba(255,255,255,.10),
+        inset 0 -1px 0 rgba(0,0,0,.22),
+        inset 1px 0 0 rgba(255,255,255,.10),
+        inset -1px 0 0 rgba(255,255,255,.08),
+        0 0 0 1px rgba(255,255,255,.10),
+        0 17px 34px rgba(15,23,42,.24),
+        0 4px 12px rgba(15,23,42,.12);
+    }
+
+    .day-tab-indicator.dragging{
+      transition:none;
+    }
+
+    .day-tab{
+      position:relative;
+      flex:0 0 25%;
+      width:25%;
+      min-width:25%;
+      max-width:25%;
+      min-height:var(--day-tab-height);
+      height:var(--day-tab-height);
+      border:none;
+      background:transparent;
+      border-radius:999px;
+      color:#334155;
+      font-weight:700;
+      font-size:16px;
+      line-height:1.1;
+      cursor:pointer;
+      overflow:visible;
+      isolation:isolate;
+      transition:transform .2s var(--glass-spring), color .2s ease, filter .2s ease;
+      -webkit-mask-image:-webkit-radial-gradient(white, black);
+      z-index:2;
+      touch-action:manipulation;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:0 8px;
+      white-space:nowrap;
+      scroll-snap-align:start;
+      box-sizing:border-box;
+      box-shadow:none !important;
+    }
+
+    .day-tab:hover{
+      transform:translateY(-1px);
+    }
+
+    .day-tab:active,
+    .day-tab.glass-pressing{
+      transform:scale(.975) translateY(1px);
+    }
+
+    .day-tab.active{
+      color:#ffffff;
+      z-index:3;
+    }
+
+    .day-tabs.dragging .day-tab.active{
+      color:#334155;
+      z-index:2;
+    }
+
+    .day-tabs.dragging .day-tab.drag-active{
+      color:#ffffff;
+      z-index:3;
+    }
+
+    @media (max-width:480px){
+      .day-tabs{
+        --day-tab-side-padding:12px;
+        --day-tab-height:62px;
+      }
+      .day-tab{
+        font-size:14px;
+      }
+    }
+
+
+    /* --- Patch v10: day dock visually matches bottom nav much more closely --- */
+    #dayTabs.day-tabs{
+      --day-tab-side-padding: 18px;
+      --day-tab-height: 74px;
+      --day-indicator-scale: 1.08;
+      --day-indicator-edge-gap: 8px;
+      --day-drag-overflow: 26px;
+      --day-drag-extra-scale: 0.20;
+      --day-dock-active-scale: 1.025;
+      --day-dock-shell-scale: 1;
+      --day-dock-shell-opacity: 0;
+      position: relative;
+      width: 100%;
+      display: flex !important;
+      align-items: stretch;
+      gap: 0;
+      padding: 8px var(--day-tab-side-padding);
+      margin-bottom: 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.28);
+      border: 1px solid rgba(255,255,255,.46);
+      box-shadow:
+        0 22px 60px rgba(15,23,42,.16),
+        0 8px 22px rgba(15,23,42,.08),
+        inset 0 1px 0 rgba(255,255,255,.76),
+        inset 0 -1px 0 rgba(15,23,42,.06),
+        inset 1px 0 0 rgba(255,255,255,.28),
+        inset -1px 0 0 rgba(255,255,255,.24);
+      backdrop-filter: blur(28px) saturate(190%) brightness(1.08);
+      -webkit-backdrop-filter: blur(28px) saturate(190%) brightness(1.08);
+      isolation: isolate;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      -webkit-mask-image: -webkit-radial-gradient(white, black);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      transform-origin: center center;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      touch-action: pan-x;
+      overscroll-behavior-x: contain;
+      transition: box-shadow .24s var(--glass-spring), padding .24s var(--glass-spring), transform .24s var(--glass-spring);
+    }
+
+    #dayTabs.day-tabs::-webkit-scrollbar{ display:none; }
+
+    #dayTabs.day-tabs::before{
+      content:"";
+      position:absolute;
+      inset:1px;
+      border-radius:inherit;
+      background:rgba(255,255,255,.08);
+      pointer-events:none;
+      z-index:0;
+    }
+
+    #dayTabs.day-tabs::after{
+      content:"";
+      position:absolute;
+      inset:-1px;
+      border-radius:inherit;
+      background:rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.38);
+      box-shadow:
+        0 16px 34px rgba(15,23,42,.12),
+        0 5px 14px rgba(15,23,42,.05),
+        inset 0 1px 0 rgba(255,255,255,.72),
+        inset 0 -1px 0 rgba(15,23,42,.055),
+        inset 1px 0 0 rgba(255,255,255,.20),
+        inset -1px 0 0 rgba(255,255,255,.18);
+      transform:scale(var(--day-dock-shell-scale));
+      transform-origin:center center;
+      opacity:var(--day-dock-shell-opacity);
+      transition:transform .24s var(--glass-spring), opacity .24s ease, box-shadow .24s var(--glass-spring);
+      pointer-events:none;
+      z-index:0;
+    }
+
+    #dayTabs.day-tabs > *{
+      position:relative;
+      z-index:1;
+    }
+
+    #dayTabs.day-tabs,
+    #dayTabs.day-tabs *{
+      user-select:none;
+      -webkit-user-select:none;
+      -webkit-touch-callout:none;
+    }
+
+    #dayTabs.day-tabs.pressing,
+    #dayTabs.day-tabs.dragging,
+    #dayTabs.day-tabs.bump{
+      --day-dock-shell-scale: var(--day-dock-active-scale);
+      --day-dock-shell-opacity: 1;
+    }
+
+    #dayTabs .day-tab-indicator{
+      position:absolute;
+      top:8px;
+      bottom:8px;
+      left:0;
+      width:0;
+      border-radius:999px;
+      background:rgba(31,41,55,.86);
+      border:1px solid rgba(255,255,255,.24);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.28),
+        inset 0 0 0 1px rgba(255,255,255,.08),
+        inset 0 -1px 0 rgba(0,0,0,.22),
+        inset 1px 0 0 rgba(255,255,255,.10),
+        inset -1px 0 0 rgba(255,255,255,.08),
+        0 0 0 1px rgba(255,255,255,.08),
+        0 11px 24px rgba(15,23,42,.22),
+        0 3px 9px rgba(15,23,42,.12);
+      pointer-events:none;
+      z-index:1;
+      opacity:0;
+      will-change:transform, width;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+      transition:transform .34s var(--glass-spring), width .34s var(--glass-spring), top .2s var(--glass-spring), bottom .2s var(--glass-spring), box-shadow .2s ease, filter .2s ease, opacity .12s ease;
+    }
+
+    #dayTabs.ready .day-tab-indicator{ opacity:1; }
+
+    #dayTabs.day-tabs.dragging{
+      overflow-y: visible;
+      -webkit-mask-image:none;
+      z-index:12;
+    }
+
+    #dayTabs.day-tabs.dragging .day-tab-indicator{
+      top:-4px;
+      bottom:-4px;
+      filter:brightness(1.06) saturate(1.1);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.30),
+        inset 0 0 0 1px rgba(255,255,255,.10),
+        inset 0 -1px 0 rgba(0,0,0,.22),
+        inset 1px 0 0 rgba(255,255,255,.10),
+        inset -1px 0 0 rgba(255,255,255,.08),
+        0 0 0 1px rgba(255,255,255,.10),
+        0 17px 34px rgba(15,23,42,.24),
+        0 4px 12px rgba(15,23,42,.12);
+    }
+
+    #dayTabs .day-tab-indicator.dragging{
+      transition:none;
+    }
+
+    #dayTabs .day-tab{
+      position:relative;
+      flex:0 0 calc((100% - (var(--day-tab-side-padding) * 2)) / 4);
+      width:calc((100% - (var(--day-tab-side-padding) * 2)) / 4);
+      min-width:calc((100% - (var(--day-tab-side-padding) * 2)) / 4);
+      max-width:calc((100% - (var(--day-tab-side-padding) * 2)) / 4);
+      min-height:var(--day-tab-height);
+      height:var(--day-tab-height);
+      padding:0;
+      border:none;
+      border-radius:999px;
+      background:transparent;
+      color:#334155;
+      font-weight:700;
+      cursor:pointer;
+      overflow:visible;
+      isolation:isolate;
+      z-index:2;
+      touch-action:manipulation;
+      box-shadow:none !important;
+      transition:transform .2s var(--glass-spring), color .2s ease, filter .2s ease;
+      -webkit-mask-image:-webkit-radial-gradient(white, black);
+      scroll-snap-align:start;
+    }
+
+    #dayTabs .day-tab::before,
+    #dayTabs .day-tab::after{ display:none; }
+
+    #dayTabs .day-tab-content{
+      position:relative;
+      z-index:2;
+      width:100%;
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      gap:6px;
+      padding:10px 8px 8px;
+    }
+
+    #dayTabs .day-tab-label{
+      display:block;
+      font-size:16px;
+      line-height:1.1;
+      font-weight:700;
+      letter-spacing:.01em;
+      color:inherit;
+      text-shadow:none;
+    }
+
+    #dayTabs .day-tab:hover{ transform:translateY(-1px); }
+
+    #dayTabs .day-tab:active,
+    #dayTabs .day-tab.glass-pressing{
+      transform:scale(.975) translateY(1px);
+    }
+
+    #dayTabs .day-tab.active{
+      color:#ffffff;
+      z-index:3;
+    }
+
+    #dayTabs .day-tab.active .day-tab-label{
+      color:#ffffff;
+    }
+
+    #dayTabs.day-tabs.dragging .day-tab.active{
+      color:#334155;
+      z-index:2;
+    }
+
+    #dayTabs.day-tabs.dragging .day-tab.active .day-tab-label{
+      color:#334155;
+    }
+
+    #dayTabs.day-tabs.dragging .day-tab.drag-active{
+      color:#ffffff;
+      z-index:3;
+    }
+
+    #dayTabs.day-tabs.dragging .day-tab.drag-active .day-tab-label{
+      color:#ffffff;
+    }
+
+    @media (max-width: 480px){
+      #dayTabs.day-tabs{
+        --day-tab-side-padding: 14px;
+        --day-tab-height: 64px;
+        --day-indicator-scale: 1.06;
+      }
+      #dayTabs .day-tab-label{
+        font-size:15px;
+      }
+    }
+
+
+    /* --- Patch v11: day dock bug fixes --- */
+    #dayTabs.day-tabs{
+      --day-tab-side-padding: 12px;
+      --day-tab-height: 60px;
+      --day-indicator-scale: 1.00;
+      --day-indicator-edge-gap: 12px;
+      --day-drag-overflow: 22px;
+      --day-drag-extra-scale: 0.10;
+      overflow-x: auto;
+      overflow-y: hidden !important;
+      padding: 6px var(--day-tab-side-padding);
+    }
+
+    #dayTabs.day-tabs.pressing,
+    #dayTabs.day-tabs.dragging,
+    #dayTabs.day-tabs.bump{
+      --day-dock-shell-scale: 1;
+      --day-dock-shell-opacity: 0;
+      transform: none;
+    }
+
+    #dayTabs.day-tabs::after{
+      opacity: 0 !important;
+      transform: scale(1) !important;
+    }
+
+    #dayTabs .day-tab{
+      flex: 0 0 calc((100% - (var(--day-tab-side-padding) * 2)) / 4);
+      width: calc((100% - (var(--day-tab-side-padding) * 2)) / 4);
+      min-width: calc((100% - (var(--day-tab-side-padding) * 2)) / 4);
+      max-width: calc((100% - (var(--day-tab-side-padding) * 2)) / 4);
+      min-height: var(--day-tab-height);
+      height: var(--day-tab-height);
+    }
+
+    #dayTabs .day-tab-content{
+      padding: 0 6px;
+      gap: 0;
+    }
+
+    #dayTabs .day-tab-label{
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    #dayTabs .day-tab-indicator{
+      top: 6px;
+      bottom: 6px;
+      border-radius: 999px;
+      transition: transform .28s var(--glass-spring), width .28s var(--glass-spring), opacity .12s ease, box-shadow .2s ease, filter .2s ease;
+    }
+
+    #dayTabs.day-tabs.dragging .day-tab-indicator{
+      top: 3px;
+      bottom: 3px;
+      filter: brightness(1.04) saturate(1.05);
+    }
+
+    #dayTabs.day-tabs.dragging{
+      overflow-y: hidden !important;
+      z-index: 12;
+    }
+
+    @media (max-width: 480px){
+      #dayTabs.day-tabs{
+        --day-tab-side-padding: 10px;
+        --day-tab-height: 56px;
+      }
+      #dayTabs .day-tab-label{
+        font-size: 13px;
+      }
+    }
+
+
+    /* --- Patch v12: keep edge auto-scroll continuous while finger stays at the edge --- */
+    #dayTabs.day-tabs.dragging{
+      scroll-snap-type:none !important;
+      scroll-behavior:auto !important;
+    }
+
+
+    /* --- Patch v13: only one dark pill may exist while dragging --- */
+    #dayTabs .day-tab,
+    #dayTabs .day-tab.active,
+    #dayTabs .day-tab.drag-active,
+    #dayTabs.day-tabs.dragging .day-tab,
+    #dayTabs.day-tabs.dragging .day-tab.active,
+    #dayTabs.day-tabs.dragging .day-tab.drag-active{
+      background: transparent !important;
+      border-color: transparent !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    #dayTabs .day-tab::before,
+    #dayTabs .day-tab::after,
+    #dayTabs .day-tab.active::before,
+    #dayTabs .day-tab.active::after,
+    #dayTabs .day-tab.drag-active::before,
+    #dayTabs .day-tab.drag-active::after{
+      display: none !important;
+      content: none !important;
+      opacity: 0 !important;
+      box-shadow: none !important;
+      border: none !important;
+      background: transparent !important;
+    }
+
+    #dayTabs .day-tab.active,
+    #dayTabs .day-tab.active .day-tab-label{
+      color:#ffffff;
+    }
+
+    #dayTabs.day-tabs.dragging .day-tab.active,
+    #dayTabs.day-tabs.dragging .day-tab.active .day-tab-label{
+      color:#334155 !important;
+    }
+
+    #dayTabs.day-tabs.dragging .day-tab.drag-active,
+    #dayTabs.day-tabs.dragging .day-tab.drag-active .day-tab-label{
+      color:#ffffff !important;
+    }
+
+    #dayTabs .day-tab-indicator,
+    #dayTabs.day-tabs.dragging .day-tab-indicator{
+      top: 6px !important;
+      bottom: 6px !important;
+      border-radius: 999px !important;
+    }
+
+    #dayTabs.day-tabs.dragging .day-tab-indicator{
+      filter: none !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.28),
+        inset 0 0 0 1px rgba(255,255,255,.08),
+        inset 0 -1px 0 rgba(0,0,0,.22),
+        inset 1px 0 0 rgba(255,255,255,.10),
+        inset -1px 0 0 rgba(255,255,255,.08),
+        0 0 0 1px rgba(255,255,255,.08),
+        0 11px 24px rgba(15,23,42,.22),
+        0 3px 9px rgba(15,23,42,.12) !important;
+    }
+
+
+    /* --- Patch v14: remove glossy highlight from day dock pill and match other dark buttons --- */
+    #dayTabs .day-tab-indicator,
+    #dayTabs.day-tabs.dragging .day-tab-indicator{
+      background: var(--dark-glass-surface) !important;
+      border: 1px solid var(--dark-glass-edge) !important;
+      backdrop-filter: blur(26px) saturate(180%) brightness(1.02) !important;
+      -webkit-backdrop-filter: blur(26px) saturate(180%) brightness(1.02) !important;
+      filter: none !important;
+      box-shadow:
+        0 12px 26px rgba(15,23,42,.22),
+        0 3px 9px rgba(15,23,42,.10),
+        inset 0 1px 0 rgba(255,255,255,.05),
+        inset 0 -1px 0 rgba(15,23,42,.15) !important;
+    }
+
+
+    /* --- Patch v15: make first/last day pill geometry match bottom navigation more closely --- */
+    #dayTabs.day-tabs{
+      --day-tab-side-padding: 10px;
+      --day-indicator-scale: 1.08;
+      --day-indicator-edge-gap: 6px;
+      padding: 6px var(--day-tab-side-padding) !important;
+      border-radius: 999px !important;
+    }
+
+    #dayTabs .day-tab-indicator,
+    #dayTabs.day-tabs.dragging .day-tab-indicator{
+      top: 6px !important;
+      bottom: 6px !important;
+      border-radius: 999px !important;
+    }
+
+    @media (max-width: 480px){
+      #dayTabs.day-tabs{
+        --day-tab-side-padding: 8px;
+        --day-indicator-scale: 1.06;
+        --day-indicator-edge-gap: 5px;
+      }
+    }
+
+
+    /* --- Patch v16: align first/last day pill geometry with bottom nav --- */
+    #dayTabs.day-tabs{
+      --day-tab-side-padding: 20px;
+      --day-tab-height: 60px;
+      --day-indicator-scale: 1.13;
+      --day-indicator-edge-gap: 8px;
+      padding: 8px var(--day-tab-side-padding) !important;
+      border-radius: 999px !important;
+    }
+
+    #dayTabs .day-tab{
+      flex: 0 0 calc((100% - (var(--day-tab-side-padding) * 2)) / 4) !important;
+      width: calc((100% - (var(--day-tab-side-padding) * 2)) / 4) !important;
+      min-width: calc((100% - (var(--day-tab-side-padding) * 2)) / 4) !important;
+      max-width: calc((100% - (var(--day-tab-side-padding) * 2)) / 4) !important;
+      min-height: var(--day-tab-height) !important;
+      height: var(--day-tab-height) !important;
+    }
+
+    #dayTabs .day-tab-indicator,
+    #dayTabs.day-tabs.dragging .day-tab-indicator{
+      top: 8px !important;
+      bottom: 8px !important;
+      border-radius: 999px !important;
+    }
+
+    @media (max-width: 480px){
+      #dayTabs.day-tabs{
+        --day-tab-side-padding: 20px;
+        --day-tab-height: 56px;
+        --day-indicator-scale: 1.13;
+        --day-indicator-edge-gap: 8px;
+        padding: 8px var(--day-tab-side-padding) !important;
+      }
+    }
+
+
+    /* --- Patch v17: make endpoint pill curvature match bottom nav by matching endpoint geometry --- */
+    #dayTabs.day-tabs{
+      --day-tab-side-padding: 20px !important;
+      --day-tab-height: 60px !important;
+      --day-indicator-scale: 1.44 !important;
+      --day-indicator-edge-gap: 0px !important;
+      padding: 8px 20px !important;
+      border-radius: 999px !important;
+    }
+
+    #dayTabs .day-tab{
+      flex: 0 0 calc((100% - 40px) / 4) !important;
+      width: calc((100% - 40px) / 4) !important;
+      min-width: calc((100% - 40px) / 4) !important;
+      max-width: calc((100% - 40px) / 4) !important;
+      min-height: 60px !important;
+      height: 60px !important;
+    }
+
+    #dayTabs .day-tab-indicator,
+    #dayTabs.day-tabs.dragging .day-tab-indicator{
+      top: 8px !important;
+      bottom: 8px !important;
+      border-radius: 999px !important;
+    }
+
+    @media (max-width: 480px){
+      #dayTabs.day-tabs{
+        --day-tab-side-padding: 20px !important;
+        --day-tab-height: 56px !important;
+        --day-indicator-scale: 1.44 !important;
+        --day-indicator-edge-gap: 0px !important;
+        padding: 8px 20px !important;
+      }
+      #dayTabs .day-tab{
+        flex: 0 0 calc((100% - 40px) / 4) !important;
+        width: calc((100% - 40px) / 4) !important;
+        min-width: calc((100% - 40px) / 4) !important;
+        max-width: calc((100% - 40px) / 4) !important;
+        min-height: 56px !important;
+        height: 56px !important;
+      }
+    }
+
+
+    /* --- Patch v18: make AI chat bubble horizontal instead of vertical --- */
+    .ai-coach-bubble{
+      right:70px !important;
+      bottom:10px !important;
+      min-width:168px;
+      max-width:min(320px, calc(100vw - 110px));
+      width:max-content;
+      padding:10px 14px !important;
+      border-radius:18px !important;
+      display:block;
+      writing-mode:horizontal-tb !important;
+      text-orientation:mixed !important;
+      white-space:normal !important;
+      word-break:break-word !important;
+      overflow-wrap:anywhere;
+      text-align:left;
+      line-height:1.5 !important;
+    }
+
+    @media (max-width:480px){
+      .ai-coach-bubble{
+        min-width:150px;
+        max-width:min(280px, calc(100vw - 96px));
+      }
+    }
+
+
+    /* --- Patch v19: reduce weekly-plan dark pill width to about 60% of current length --- */
+    #dayTabs.day-tabs{
+      --day-indicator-scale: 0.86 !important;
+      --day-drag-extra-scale: 0.06 !important;
+    }
+
+    @media (max-width: 480px){
+      #dayTabs.day-tabs{
+        --day-indicator-scale: 0.86 !important;
+        --day-drag-extra-scale: 0.06 !important;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -1214,6 +3039,37 @@
       </div>
 
       <div class="card">
+        <h2>今天状态不一样？</h2>
+        <div class="softbox">睡眠、酸痛或器材临时变化时，可以让 AI 按当前计划给今天做一个轻量调整，不会覆盖周计划模板。</div>
+        <div class="grid2">
+          <div>
+            <label class="label">昨晚睡眠</label>
+            <select id="aiDailySleep"><option>好</option><option selected>一般</option><option>差</option></select>
+          </div>
+          <div>
+            <label class="label">身体酸痛</label>
+            <select id="aiDailySoreness"><option selected>无</option><option>轻微</option><option>明显</option></select>
+          </div>
+        </div>
+        <div class="grid2">
+          <div>
+            <label class="label">今天时间</label>
+            <select id="aiDailyTime"><option>20分钟</option><option selected>40分钟</option><option>60分钟</option></select>
+          </div>
+          <div>
+            <label class="label">器材</label>
+            <select id="aiDailyGear"><option selected>完整</option><option>只有哑铃</option><option>只有弹力绳</option><option>无器械</option></select>
+          </div>
+        </div>
+        <label class="label">精神状态</label>
+        <select id="aiDailyEnergy"><option>好</option><option selected>一般</option><option>累</option></select>
+        <label class="label">备注</label>
+        <textarea id="aiDailyNotes" placeholder="例如：肩前侧有点紧，今天时间比较赶"></textarea>
+        <button class="btn-outline full" id="aiDailyAdjustBtn" type="button">让 AI 调整今天训练</button>
+        <div id="aiDailyAdjustResult" class="softbox" style="display:none;"></div>
+      </div>
+
+      <div class="card">
         <h2>睡眠与恢复建议</h2>
         <div class="softbox">推荐目标：平均睡眠尽量拉到 <b>7.5小时以上</b>。</div>
         <div class="softbox">推荐入睡：尽量稳定在 <b>01:00–01:30</b>，再慢慢提前。</div>
@@ -1264,6 +3120,14 @@
     <section id="record" class="section">
       <div class="card">
         <h2>本周反馈填写</h2>
+
+        <div class="softbox">
+          <b>用一句话填写</b>
+          <div class="help" style="margin-top:4px;">把本周体重、睡眠、引体、饮食和状态直接写成一句话，AI 会尽量帮你填入空字段。</div>
+          <textarea id="aiNaturalLogInput" placeholder="例如：这周体重55.1、54.6、55.9，平均睡眠7小时，引体最高6个，总量19，饮食一般，周五周六没器材。" style="margin-top:10px;"></textarea>
+          <button class="btn-outline full" id="aiParseLogBtn" type="button">AI 解析并填入</button>
+          <div class="help" id="aiNaturalLogStatus"></div>
+        </div>
 
         <label class="label">周次</label>
         <input id="weekLabel" placeholder="例如：4月第1周 / 2026-04-01 至 2026-04-07" />
@@ -1328,17 +3192,44 @@
           <button class="btn-outline" id="copyBtn">复制给教练</button>
         </div>
 
+        <button class="btn-outline full" id="aiWeeklyBtn" type="button">生成 AI 教练反馈</button>
+        <button class="btn-outline full" id="aiNextPlanBtn" type="button">根据本周情况生成下周计划</button>
+        <button class="btn-outline full" id="restoreDraftBackupBtn" type="button" style="display:none;">恢复上次被覆盖前的草稿</button>
         <button class="btn-outline full" id="clearBtn">清空当前填写</button>
         <div class="help">当前内容会自动保存在本机浏览器。换手机、清浏览器数据，记录可能会丢。</div>
       </div>
 
-      <div class="card">
-        <h2>复制预览</h2>
-        <div class="softbox"><pre id="summaryPreview"></pre></div>
+      <pre id="summaryPreview" style="display:none"></pre>
+
+      <div class="card" id="aiWeeklyFeedbackCard" style="display:none;">
+        <h2>AI 教练反馈</h2>
+        <div id="aiWeeklyFeedbackContent" class="softbox">还没有生成反馈。</div>
+        <div class="btns">
+          <button class="btn-outline" id="copyAiWeeklyBtn" type="button">复制 AI 反馈</button>
+          <button class="btn-outline" id="saveAiWeeklyBtn" type="button">保存到历史记录</button>
+        </div>
+      </div>
+
+      <div class="card" id="aiNextPlanCard" style="display:none;">
+        <h2>AI 下周计划预览</h2>
+        <div id="aiNextPlanContent" class="softbox">还没有生成计划。</div>
+        <div class="btns">
+          <button class="btn" id="adoptAiPlanBtn" type="button">采用 AI 计划</button>
+          <button class="btn-outline" id="copyAiPlanBtn" type="button">复制计划</button>
+        </div>
+        <button class="btn-outline full" id="regenerateAiPlanBtn" type="button">重新生成</button>
+        <button class="btn-danger full" id="cancelAiPlanBtn" type="button">取消预览</button>
       </div>
     </section>
 
     <section id="history" class="section">
+      <div class="card">
+        <h2>AI 趋势观察</h2>
+        <div class="softbox">根据最近周记录、训练日历和当前计划完成度，观察体重、睡眠和训练趋势。</div>
+        <button class="btn-outline full" id="aiTrendBtn" type="button">分析最近记录</button>
+        <div id="aiTrendResult" class="softbox" style="display:none;"></div>
+      </div>
+
       <div class="card">
         <h2>训练日历</h2>
         <div class="softbox">按月查看每天训练了什么。点击某一天可以查看完成动作、填写体重 / 睡眠 / 备注，并保存在本地与云端同步。</div>
@@ -1397,7 +3288,11 @@
           <button class="btn-outline" type="button" data-timer-preset="120">120s</button>
         </div>
 
-        <div class="timer-value" id="timerDisplay">01:00</div>
+        <div class="timer-adjust-row">
+          <button class="timer-adjust-btn" id="timerMinus10Btn" type="button" aria-label="减少10秒">−</button>
+          <div class="timer-value" id="timerDisplay">01:00</div>
+          <button class="timer-adjust-btn" id="timerPlus10Btn" type="button" aria-label="增加10秒">+</button>
+        </div>
         <div class="tool-row-3">
           <button class="btn" id="timerStartBtn">开始</button>
           <button class="btn-outline" id="timerPauseBtn">暂停</button>
@@ -1406,6 +3301,61 @@
         <div class="help">建议组间休息可先设 60–90 秒，主力动作可设 90–120 秒。</div>
       </div>
 
+
+      <div class="card">
+        <h2>AI 教练设置</h2>
+        <div class="softbox">开启后，AI 会在你完成训练动作、保存周记录或生成下周计划时，像教练一样给出反馈。桌宠会用短气泡提醒，不会打断当前操作。</div>
+        <div class="tool-row" style="margin-top:12px;">
+          <button class="btn-outline" id="aiEnabledBtn" type="button">AI 教练：关闭</button>
+          <button class="btn-outline" id="aiPetEnabledBtn" type="button">桌宠反馈：关闭</button>
+        </div>
+        <div class="tool-row" style="margin-top:10px;">
+          <button class="btn-outline" id="aiBubbleEnabledBtn" type="button">聊天气泡：关闭</button>
+          <button class="btn-outline" id="aiQuietModeBtn" type="button">安静模式：关闭</button>
+        </div>
+        <div class="grid2">
+          <div>
+            <label class="label">API 调用模式</label>
+            <select id="aiApiMode"><option value="direct">前端直连 DeepSeek</option><option value="proxy">代理接口</option></select>
+          </div>
+          <div>
+            <label class="label">模型名称</label>
+            <select id="aiModel"><option value="deepseek-v4-flash">deepseek-v4-flash</option><option value="deepseek-v4-pro">deepseek-v4-pro</option></select>
+          </div>
+        </div>
+        <label class="label ai-direct-field">API Base URL</label>
+        <input class="ai-direct-field" id="aiApiBaseUrl" placeholder="https://api.deepseek.com" />
+        <label class="label ai-direct-field">API Key</label>
+        <div class="tool-row ai-direct-field">
+          <input id="aiApiKey" type="password" placeholder="sk-..." />
+          <button class="btn-outline" id="aiToggleKeyBtn" type="button">显示</button>
+        </div>
+        <button class="btn-outline full ai-direct-field" id="aiClearKeyBtn" type="button">清除 Key</button>
+        <label class="label ai-proxy-field">代理 URL</label>
+        <input class="ai-proxy-field" id="aiProxyUrl" placeholder="https://your-domain.com/api/ai-coach" />
+        <div class="grid2">
+          <div>
+            <label class="label">反馈长度</label>
+            <select id="aiFeedbackLength"><option value="short">短反馈</option><option value="medium">中等反馈</option><option value="detailed">详细分析</option></select>
+          </div>
+          <div>
+            <label class="label">教练语气</label>
+            <select id="aiCoachTone"><option value="direct_warm">直接但鼓励</option><option value="strict">严格教练</option><option value="gentle">温和陪练</option><option value="funny">轻松一点</option></select>
+          </div>
+        </div>
+        <label class="label">AI 教练图标</label>
+        <div class="tool-row" style="margin-top:6px;">
+          <button class="btn-outline" id="uploadAiPetIconBtn" type="button">上传图标</button>
+          <button class="btn-outline" id="clearAiPetIconBtn" type="button">恢复默认图标</button>
+        </div>
+        <input type="file" id="aiPetIconFileInput" accept="image/*" style="display:none" />
+        <div class="help" id="aiPetIconStatus">当前图标：默认</div>
+        <div class="btns">
+          <button class="btn-outline" id="aiTestBtn" type="button">测试 AI 连接</button>
+          <button class="btn" id="aiSaveSettingsBtn" type="button">保存 AI 设置</button>
+        </div>
+        <div class="help" id="aiSettingsStatus">AI 状态：未配置</div>
+      </div>
 
       <div class="card">
         <h2>云同步（Supabase）</h2>
@@ -1420,7 +3370,9 @@
         </div>
         <div class="tool-row" style="margin-top:12px;">
           <button class="btn-outline" id="cloudAutoSyncBtn">自动同步：关闭</button>
+          <button class="btn-outline" id="aiSyncKeyBtn" type="button">同步key：开启</button>
         </div>
+        <div class="help">API Key 会随你的云端存档同步。请只在你自己的账号和设备中使用，不要把包含 Key 的备份文件或云端账号共享给他人。公开部署网页时，仍建议使用代理接口模式。</div>
         <div class="help" id="cloudStatusText">云端状态：未登录</div>
         <div class="help" id="cloudSyncHint">提示：本地导出 JSON 备份建议继续保留。</div>
         <div class="help" id="cloudAutoSyncHint">自动同步关闭时，仍可手动同步；开启后，本机数据变化会在已登录状态下自动上传，不会自动从云端覆盖本机。</div>
@@ -1441,38 +3393,50 @@
         <h2>工具</h2>
         <div class="softbox">这个网页是离线可用的单文件版本。首次打开后，后续也能继续在浏览器里使用。</div>
         <button class="btn full" id="exportBtn">导出所有记录（JSON）</button>
+        <div class="help tool-card-help">导出的 JSON 可能包含 AI API Key，请不要发送给他人。</div>
         <button class="btn-outline full" id="importBtn">导入记录（JSON）</button>
         <input type="file" id="importFile" accept="application/json" style="display:none" />
         <button class="btn-outline full" id="resetPlanCheckBtn">清空全部训练打卡</button>
         <button class="btn-outline full" id="resetAllBtn">清空全部本地记录</button>
-        <div class="help">建议把这个网页加入手机主屏幕，像小应用一样打开会更方便。</div>
-      </div>
-
-      <div class="card">
-        <h2>iPhone 主屏幕使用建议</h2>
-        <div class="softbox">
-          第一次请务必用 Safari 打开部署后的固定网址，再点“分享 → 添加到主屏幕”。<br />
-          以后都从主屏幕打开，不要从聊天预览、文件预览或临时网页里打开，否则本地记录可能看起来像“丢了”。<br />
-          这套网页仍然主要保存在本机浏览器里，建议继续保留“导出所有记录（JSON）”作为备份。
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>使用说明</h2>
-        <div class="softbox">
-          1. 先在“计划”里看当天训练。<br />
-          2. 每个动作右侧都能点一下打勾。<br />
-          3. 每周固定一天去“记录”页填本周数据。<br />
-          4. 点“保存本周（含打卡）”后，本周打卡摘要会跟周记录一起保存。<br />
-          5. 历史记录里会显示本周训练完成百分比和总打卡统计。<br />
-          6. 点“复制给教练”，把内容直接发给我。
-        </div>
+        <div class="help tool-card-help">建议把这个网页加入手机主屏幕，像小应用一样打开会更方便。</div>
       </div>
 
       <div class="help" id="appVersionText" style="text-align:center;margin-top:6px;">当前版本：-</div>
     </section>
 
     <div class="footer-space"></div>
+  </div>
+
+  <div id="aiCoachPet" class="ai-coach-pet" aria-live="polite">
+    <div id="aiCoachBubble" class="ai-coach-bubble" style="display:none;"></div>
+    <button id="aiCoachAvatar" class="ai-coach-avatar" type="button" aria-label="AI教练">
+      <span class="ai-coach-face">🏋️</span>
+    </button>
+  </div>
+
+  <div id="aiCoachPanelModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:998;align-items:center;justify-content:center;padding:20px;">
+    <div style="width:min(520px,100%);max-height:min(80vh,760px);overflow:auto;background:rgba(255,255,255,.94);backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);border-radius:24px;padding:22px;box-shadow:0 20px 50px rgba(15,23,42,.2);">
+      <div id="aiCoachPanelContent"></div>
+      <div class="btns">
+        <button id="aiPanelHistoryBtn" class="btn-outline" type="button">查看反馈历史</button>
+        <button id="aiPanelQuietBtn" class="btn-outline" type="button">安静模式</button>
+      </div>
+      <button id="closeAiCoachPanelBtn" class="btn full" type="button">关闭</button>
+    </div>
+  </div>
+
+  <div id="historyRecordModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:998;align-items:center;justify-content:center;padding:20px;">
+    <div style="width:min(560px,100%);max-height:min(82vh,760px);overflow:auto;background:rgba(255,255,255,.94);backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);border-radius:24px;padding:22px;box-shadow:0 20px 50px rgba(15,23,42,.2);">
+      <div id="historyRecordModalContent"></div>
+      <div class="btns">
+        <button id="copyHistoryJsonBtn" class="btn-outline" type="button">复制 JSON</button>
+        <button id="loadHistoryToFormBtn" class="btn-outline" type="button">载入到当前填写</button>
+      </div>
+      <div class="btns">
+        <button id="deleteHistoryFromModalBtn" class="btn-danger" type="button">删除记录</button>
+        <button id="closeHistoryRecordModalBtn" class="btn" type="button">关闭</button>
+      </div>
+    </div>
   </div>
 
   <div id="planGuideModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:998;align-items:center;justify-content:center;padding:20px;">
@@ -1496,7 +3460,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.05.06-38-cache-first-gifs";
+    const APP_VERSION = "v2026.05.07-65-day-pill-width-60pct";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const DAILY_LOGS_KEY = "gain-daily-logs";
     const LAST_CLOUD_SYNC_AT_KEY = "gain-last-cloud-sync-at";
@@ -1514,6 +3478,14 @@
     const TIMER_ALARM_PENDING_KEY = "portable-timer-alarm-pending";
     const CLOUD_AUTO_SYNC_KEY = "supabase-auto-sync-enabled";
     const LOCAL_STATE_META_KEY = "gain-local-state-meta";
+    const AI_SETTINGS_KEY = "gain-ai-settings";
+    const AI_LAST_FEEDBACK_KEY = "gain-ai-last-feedback";
+    const AI_FEEDBACK_HISTORY_KEY = "gain-ai-feedback-history";
+    const AI_PET_STATE_KEY = "gain-ai-pet-state";
+    const AI_PET_ICON_KEY = "gain-ai-pet-icon";
+    const AI_MILESTONE_KEY = "gain-ai-milestones";
+    const FORM_DRAFT_BACKUP_KEY = "gain-tracker-form-draft-backup";
+    const AI_BUBBLE_MIN_INTERVAL = 10000;
 
     const SUPABASE_URL = "https://bzzbdchqrvwdaenydoqm.supabase.co";
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_NshT086od8vjfXFIhGvrkw_DgqzzXAL";
@@ -1929,6 +3901,18 @@
     let timerAudioUnlocked = false;
     let timerFallbackBeepLoop = null;
     let timerAlarmSession = 0;
+    let timerHoldDelay = 0;
+    let timerHoldInterval = 0;
+    let aiBubbleHideTimer = 0;
+    let aiPendingFeedbackTimer = 0;
+    let latestAiWeeklyResult = null;
+    let latestAiPlanResult = null;
+    let latestAiDailyAdjust = null;
+    let latestAiTrendResult = null;
+    let activeHistoryRecordId = 0;
+    let planSwipeStartX = 0;
+    let planSwipeStartY = 0;
+    let planSwipeTracking = false;
 
     function $(id){
       return document.getElementById(id);
@@ -1941,6 +3925,484 @@
         .replace(/>/g,"&gt;")
         .replace(/"/g,"&quot;")
         .replace(/'/g,"&#39;");
+    }
+
+    function safeJsonParse(text, fallback){
+      try{
+        return JSON.parse(text);
+      }catch(e){
+        return fallback;
+      }
+    }
+
+    function getDefaultAiSettings(){
+      return {
+        enabled: false,
+        provider: "deepseek",
+        apiMode: "direct",
+        apiBaseUrl: "https://api.deepseek.com",
+        proxyUrl: "",
+        apiKey: "",
+        model: "deepseek-v4-flash",
+        temperature: 0.7,
+        maxTokens: 500,
+        deskPetEnabled: true,
+        bubbleEnabled: true,
+        soundEnabled: false,
+        autoFeedbackOnCheck: true,
+        autoFeedbackOnDayComplete: true,
+        autoWeeklyAnalysis: true,
+        autoPlanGeneration: false,
+        coachTone: "direct_warm",
+        feedbackLength: "short",
+        quietMode: false,
+        bubbleDurationMs: 4000,
+        syncApiKeyToCloud: true
+      };
+    }
+
+    function normalizeAiSettings(raw){
+      const defaults = getDefaultAiSettings();
+      const next = { ...defaults, ...(raw && typeof raw === "object" ? raw : {}) };
+      next.enabled = !!next.enabled;
+      next.deskPetEnabled = next.deskPetEnabled !== false;
+      next.bubbleEnabled = next.bubbleEnabled !== false;
+      next.quietMode = !!next.quietMode;
+      next.autoFeedbackOnCheck = next.autoFeedbackOnCheck !== false;
+      next.autoFeedbackOnDayComplete = next.autoFeedbackOnDayComplete !== false;
+      next.autoWeeklyAnalysis = next.autoWeeklyAnalysis !== false;
+      next.syncApiKeyToCloud = next.syncApiKeyToCloud !== false;
+      next.apiMode = next.apiMode === "proxy" ? "proxy" : "direct";
+      next.apiBaseUrl = String(next.apiBaseUrl || defaults.apiBaseUrl).trim() || defaults.apiBaseUrl;
+      next.proxyUrl = String(next.proxyUrl || "").trim();
+      next.apiKey = String(next.apiKey || "").trim();
+      next.model = ["deepseek-v4-flash","deepseek-v4-pro"].includes(next.model) ? next.model : defaults.model;
+      next.coachTone = ["direct_warm","strict","gentle","funny"].includes(next.coachTone) ? next.coachTone : defaults.coachTone;
+      next.feedbackLength = ["short","medium","detailed"].includes(next.feedbackLength) ? next.feedbackLength : defaults.feedbackLength;
+      next.temperature = Number.isFinite(Number(next.temperature)) ? Number(next.temperature) : defaults.temperature;
+      next.maxTokens = Number.isFinite(Number(next.maxTokens)) ? Number(next.maxTokens) : defaults.maxTokens;
+      next.bubbleDurationMs = Math.max(1500, Math.min(10000, Number(next.bubbleDurationMs) || defaults.bubbleDurationMs));
+      return next;
+    }
+
+    function getAiSettings(){
+      return normalizeAiSettings(safeJsonParse(localStorage.getItem(AI_SETTINGS_KEY) || "{}", {}));
+    }
+
+    function getAiSettingsForBackup(){
+      const settings = getAiSettings();
+      if(!settings.syncApiKeyToCloud){
+        return { ...settings, apiKey: "" };
+      }
+      return settings;
+    }
+
+    function saveAiSettings(settings, options = {}){
+      localStorage.setItem(AI_SETTINGS_KEY, JSON.stringify(normalizeAiSettings(settings)));
+      updateAiSettingsUi();
+      updateAiPetVisibility();
+      queueAutoSync("AI 设置更新");
+      if(options.bubble){
+        showCoachBubble("AI 教练设置已保存。", "normal", 2600, { force:true });
+      }
+    }
+
+    function getAiFeedbackHistory(){
+      const list = safeJsonParse(localStorage.getItem(AI_FEEDBACK_HISTORY_KEY) || "[]", []);
+      return Array.isArray(list) ? list : [];
+    }
+
+    function saveAiFeedback(feedback, meta = {}){
+      const item = {
+        type: feedback?.type || "coach_feedback",
+        title: feedback?.title || "AI 教练",
+        message: feedback?.message || feedback?.coach_message || feedback?.summary || "",
+        meta,
+        createdAt: new Date().toISOString()
+      };
+      localStorage.setItem(AI_LAST_FEEDBACK_KEY, JSON.stringify(item));
+      const list = getAiFeedbackHistory();
+      list.unshift(item);
+      localStorage.setItem(AI_FEEDBACK_HISTORY_KEY, JSON.stringify(list.slice(0, 50)));
+      queueAutoSync("AI 反馈更新");
+      return item;
+    }
+
+    function getAiLastFeedback(){
+      return safeJsonParse(localStorage.getItem(AI_LAST_FEEDBACK_KEY) || "null", null);
+    }
+
+    function getAiPetState(){
+      return {
+        visible:true,
+        muted:false,
+        collapsed:false,
+        position:"right-bottom",
+        lastBubbleAt:0,
+        ...safeJsonParse(localStorage.getItem(AI_PET_STATE_KEY) || "{}", {})
+      };
+    }
+
+    function setAiPetState(petState){
+      localStorage.setItem(AI_PET_STATE_KEY, JSON.stringify({ ...getAiPetState(), ...(petState || {}) }));
+    }
+
+    function updateAiPetVisibility(){
+      const settings = getAiSettings();
+      const pet = $("aiCoachPet");
+      updateAiPetAvatar();
+      if(!pet) return;
+      pet.classList.toggle("show", !!(settings.enabled && settings.deskPetEnabled));
+    }
+
+    function showCoachBubble(message, priority = "normal", durationMs = 4000, options = {}){
+      const text = String(message || "").trim();
+      if(!text) return;
+      const settings = getAiSettings();
+      if(!options.force && (!settings.enabled || !settings.deskPetEnabled || !settings.bubbleEnabled || settings.quietMode)) return;
+      const pet = $("aiCoachPet");
+      const bubble = $("aiCoachBubble");
+      if(!pet || !bubble) return;
+
+      const state = getAiPetState();
+      const now = Date.now();
+      const canBypass = priority === "high" || priority === "risk" || options.force;
+      if(!canBypass && now - Number(state.lastBubbleAt || 0) < AI_BUBBLE_MIN_INTERVAL){
+        clearTimeout(aiPendingFeedbackTimer);
+        aiPendingFeedbackTimer = setTimeout(() => {
+          showCoachBubble(text, priority, durationMs, { ...options, force:true });
+        }, AI_BUBBLE_MIN_INTERVAL - (now - Number(state.lastBubbleAt || 0)) + 50);
+        return;
+      }
+
+      setAiPetState({ lastBubbleAt: now });
+      updateAiPetVisibility();
+      bubble.textContent = text;
+      bubble.style.display = "block";
+      requestAnimationFrame(() => bubble.classList.add("show"));
+      pet.classList.add("talking");
+      clearTimeout(aiBubbleHideTimer);
+      aiBubbleHideTimer = setTimeout(() => {
+        bubble.classList.remove("show");
+        setTimeout(() => {
+          if(!bubble.classList.contains("show")) bubble.style.display = "none";
+        }, 240);
+        pet.classList.remove("talking");
+      }, Math.max(1500, durationMs || settings.bubbleDurationMs || 4000));
+    }
+
+    function updateAiSettingsUi(){
+      const settings = getAiSettings();
+      const setBtn = (id, label, enabled) => {
+        const btn = $(id);
+        if(!btn) return;
+        btn.textContent = `${label}：${enabled ? "开启" : "关闭"}`;
+        btn.className = enabled ? "btn" : "btn-outline";
+      };
+      setBtn("aiEnabledBtn", "AI 教练", settings.enabled);
+      setBtn("aiPetEnabledBtn", "桌宠反馈", settings.deskPetEnabled);
+      setBtn("aiBubbleEnabledBtn", "聊天气泡", settings.bubbleEnabled);
+      setBtn("aiQuietModeBtn", "安静模式", settings.quietMode);
+      const syncBtn = $("aiSyncKeyBtn");
+      if(syncBtn){
+        syncBtn.textContent = `同步key：${settings.syncApiKeyToCloud ? "开启" : "关闭"}`;
+        syncBtn.className = settings.syncApiKeyToCloud ? "btn" : "btn-outline";
+      }
+      const fields = {
+        aiApiMode: settings.apiMode,
+        aiApiBaseUrl: settings.apiBaseUrl,
+        aiProxyUrl: settings.proxyUrl,
+        aiApiKey: settings.apiKey,
+        aiModel: settings.model,
+        aiFeedbackLength: settings.feedbackLength,
+        aiCoachTone: settings.coachTone
+      };
+      Object.entries(fields).forEach(([id, value]) => {
+        const el = $(id);
+        if(el && el.value !== String(value || "")) el.value = String(value || "");
+      });
+      document.querySelectorAll(".ai-direct-field").forEach((el) => {
+        el.style.display = settings.apiMode === "direct" ? "" : "none";
+      });
+      document.querySelectorAll(".ai-proxy-field").forEach((el) => {
+        el.style.display = settings.apiMode === "proxy" ? "" : "none";
+      });
+      const status = $("aiSettingsStatus");
+      if(status){
+        const ready = settings.apiMode === "proxy" ? !!settings.proxyUrl : !!settings.apiKey;
+        status.textContent = settings.enabled
+          ? `AI 状态：已开启 · ${ready ? "接口已填写" : "等待填写接口"}`
+          : "AI 状态：已关闭";
+      }
+    }
+
+    function collectAiSettingsFromUi(){
+      const current = getAiSettings();
+      return normalizeAiSettings({
+        ...current,
+        apiMode: $("aiApiMode")?.value || current.apiMode,
+        apiBaseUrl: $("aiApiBaseUrl")?.value || current.apiBaseUrl,
+        proxyUrl: $("aiProxyUrl")?.value || "",
+        apiKey: $("aiApiKey")?.value || "",
+        model: $("aiModel")?.value || current.model,
+        feedbackLength: $("aiFeedbackLength")?.value || current.feedbackLength,
+        coachTone: $("aiCoachTone")?.value || current.coachTone
+      });
+    }
+
+    function buildAiCoachSystemPrompt(settings){
+      const toneMap = {
+        direct_warm:"语气直接但温暖，像认真负责的教练。",
+        strict:"语气更严格，强调执行力和动作质量。",
+        gentle:"语气温和，更多鼓励，少批评。",
+        funny:"语气轻松一点，但不要油腻，不要卖萌过度。"
+      };
+      return [
+        "你是一个真实的中文健身教练，负责给用户提供训练反馈、鼓励和计划调整建议。",
+        "用户目标以增肌、增重、提升引体向上、改善上肢体型为主。",
+        "你说话要像真人教练，不要像客服。语气直接、简短、有鼓励，但不要过度夸张。",
+        "训练中即时反馈必须短，不超过 60 个中文字符，除非任务要求详细分析。",
+        "如果发现睡眠不足、疼痛、过度训练、动作风险，要优先提醒安全和恢复。",
+        "不要编造用户没有提供的数据。不要给医疗诊断；疼痛持续时建议停止相关动作并咨询专业人士。",
+        toneMap[settings.coachTone] || toneMap.direct_warm,
+        "必须返回合法 JSON，不要返回 Markdown。"
+      ].join("\n");
+    }
+
+    function buildAiCoachUserPrompt(task, payload, settings){
+      const formats = {
+        exercise_completed: '{"type":"exercise_completed","title":"动作完成","message":"","priority":"normal","durationMs":3000}',
+        day_complete: '{"type":"day_complete","title":"今日训练完成","message":"","praise":"","warning":"","recovery":"","durationMs":5000}',
+        weekly_analysis: '{"type":"weekly_analysis","title":"本周教练反馈","summary":"","progress":[],"problems":[],"next_week_advice":[],"coach_message":""}',
+        next_week_plan: '{"type":"next_week_plan","title":"下周训练计划","plan":{"version":1,"days":[]},"changes":[],"reason":""}',
+        daily_adjust: '{"type":"daily_adjust","title":"今日训练调整","mode":"normal","message":"","adjustedItems":[],"warnings":[],"recovery":""}',
+        natural_language_log: '{"type":"natural_language_log","formPatch":{},"confidence":"medium","missingFields":[],"message":""}',
+        trend_analysis: '{"type":"trend_analysis","title":"AI 趋势观察","observations":[],"risks":[],"suggestions":[],"coach_message":""}',
+        test_connection: '{"type":"test_connection","title":"连接测试","message":"AI 教练连接成功。"}'
+      };
+      return [
+        `任务类型：${task}`,
+        `反馈长度：${settings.feedbackLength}`,
+        "用户当前数据：",
+        JSON.stringify(payload || {}, null, 2),
+        "输出要求：必须返回 JSON；不要 Markdown；不要解释 JSON 外内容；语气像真实中文健身教练。",
+        `返回格式参考：${formats[task] || "{}"}`
+      ].join("\n");
+    }
+
+    const LOCAL_COACH_LINES = {
+      exercise_completed:["可以，这组完成得不错。","很好，继续稳住动作质量。","这个动作拿下了，下一项别急。","做得好，后面保持节奏。","主项之后别乱冲，动作干净更重要。"],
+      main_lift_completed:["主项完成了，今天训练已经有质量了。","这组很关键，今天的训练主线立住了。","可以，核心动作拿下，后面做补强就行。"],
+      half_done:["训练已经过半，后面保持质量。","前半段做得不错，后面别乱赶。","主项差不多完成了，剩下动作稳住。"],
+      day_complete:["今天训练闭环了，做得很好。","主项和补强都完成了，这次训练很完整。","今天可以收工，接下来重点是吃和睡。"]
+    };
+
+    function pickLocalCoachLine(bucket){
+      const arr = LOCAL_COACH_LINES[bucket] || LOCAL_COACH_LINES.exercise_completed;
+      return arr[Math.floor(Math.random() * arr.length)] || "继续稳住动作质量。";
+    }
+
+    function getFallbackCoachFeedback(task, payload = {}){
+      if(task === "exercise_completed"){
+        const percent = Number(payload.progressPercent || 0);
+        const bucket = percent >= 100 ? "day_complete" : percent >= 50 ? "half_done" : "exercise_completed";
+        return { type:"exercise_completed", title:"动作完成", message:pickLocalCoachLine(bucket), priority:"normal", durationMs:3000 };
+      }
+      if(task === "day_complete"){
+        return { type:"day_complete", title:"今日训练完成", message:"今天训练闭环了。接下来吃和睡要跟上，不然刺激就浪费了。", praise:"执行力不错。", warning:"不建议额外加练，先保证恢复。", recovery:"训练后补蛋白和主食。", durationMs:5000 };
+      }
+      if(task === "weekly_analysis"){
+        return { type:"weekly_analysis", title:"本周教练反馈", summary:"本周记录已整理。重点看完成率、体重趋势和恢复是否稳定。", progress:["能完成的训练先保持节奏","打卡数据已经可以用于复盘"], problems:["饮食和睡眠字段不完整时，判断会偏保守"], next_week_advice:["下周训练量先别大幅增加","每天把主食和蛋白补稳","睡眠不足日降低强度"], coach_message:"方向先稳住，别急着堆量，把吃、睡、动作质量做好。" };
+      }
+      if(task === "next_week_plan"){
+        const current = getPlanTemplate();
+        return { type:"next_week_plan", title:"下周训练计划", plan:current, changes:["保留当前计划结构"], reason:"当前没有可用 AI 接口，先保留现有计划，建议按本周反馈小幅调整。" };
+      }
+      if(task === "daily_adjust"){
+        const day = getPlanDays()[activePlanDay] || { items:[] };
+        return { type:"daily_adjust", title:"今日训练调整", mode:"reduced", message:"今天按状态保守一点，保留主项，训练量减少约三成。", adjustedItems:(day.items || []).slice(0, Math.max(3, Math.ceil((day.items || []).length * .65))), warnings:["不要做到力竭","有明显疼痛就停止相关动作"], recovery:"训练后补蛋白，今晚尽量早点睡。" };
+      }
+      if(task === "natural_language_log"){
+        return parseNaturalLogFallback(payload.text || "");
+      }
+      if(task === "trend_analysis"){
+        return { type:"trend_analysis", title:"AI 趋势观察", observations:["最近记录越完整，趋势判断越准。"], risks:["如果连续两周体重不涨，需要增加热量。"], suggestions:["每周至少保留体重、睡眠、训练完成度三类数据。"], coach_message:"先把记录补齐，训练和饮食调整会更稳。" };
+      }
+      return { type:task, title:"AI 教练", message:"AI 教练连接成功。" };
+    }
+
+    function extractJsonFromText(text){
+      const raw = String(text || "").trim();
+      if(!raw) return null;
+      try{ return JSON.parse(raw); }catch(e){}
+      const start = raw.indexOf("{");
+      const end = raw.lastIndexOf("}");
+      if(start >= 0 && end > start){
+        try{ return JSON.parse(raw.slice(start, end + 1)); }catch(e){}
+      }
+      return null;
+    }
+
+    async function callAiCoach(task, payload, options = {}){
+      const settings = getAiSettings();
+      const fallback = getFallbackCoachFeedback(task, payload);
+      if(!settings.enabled && !options.force){
+        return { ok:false, task, data:fallback, error:"AI 教练未开启" };
+      }
+      if(settings.apiMode === "direct" && !settings.apiKey){
+        return { ok:false, task, data:fallback, error:"未配置 API Key" };
+      }
+      if(settings.apiMode === "proxy" && !settings.proxyUrl){
+        return { ok:false, task, data:fallback, error:"未配置代理 URL" };
+      }
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), options.timeoutMs || 20000);
+      try{
+        let res;
+        if(settings.apiMode === "proxy"){
+          res = await fetch(settings.proxyUrl, {
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            signal: controller.signal,
+            body: JSON.stringify({
+              task,
+              payload,
+              settings:{
+                model:settings.model,
+                temperature:settings.temperature,
+                maxTokens:settings.maxTokens,
+                coachTone:settings.coachTone,
+                feedbackLength:settings.feedbackLength
+              }
+            })
+          });
+        }else{
+          res = await fetch(`${settings.apiBaseUrl.replace(/\/$/, "")}/chat/completions`, {
+            method:"POST",
+            headers:{
+              "Content-Type":"application/json",
+              "Authorization":`Bearer ${settings.apiKey}`
+            },
+            signal: controller.signal,
+            body: JSON.stringify({
+              model: settings.model || "deepseek-v4-flash",
+              temperature: settings.temperature ?? 0.7,
+              max_tokens: settings.maxTokens ?? 500,
+              messages:[
+                { role:"system", content:buildAiCoachSystemPrompt(settings) },
+                { role:"user", content:buildAiCoachUserPrompt(task, payload, settings) }
+              ],
+              response_format:{ type:"json_object" }
+            })
+          });
+        }
+        if(!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        const content = json?.choices?.[0]?.message?.content || json?.message || json?.data || json;
+        const data = typeof content === "string" ? extractJsonFromText(content) : content;
+        if(!data || typeof data !== "object") throw new Error("AI 返回不是合法 JSON");
+        return { ok:true, task, data, raw: typeof content === "string" ? content : JSON.stringify(content) };
+      }catch(err){
+        console.error("AI 调用失败", err);
+        return { ok:false, task, data:fallback, error:err.message || "AI 调用失败" };
+      }finally{
+        clearTimeout(timeout);
+      }
+    }
+
+    function getPlanCheckSummaryJson(checks = getPlanChecks(), days = getPlanDays()){
+      const totalItems = countTotalPlanItems(days);
+      const completedItems = countCheckedItems(checks, days);
+      return {
+        totalItems,
+        completedItems,
+        completionRate: totalItems ? Math.round(completedItems / totalItems * 100) + "%" : "0%",
+        days: days.map((day, dayIndex) => {
+          const completed = (day.items || []).filter((_, itemIndex) => checks[`d${dayIndex}_i${itemIndex}`]);
+          const missed = (day.items || []).filter((_, itemIndex) => !checks[`d${dayIndex}_i${itemIndex}`]);
+          return {
+            day: day.day || `第${dayIndex + 1}天`,
+            weekday: inferPlanWeekday(day, dayIndex),
+            focus: day.focus || "",
+            completedCount: completed.length,
+            totalCount: (day.items || []).length,
+            completedItems: completed,
+            missedItems: missed
+          };
+        })
+      };
+    }
+
+    function buildCoachJsonPayload(sourceEntry = null){
+      const data = sourceEntry || getForm();
+      const weights = [data.weight1,data.weight2,data.weight3,data.weight4,data.weight5,data.weight6,data.weight7].map((v) => v || "");
+      const checks = sourceEntry?.planChecksSnapshot || getPlanChecks();
+      const days = getPlanDays();
+      return {
+        type:"weekly_training_feedback",
+        version:1,
+        weekLabel:data.weekLabel || "",
+        body:{
+          heightCm:"",
+          target:"增肌增重",
+          weights,
+          averageWeightKg:data.avgWeight || calcAverage(weights) || "",
+          averageSleep:data.avgSleep || "",
+          latestSleep:data.latestSleep || "",
+          trainingDays:data.trainingDays || "",
+          pushupBest:data.pushupBest || "",
+          pullupBest:data.pullupBest || "",
+          pullupTotal:data.pullupTotal || "",
+          diet:data.diet || "",
+          status:data.status || "",
+          notes:data.notes || ""
+        },
+        planCheckSummary:getPlanCheckSummaryJson(checks, days),
+        dailyLogs:Object.values(getDailyLogs()).sort((a,b) => String(a.date || "").localeCompare(String(b.date || ""))),
+        generatedAt:new Date().toISOString()
+      };
+    }
+
+    function parseNaturalLogFallback(text){
+      const t = String(text || "");
+      const patch = {};
+      const nums = t.match(/\d+(?:\.\d+)?/g) || [];
+      const weightNums = nums.filter((n) => {
+        const v = Number(n);
+        return v >= 35 && v <= 120;
+      }).slice(0, 7);
+      weightNums.forEach((v, i) => patch[`weight${i + 1}`] = v);
+      const pullBest = t.match(/引体(?:最高|最多|一组)?[^\d]*(\d+)/);
+      if(pullBest) patch.pullupBest = pullBest[1];
+      const pullTotal = t.match(/(?:总量|总共|合计)[^\d]*(\d+)/);
+      if(pullTotal) patch.pullupTotal = pullTotal[1];
+      const sleep = t.match(/(?:平均睡眠|睡眠)[^\d]*(\d+(?:\.\d+)?\s*(?:小时|h)?)/i);
+      if(sleep) patch.avgSleep = sleep[1];
+      if(/饮食一般/.test(t)) patch.diet = "一般";
+      if(/没器材|无器械/.test(t)) patch.notes = [patch.notes, "有无器械训练日"].filter(Boolean).join("；");
+      return { type:"natural_language_log", formPatch:patch, confidence:"low", missingFields:[], message:"已用本地规则填入能识别的信息，缺少字段可以手动补。" };
+    }
+
+    function renderAiObject(data){
+      if(!data) return "暂无内容";
+      const lines = [];
+      if(data.title) lines.push(`<b>${escapeHtml(data.title)}</b>`);
+      if(data.summary) lines.push(`<div style="margin-top:8px;">${escapeHtml(data.summary)}</div>`);
+      if(data.message) lines.push(`<div style="margin-top:8px;">${escapeHtml(data.message)}</div>`);
+      if(data.coach_message) lines.push(`<div style="margin-top:8px;"><b>教练话：</b>${escapeHtml(data.coach_message)}</div>`);
+      ["progress","problems","next_week_advice","changes","observations","risks","suggestions","warnings","adjustedItems"].forEach((key) => {
+        if(Array.isArray(data[key]) && data[key].length){
+          const labelMap = {progress:"做得好的地方",problems:"需要注意",next_week_advice:"下周建议",changes:"计划变化",observations:"观察",risks:"风险",suggestions:"建议",warnings:"注意事项",adjustedItems:"调整动作"};
+          lines.push(`<div class="label">${labelMap[key] || key}</div><ul class="calendar-items">${data[key].map((x) => `<li>${escapeHtml(x)}</li>`).join("")}</ul>`);
+        }
+      });
+      if(data.reason) lines.push(`<div class="label">修改原因</div><div>${escapeHtml(data.reason)}</div>`);
+      if(data.plan && Array.isArray(data.plan.days)){
+        lines.push(`<div class="label">训练安排</div>`);
+        lines.push(data.plan.days.map((d) => `<div class="mini" style="margin-top:8px;"><b>${escapeHtml(d.day || "")}</b> · ${escapeHtml(d.focus || "")}<br>${escapeHtml((d.items || []).join("；"))}</div>`).join(""));
+      }
+      return lines.join("") || `<pre>${escapeHtml(JSON.stringify(data, null, 2))}</pre>`;
     }
 
     function downloadJson(filename, data){
@@ -2034,6 +4496,97 @@
       alert("已移除网页背景");
     }
 
+    function getAiPetIconData(){
+      return localStorage.getItem(AI_PET_ICON_KEY) || "";
+    }
+
+    function updateAiPetIconStatus(){
+      const status = $("aiPetIconStatus");
+      if(!status) return;
+      status.textContent = getAiPetIconData() ? "当前图标：已设置" : "当前图标：默认";
+    }
+
+    function updateAiPetAvatar(){
+      const face = document.querySelector("#aiCoachAvatar .ai-coach-face");
+      if(!face) return;
+      const dataUrl = String(getAiPetIconData() || "").trim();
+      face.innerHTML = "";
+      if(dataUrl){
+        face.classList.add("has-image");
+        const img = document.createElement("img");
+        img.alt = "AI教练图标";
+        img.src = dataUrl;
+        face.appendChild(img);
+      }else{
+        face.classList.remove("has-image");
+        face.textContent = "🏋️";
+      }
+      updateAiPetIconStatus();
+    }
+
+    function applyAiPetIcon(dataUrl){
+      const value = String(dataUrl || "").trim();
+      if(value){
+        localStorage.setItem(AI_PET_ICON_KEY, value);
+      }else{
+        localStorage.removeItem(AI_PET_ICON_KEY);
+      }
+      updateAiPetAvatar();
+    }
+
+    function compressAiPetIconFileToDataUrl(file){
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const maxSide = 512;
+            const scale = Math.min(1, maxSide / Math.max(img.width || 1, img.height || 1));
+            const width = Math.max(1, Math.round((img.width || 1) * scale));
+            const height = Math.max(1, Math.round((img.height || 1) * scale));
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            if(!ctx){
+              reject(new Error("无法处理图片"));
+              return;
+            }
+            ctx.clearRect(0, 0, width, height);
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL("image/png"));
+          };
+          img.onerror = () => reject(new Error("图片读取失败"));
+          img.src = e.target.result;
+        };
+        reader.onerror = () => reject(new Error("文件读取失败"));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function handleAiPetIconUpload(file){
+      if(!file) return;
+      try{
+        const dataUrl = await compressAiPetIconFileToDataUrl(file);
+        applyAiPetIcon(dataUrl);
+        queueAutoSync("AI 教练图标更新");
+        alert("AI 教练图标已更新");
+      }catch(err){
+        console.error(err);
+        alert("图标上传失败：" + (err.message || "未知错误"));
+      }
+    }
+
+    function clearAiPetIcon(){
+      if(!getAiPetIconData()){
+        updateAiPetAvatar();
+        return;
+      }
+      applyAiPetIcon("");
+      queueAutoSync("移除 AI 教练图标");
+      alert("已恢复默认 AI 教练图标");
+    }
+
     function setCloudStatus(text){
       if($("cloudStatusText")) $("cloudStatusText").textContent = text;
     }
@@ -2053,7 +4606,7 @@
     }
 
     function setCloudBusy(isBusy){
-      ["cloudLoginBtn","cloudLogoutBtn","cloudSyncBtn","cloudRestoreBtn","cloudAutoSyncBtn"].forEach((id) => {
+      ["cloudLoginBtn","cloudLogoutBtn","cloudSyncBtn","cloudRestoreBtn","cloudAutoSyncBtn","aiSyncKeyBtn"].forEach((id) => {
         const el = $(id);
         if(el) el.disabled = !!isBusy;
       });
@@ -2161,6 +4714,11 @@
       const embeddedDailyLogs = rawForm.__dailyLogs && typeof rawForm.__dailyLogs === "object" ? rawForm.__dailyLogs : {};
       const embeddedPlanChecks = rawForm.__planChecks && typeof rawForm.__planChecks === "object" ? rawForm.__planChecks : {};
       const embeddedPlanTemplate = rawForm.__planTemplate && typeof rawForm.__planTemplate === "object" ? rawForm.__planTemplate : DEFAULT_PLAN_TEMPLATE;
+      const embeddedAiSettings = rawForm.__aiSettings && typeof rawForm.__aiSettings === "object" ? rawForm.__aiSettings : null;
+      const embeddedAiFeedbackHistory = Array.isArray(rawForm.__aiFeedbackHistory) ? rawForm.__aiFeedbackHistory : [];
+      const embeddedAiLastFeedback = rawForm.__aiLastFeedback && typeof rawForm.__aiLastFeedback === "object" ? rawForm.__aiLastFeedback : null;
+      const embeddedAiPetState = rawForm.__aiPetState && typeof rawForm.__aiPetState === "object" ? rawForm.__aiPetState : null;
+      const embeddedAiMilestones = rawForm.__aiMilestones && typeof rawForm.__aiMilestones === "object" ? rawForm.__aiMilestones : {};
       return {
         id: row.id || row.uuid || row.row_id || null,
         user_id: row.user_id || "",
@@ -2169,6 +4727,11 @@
         daily_logs_json: row.daily_logs_json && typeof row.daily_logs_json === "object" ? row.daily_logs_json : embeddedDailyLogs,
         plan_checks_json: row.plan_checks_json && typeof row.plan_checks_json === "object" ? row.plan_checks_json : embeddedPlanChecks,
         plan_template_json: row.plan_template_json && typeof row.plan_template_json === "object" ? row.plan_template_json : embeddedPlanTemplate,
+        ai_settings_json: embeddedAiSettings,
+        ai_feedback_history_json: embeddedAiFeedbackHistory,
+        ai_last_feedback_json: embeddedAiLastFeedback,
+        ai_pet_state_json: embeddedAiPetState,
+        ai_milestones_json: embeddedAiMilestones,
         updated_at: rawForm.__updatedAt || row.updated_at || row.modified_at || row.created_at || ""
       };
     }
@@ -2279,6 +4842,12 @@
           __planChecks: snapshot.planChecks,
           __planTemplate: snapshot.planTemplate,
           __pageBackground: getPageBackgroundData(),
+          __aiSettings: snapshot.aiSettings,
+          __aiFeedbackHistory: snapshot.aiFeedbackHistory,
+          __aiLastFeedback: snapshot.aiLastFeedback,
+          __aiPetState: snapshot.aiPetState,
+          __aiPetIcon: snapshot.aiPetIcon,
+          __aiMilestones: snapshot.aiMilestones,
           __lastCloudSyncAt: uploadUpdatedAt,
           __updatedAt: uploadUpdatedAt
         };
@@ -2393,6 +4962,11 @@
             lastCloudSyncAt: cloud.updated_at || new Date().toISOString(),
             planChecks: cloud.plan_checks_json || {},
             planTemplate: cloud.plan_template_json || DEFAULT_PLAN_TEMPLATE,
+            aiSettings: cloud.ai_settings_json || undefined,
+            aiFeedbackHistory: cloud.ai_feedback_history_json || [],
+            aiLastFeedback: cloud.ai_last_feedback_json || null,
+            aiPetState: cloud.ai_pet_state_json || null,
+            aiMilestones: cloud.ai_milestones_json || {},
             updatedAt: cloud.updated_at || new Date().toISOString()
           });
           setCloudStatus(`云端状态：已自动恢复较新的云端版本（${getCloudUserLabel(user)}）`);
@@ -2452,6 +5026,12 @@
         lastCloudSyncAt: getLastCloudSyncAt(),
         planChecks: getPlanChecks(),
         planTemplate: getPlanTemplate(),
+        aiSettings: getAiSettingsForBackup(),
+        aiFeedbackHistory: getAiFeedbackHistory(),
+        aiLastFeedback: getAiLastFeedback(),
+        aiPetState: getAiPetState(),
+        aiPetIcon: getAiPetIconData(),
+        aiMilestones: safeJsonParse(localStorage.getItem(AI_MILESTONE_KEY) || "{}", {}),
         updatedAt: getLocalUpdatedAt()
       };
     }
@@ -2465,18 +5045,36 @@
       const embeddedPlanTemplate = safeForm.__planTemplate;
       const embeddedLastCloudSyncAt = safeForm.__lastCloudSyncAt;
       const embeddedUpdatedAt = safeForm.__updatedAt;
+      const embeddedAiSettings = safeForm.__aiSettings;
+      const embeddedAiFeedbackHistory = safeForm.__aiFeedbackHistory;
+      const embeddedAiLastFeedback = safeForm.__aiLastFeedback;
+      const embeddedAiPetState = safeForm.__aiPetState;
+      const embeddedAiPetIcon = safeForm.__aiPetIcon;
+      const embeddedAiMilestones = safeForm.__aiMilestones;
       delete safeForm.__pageBackground;
       delete safeForm.__dailyLogs;
       delete safeForm.__planChecks;
       delete safeForm.__planTemplate;
       delete safeForm.__lastCloudSyncAt;
       delete safeForm.__updatedAt;
+      delete safeForm.__aiSettings;
+      delete safeForm.__aiFeedbackHistory;
+      delete safeForm.__aiLastFeedback;
+      delete safeForm.__aiPetState;
+      delete safeForm.__aiPetIcon;
+      delete safeForm.__aiMilestones;
 
       const safeHistory = payload && Array.isArray(payload.history) ? payload.history : [];
       const safeDailyLogs = payload && payload.dailyLogs ? payload.dailyLogs : (embeddedDailyLogs && typeof embeddedDailyLogs === "object" ? embeddedDailyLogs : {});
       const safePlanChecks = payload && payload.planChecks ? payload.planChecks : (embeddedPlanChecks && typeof embeddedPlanChecks === "object" ? embeddedPlanChecks : {});
       const planTemplateSource = payload && payload.planTemplate ? payload.planTemplate : (embeddedPlanTemplate && typeof embeddedPlanTemplate === "object" ? embeddedPlanTemplate : getPlanTemplate());
       const safePlanTemplate = normalizePlanTemplate(planTemplateSource);
+      const safeAiSettings = payload && payload.aiSettings ? payload.aiSettings : (embeddedAiSettings || null);
+      const safeAiFeedbackHistory = payload && Array.isArray(payload.aiFeedbackHistory) ? payload.aiFeedbackHistory : (Array.isArray(embeddedAiFeedbackHistory) ? embeddedAiFeedbackHistory : []);
+      const safeAiLastFeedback = payload && payload.aiLastFeedback ? payload.aiLastFeedback : (embeddedAiLastFeedback || null);
+      const safeAiPetState = payload && payload.aiPetState ? payload.aiPetState : (embeddedAiPetState || null);
+      const safeAiPetIcon = payload && typeof payload.aiPetIcon === "string" ? payload.aiPetIcon : (typeof embeddedAiPetIcon === "string" ? embeddedAiPetIcon : "");
+      const safeAiMilestones = payload && payload.aiMilestones ? payload.aiMilestones : (embeddedAiMilestones || {});
       const updatedAt = (payload && payload.updatedAt) || embeddedUpdatedAt || new Date().toISOString();
 
       suppressAutoSync = true;
@@ -2486,6 +5084,12 @@
         localStorage.setItem(DAILY_LOGS_KEY, JSON.stringify(safeDailyLogs));
         localStorage.setItem(PLAN_CHECKS_KEY, JSON.stringify(safePlanChecks));
         localStorage.setItem(PLAN_TEMPLATE_KEY, JSON.stringify(safePlanTemplate));
+        if(safeAiSettings) localStorage.setItem(AI_SETTINGS_KEY, JSON.stringify(normalizeAiSettings(safeAiSettings)));
+        localStorage.setItem(AI_FEEDBACK_HISTORY_KEY, JSON.stringify(safeAiFeedbackHistory));
+        if(safeAiLastFeedback) localStorage.setItem(AI_LAST_FEEDBACK_KEY, JSON.stringify(safeAiLastFeedback));
+        if(safeAiPetState) localStorage.setItem(AI_PET_STATE_KEY, JSON.stringify(safeAiPetState));
+        if(safeAiPetIcon) localStorage.setItem(AI_PET_ICON_KEY, safeAiPetIcon); else localStorage.removeItem(AI_PET_ICON_KEY);
+        localStorage.setItem(AI_MILESTONE_KEY, JSON.stringify(safeAiMilestones));
         setLastCloudSyncAt((payload && payload.lastCloudSyncAt) || embeddedLastCloudSyncAt || updatedAt);
         applyPageBackground(pageBackground);
         markLocalStateChanged("从云端恢复到本机", updatedAt);
@@ -2493,6 +5097,9 @@
         setForm(safeForm);
         renderHistory();
         renderPlan();
+        updateAiSettingsUi();
+        updateAiPetVisibility();
+        updateRestoreDraftButton();
         updateSummary();
       }finally{
         suppressAutoSync = false;
@@ -2582,6 +5189,11 @@
           lastCloudSyncAt: data.updated_at || new Date().toISOString(),
           planChecks: data.plan_checks_json || {},
           planTemplate: data.plan_template_json || DEFAULT_PLAN_TEMPLATE,
+          aiSettings: data.ai_settings_json || undefined,
+          aiFeedbackHistory: data.ai_feedback_history_json || [],
+          aiLastFeedback: data.ai_last_feedback_json || null,
+          aiPetState: data.ai_pet_state_json || null,
+          aiMilestones: data.ai_milestones_json || {},
           updatedAt: data.updated_at || new Date().toISOString()
         });
         setCloudStatus(`云端状态：已从云端恢复（${getCloudUserLabel(user)}）`);
@@ -2599,15 +5211,24 @@
     }
 
     function normalizePlanTemplate(raw){
-      const safe = raw && Array.isArray(raw.days) ? raw : DEFAULT_PLAN_TEMPLATE;
+      const source = raw && Array.isArray(raw.days) ? raw : DEFAULT_PLAN_TEMPLATE;
+      const days = source.days.map((day, index) => ({
+        day: String(day?.day || `周${index + 1}`),
+        weekday: inferPlanWeekday(day, index),
+        focus: String(day?.focus || ""),
+        items: Array.isArray(day?.items) ? day.items.map((x) => String(x)).filter(Boolean) : [],
+        protein: String(day?.protein || "")
+      }));
+      const range = getCurrentWeekRange();
       return {
-        version: 1,
-        days: safe.days.map((day, index) => ({
-          day: String(day?.day || `周${index + 1}`),
-          focus: String(day?.focus || ""),
-          items: Array.isArray(day?.items) ? day.items.map((x) => String(x)).filter(Boolean) : [],
-          protein: String(day?.protein || "")
-        }))
+        version: Number(source.version) || 1,
+        meta: {
+          weekLabel: source.meta?.weekLabel || "",
+          weekStart: source.meta?.weekStart || range.start,
+          weekEnd: source.meta?.weekEnd || range.end,
+          goal: source.meta?.goal || "增肌增重"
+        },
+        days
       };
     }
 
@@ -2621,9 +5242,11 @@
     }
 
     function setPlanTemplate(template, clearChecks = false){
-      localStorage.setItem(PLAN_TEMPLATE_KEY, JSON.stringify(normalizePlanTemplate(template)));
+      const normalized = normalizePlanTemplate(template);
+      localStorage.setItem(PLAN_TEMPLATE_KEY, JSON.stringify(normalized));
       if(clearChecks){
         localStorage.removeItem(PLAN_CHECKS_KEY);
+        localStorage.removeItem(AI_MILESTONE_KEY);
       }
       queueAutoSync(clearChecks ? "训练模板更新并重置打卡" : "训练模板更新");
     }
@@ -2890,6 +5513,434 @@
       renderPlan();
     }
 
+    function getDayDragExtraScale(){
+      const tabsEl = $("dayTabs");
+      if(!tabsEl) return dayDockDrag.extraScale;
+      return parseFloat(getComputedStyle(tabsEl).getPropertyValue("--day-drag-extra-scale")) || dayDockDrag.extraScale;
+    }
+
+    function getDayDockMetrics(extraScale = 0){
+      const tabsEl = $("dayTabs");
+      const indicator = tabsEl ? tabsEl.querySelector(".day-tab-indicator") : null;
+      const buttons = tabsEl ? Array.from(tabsEl.querySelectorAll(".day-tab")) : [];
+      const activeTab = tabsEl ? tabsEl.querySelector(".day-tab.active") : null;
+      if(!tabsEl || !indicator || !buttons.length || !activeTab) return null;
+
+      const contentWidth = tabsEl.scrollWidth;
+      const styles = getComputedStyle(tabsEl);
+      const scale = (parseFloat(styles.getPropertyValue("--day-indicator-scale")) || 1.13) + extraScale;
+      const edgeGap = parseFloat(styles.getPropertyValue("--day-indicator-edge-gap")) || 8;
+      const width = activeTab.offsetWidth * scale;
+      const maxLeft = Math.max(edgeGap, contentWidth - width - edgeGap);
+      const activeCenter = activeTab.offsetLeft + activeTab.offsetWidth / 2;
+      const activeLeft = Math.max(edgeGap, Math.min(activeCenter - width / 2, maxLeft));
+
+      const snapLefts = buttons.map((btn) => {
+        const center = btn.offsetLeft + btn.offsetWidth / 2;
+        const left = center - width / 2;
+        return Math.max(edgeGap, Math.min(left, maxLeft));
+      });
+
+      return { tabsEl, indicator, buttons, contentWidth, width, edgeGap, maxLeft, activeLeft, snapLefts };
+    }
+
+    function getDayIndicatorLeft(indicator){
+      const transform = indicator.style.transform || getComputedStyle(indicator).transform;
+      if(!transform || transform === "none") return 0;
+      if(transform.startsWith("translateX(")){
+        return parseFloat(transform.replace("translateX(", "").replace("px)", "")) || 0;
+      }
+      try{
+        return new DOMMatrix(transform).m41 || 0;
+      }catch(err){
+        return 0;
+      }
+    }
+
+    function clearDayDragActiveTab(){
+      document.querySelectorAll(".day-tab.drag-active").forEach((btn) => {
+        btn.classList.remove("drag-active");
+      });
+    }
+
+    function clearDayDockPreviewState(){
+      const tabsEl = $("dayTabs");
+      const indicator = tabsEl ? tabsEl.querySelector(".day-tab-indicator") : null;
+      if(!tabsEl || !indicator) return;
+      tabsEl.classList.remove("dragging");
+      tabsEl.classList.remove("pressing");
+      tabsEl.classList.remove("bump");
+      indicator.classList.remove("dragging");
+      clearDayDragActiveTab();
+    }
+
+    function setDayDockPressed(pressed){
+      const tabsEl = $("dayTabs");
+      if(!tabsEl) return;
+      tabsEl.classList.toggle("pressing", !!pressed);
+    }
+
+    function pulseDayDock(){
+      const tabsEl = $("dayTabs");
+      if(!tabsEl) return;
+      tabsEl.classList.remove("bump");
+      void tabsEl.offsetWidth;
+      tabsEl.classList.add("bump");
+      clearTimeout(tabsEl.__dayDockPulseTimer);
+      tabsEl.__dayDockPulseTimer = setTimeout(() => {
+        tabsEl.classList.remove("bump");
+      }, 170);
+    }
+
+    function getDayButtonSnapState(button, extraScale = 0){
+      const metrics = getDayDockMetrics(extraScale);
+      if(!metrics || !button) return null;
+      const index = metrics.buttons.indexOf(button);
+      if(index < 0) return null;
+      return { metrics, index, left: metrics.snapLefts[index] };
+    }
+
+    function previewDayIndicatorAtButton(button){
+      const extraScale = getDayDragExtraScale();
+      const state = getDayButtonSnapState(button, extraScale);
+      if(!state) return;
+      const { metrics, left } = state;
+      metrics.tabsEl.classList.add("pressing", "dragging");
+      metrics.indicator.classList.remove("dragging");
+      metrics.indicator.style.opacity = "1";
+      metrics.indicator.style.width = metrics.width + "px";
+      metrics.indicator.style.transform = `translateX(${left}px)`;
+      clearDayDragActiveTab();
+      button.classList.add("drag-active");
+    }
+
+    function clearDayDockHoldTimer(){
+      clearTimeout(dayDockHold.timer);
+      dayDockHold.timer = 0;
+    }
+
+    function resetDayDockHold(){
+      clearDayDockHoldTimer();
+      dayDockHold.active = false;
+      dayDockHold.activated = false;
+      dayDockHold.targetButton = null;
+      dayDockHold.targetIndex = -1;
+      dayDockHold.startX = 0;
+      dayDockHold.startY = 0;
+    }
+
+    function cancelDayDockHold(restoreIndicator = true){
+      const wasActivated = dayDockHold.activated;
+      resetDayDockHold();
+      if(!dayDockDrag.active){
+        setDayDockPressed(false);
+      }
+      if(restoreIndicator && wasActivated && !dayDockDrag.active){
+        clearDayDockPreviewState();
+        updateDayTabIndicator();
+      }
+    }
+
+    function activateDayDockHold(){
+      if(!dayDockHold.active || dayDockHold.activated || !dayDockHold.targetButton) return;
+      dayDockHold.activated = true;
+      previewDayIndicatorAtButton(dayDockHold.targetButton);
+      triggerBestEffortHaptic(8);
+    }
+
+    function updateDayDraggedTabHighlight(indicatorLeft){
+      const metrics = getDayDockMetrics(dayDockDrag.extraScale);
+      if(!metrics) return;
+      const pillStart = indicatorLeft;
+      const pillEnd = indicatorLeft + metrics.width;
+      let bestButton = metrics.buttons[0] || null;
+      let bestOverlap = -1;
+
+      metrics.buttons.forEach((btn) => {
+        const btnStart = btn.offsetLeft;
+        const btnEnd = btnStart + btn.offsetWidth;
+        const overlap = Math.max(0, Math.min(pillEnd, btnEnd) - Math.max(pillStart, btnStart));
+        if(overlap > bestOverlap){
+          bestOverlap = overlap;
+          bestButton = btn;
+        }
+      });
+
+      clearDayDragActiveTab();
+      if(bestButton) bestButton.classList.add("drag-active");
+    }
+
+    function startDayDockDrag(clientX, startLeftOverride = null){
+      dayDockDrag.extraScale = getDayDragExtraScale();
+      const metrics = getDayDockMetrics(dayDockDrag.extraScale);
+      if(!metrics) return;
+      const dragOverflow = parseFloat(getComputedStyle(metrics.tabsEl).getPropertyValue("--day-drag-overflow")) || 28;
+      stopDayDockAutoScroll();
+      dayDockDrag.active = true;
+      dayDockDrag.moved = false;
+      dayDockDrag.startX = clientX;
+      dayDockDrag.lastClientX = clientX;
+      dayDockDrag.startLeft = typeof startLeftOverride === "number" ? startLeftOverride : metrics.activeLeft;
+      dayDockDrag.startScrollLeft = metrics.tabsEl.scrollLeft;
+      dayDockDrag.minLeft = -dragOverflow;
+      dayDockDrag.maxLeft = metrics.contentWidth - metrics.width + dragOverflow;
+      metrics.tabsEl.classList.add("dragging", "pressing");
+      metrics.indicator.classList.add("dragging");
+      metrics.indicator.style.opacity = "1";
+      metrics.indicator.style.width = metrics.width + "px";
+      metrics.indicator.style.transform = `translateX(${dayDockDrag.startLeft}px)`;
+      updateDayDraggedTabHighlight(dayDockDrag.startLeft);
+      document.body.style.userSelect = "none";
+      triggerBestEffortHaptic(8);
+    }
+
+    function getDayDockAutoScrollDelta(clientX, tabsEl){
+      const rect = tabsEl.getBoundingClientRect();
+      const threshold = Math.min(72, rect.width * 0.22);
+      let delta = 0;
+      if(clientX < rect.left + threshold){
+        delta = -Math.min(26, Math.max(2, ((rect.left + threshold) - clientX) * 0.38));
+      }else if(clientX > rect.right - threshold){
+        delta = Math.min(26, Math.max(2, (clientX - (rect.right - threshold)) * 0.38));
+      }
+      return delta;
+    }
+
+    function stopDayDockAutoScroll(){
+      if(dayDockDrag.autoScrollRaf){
+        cancelAnimationFrame(dayDockDrag.autoScrollRaf);
+        dayDockDrag.autoScrollRaf = 0;
+      }
+    }
+
+    function syncDayDockDragPosition(clientX){
+      const metrics = getDayDockMetrics(dayDockDrag.extraScale);
+      if(!metrics) return;
+      dayDockDrag.lastClientX = clientX;
+      const deltaX = clientX - dayDockDrag.startX;
+      if(Math.abs(deltaX) > 4) dayDockDrag.moved = true;
+      const scrollDelta = metrics.tabsEl.scrollLeft - dayDockDrag.startScrollLeft;
+      const next = Math.max(dayDockDrag.minLeft, Math.min(dayDockDrag.startLeft + deltaX + scrollDelta, dayDockDrag.maxLeft));
+      metrics.indicator.style.transform = `translateX(${next}px)`;
+      updateDayDraggedTabHighlight(next);
+    }
+
+    function stepDayDockAutoScroll(){
+      if(!dayDockDrag.active){
+        stopDayDockAutoScroll();
+        return;
+      }
+      const metrics = getDayDockMetrics(dayDockDrag.extraScale);
+      if(!metrics){
+        stopDayDockAutoScroll();
+        return;
+      }
+      const delta = getDayDockAutoScrollDelta(dayDockDrag.lastClientX, metrics.tabsEl);
+      if(!delta){
+        dayDockDrag.autoScrollRaf = 0;
+        return;
+      }
+      const maxScroll = metrics.tabsEl.scrollWidth - metrics.tabsEl.clientWidth;
+      const nextScroll = Math.max(0, Math.min(metrics.tabsEl.scrollLeft + delta, maxScroll));
+      if(nextScroll !== metrics.tabsEl.scrollLeft){
+        metrics.tabsEl.scrollLeft = nextScroll;
+        syncDayDockDragPosition(dayDockDrag.lastClientX);
+      }
+      dayDockDrag.autoScrollRaf = requestAnimationFrame(stepDayDockAutoScroll);
+    }
+
+    function ensureDayDockAutoScroll(){
+      if(dayDockDrag.autoScrollRaf) return;
+      dayDockDrag.autoScrollRaf = requestAnimationFrame(stepDayDockAutoScroll);
+    }
+
+    function moveDayDockDrag(clientX){
+      if(!dayDockDrag.active) return;
+      syncDayDockDragPosition(clientX);
+      const metrics = getDayDockMetrics(dayDockDrag.extraScale);
+      if(!metrics) return;
+      const autoDelta = getDayDockAutoScrollDelta(clientX, metrics.tabsEl);
+      if(autoDelta){
+        ensureDayDockAutoScroll();
+      }else{
+        stopDayDockAutoScroll();
+      }
+    }
+
+    function snapToNearestDayTab(){
+      const metrics = getDayDockMetrics(dayDockDrag.extraScale);
+      if(!metrics) return;
+      const currentLeft = getDayIndicatorLeft(metrics.indicator);
+      let nearestIndex = 0;
+      let nearestDistance = Infinity;
+      metrics.snapLefts.forEach((snapLeft, index) => {
+        const distance = Math.abs(currentLeft - snapLeft);
+        if(distance < nearestDistance){
+          nearestDistance = distance;
+          nearestIndex = index;
+        }
+      });
+      suppressDayClickUntil = Date.now() + 500;
+      suppressDayClickIndex = nearestIndex;
+      setActivePlanDay(nearestIndex);
+    }
+
+    function endDayDockDrag(){
+      if(!dayDockDrag.active) return;
+      stopDayDockAutoScroll();
+      const metrics = getDayDockMetrics(dayDockDrag.extraScale);
+      if(metrics){
+        metrics.tabsEl.classList.remove("dragging");
+        metrics.tabsEl.classList.remove("pressing");
+        metrics.indicator.classList.remove("dragging");
+      }
+      clearDayDragActiveTab();
+      document.body.style.userSelect = "";
+
+      const moved = dayDockDrag.moved;
+      dayDockDrag.active = false;
+      dayDockDrag.moved = false;
+      dayDockDrag.lastClientX = 0;
+
+      if(moved){
+        snapToNearestDayTab();
+        triggerBestEffortHaptic(10);
+      }else{
+        updateDayTabIndicator();
+      }
+    }
+
+    function updateDayTabIndicator(options = {}){
+      const metrics = getDayDockMetrics();
+      if(!metrics) return;
+      const { tabsEl, indicator, width, activeLeft } = metrics;
+      const immediate = !!options.immediate;
+
+      if(immediate){
+        const oldTransition = indicator.style.transition;
+        indicator.style.transition = "none";
+        indicator.style.width = width + "px";
+        indicator.style.transform = `translateX(${activeLeft}px)`;
+        indicator.style.opacity = "1";
+        void indicator.offsetWidth;
+        indicator.style.transition = oldTransition || "";
+      }else{
+        indicator.style.width = width + "px";
+        indicator.style.transform = `translateX(${activeLeft}px)`;
+        indicator.style.opacity = "1";
+      }
+      tabsEl.classList.add("ready");
+    }
+
+    function scrollActiveDayTabIntoView(behavior = "smooth"){
+      const tabs = $("dayTabs");
+      const active = tabs ? tabs.querySelector(".day-tab.active") : null;
+      if(active){
+        active.scrollIntoView({ behavior, inline:"center", block:"nearest" });
+      }
+    }
+
+    function attachDayDockInteractions(){
+      const tabsEl = $("dayTabs");
+      if(!tabsEl || tabsEl.dataset.dayDockBound === "1") return;
+      tabsEl.dataset.dayDockBound = "1";
+
+      const handleStart = (event) => {
+        if(dayDockDrag.active) return;
+        const target = event.target;
+        if(!(target instanceof Element)) return;
+        const button = target.closest(".day-tab");
+        if(!button) return;
+
+        resetDayDockHold();
+        dayDockHold.active = true;
+        dayDockHold.targetButton = button;
+        dayDockHold.targetIndex = Number(button.getAttribute("data-plan-tab"));
+        dayDockHold.startX = getDragClientX(event);
+        dayDockHold.startY = getDragClientY(event);
+        setDayDockPressed(true);
+        clearDayDockHoldTimer();
+        dayDockHold.timer = setTimeout(() => {
+          activateDayDockHold();
+        }, 140);
+      };
+
+      const handleMoveHold = (event) => {
+        if(!dayDockHold.active || dayDockDrag.active) return;
+        const clientX = getDragClientX(event);
+        const clientY = getDragClientY(event);
+        const deltaX = clientX - dayDockHold.startX;
+        const deltaY = clientY - dayDockHold.startY;
+        const absX = Math.abs(deltaX);
+        const absY = Math.abs(deltaY);
+
+        if(!dayDockHold.activated){
+          if(absX > 6 && absX >= absY){
+            const state = getDayButtonSnapState(dayDockHold.targetButton, getDayDragExtraScale());
+            const startLeft = state ? state.left : 0;
+            resetDayDockHold();
+            startDayDockDrag(clientX, startLeft);
+            moveDayDockDrag(clientX);
+            if(event.cancelable) event.preventDefault();
+            return;
+          }
+
+          if(absY > 10){
+            cancelDayDockHold(false);
+          }
+          return;
+        }
+
+        if(absX > 4){
+          const state = getDayButtonSnapState(dayDockHold.targetButton, getDayDragExtraScale());
+          const currentLeft = state ? getDayIndicatorLeft(state.metrics.indicator) : 0;
+          resetDayDockHold();
+          startDayDockDrag(clientX, currentLeft);
+          moveDayDockDrag(clientX);
+        }
+
+        if(event.cancelable) event.preventDefault();
+      };
+
+      const handleEndHold = () => {
+        if(dayDockDrag.active || !dayDockHold.active) return;
+        const activated = dayDockHold.activated;
+        const targetIndex = dayDockHold.targetIndex;
+        resetDayDockHold();
+        setDayDockPressed(false);
+
+        if(activated && targetIndex >= 0){
+          suppressDayClickUntil = Date.now() + 500;
+          suppressDayClickIndex = targetIndex;
+          clearDayDockPreviewState();
+          pulseDayDock();
+          setActivePlanDay(targetIndex);
+          triggerBestEffortHaptic(10);
+        }
+      };
+
+      const handleDragMove = (event) => {
+        if(!dayDockDrag.active) return;
+        moveDayDockDrag(getDragClientX(event));
+        if(event.cancelable) event.preventDefault();
+      };
+
+      tabsEl.addEventListener("mousedown", handleStart);
+      tabsEl.addEventListener("touchstart", handleStart, { passive:true });
+      window.addEventListener("mousemove", handleMoveHold);
+      window.addEventListener("touchmove", handleMoveHold, { passive:false });
+      window.addEventListener("mouseup", handleEndHold);
+      window.addEventListener("touchend", handleEndHold);
+      window.addEventListener("touchcancel", () => cancelDayDockHold(true));
+      window.addEventListener("scroll", () => cancelDayDockHold(true), { passive:true });
+
+      window.addEventListener("mousemove", handleDragMove);
+      window.addEventListener("touchmove", handleDragMove, { passive:false });
+      window.addEventListener("mouseup", endDayDockDrag);
+      window.addEventListener("touchend", endDayDockDrag);
+      window.addEventListener("touchcancel", endDayDockDrag);
+    }
+
     function setActivePlanDay(dayIndex){
       const days = getPlanDays();
       if(!days.length){
@@ -2899,6 +5950,56 @@
       }
       localStorage.setItem(ACTIVE_PLAN_DAY_KEY, String(activePlanDay));
       renderPlan();
+      requestAnimationFrame(() => {
+        updateDayTabIndicator();
+        scrollActiveDayTabIntoView("smooth");
+      });
+    }
+
+    function switchPlanDayByOffset(offset){
+      const days = getPlanDays();
+      if(!days.length) return;
+      const next = Math.max(0, Math.min(days.length - 1, activePlanDay + offset));
+      if(next === activePlanDay) return;
+      const container = $("planContainer");
+      if(container){
+        container.classList.add("plan-switching");
+        setTimeout(() => {
+          setActivePlanDay(next);
+          container.classList.remove("plan-switching");
+        }, 90);
+      }else{
+        setActivePlanDay(next);
+      }
+    }
+
+    function onPlanSwipeStart(e){
+      const touch = e.changedTouches && e.changedTouches[0];
+      if(!touch) return;
+      planSwipeStartX = touch.clientX;
+      planSwipeStartY = touch.clientY;
+      planSwipeTracking = true;
+    }
+
+    function onPlanSwipeEnd(e){
+      if(!planSwipeTracking) return;
+      const touch = e.changedTouches && e.changedTouches[0];
+      if(!touch) return;
+      const dx = touch.clientX - planSwipeStartX;
+      const dy = touch.clientY - planSwipeStartY;
+      planSwipeTracking = false;
+      if(Math.abs(dx) < 45) return;
+      if(Math.abs(dx) < Math.abs(dy) * 1.2) return;
+      switchPlanDayByOffset(dx < 0 ? 1 : -1);
+    }
+
+    function bindPlanSwipeNavigation(){
+      const container = $("planContainer");
+      if(!container || container.dataset.swipeBound === "1") return;
+      container.dataset.swipeBound = "1";
+      container.addEventListener("touchstart", onPlanSwipeStart, { passive:true });
+      container.addEventListener("touchend", onPlanSwipeEnd, { passive:true });
+      container.addEventListener("touchcancel", () => { planSwipeTracking = false; }, { passive:true });
     }
 
     function fillPlanEditorFromActiveDay(){
@@ -2912,12 +6013,276 @@
       $("planProteinEdit").value = day.protein || "";
     }
 
+    function parsePlanCheckKey(key){
+      const m = String(key || "").match(/^d(\d+)_i(\d+)$/);
+      if(!m) return null;
+      return { dayIndex:Number(m[1]), itemIndex:Number(m[2]) };
+    }
+
+    function getRecentHistoryBrief(limit = 3){
+      return getHistory().slice(0, limit).map((entry) => ({
+        weekLabel: entry.weekLabel || "",
+        avgWeight: entry.avgWeight || "",
+        completionPercent: entry.completionPercent || "",
+        trainingDays: entry.trainingDays || "",
+        pullupBest: entry.pullupBest || "",
+        pullupTotal: entry.pullupTotal || ""
+      }));
+    }
+
+    function getAiMilestones(){
+      return safeJsonParse(localStorage.getItem(AI_MILESTONE_KEY) || "{}", {});
+    }
+
+    function setAiMilestones(value){
+      localStorage.setItem(AI_MILESTONE_KEY, JSON.stringify(value || {}));
+    }
+
+    async function handleAiExerciseCompleted(key){
+      const settings = getAiSettings();
+      if(!settings.enabled || !settings.autoFeedbackOnCheck) return;
+      const parsed = parsePlanCheckKey(key);
+      if(!parsed) return;
+      const days = getPlanDays();
+      const day = days[parsed.dayIndex];
+      const item = day?.items?.[parsed.itemIndex];
+      if(!day || !item) return;
+      const checks = getPlanChecks();
+      const completedItems = (day.items || []).filter((_, index) => checks[`d${parsed.dayIndex}_i${index}`]);
+      const totalCount = (day.items || []).length;
+      const completedCount = completedItems.length;
+      const progressPercent = totalCount ? Math.round(completedCount / totalCount * 100) : 0;
+      const payload = {
+        currentDayIndex: parsed.dayIndex,
+        currentDayName: day.day || "",
+        focus: day.focus || "",
+        completedExercise: item,
+        completedCount,
+        totalCount,
+        progressPercent,
+        completedItems,
+        allItems: day.items || [],
+        weeklyForm: getForm(),
+        recentHistoryBrief: getRecentHistoryBrief()
+      };
+      const res = await callAiCoach("exercise_completed", payload, { timeoutMs:12000 });
+      const feedback = res.data || getFallbackCoachFeedback("exercise_completed", payload);
+      saveAiFeedback(feedback, { day: day.day, exercise:item });
+      showCoachBubble(feedback.message, feedback.priority || "normal", feedback.durationMs || 3000);
+      handleAiMilestone(parsed.dayIndex, progressPercent, day).catch((err) => console.error("AI 里程碑失败", err));
+      if(progressPercent >= 100){
+        handleAiDayComplete(parsed.dayIndex, { source:"last_item_checked" }).catch((err) => console.error("AI 完成反馈失败", err));
+      }
+    }
+
+    async function handleAiMilestone(dayIndex, progressPercent, day){
+      const settings = getAiSettings();
+      if(!settings.enabled || !settings.autoFeedbackOnCheck) return;
+      const thresholds = [50, 80, 100];
+      const matched = thresholds.filter((value) => progressPercent >= value).pop();
+      if(!matched) return;
+      const todayKey = formatDateKey(new Date());
+      const key = `${todayKey}:day-${dayIndex}:${matched}`;
+      const milestones = getAiMilestones();
+      if(milestones[key]) return;
+      milestones[key] = true;
+      setAiMilestones(milestones);
+      const text = matched === 50
+        ? "训练已经过半，后面别赶，动作质量放第一。"
+        : matched === 80
+          ? "已经接近收尾了，别在最后乱冲。稳稳完成更重要。"
+          : "今天训练闭环了。接下来吃和睡要跟上。";
+      const feedback = { type:"milestone", title:"训练进度", message:text, priority: matched === 100 ? "high" : "normal", durationMs: matched === 100 ? 5000 : 4000 };
+      saveAiFeedback(feedback, { day: day?.day || "", milestone: matched });
+      showCoachBubble(text, feedback.priority, feedback.durationMs);
+    }
+
+    async function handleAiDayComplete(dayIndex, meta = {}){
+      const settings = getAiSettings();
+      if(!settings.enabled || !settings.autoFeedbackOnDayComplete) return;
+      const days = getPlanDays();
+      const day = days[dayIndex];
+      if(!day) return;
+      const checks = getPlanChecks();
+      const completedItems = (day.items || []).filter((_, index) => checks[`d${dayIndex}_i${index}`]);
+      const payload = {
+        dayName: day.day,
+        focus: day.focus,
+        completedItems,
+        totalCount: (day.items || []).length,
+        weeklyForm: getForm(),
+        sleep: $("avgSleep")?.value || "",
+        latestSleep: $("latestSleep")?.value || "",
+        notes: $("notes")?.value || ""
+      };
+      const res = await callAiCoach("day_complete", payload, { timeoutMs:16000 });
+      const feedback = res.data || getFallbackCoachFeedback("day_complete", payload);
+      saveAiFeedback(feedback, { day: day.day, ...meta });
+      showCoachBubble(feedback.message, "high", feedback.durationMs || 5000);
+    }
+
+    async function generateAiWeeklyAnalysis(options = {}){
+      const btn = $("aiWeeklyBtn");
+      if(btn) btn.disabled = true;
+      try{
+        const payload = {
+          current: buildCoachJsonPayload(),
+          recentHistory: getHistory().slice(0, 3),
+          planTemplate: getPlanTemplate(),
+          planCheckSummary: getPlanCheckSummaryJson()
+        };
+        const res = await callAiCoach("weekly_analysis", payload, { timeoutMs:25000, force:options.force });
+        latestAiWeeklyResult = res.data || getFallbackCoachFeedback("weekly_analysis", payload);
+        const card = $("aiWeeklyFeedbackCard");
+        const content = $("aiWeeklyFeedbackContent");
+        if(card) card.style.display = "block";
+        if(content) content.innerHTML = renderAiObject(latestAiWeeklyResult);
+        saveAiFeedback({ type:"weekly_analysis", title:"本周教练反馈", message:latestAiWeeklyResult.coach_message || latestAiWeeklyResult.summary || "本周反馈已生成。" }, { weekLabel: $("weekLabel")?.value || "" });
+        showCoachBubble(latestAiWeeklyResult.coach_message || latestAiWeeklyResult.summary || "本周教练反馈已生成。", "high", 5000);
+      }finally{
+        if(btn) btn.disabled = false;
+      }
+    }
+
+    async function generateAiNextWeekPlan(){
+      const btn = $("aiNextPlanBtn");
+      if(btn) btn.disabled = true;
+      try{
+        const payload = {
+          current: buildCoachJsonPayload(),
+          recentHistory: getHistory().slice(0, 3),
+          currentPlan: getPlanTemplate(),
+          currentWeekLabel: $("weekLabel")?.value || formatCurrentWeekLabel()
+        };
+        const res = await callAiCoach("next_week_plan", payload, { timeoutMs:30000, force:true });
+        latestAiPlanResult = res.data || getFallbackCoachFeedback("next_week_plan", payload);
+        const card = $("aiNextPlanCard");
+        const content = $("aiNextPlanContent");
+        if(card) card.style.display = "block";
+        if(content) content.innerHTML = renderAiObject(latestAiPlanResult);
+        showCoachBubble("下周计划已生成，先看预览，确认后再采用。", "high", 4500);
+      }finally{
+        if(btn) btn.disabled = false;
+      }
+    }
+
+    function adoptAiPlan(){
+      const plan = latestAiPlanResult && latestAiPlanResult.plan;
+      if(!plan || !Array.isArray(plan.days)){
+        alert("当前没有可采用的 AI 计划");
+        return;
+      }
+      const ok = confirm("采用 AI 计划会覆盖当前训练模板，并清空旧打卡。确定继续吗？");
+      if(!ok) return;
+      setPlanTemplate(plan, true);
+      activePlanDay = 0;
+      localStorage.setItem(ACTIVE_PLAN_DAY_KEY, "0");
+      renderPlan();
+      updateSummary();
+      $("aiNextPlanCard").style.display = "none";
+      alert("已采用 AI 下周计划，并清空旧打卡。");
+      syncToCloud(false).catch(() => {});
+    }
+
+    function applyFormPatchWithoutOverwriting(patch){
+      const data = getForm();
+      const conflicts = [];
+      Object.entries(patch || {}).forEach(([key, value]) => {
+        if(!formKeys.includes(key)) return;
+        const nextValue = String(value || "").trim();
+        if(!nextValue) return;
+        if(data[key] && data[key] !== nextValue){
+          conflicts.push({ key, current:data[key], next:nextValue });
+        }else if(!data[key]){
+          data[key] = nextValue;
+        }
+      });
+      if(conflicts.length){
+        const ok = confirm(`AI 识别到 ${conflicts.length} 个字段与当前内容不同，是否覆盖这些字段？`);
+        if(ok){
+          conflicts.forEach((item) => { data[item.key] = item.next; });
+        }
+      }
+      setForm(data);
+      queueAutoSync("AI 解析训练记录");
+      return conflicts.length;
+    }
+
+    async function parseNaturalLogWithAi(){
+      const text = $("aiNaturalLogInput")?.value || "";
+      const status = $("aiNaturalLogStatus");
+      if(!text.trim()){
+        if(status) status.textContent = "请先输入本周记录内容。";
+        return;
+      }
+      if(status) status.textContent = "AI 正在解析...";
+      const res = await callAiCoach("natural_language_log", { text, existingForm:getForm() }, { timeoutMs:22000, force:true });
+      const data = res.data || parseNaturalLogFallback(text);
+      applyFormPatchWithoutOverwriting(data.formPatch || {});
+      if(status) status.textContent = data.message || "已填入能识别的信息。";
+      showCoachBubble(data.message || "已帮你填入能识别的信息。", "normal", 3500);
+    }
+
+    async function generateDailyAdjust(){
+      const day = getPlanDays()[activePlanDay] || { items:[] };
+      const payload = {
+        dayIndex: activePlanDay,
+        dayName: day.day || "",
+        focus: day.focus || "",
+        items: day.items || [],
+        state: {
+          sleep: $("aiDailySleep")?.value || "",
+          soreness: $("aiDailySoreness")?.value || "",
+          time: $("aiDailyTime")?.value || "",
+          gear: $("aiDailyGear")?.value || "",
+          energy: $("aiDailyEnergy")?.value || "",
+          notes: $("aiDailyNotes")?.value || ""
+        }
+      };
+      const res = await callAiCoach("daily_adjust", payload, { timeoutMs:22000, force:true });
+      latestAiDailyAdjust = res.data || getFallbackCoachFeedback("daily_adjust", payload);
+      const box = $("aiDailyAdjustResult");
+      if(box){
+        box.style.display = "block";
+        box.innerHTML = renderAiObject(latestAiDailyAdjust) + `<div class="btns"><button class="btn-outline" id="copyDailyAdjustBtn" type="button">复制建议</button><button class="btn-outline" id="useDailyAdjustBtn" type="button">临时使用此计划</button></div>`;
+        const copyBtn = $("copyDailyAdjustBtn");
+        if(copyBtn) copyBtn.onclick = () => copyText(JSON.stringify(latestAiDailyAdjust, null, 2), "已复制今日调整建议");
+        const useBtn = $("useDailyAdjustBtn");
+        if(useBtn) useBtn.onclick = () => {
+          alert("已生成临时计划。为避免覆盖周计划，请按上方调整动作执行。原计划不变。 ");
+        };
+      }
+      showCoachBubble(latestAiDailyAdjust.message || "今日训练调整已生成。", "high", 5000);
+    }
+
+    async function generateTrendAnalysis(){
+      const payload = {
+        recentHistory:getHistory().slice(0, 4),
+        dailyLogs:Object.values(getDailyLogs()).slice(-14),
+        planCheckSummary:getPlanCheckSummaryJson(),
+        currentForm:getForm()
+      };
+      const res = await callAiCoach("trend_analysis", payload, { timeoutMs:25000, force:true });
+      latestAiTrendResult = res.data || getFallbackCoachFeedback("trend_analysis", payload);
+      const box = $("aiTrendResult");
+      if(box){
+        box.style.display = "block";
+        box.innerHTML = renderAiObject(latestAiTrendResult);
+      }
+      showCoachBubble(latestAiTrendResult.coach_message || "趋势观察已生成。", "high", 5000);
+    }
+
     function togglePlanCheck(key){
       const checks = getPlanChecks();
+      const beforeDone = !!checks[key];
       checks[key] = !checks[key];
+      const afterDone = !!checks[key];
       setPlanChecks(checks);
       renderPlan();
       updateSummary();
+      if(!beforeDone && afterDone){
+        handleAiExerciseCompleted(key).catch((err) => console.error("AI 动作反馈失败", err));
+      }
     }
 
     function completeDay(dayIndex){
@@ -2930,6 +6295,7 @@
       setPlanChecks(checks);
       renderPlan();
       updateSummary();
+      handleAiDayComplete(dayIndex, { source:"complete_day_button" }).catch((err) => console.error("AI 完成反馈失败", err));
     }
 
     function resetPlanChecks(){
@@ -2957,9 +6323,12 @@
         localStorage.setItem(ACTIVE_PLAN_DAY_KEY, "0");
       }
 
-      tabs.innerHTML = days.map((d, i) => {
-        return `<button class="day-tab ${i === activePlanDay ? "active" : ""}" data-plan-tab="${i}">${escapeHtml(d.day)}</button>`;
-      }).join("");
+      tabs.innerHTML = `
+        <div class="day-tab-indicator" aria-hidden="true"></div>
+        ${days.map((d, i) => {
+          return `<button class="day-tab ${i === activePlanDay ? "active" : ""}" data-plan-tab="${i}" type="button" aria-label="${escapeHtml(d.day)}"><span class="day-tab-content"><span class="day-tab-label">${escapeHtml(d.day)}</span></span></button>`;
+        }).join("")}
+      `;
 
       container.innerHTML = days.map((d, dayIndex) => {
         const itemsHtml = d.items.map((item, itemIndex) => {
@@ -2983,14 +6352,28 @@
             <div class="greenbox"><b>蛋白粉安排：</b>${escapeHtml(d.protein || "暂无")}</div>
             <div class="plan-actions">
               <button class="btn-outline" data-day-complete="${dayIndex}">一键完成今天</button>
-              <button class="btn-outline" data-record-daily-log="${dayIndex}">记录到今天</button>
+              <button class="btn-outline" data-record-daily-log="${dayIndex}">记录到本周对应日期</button>
             </div>
           </div>
         `;
       }).join("");
 
       tabs.querySelectorAll("[data-plan-tab]").forEach((btn) => {
-        btn.onclick = () => setActivePlanDay(Number(btn.getAttribute("data-plan-tab")));
+        btn.onclick = () => {
+          const index = Number(btn.getAttribute("data-plan-tab"));
+          if(Date.now() < suppressDayClickUntil && suppressDayClickIndex === index) return;
+          pulseDayDock();
+          setActivePlanDay(index);
+        };
+      });
+      tabs.classList.remove("ready");
+      const indicator = tabs.querySelector(".day-tab-indicator");
+      if(indicator){
+        indicator.style.opacity = "0";
+      }
+      requestAnimationFrame(() => {
+        updateDayTabIndicator({ immediate:true });
+        scrollActiveDayTabIntoView("auto");
       });
 
       container.querySelectorAll("[data-check]").forEach((btn) => {
@@ -3018,6 +6401,7 @@
       fillPlanEditorFromActiveDay();
       renderInlinePlanGuidePanel();
       renderPlanGuideSearchResults();
+      requestAnimationFrame(scrollActiveDayTabIntoView);
     }
 
     function saveCurrentPlanDay(){
@@ -3037,6 +6421,7 @@
 
       days[activePlanDay] = {
         day: dayName,
+        weekday: inferPlanWeekday({ day: dayName, weekday: days[activePlanDay]?.weekday }, activePlanDay),
         focus,
         items,
         protein
@@ -3071,6 +6456,7 @@
         try{
           const payload = JSON.parse(e.target.result);
           setPlanTemplate(payload, true);
+          ensureWeekLabelAfterPlanImport(payload);
           activePlanDay = 0;
           localStorage.setItem(ACTIVE_PLAN_DAY_KEY, "0");
           renderPlan();
@@ -3149,6 +6535,71 @@
       return `${y}-${m}-${d}`;
     }
 
+    function parseDateKey(key){
+      const parts = String(key || "").split("-").map((x) => parseInt(x, 10));
+      if(parts.length !== 3 || parts.some((x) => !Number.isFinite(x))) return null;
+      return new Date(parts[0], parts[1] - 1, parts[2]);
+    }
+
+    function addDays(date, count){
+      const next = new Date(date);
+      next.setDate(next.getDate() + count);
+      return next;
+    }
+
+    function getCurrentWeekRange(date = new Date()){
+      const base = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const weekday = (base.getDay() + 6) % 7;
+      const startDate = addDays(base, -weekday);
+      const dates = Array.from({ length:7 }, (_, i) => formatDateKey(addDays(startDate, i)));
+      return { start:dates[0], end:dates[6], dates };
+    }
+
+    function formatCurrentWeekLabel(date = new Date()){
+      const range = getCurrentWeekRange(date);
+      return `${range.start} 至 ${range.end}`;
+    }
+
+    const PLAN_DAY_TO_WEEKDAY = { "周一":1, "周二":2, "周三":3, "周四":4, "周五":5, "周六":6, "周日":7 };
+
+    function inferPlanWeekday(day, index = 0){
+      const weekday = Number(day?.weekday);
+      if(weekday >= 1 && weekday <= 7) return weekday;
+      const name = String(day?.day || "").trim();
+      if(PLAN_DAY_TO_WEEKDAY[name]) return PLAN_DAY_TO_WEEKDAY[name];
+      const match = name.match(/周([一二三四五六日天])/);
+      if(match){
+        return { 一:1, 二:2, 三:3, 四:4, 五:5, 六:6, 日:7, 天:7 }[match[1]] || Math.min(index + 1, 7);
+      }
+      return Math.min(Math.max(index + 1, 1), 7);
+    }
+
+    function getDateForPlanDayInCurrentWeek(planDayName, dayIndex = 0, baseDate = new Date()){
+      const days = getPlanDays();
+      const day = days[dayIndex] || { day: planDayName };
+      const weekday = inferPlanWeekday(day, dayIndex);
+      const range = getCurrentWeekRange(baseDate);
+      return range.dates[Math.max(0, Math.min(6, weekday - 1))];
+    }
+
+    function ensureWeekLabelAfterPlanImport(template){
+      const desired = String(template?.meta?.weekLabel || formatCurrentWeekLabel()).trim();
+      const el = $("weekLabel");
+      if(!el) return;
+      if(!el.value.trim()){
+        el.value = desired;
+        updateSummary();
+        return;
+      }
+      if(el.value.trim() !== desired){
+        const ok = confirm(`导入模板中包含周次：${desired}\n是否覆盖当前周次？`);
+        if(ok){
+          el.value = desired;
+          updateSummary();
+        }
+      }
+    }
+
     function formatMonthLabel(date){
       return `${date.getFullYear()}年${date.getMonth() + 1}月`;
     }
@@ -3181,6 +6632,13 @@
         localStorage.setItem(LAST_CLOUD_SYNC_AT_KEY, value);
       }else{
         localStorage.removeItem(LAST_CLOUD_SYNC_AT_KEY);
+      localStorage.removeItem(AI_SETTINGS_KEY);
+      localStorage.removeItem(AI_LAST_FEEDBACK_KEY);
+      localStorage.removeItem(AI_FEEDBACK_HISTORY_KEY);
+      localStorage.removeItem(AI_PET_STATE_KEY);
+      localStorage.removeItem(AI_PET_ICON_KEY);
+      localStorage.removeItem(AI_MILESTONE_KEY);
+      localStorage.removeItem(FORM_DRAFT_BACKUP_KEY);
       }
     }
 
@@ -3259,7 +6717,7 @@
       if(!log){
         box.innerHTML = `
           <div style="font-weight:800;font-size:18px;">${escapeHtml(selectedCalendarDate)}</div>
-          <div class="help" style="margin-top:8px;">这一天还没有训练日志。先去“计划”页点“记录到今天”，再回来这里补体重、睡眠和备注。</div>
+          <div class="help" style="margin-top:8px;">这一天还没有训练日志。先去“计划”页点“记录到本周对应日期”，再回来这里补体重、睡眠和备注。</div>
         `;
         return;
       }
@@ -3327,7 +6785,7 @@
       if(!day) return;
       const checks = getPlanChecks();
       const completedItems = (day.items || []).filter((_, itemIndex) => checks[`d${dayIndex}_i${itemIndex}`]);
-      const dateKey = formatDateKey(new Date());
+      const dateKey = getDateForPlanDayInCurrentWeek(day.day, dayIndex);
       const logs = getDailyLogs();
 
       logs[dateKey] = {
@@ -3350,6 +6808,7 @@
       setDailyLogs(logs, { syncToCloud: true });
       switchTab("history");
       window.scrollTo({ top: 0, behavior: "smooth" });
+      alert(`已保存到本周对应日期：${dateKey}`);
     }
 
     function getHistory(){
@@ -3411,11 +6870,127 @@
         entry.planSummary
       ].join("\n");
       alert("已保存本周记录，并附带训练打卡摘要");
+      if(getAiSettings().enabled && getAiSettings().autoWeeklyAnalysis){
+        generateAiWeeklyAnalysis().catch((err) => console.error("AI 周反馈失败", err));
+      }
       syncToCloud(false).catch(() => {});
     }
 
     function clearForm(){
       setForm(defaultForm);
+    }
+
+    function hasUnsavedCurrentForm(){
+      const data = getForm();
+      return formKeys.some((key) => String(data[key] || "").trim());
+    }
+
+    function backupCurrentDraft(reason = "before_load_history_record"){
+      const backup = {
+        form: getForm(),
+        planChecks: getPlanChecks(),
+        dailyLogs: getDailyLogs(),
+        createdAt: new Date().toISOString(),
+        reason
+      };
+      localStorage.setItem(FORM_DRAFT_BACKUP_KEY, JSON.stringify(backup));
+      updateRestoreDraftButton();
+      return backup;
+    }
+
+    function updateRestoreDraftButton(){
+      const btn = $("restoreDraftBackupBtn");
+      if(btn) btn.style.display = localStorage.getItem(FORM_DRAFT_BACKUP_KEY) ? "block" : "none";
+    }
+
+    function restoreDraftBackup(){
+      const backup = safeJsonParse(localStorage.getItem(FORM_DRAFT_BACKUP_KEY) || "null", null);
+      if(!backup){
+        alert("没有可恢复的草稿备份");
+        updateRestoreDraftButton();
+        return;
+      }
+      const ok = confirm("确定恢复上次被覆盖前的草稿吗？当前填写内容会被替换。");
+      if(!ok) return;
+      setForm(backup.form || {});
+      localStorage.setItem(PLAN_CHECKS_KEY, JSON.stringify(backup.planChecks || {}));
+      localStorage.setItem(DAILY_LOGS_KEY, JSON.stringify(backup.dailyLogs || {}));
+      renderPlan();
+      renderHistory();
+      updateSummary();
+      queueAutoSync("恢复草稿备份");
+      alert("已恢复草稿备份");
+    }
+
+    function entryToSummaryText(entry){
+      return [
+        `每周反馈：${entry.weekLabel || "未填写周次"}`,
+        `7天空腹体重：${[entry.weight1,entry.weight2,entry.weight3,entry.weight4,entry.weight5,entry.weight6,entry.weight7].map((v) => v || "-").join(" / ")}`,
+        `周平均体重：${entry.avgWeight || "-"} kg`,
+        `平均睡眠：${entry.avgSleep || "-"}`,
+        `最晚入睡时间：${entry.latestSleep || "-"}`,
+        `本周训练完成：${entry.trainingDays || "-"} 天`,
+        `俯卧撑最高一组：${entry.pushupBest || "-"}`,
+        `引体向上最高一组：${entry.pullupBest || "-"}`,
+        `本周引体总量：${entry.pullupTotal || "-"}`,
+        `饮食情况：${entry.diet || "-"}`,
+        `本周状态：${entry.status || "-"}`,
+        `备注：${entry.notes || "-"}`,
+        "",
+        entry.planSummary || "本周计划打卡：暂无打卡记录"
+      ].join("\n");
+    }
+
+    function openHistoryRecordModal(entry){
+      if(!entry) return;
+      activeHistoryRecordId = entry.id;
+      const modal = $("historyRecordModal");
+      const content = $("historyRecordModalContent");
+      if(content){
+        content.innerHTML = `
+          <div style="font-size:22px;font-weight:800;margin-bottom:10px;">${escapeHtml(entry.weekLabel || "未命名周次")}</div>
+          <div class="help">保存于 ${escapeHtml(entry.createdAt || "")}</div>
+          <div class="softbox"><pre>${escapeHtml(entryToSummaryText(entry))}</pre></div>
+        `;
+      }
+      if(modal) modal.style.display = "flex";
+    }
+
+    function closeHistoryRecordModal(){
+      const modal = $("historyRecordModal");
+      if(modal) modal.style.display = "none";
+    }
+
+    function getActiveHistoryEntry(){
+      return getHistory().find((x) => Number(x.id) === Number(activeHistoryRecordId));
+    }
+
+    function loadHistoryEntryToCurrentForm(){
+      const entry = getActiveHistoryEntry();
+      if(!entry) return;
+      if(hasUnsavedCurrentForm()){
+        const ok = confirm("当前正在填写的本周记录会被覆盖。建议先保存或导出。确定继续吗？");
+        if(!ok) return;
+      }
+      backupCurrentDraft("before_load_history_record");
+      setForm(entry);
+      if(entry.planChecksSnapshot){
+        setPlanChecks(entry.planChecksSnapshot);
+      }
+      renderPlan();
+      updateSummary();
+      closeHistoryRecordModal();
+      switchTab("record");
+      window.scrollTo({ top:0, behavior:"smooth" });
+    }
+
+    function deleteActiveHistoryEntry(){
+      const entry = getActiveHistoryEntry();
+      if(!entry) return;
+      const ok = confirm("确定删除这条历史周记录吗？不会影响当前正在填写的记录。");
+      if(!ok) return;
+      setHistory(getHistory().filter((x) => Number(x.id) !== Number(entry.id)));
+      closeHistoryRecordModal();
     }
 
     function renderHistory(){
@@ -3456,7 +7031,7 @@
             <div class="mini">完成率：${escapeHtml(completionPercent)}</div>
           </div>
           <div class="btns">
-            <button class="btn-outline" data-load="${entry.id}">载入查看</button>
+            <button class="btn-outline" data-load="${entry.id}">查看详情</button>
             <button class="btn-danger" data-del="${entry.id}">删除</button>
           </div>
         `;
@@ -3467,35 +7042,7 @@
         btn.onclick = () => {
           const id = Number(btn.getAttribute("data-load"));
           const entry = list.find((x) => x.id === id);
-          if(!entry) return;
-
-          setForm(entry);
-          if(entry.planChecksSnapshot){
-            setPlanChecks(entry.planChecksSnapshot);
-          }
-          renderPlan();
-
-          $("summaryPreview").textContent = [
-            `每周反馈：${entry.weekLabel || "未填写周次"}`,
-            `7天空腹体重：${[
-              entry.weight1,entry.weight2,entry.weight3,entry.weight4,entry.weight5,entry.weight6,entry.weight7
-            ].map((v) => v || "-").join(" / ")}`,
-            `周平均体重：${entry.avgWeight || "-"} kg`,
-            `平均睡眠：${entry.avgSleep || "-"}`,
-            `最晚入睡时间：${entry.latestSleep || "-"}`,
-            `本周训练完成：${entry.trainingDays || "-"} 天`,
-            `俯卧撑最高一组：${entry.pushupBest || "-"}`,
-            `引体向上最高一组：${entry.pullupBest || "-"}`,
-            `本周引体总量：${entry.pullupTotal || "-"}`,
-            `饮食情况：${entry.diet || "-"}`,
-            `本周状态：${entry.status || "-"}`,
-            `备注：${entry.notes || "-"}`,
-            "",
-            entry.planSummary || "本周计划打卡：暂无打卡记录"
-          ].join("\n");
-
-          switchTab("record");
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          openHistoryRecordModal(entry);
         };
       });
 
@@ -3508,6 +7055,33 @@
     }
 
 
+
+    const dayDockDrag = {
+      active:false,
+      moved:false,
+      startX:0,
+      startLeft:0,
+      startScrollLeft:0,
+      lastClientX:0,
+      minLeft:0,
+      maxLeft:0,
+      targetIndex:-1,
+      extraScale:0.18,
+      autoScrollRaf:0
+    };
+
+    const dayDockHold = {
+      active:false,
+      activated:false,
+      targetButton:null,
+      targetIndex:-1,
+      startX:0,
+      startY:0,
+      timer:0
+    };
+
+    let suppressDayClickUntil = 0;
+    let suppressDayClickIndex = -1;
 
     const tabDrag = {
       active:false,
@@ -3704,6 +7278,31 @@
           navigator.vibrate(duration);
         }
       }catch(err){}
+    }
+
+    function attachLiquidGlassControls(){
+      if(document.documentElement.dataset.liquidGlassBound === "1") return;
+      document.documentElement.dataset.liquidGlassBound = "1";
+      const selector = ".btn,.btn-outline,.btn-danger,.mini-btn,.check-btn,.day-tab,.tab,.timer-adjust-btn";
+      let activeControl = null;
+
+      const releaseControl = () => {
+        if(activeControl){
+          activeControl.classList.remove("glass-pressing");
+          activeControl = null;
+        }
+      };
+
+      document.addEventListener("pointerdown", (event) => {
+        const target = event.target instanceof Element ? event.target.closest(selector) : null;
+        if(!target || target.disabled) return;
+        activeControl = target;
+        target.classList.add("glass-pressing");
+      }, { passive:true });
+
+      document.addEventListener("pointerup", releaseControl, { passive:true });
+      document.addEventListener("pointercancel", releaseControl, { passive:true });
+      window.addEventListener("blur", releaseControl);
     }
 
     function getDragExtraScale(){
@@ -3960,6 +7559,11 @@
       indicator.style.transform = `translateX(${left}px)`;
     }
 
+    window.addEventListener("resize", () => {
+      updateDayTabIndicator();
+      updateTabIndicator();
+    });
+
     function switchTab(name, shouldPulse = true){
       clearTabPreviewState();
       if(shouldPulse) pulseTabsDock();
@@ -3974,17 +7578,23 @@
       updateTabIndicator();
     }
 
-    function copySummary(){
-      const text = $("summaryPreview").textContent;
+    function copyText(text, successMessage = "已复制"){
       if(!navigator.clipboard){
         alert("当前环境不支持一键复制，请手动复制");
-        return;
+        return Promise.resolve(false);
       }
-      navigator.clipboard.writeText(text).then(() => {
-        alert("已复制，可以直接发给我");
+      return navigator.clipboard.writeText(String(text || "")).then(() => {
+        alert(successMessage);
+        return true;
       }).catch(() => {
         alert("复制失败，请手动长按复制");
+        return false;
       });
+    }
+
+    function copySummary(){
+      const text = JSON.stringify(buildCoachJsonPayload(), null, 2);
+      copyText(text, "已复制 JSON 格式训练反馈。");
     }
 
     function exportData(){
@@ -3995,8 +7605,16 @@
         lastCloudSyncAt: getLastCloudSyncAt(),
         planChecks: getPlanChecks(),
         planTemplate: getPlanTemplate(),
-        pageBackground: getPageBackgroundData()
+        pageBackground: getPageBackgroundData(),
+        aiSettings: getAiSettingsForBackup(),
+        aiFeedbackHistory: getAiFeedbackHistory(),
+        aiLastFeedback: getAiLastFeedback(),
+        aiPetState: getAiPetState(),
+        aiPetIcon: getAiPetIconData(),
+        aiMilestones: getAiMilestones()
       };
+      const ok = confirm("导出的备份可能包含 AI API Key，请不要发送给他人。继续导出吗？");
+      if(!ok) return;
       const date = new Date().toISOString().slice(0, 10);
       downloadJson(`增肌记录备份_${date}.json`, payload);
     }
@@ -4030,13 +7648,35 @@
           if(payload.planChecks){
             localStorage.setItem(PLAN_CHECKS_KEY, JSON.stringify(payload.planChecks));
           }
+          if(payload.aiSettings){
+            localStorage.setItem(AI_SETTINGS_KEY, JSON.stringify(normalizeAiSettings(payload.aiSettings)));
+          }
+          if(Array.isArray(payload.aiFeedbackHistory)){
+            localStorage.setItem(AI_FEEDBACK_HISTORY_KEY, JSON.stringify(payload.aiFeedbackHistory.slice(0, 50)));
+          }
+          if(payload.aiLastFeedback){
+            localStorage.setItem(AI_LAST_FEEDBACK_KEY, JSON.stringify(payload.aiLastFeedback));
+          }
+          if(payload.aiPetState){
+            localStorage.setItem(AI_PET_STATE_KEY, JSON.stringify(payload.aiPetState));
+          }
+          if(typeof payload.aiPetIcon === "string"){
+            if(payload.aiPetIcon) localStorage.setItem(AI_PET_ICON_KEY, payload.aiPetIcon);
+            else localStorage.removeItem(AI_PET_ICON_KEY);
+          }
+          if(payload.aiMilestones){
+            localStorage.setItem(AI_MILESTONE_KEY, JSON.stringify(payload.aiMilestones));
+          }
           applyPageBackground(payload.pageBackground || "");
 
           setForm(JSON.parse(localStorage.getItem(FORM_KEY) || JSON.stringify(defaultForm)));
           renderHistory();
           renderPlan();
+          updateAiSettingsUi();
+          updateAiPetVisibility();
+          updateRestoreDraftButton();
           markLocalStateChanged("导入本地备份");
-          alert("导入成功");
+          alert(payload.aiSettings ? "导入成功。AI 设置已导入，如包含 API Key，请确认这是你自己的备份文件。" : "导入成功");
           syncToCloud(false).catch(() => {});
         }catch(err){
           alert("导入失败，文件格式不对");
@@ -4064,6 +7704,13 @@
       localStorage.removeItem(PAGE_BG_KEY);
       localStorage.removeItem(DAILY_LOGS_KEY);
       localStorage.removeItem(LAST_CLOUD_SYNC_AT_KEY);
+      localStorage.removeItem(AI_SETTINGS_KEY);
+      localStorage.removeItem(AI_LAST_FEEDBACK_KEY);
+      localStorage.removeItem(AI_FEEDBACK_HISTORY_KEY);
+      localStorage.removeItem(AI_PET_STATE_KEY);
+      localStorage.removeItem(AI_PET_ICON_KEY);
+      localStorage.removeItem(AI_MILESTONE_KEY);
+      localStorage.removeItem(FORM_DRAFT_BACKUP_KEY);
 
       activePlanDay = 0;
       counterValue = 0;
@@ -4086,6 +7733,9 @@
       renderTimer();
       renderPlan();
       applyPageBackground("");
+      updateAiSettingsUi();
+      updateAiPetVisibility();
+      updateRestoreDraftButton();
       queueAutoSync("清空本地记录");
       alert("已清空全部本地记录");
     }
@@ -4287,6 +7937,8 @@
         $("timerResetBtn"),
         $("timerMinutes"),
         $("timerSeconds"),
+        $("timerMinus10Btn"),
+        $("timerPlus10Btn"),
         ...Array.from(document.querySelectorAll("[data-timer-preset]"))
       ].filter(Boolean);
 
@@ -4602,6 +8254,52 @@
       renderTimer();
     }
 
+    function adjustTimerBySeconds(deltaSeconds){
+      const deltaMs = Number(deltaSeconds || 0) * 1000;
+      const maxMs = (99 * 60 + 59) * 1000;
+      stopAlarmLoop();
+      if(timerRunning){
+        timerRemainingMs = Math.max(0, Math.min(maxMs, timerEndAt - Date.now() + deltaMs));
+        if(timerRemainingMs <= 0){
+          finishTimerAndAlarm();
+          return;
+        }
+        timerEndAt = Date.now() + timerRemainingMs;
+        timerInitialMs = Math.max(timerInitialMs, timerRemainingMs);
+      }else{
+        timerRemainingMs = Math.max(0, Math.min(maxMs, timerRemainingMs + deltaMs));
+        timerInitialMs = timerRemainingMs || 0;
+        if(timerInitialMs > 0) syncTimerInputsFromInitial();
+      }
+      renderTimer();
+    }
+
+    function stopTimerHoldAdjust(){
+      clearTimeout(timerHoldDelay);
+      clearInterval(timerHoldInterval);
+      timerHoldDelay = 0;
+      timerHoldInterval = 0;
+    }
+
+    function bindHoldButton(button, onTick){
+      if(!button || button.dataset.holdBound === "1") return;
+      button.dataset.holdBound = "1";
+      const start = (e) => {
+        if(e.cancelable) e.preventDefault();
+        stopTimerHoldAdjust();
+        onTick();
+        timerHoldDelay = setTimeout(() => {
+          timerHoldInterval = setInterval(onTick, 120);
+        }, 400);
+      };
+      const stop = () => stopTimerHoldAdjust();
+      button.addEventListener("pointerdown", start);
+      button.addEventListener("pointerup", stop);
+      button.addEventListener("pointerleave", stop);
+      button.addEventListener("pointercancel", stop);
+      button.addEventListener("touchend", stop, { passive:true });
+    }
+
     function initPortableTools(){
       renderCounter();
 
@@ -4630,6 +8328,8 @@
       $("timerStartBtn").onclick = timerStart;
       $("timerPauseBtn").onclick = timerPause;
       $("timerResetBtn").onclick = timerReset;
+      bindHoldButton($("timerMinus10Btn"), () => adjustTimerBySeconds(-10));
+      bindHoldButton($("timerPlus10Btn"), () => adjustTimerBySeconds(10));
 
       document.querySelectorAll("[data-timer-preset]").forEach((btn) => {
         btn.onclick = () => {
@@ -4665,6 +8365,144 @@
       }
 
       handleTimerWakeCheck();
+    }
+
+    function openAiCoachPanel(showHistory = false){
+      const modal = $("aiCoachPanelModal");
+      const content = $("aiCoachPanelContent");
+      if(!modal || !content) return;
+      const last = getAiLastFeedback();
+      const history = getAiFeedbackHistory();
+      if(showHistory){
+        content.innerHTML = `
+          <div style="font-size:22px;font-weight:800;margin-bottom:10px;">AI 教练反馈历史</div>
+          ${history.length ? history.map((item) => `
+            <div class="softbox">
+              <b>${escapeHtml(item.title || "AI 教练")}</b>
+              <div style="margin-top:6px;">${escapeHtml(item.message || "")}</div>
+              <div class="help">${escapeHtml(new Date(item.createdAt || Date.now()).toLocaleString("zh-CN"))}</div>
+            </div>
+          `).join("") : `<div class="softbox">还没有 AI 反馈。</div>`}
+        `;
+      }else{
+        content.innerHTML = `
+          <div style="font-size:22px;font-weight:800;margin-bottom:10px;">AI 教练</div>
+          <div class="softbox">
+            <b>最近反馈：</b><br>
+            ${escapeHtml(last?.message || "还没有反馈。完成一个动作后，这里会显示最近一次教练提醒。")}
+          </div>
+        `;
+      }
+      const quietBtn = $("aiPanelQuietBtn");
+      if(quietBtn){
+        quietBtn.textContent = `安静模式：${getAiSettings().quietMode ? "开启" : "关闭"}`;
+      }
+      modal.style.display = "flex";
+    }
+
+    function closeAiCoachPanel(){
+      const modal = $("aiCoachPanelModal");
+      if(modal) modal.style.display = "none";
+    }
+
+    async function testAiConnection(){
+      const status = $("aiSettingsStatus");
+      if(status) status.textContent = "AI 状态：正在测试连接...";
+      saveAiSettings(collectAiSettingsFromUi());
+      const res = await callAiCoach("test_connection", { prompt:"请只返回一句中文：AI 教练连接成功。" }, { timeoutMs:15000, force:true });
+      if(res.ok){
+        const msg = res.data?.message || "AI 教练连接成功。";
+        if(status) status.textContent = "AI 状态：连接成功";
+        showCoachBubble(msg, "high", 3500, { force:true });
+      }else{
+        if(status) status.textContent = `AI 状态：连接失败 · ${res.error || "请检查配置"}`;
+        alert("连接失败，请检查 API Key、Base URL 或代理接口。");
+      }
+    }
+
+    function bindAiSettingsControls(){
+      const toggle = (field) => {
+        const settings = collectAiSettingsFromUi();
+        settings[field] = !settings[field];
+        saveAiSettings(settings);
+      };
+      if($("aiEnabledBtn")) $("aiEnabledBtn").onclick = () => toggle("enabled");
+      if($("aiPetEnabledBtn")) $("aiPetEnabledBtn").onclick = () => toggle("deskPetEnabled");
+      if($("aiBubbleEnabledBtn")) $("aiBubbleEnabledBtn").onclick = () => toggle("bubbleEnabled");
+      if($("aiQuietModeBtn")) $("aiQuietModeBtn").onclick = () => toggle("quietMode");
+      if($("aiSyncKeyBtn")) $("aiSyncKeyBtn").onclick = () => toggle("syncApiKeyToCloud");
+      if($("aiSaveSettingsBtn")) $("aiSaveSettingsBtn").onclick = () => saveAiSettings(collectAiSettingsFromUi(), { bubble:true });
+      if($("aiTestBtn")) $("aiTestBtn").onclick = () => testAiConnection().catch((err) => {
+        console.error(err);
+        alert("连接失败，请检查 API Key、Base URL 或代理接口。");
+      });
+      if($("aiClearKeyBtn")) $("aiClearKeyBtn").onclick = () => {
+        const settings = collectAiSettingsFromUi();
+        settings.apiKey = "";
+        saveAiSettings(settings);
+        updateAiSettingsUi();
+        syncToCloud(false).catch(() => {});
+      };
+      if($("aiToggleKeyBtn")) $("aiToggleKeyBtn").onclick = () => {
+        const input = $("aiApiKey");
+        if(!input) return;
+        input.type = input.type === "password" ? "text" : "password";
+        $("aiToggleKeyBtn").textContent = input.type === "password" ? "显示" : "隐藏";
+      };
+      ["aiApiMode","aiApiBaseUrl","aiProxyUrl","aiApiKey","aiModel","aiFeedbackLength","aiCoachTone"].forEach((id) => {
+        const el = $(id);
+        if(el){
+          el.addEventListener("change", () => saveAiSettings(collectAiSettingsFromUi()));
+          el.addEventListener("input", () => {
+            if(id === "aiApiMode") saveAiSettings(collectAiSettingsFromUi());
+          });
+        }
+      });
+      const pet = $("aiCoachAvatar");
+      if(pet) pet.onclick = () => openAiCoachPanel(false);
+      if($("closeAiCoachPanelBtn")) $("closeAiCoachPanelBtn").onclick = closeAiCoachPanel;
+      if($("aiPanelHistoryBtn")) $("aiPanelHistoryBtn").onclick = () => openAiCoachPanel(true);
+      if($("aiPanelQuietBtn")) $("aiPanelQuietBtn").onclick = () => toggle("quietMode");
+      const modal = $("aiCoachPanelModal");
+      if(modal) modal.onclick = (e) => { if(e.target === modal) closeAiCoachPanel(); };
+    }
+
+    function bindAiFeatureButtons(){
+      if($("aiWeeklyBtn")) $("aiWeeklyBtn").onclick = () => generateAiWeeklyAnalysis({ force:true }).catch((err) => alert("AI 反馈生成失败：" + (err.message || "未知错误")));
+      if($("aiNextPlanBtn")) $("aiNextPlanBtn").onclick = () => generateAiNextWeekPlan().catch((err) => alert("AI 计划生成失败：" + (err.message || "未知错误")));
+      if($("regenerateAiPlanBtn")) $("regenerateAiPlanBtn").onclick = () => generateAiNextWeekPlan();
+      if($("adoptAiPlanBtn")) $("adoptAiPlanBtn").onclick = adoptAiPlan;
+      if($("copyAiPlanBtn")) $("copyAiPlanBtn").onclick = () => copyText(JSON.stringify(latestAiPlanResult || {}, null, 2), "已复制 AI 计划");
+      if($("cancelAiPlanBtn")) $("cancelAiPlanBtn").onclick = () => { if($("aiNextPlanCard")) $("aiNextPlanCard").style.display = "none"; };
+      if($("copyAiWeeklyBtn")) $("copyAiWeeklyBtn").onclick = () => copyText(JSON.stringify(latestAiWeeklyResult || {}, null, 2), "已复制 AI 反馈");
+      if($("saveAiWeeklyBtn")) $("saveAiWeeklyBtn").onclick = () => {
+        if(!latestAiWeeklyResult){ alert("还没有 AI 反馈"); return; }
+        const list = getHistory();
+        const top = list[0];
+        if(top){
+          top.aiWeeklyFeedback = latestAiWeeklyResult;
+          setHistory(list);
+          alert("已保存到最近一条历史记录");
+        }else{
+          alert("请先保存本周记录，再保存 AI 反馈");
+        }
+      };
+      if($("aiParseLogBtn")) $("aiParseLogBtn").onclick = () => parseNaturalLogWithAi().catch((err) => alert("AI 解析失败：" + (err.message || "未知错误")));
+      if($("aiDailyAdjustBtn")) $("aiDailyAdjustBtn").onclick = () => generateDailyAdjust().catch((err) => alert("AI 调整失败：" + (err.message || "未知错误")));
+      if($("aiTrendBtn")) $("aiTrendBtn").onclick = () => generateTrendAnalysis().catch((err) => alert("趋势分析失败：" + (err.message || "未知错误")));
+      if($("restoreDraftBackupBtn")) $("restoreDraftBackupBtn").onclick = restoreDraftBackup;
+    }
+
+    function bindHistoryModalControls(){
+      if($("closeHistoryRecordModalBtn")) $("closeHistoryRecordModalBtn").onclick = closeHistoryRecordModal;
+      if($("copyHistoryJsonBtn")) $("copyHistoryJsonBtn").onclick = () => {
+        const entry = getActiveHistoryEntry();
+        if(entry) copyText(JSON.stringify(buildCoachJsonPayload(entry), null, 2), "已复制历史记录 JSON");
+      };
+      if($("loadHistoryToFormBtn")) $("loadHistoryToFormBtn").onclick = loadHistoryEntryToCurrentForm;
+      if($("deleteHistoryFromModalBtn")) $("deleteHistoryFromModalBtn").onclick = deleteActiveHistoryEntry;
+      const modal = $("historyRecordModal");
+      if(modal) modal.onclick = (e) => { if(e.target === modal) closeHistoryRecordModal(); };
     }
 
     function isStandaloneMode(){
@@ -4767,12 +8605,23 @@
       if(file) handleBackgroundUpload(file);
       e.target.value = "";
     });
+    if($("uploadAiPetIconBtn")) $("uploadAiPetIconBtn").onclick = () => $("aiPetIconFileInput").click();
+    if($("clearAiPetIconBtn")) $("clearAiPetIconBtn").onclick = clearAiPetIcon;
+    if($("aiPetIconFileInput")) $("aiPetIconFileInput").addEventListener("change", (e) => {
+      const file = e.target.files && e.target.files[0];
+      if(file) handleAiPetIconUpload(file);
+      e.target.value = "";
+    });
 
     $("cloudLoginBtn").onclick = signInWithGitHub;
     $("cloudLogoutBtn").onclick = signOutCloud;
     $("cloudSyncBtn").onclick = () => syncToCloud(true);
     $("cloudRestoreBtn").onclick = restoreFromCloud;
     $("cloudAutoSyncBtn").onclick = toggleAutoSync;
+
+    bindAiSettingsControls();
+    bindAiFeatureButtons();
+    bindHistoryModalControls();
 
     sb.auth.onAuthStateChange((event) => {
       refreshCloudUi().catch(() => {});
@@ -4784,7 +8633,12 @@
     });
 
     applyPageBackground(getPageBackgroundData());
+    updateAiSettingsUi();
+    updateAiPetVisibility();
+    updateRestoreDraftButton();
+    bindPlanSwipeNavigation();
     renderPlan();
+    attachDayDockInteractions();
     setForm(JSON.parse(localStorage.getItem(FORM_KEY) || JSON.stringify(defaultForm)));
     renderHistory();
     initPortableTools();
@@ -4794,6 +8648,7 @@
       attachTabPress();
       attachTabHold();
       attachTabDrag();
+      attachLiquidGlassControls();
     });
     updateSummary();
     refreshCloudUi().catch(() => {});
