@@ -583,6 +583,16 @@
       margin-top:6px;
     }
 
+    .guide-source-link{
+      color:#2563eb;
+      font-weight:700;
+      text-decoration:none;
+    }
+
+    .guide-source-link:hover{
+      text-decoration:underline;
+    }
+
     .guide-diagram{
       margin-top:10px;
       background:rgba(241,245,249,.88);
@@ -1486,7 +1496,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.04.19-34-cloud-basic-schema";
+    const APP_VERSION = "v2026.05.06-36-real-exercise-gifs";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const DAILY_LOGS_KEY = "gain-daily-logs";
     const LAST_CLOUD_SYNC_AT_KEY = "gain-last-cloud-sync-at";
@@ -1649,6 +1659,14 @@
         cautions:["全程身体一条线","窄距更吃肘腕，手腕不适先减量","机械递减不要追求动作变形后的数量"]
       },
       {
+        id:"pike-pushup",
+        title:"下犬式俯卧撑 / Pike Push-up",
+        keywords:["下犬式俯卧撑","Pike Push-up","Pike Pushup","派克俯卧撑"],
+        focus:["肩前束","肩中束","肱三头","核心稳定"],
+        diagram:"起始：双手撑地，髋部抬高，身体呈倒 V\n下降：屈肘让头部朝两手之间下放\n底部：肩部保持主动，不塌肩\n推起：手掌推地回到倒 V 姿势",
+        cautions:["动作慢，不要用头去点地","肩不舒服就缩短幅度","核心收紧，避免腰椎塌下去"]
+      },
+      {
         id:"db-floor-press",
         title:"哑铃地板卧推",
         keywords:["哑铃地板卧推","地板卧推","卧推"],
@@ -1713,6 +1731,14 @@
         cautions:["先做肩胛下沉，不要耸肩硬拉","避免大幅摆腿","离心阶段别突然掉下去"]
       },
       {
+        id:"scapular-pull",
+        title:"肩胛引体 / 沉肩悬垂",
+        keywords:["肩胛引体/沉肩悬垂","肩胛引体","沉肩悬垂"],
+        focus:["肩胛下沉","背阔肌启动","下斜方肌"],
+        diagram:"起始：双手悬垂，手臂保持伸直\n下沉：不弯肘，把肩膀从耳朵旁拉远\n顶端：胸口微微抬起，背部有发力感\n回位：控制肩胛上提回到悬垂",
+        cautions:["不要做成半个引体向上","全程手臂尽量伸直","先小幅度找背阔发力"]
+      },
+      {
         id:"row",
         title:"单臂哑铃划船 / 俯身双哑铃划船 / 弹力绳划船",
         keywords:["单臂哑铃划船","俯身双哑铃划船","弹力绳划船","划船"],
@@ -1723,10 +1749,18 @@
       {
         id:"lat-pulldown-band",
         title:"弹力绳高位下拉",
-        keywords:["弹力绳高位下拉","高位下拉"],
+        keywords:["弹力绳高位下拉","弹力绳下拉","高位下拉"],
         focus:["背阔肌","肩胛下沉"],
         diagram:"起始：绳固定高处，双手抓绳\n下拉：肘向下向后带，拉向锁骨或上胸\n回位：慢慢放回",
         cautions:["别用腰猛后仰借力","先想肩胛下沉再拉肘","回位别松掉张力"]
+      },
+      {
+        id:"band-straight-arm-pulldown",
+        title:"弹力绳直臂下拉",
+        keywords:["弹力绳直臂下拉","直臂下拉"],
+        focus:["背阔肌","肩胛下沉","核心稳定"],
+        diagram:"起始：弹力绳固定高处，双臂伸直或微屈\n下拉：手臂沿弧线向大腿方向压下\n底部：背阔收紧，胸口保持打开\n回位：控制弹力绳回到高处",
+        cautions:["不要弯肘做成下压","别用腰后仰借力","重量宁轻，先找背阔收缩"]
       },
       {
         id:"facepull",
@@ -1761,12 +1795,44 @@
         cautions:["不要塌腰含胸","膝盖不要内扣","蹲不深先保证稳定和中立位"]
       },
       {
+        id:"bulgarian-split-squat",
+        title:"保加利亚分腿蹲",
+        keywords:["保加利亚分腿蹲","分腿蹲"],
+        focus:["股四头","臀","单腿稳定"],
+        diagram:"起始：后脚搭在凳子或固定支撑上，前脚站稳\n下降：前腿屈膝下蹲，躯干略前倾\n底部：前脚全脚掌踩稳，膝盖跟脚尖同向\n站起：前腿发力站回",
+        cautions:["前脚别站太近，膝盖压力会变大","先徒手找平衡再加哑铃","不要用后腿猛蹬"]
+      },
+      {
         id:"rdl",
         title:"哑铃罗马尼亚硬拉",
         keywords:["哑铃罗马尼亚硬拉","罗马尼亚硬拉","硬拉"],
         focus:["腘绳肌","臀","下背等长稳定"],
         diagram:"起始：双手持铃站立\n下放：髋向后折叠，哑铃贴近大腿向下\n底部：感到大腿后侧拉伸\n起身：夹臀伸髋站起",
         cautions:["重点是髋折叠，不是弯腰找地","背部保持中立","下放到拉伸明显即可，不必强求更低"]
+      },
+      {
+        id:"db-calf-raise",
+        title:"哑铃提踵",
+        keywords:["哑铃提踵","提踵"],
+        focus:["腓肠肌","比目鱼肌","脚踝稳定"],
+        diagram:"起始：手持哑铃站稳，脚掌踩实\n上抬：脚跟向上抬到最高点\n顶端：小腿收紧，停 1 秒\n下放：控制脚跟回落，保持平衡",
+        cautions:["不要快速弹跳","顶峰停顿比追重量更重要","需要时扶墙保持稳定"]
+      },
+      {
+        id:"bird-dog",
+        title:"鸟狗",
+        keywords:["鸟狗","Bird Dog"],
+        focus:["核心稳定","臀","肩胛稳定"],
+        diagram:"起始：四点跪姿，双手在肩下，双膝在髋下\n伸展：对侧手脚同时向远处伸直\n停顿：骨盆保持水平，腰不塌\n回位：慢慢收回，再换另一侧",
+        cautions:["不要为了抬高腿而塌腰","动作越慢越能练核心稳定","骨盆左右晃动明显就缩短幅度"]
+      },
+      {
+        id:"adductor-stretch",
+        title:"大腿内侧拉伸 / 放松",
+        keywords:["大腿内侧放松拉伸","大腿内侧拉伸","大腿内侧轻度放松","大腿内侧"],
+        focus:["内收肌","髋部活动度","恢复"],
+        diagram:"起始：进入侧向或侧卧大腿内侧拉伸位\n拉伸：慢慢打开髋部，找到大腿内侧拉伸感\n保持：稳定呼吸 30–40 秒\n回位：缓慢退出，不要弹震",
+        cautions:["只要拉伸感，不追求疼痛","酸痛明显时减小幅度","两侧都做，注意左右差异"]
       },
       {
         id:"walk-stretch",
@@ -1779,12 +1845,28 @@
     ];
 
     const EXERCISE_GIF_MAP = {
-      "肩胛引体/沉肩悬垂": { gif:"custom_scapular_pull.gif", label:"肩胛引体 / 沉肩悬垂（简化示意 GIF）", note:"依据聊天记录描述制作的简化线稿示意，重点展示肩胛下沉与手臂保持伸直。" },
-      "肩胛引体": { gif:"custom_scapular_pull.gif", label:"肩胛引体 / 沉肩悬垂（简化示意 GIF）", note:"依据聊天记录描述制作的简化线稿示意，重点展示肩胛下沉与手臂保持伸直。" },
-      "沉肩悬垂": { gif:"custom_scapular_pull.gif", label:"肩胛引体 / 沉肩悬垂（简化示意 GIF）", note:"依据聊天记录描述制作的简化线稿示意，重点展示肩胛下沉与手臂保持伸直。" },
-      "弹力绳直臂下拉": { gif:"custom_band_straight_arm_pulldown.gif", label:"弹力绳直臂下拉（简化示意 GIF）", note:"依据聊天记录描述制作的简化线稿示意，重点展示直臂轨迹与背阔发力。" },
-      "保加利亚分腿蹲": { gif:"custom_bulgarian_split_squat.gif", label:"保加利亚分腿蹲（简化示意 GIF）", note:"依据聊天记录描述制作的简化线稿示意，重点展示前腿主力与后脚抬高。"},
-      "哑铃提踵": { gif:"custom_dumbbell_calf_raise.gif", label:"哑铃提踵（简化示意 GIF）", note:"依据聊天记录描述制作的简化线稿示意，重点展示脚跟抬起与顶峰停顿。"},
+      "肩胛引体/沉肩悬垂": { gif:"custom_scapular_pull.gif", label:"肩胛引体 / 沉肩悬垂", note:"现成动作 GIF，用于参考手臂伸直时肩胛下沉和回放的轨迹。", sourceUrl:"https://loadmuscle.com/exercises/scapular-pull-up", sourceLabel:"素材来源：LoadMuscle" },
+      "肩胛引体": { gif:"custom_scapular_pull.gif", label:"肩胛引体 / 沉肩悬垂", note:"现成动作 GIF，用于参考手臂伸直时肩胛下沉和回放的轨迹。", sourceUrl:"https://loadmuscle.com/exercises/scapular-pull-up", sourceLabel:"素材来源：LoadMuscle" },
+      "沉肩悬垂": { gif:"custom_scapular_pull.gif", label:"肩胛引体 / 沉肩悬垂", note:"现成动作 GIF，用于参考手臂伸直时肩胛下沉和回放的轨迹。", sourceUrl:"https://loadmuscle.com/exercises/scapular-pull-up", sourceLabel:"素材来源：LoadMuscle" },
+      "弹力绳直臂下拉": { gif:"custom_band_straight_arm_pulldown.gif", label:"弹力绳直臂下拉", note:"现成动作 GIF，用于参考直臂下拉轨迹和背阔发力。", sourceUrl:"https://loadmuscle.com/exercises/band-straight-arm-pulldown", sourceLabel:"素材来源：LoadMuscle" },
+      "弹力绳下拉": { gif:"0983.gif", label:"近似替代图示：弹力绳高位下拉", note:"计划里的“弹力绳下拉”按高位下拉处理，重点看先沉肩再把肘向下带。" },
+      "保加利亚分腿蹲": { gif:"custom_bulgarian_split_squat.gif", label:"保加利亚分腿蹲", note:"现成动作 GIF，用于参考后脚抬高、前腿主导下蹲和站起的轨迹。", sourceUrl:"https://loadmuscle.com/exercises/bulgarian-split-squat", sourceLabel:"素材来源：LoadMuscle" },
+      "哑铃提踵": { gif:"custom_dumbbell_calf_raise.gif", label:"哑铃提踵", note:"现成动作 GIF，用于参考脚跟抬起、顶峰停顿和受控下放。", sourceUrl:"https://loadmuscle.com/exercises/dumbbell-standing-calf-raise", sourceLabel:"素材来源：LoadMuscle" },
+      "鸟狗": { gif:"bird_dog.gif", label:"鸟狗", note:"现成动作 GIF，用于参考对侧手脚伸展和骨盆稳定。", sourceUrl:"https://tenor.com/view/bird-dog-gif-27559649", sourceLabel:"素材来源：Tenor" },
+      "下犬式俯卧撑": { gif:"pike_push_up.webp", label:"下犬式俯卧撑 / Pike Push-up", note:"现成动作图，用于参考倒 V 姿势下的肩推动作轨迹。", sourceUrl:"https://loadmuscle.com/exercises/pike-push-up", sourceLabel:"素材来源：LoadMuscle" },
+      "Pike Push-up": { gif:"pike_push_up.webp", label:"下犬式俯卧撑 / Pike Push-up", note:"现成动作图，用于参考倒 V 姿势下的肩推动作轨迹。", sourceUrl:"https://loadmuscle.com/exercises/pike-push-up", sourceLabel:"素材来源：LoadMuscle" },
+      "大腿内侧放松拉伸": { gif:"adductor_stretch.webp", label:"大腿内侧拉伸", note:"现成动作图，用于参考内收肌拉伸姿势。", sourceUrl:"https://loadmuscle.com/exercises/standing-wide-knees-adductor-stretch", sourceLabel:"素材来源：LoadMuscle" },
+      "大腿内侧拉伸": { gif:"adductor_stretch.webp", label:"大腿内侧拉伸", note:"现成动作图，用于参考内收肌拉伸姿势。", sourceUrl:"https://loadmuscle.com/exercises/standing-wide-knees-adductor-stretch", sourceLabel:"素材来源：LoadMuscle" },
+      "大腿内侧轻度放松": { gif:"adductor_stretch.webp", label:"大腿内侧拉伸", note:"现成动作图，用于参考内收肌拉伸姿势。", sourceUrl:"https://loadmuscle.com/exercises/standing-wide-knees-adductor-stretch", sourceLabel:"素材来源：LoadMuscle" },
+      "快走": { gif:"marching_on_spot.webp", label:"快走 / 原地踏步参考", note:"快走没有固定器械轨迹，这里用原地踏步动作图作节奏和姿态参考。", sourceUrl:"https://loadmuscle.com/exercises/marching-on-spot", sourceLabel:"素材来源：LoadMuscle" },
+      "散步": { gif:"marching_on_spot.webp", label:"散步 / 原地踏步参考", note:"散步没有固定器械轨迹，这里用原地踏步动作图作节奏和姿态参考。", sourceUrl:"https://loadmuscle.com/exercises/marching-on-spot", sourceLabel:"素材来源：LoadMuscle" },
+      "胸、背、肩拉伸": { gif:"standing_back_rotation_stretch.webp", label:"胸背肩拉伸参考", note:"现成动作图，用于参考上肢和躯干拉伸节奏；髋部拉伸请按文字提示补充。", sourceUrl:"https://loadmuscle.com/exercises/standing-reach-up-back-rotation-stretch", sourceLabel:"素材来源：LoadMuscle" },
+      "胸、背、髋部拉伸": { gif:"standing_back_rotation_stretch.webp", label:"胸背拉伸参考", note:"现成动作图，用于参考上肢和躯干拉伸节奏；髋部拉伸请按文字提示补充。", sourceUrl:"https://loadmuscle.com/exercises/standing-reach-up-back-rotation-stretch", sourceLabel:"素材来源：LoadMuscle" },
+      "肩背拉伸": { gif:"standing_back_rotation_stretch.webp", label:"肩背拉伸参考", note:"现成动作图，用于参考肩背活动和躯干旋转。", sourceUrl:"https://loadmuscle.com/exercises/standing-reach-up-back-rotation-stretch", sourceLabel:"素材来源：LoadMuscle" },
+      "肩部轻拉伸": { gif:"standing_back_rotation_stretch.webp", label:"肩背拉伸参考", note:"现成动作图，用于参考肩背活动和躯干旋转。", sourceUrl:"https://loadmuscle.com/exercises/standing-reach-up-back-rotation-stretch", sourceLabel:"素材来源：LoadMuscle" },
+      "全身轻拉伸": { gif:"standing_back_rotation_stretch.webp", label:"全身轻拉伸参考", note:"现成动作图，用于参考轻量拉伸节奏；不同部位可按计划文字分开做。", sourceUrl:"https://loadmuscle.com/exercises/standing-reach-up-back-rotation-stretch", sourceLabel:"素材来源：LoadMuscle" },
+      "全身拉伸": { gif:"standing_back_rotation_stretch.webp", label:"全身拉伸参考", note:"现成动作图，用于参考轻量拉伸节奏；不同部位可按计划文字分开做。", sourceUrl:"https://loadmuscle.com/exercises/standing-reach-up-back-rotation-stretch", sourceLabel:"素材来源：LoadMuscle" },
+      "拉伸": { gif:"standing_back_rotation_stretch.webp", label:"通用拉伸参考", note:"现成动作图，用于参考轻量拉伸节奏；具体部位按计划文字执行。", sourceUrl:"https://loadmuscle.com/exercises/standing-reach-up-back-rotation-stretch", sourceLabel:"素材来源：LoadMuscle" },
 
       "下斜俯卧撑": { gif:"0279.gif", label:"下斜俯卧撑", note:"" },
       "宽距俯卧撑": { gif:"1311.gif", label:"宽距俯卧撑", note:"" },
@@ -2545,18 +2627,22 @@
 
     function findGuideByItem(itemText){
       const text = String(itemText || "");
-      const guide = EXERCISE_GUIDES.find((entry) => entry.keywords.some((keyword) => text.includes(keyword))) || null;
-      if(!guide) return null;
-      const matchedKeyword = guide.keywords.find((keyword) => text.includes(keyword)) || guide.title;
+      const match = EXERCISE_GUIDES
+        .flatMap((entry) => (entry.keywords || []).map((keyword) => ({ entry, keyword })))
+        .filter((item) => text.includes(item.keyword))
+        .sort((a, b) => b.keyword.length - a.keyword.length)[0];
+      if(!match) return null;
       return {
-        ...guide,
-        title: matchedKeyword
+        ...match.entry,
+        title: match.keyword
       };
     }
 
     function findGifByItem(itemText){
       const text = String(itemText || "");
-      const matchedKey = Object.keys(EXERCISE_GIF_MAP).find((keyword) => text.includes(keyword));
+      const matchedKey = Object.keys(EXERCISE_GIF_MAP)
+        .filter((keyword) => text.includes(keyword))
+        .sort((a, b) => b.length - a.length)[0];
       if(!matchedKey) return null;
       return {
         keyword: matchedKey,
@@ -2601,6 +2687,9 @@
       const cautions = guide?.cautions?.length
         ? guide.cautions.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
         : `<li>先用你能稳定控制的重量和幅度。</li><li>有明显关节疼痛时立即停下。</li>`;
+      const sourceLink = gifInfo?.sourceUrl
+        ? `<div class="guide-meta" style="margin-top:6px;"><a class="guide-source-link" href="${escapeHtml(gifInfo.sourceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(gifInfo.sourceLabel || "素材来源")}</a></div>`
+        : "";
 
       const gifBlock = gifInfo ? `
         <div style="margin-top:14px;border-radius:18px;overflow:hidden;border:1px solid rgba(148,163,184,.16);background:rgba(255,255,255,.62);">
@@ -2608,6 +2697,7 @@
           <div style="padding:12px 14px;">
             <div style="font-size:14px;font-weight:700;line-height:1.5;">${escapeHtml(gifInfo.label)}</div>
             <div class="guide-meta" style="margin-top:6px;">${escapeHtml(gifInfo.note || "本地 GIF 动作轨迹演示。")}</div>
+            ${sourceLink}
           </div>
         </div>
       ` : `
