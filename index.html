@@ -1496,7 +1496,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.05.06-36-real-exercise-gifs";
+    const APP_VERSION = "v2026.05.06-38-cache-first-gifs";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const DAILY_LOGS_KEY = "gain-daily-logs";
     const LAST_CLOUD_SYNC_AT_KEY = "gain-last-cloud-sync-at";
@@ -2158,26 +2158,61 @@
       if(!row) return null;
       const rawForm = row.form_json && typeof row.form_json === "object" ? row.form_json : {};
       const history = Array.isArray(row.history_json) ? row.history_json : [];
+      const embeddedDailyLogs = rawForm.__dailyLogs && typeof rawForm.__dailyLogs === "object" ? rawForm.__dailyLogs : {};
+      const embeddedPlanChecks = rawForm.__planChecks && typeof rawForm.__planChecks === "object" ? rawForm.__planChecks : {};
+      const embeddedPlanTemplate = rawForm.__planTemplate && typeof rawForm.__planTemplate === "object" ? rawForm.__planTemplate : DEFAULT_PLAN_TEMPLATE;
       return {
         id: row.id || row.uuid || row.row_id || null,
         user_id: row.user_id || "",
         form_json: rawForm,
         history_json: history,
-        daily_logs_json: rawForm.__dailyLogs && typeof rawForm.__dailyLogs === "object" ? rawForm.__dailyLogs : {},
-        plan_checks_json: rawForm.__planChecks && typeof rawForm.__planChecks === "object" ? rawForm.__planChecks : {},
-        plan_template_json: rawForm.__planTemplate && typeof rawForm.__planTemplate === "object" ? rawForm.__planTemplate : DEFAULT_PLAN_TEMPLATE,
+        daily_logs_json: row.daily_logs_json && typeof row.daily_logs_json === "object" ? row.daily_logs_json : embeddedDailyLogs,
+        plan_checks_json: row.plan_checks_json && typeof row.plan_checks_json === "object" ? row.plan_checks_json : embeddedPlanChecks,
+        plan_template_json: row.plan_template_json && typeof row.plan_template_json === "object" ? row.plan_template_json : embeddedPlanTemplate,
         updated_at: rawForm.__updatedAt || row.updated_at || row.modified_at || row.created_at || ""
       };
     }
 
     async function fetchCloudRows(userId){
-      // 只依赖最基础字段，避免旧 Supabase 表缺少 daily_logs_json 等字段时报错。
       let res = await sb
         .from(SUPABASE_TABLE)
-        .select("id,user_id,form_json,history_json")
+        .select("id,user_id,form_json,history_json,daily_logs_json,plan_checks_json,plan_template_json,updated_at")
         .eq("user_id", userId)
         .limit(20);
 
+      if(res.error && isMissingColumnError(res.error)){
+        res = await sb
+          .from(SUPABASE_TABLE)
+          .select("id,user_id,form_json,history_json,daily_logs_json,updated_at")
+          .eq("user_id", userId)
+          .limit(20);
+      }
+
+      if(res.error && isMissingColumnError(res.error)){
+        res = await sb
+          .from(SUPABASE_TABLE)
+          .select("id,user_id,form_json,history_json,daily_logs_json")
+          .eq("user_id", userId)
+          .limit(20);
+      }
+
+      if(res.error && isMissingColumnError(res.error)){
+        res = await sb
+          .from(SUPABASE_TABLE)
+          .select("user_id,form_json,history_json,daily_logs_json,updated_at")
+          .eq("user_id", userId)
+          .limit(20);
+      }
+
+      if(res.error && isMissingColumnError(res.error)){
+        res = await sb
+          .from(SUPABASE_TABLE)
+          .select("user_id,form_json,history_json,daily_logs_json")
+          .eq("user_id", userId)
+          .limit(20);
+      }
+
+      // 旧 Supabase 表可能没有 daily_logs_json 等列，继续回退到 form_json 内嵌数据。
       if(res.error && isMissingColumnError(res.error)){
         res = await sb
           .from(SUPABASE_TABLE)
@@ -2249,6 +2284,33 @@
         };
 
         const cloud = await fetchCloudSnapshot(user.id).catch(() => null);
+        const rowWithStructuredData = {
+          user_id: user.id,
+          form_json: richForm,
+          history_json: snapshot.history,
+          daily_logs_json: snapshot.dailyLogs,
+          plan_checks_json: snapshot.planChecks,
+          plan_template_json: snapshot.planTemplate,
+          updated_at: uploadUpdatedAt
+        };
+        const rowWithDailyLogs = {
+          user_id: user.id,
+          form_json: richForm,
+          history_json: snapshot.history,
+          daily_logs_json: snapshot.dailyLogs,
+          updated_at: uploadUpdatedAt
+        };
+        const rowWithDailyLogsNoUpdatedAt = {
+          user_id: user.id,
+          form_json: richForm,
+          history_json: snapshot.history,
+          daily_logs_json: snapshot.dailyLogs
+        };
+        const rowDailyLogsMinimal = {
+          user_id: user.id,
+          form_json: richForm,
+          daily_logs_json: snapshot.dailyLogs
+        };
         const rowWithHistory = {
           user_id: user.id,
           form_json: richForm,
@@ -2269,16 +2331,25 @@
           return await sb.from(SUPABASE_TABLE).insert(row);
         }
 
-        let writeRes = await writeRow(rowWithHistory);
-        if(writeRes.error && isMissingColumnError(writeRes.error)){
-          writeRes = await writeRow(rowMinimal);
+        const rowAttempts = [
+          rowWithStructuredData,
+          rowWithDailyLogs,
+          rowWithDailyLogsNoUpdatedAt,
+          rowDailyLogsMinimal,
+          rowWithHistory,
+          rowMinimal
+        ];
+        let writeRes = null;
+        for(const row of rowAttempts){
+          writeRes = await writeRow(row);
+          if(!writeRes.error || !isMissingColumnError(writeRes.error)) break;
         }
         if(writeRes.error) throw writeRes.error;
 
         markLocalStateChanged("已同步到云端", uploadUpdatedAt);
         setLastCloudSyncAt(uploadUpdatedAt);
         setCloudStatus(`云端状态：已同步到云端（${getCloudUserLabel(user)}）`);
-        setCloudHint(isAutoSyncEnabled() ? "自动同步已开启：已使用基础表结构同步，兼容旧 Supabase 表。" : "以后换设备登录同一个 GitHub 账号后，可以点“从云端恢复到本机”。");
+        setCloudHint(isAutoSyncEnabled() ? "自动同步已开启：训练日历、打卡、模板和历史记录已同步。" : "以后换设备登录同一个 GitHub 账号后，可以点“从云端恢复到本机”。");
         if(showAlert) alert("已同步到 Supabase 云端");
         return true;
       }catch(err){
@@ -3090,10 +3161,15 @@
       }
     }
 
-    function setDailyLogs(logs){
+    function setDailyLogs(logs, options = {}){
       localStorage.setItem(DAILY_LOGS_KEY, JSON.stringify(logs || {}));
       renderHistory();
       queueAutoSync("日历日志更新");
+      if(options.syncToCloud){
+        syncToCloud(false).catch((err) => {
+          console.error("日历日志静默同步失败", err);
+        });
+      }
     }
 
     function getLastCloudSyncAt(){
@@ -3233,7 +3309,7 @@
         current.updatedAtIso = new Date().toISOString();
         current.updatedAt = new Date().toLocaleString("zh-CN");
         nextLogs[selectedCalendarDate] = current;
-        setDailyLogs(nextLogs);
+        setDailyLogs(nextLogs, { syncToCloud: true });
       };
 
       $("deleteCalendarDetailBtn").onclick = () => {
@@ -3241,7 +3317,7 @@
         if(!ok) return;
         const nextLogs = getDailyLogs();
         delete nextLogs[selectedCalendarDate];
-        setDailyLogs(nextLogs);
+        setDailyLogs(nextLogs, { syncToCloud: true });
       };
     }
 
@@ -3271,7 +3347,7 @@
       };
 
       selectedCalendarDate = dateKey;
-      setDailyLogs(logs);
+      setDailyLogs(logs, { syncToCloud: true });
       switchTab("history");
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -4746,14 +4822,9 @@
 
     if("serviceWorker" in navigator){
       window.addEventListener("load", () => {
-        navigator.serviceWorker.getRegistrations()
-          .then((regs) => Promise.all(regs.map((reg) => reg.unregister())))
-          .catch(() => {});
-        if(window.caches){
-          caches.keys()
-            .then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
-            .catch(() => {});
-        }
+        navigator.serviceWorker.register("./sw.js")
+          .then((registration) => registration.update())
+          .catch((err) => console.error("Service Worker 注册失败", err));
       });
     }
   </script>

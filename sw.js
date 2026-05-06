@@ -1,9 +1,12 @@
-const CACHE_NAME = "gain-tracker-pwa-v4-real-exercise-gifs";
-const APP_SHELL = [
+const CACHE_NAME = "gain-tracker-pwa-v6-cache-first-gifs";
+const CORE_ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
-  "./icons/app-icon.svg",
+  "./icons/app-icon.svg"
+];
+
+const MEDIA_ASSETS = [
   "./gifs/0259.gif",
   "./gifs/0274.gif",
   "./gifs/0276.gif",
@@ -46,7 +49,12 @@ const APP_SHELL = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME)
+      .then(async (cache) => {
+        await cache.addAll(CORE_ASSETS);
+        await Promise.allSettled(MEDIA_ASSETS.map((asset) => cache.add(asset)));
+      })
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -67,11 +75,42 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
 
+  const isMediaRequest =
+    url.pathname.includes("/gifs/") ||
+    event.request.destination === "image";
+
+  if (isMediaRequest) {
+    event.respondWith(
+      caches.match(event.request).then((cached) => {
+        const networkUpdate = fetch(event.request)
+          .then((response) => {
+            if (response && response.ok) {
+              const cloned = response.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cloned));
+            }
+            return response;
+          })
+          .catch(() => null);
+
+        return cached || networkUpdate.then((response) => {
+          if (response) return response;
+          return new Response("离线中，且该图片尚未缓存。", {
+            status: 503,
+            headers: { "Content-Type": "text/plain; charset=utf-8" }
+          });
+        });
+      })
+    );
+    return;
+  }
+
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        const cloned = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cloned));
+        if (response && response.ok) {
+          const cloned = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cloned));
+        }
         return response;
       })
       .catch(async () => {
