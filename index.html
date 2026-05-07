@@ -2029,6 +2029,117 @@
       border-radius:inherit;
     }
 
+    .character-card-list{
+      display:grid;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .character-card-item{
+      display:grid;
+      grid-template-columns:auto 1fr;
+      gap:10px;
+      align-items:start;
+      padding:12px;
+      border-radius:18px;
+      background:rgba(255,255,255,.68);
+      border:1px solid var(--glass-line);
+      box-shadow:0 10px 22px rgba(15,23,42,.08), inset 0 1px 0 rgba(255,255,255,.78);
+    }
+
+    .character-card-avatar{
+      width:44px;
+      height:44px;
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-shrink:0;
+      overflow:hidden;
+      background:rgba(31,41,55,.9);
+      color:#fff;
+      font-weight:800;
+      line-height:1;
+      box-shadow:0 10px 22px rgba(15,23,42,.14);
+    }
+
+    .character-card-avatar img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .character-card-title{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      min-width:0;
+      font-size:15px;
+      font-weight:800;
+      color:#0f172a;
+    }
+
+    .character-card-badge{
+      padding:3px 8px;
+      border-radius:999px;
+      background:#dcfce7;
+      color:#166534;
+      font-size:11px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .character-card-summary{
+      margin-top:4px;
+      font-size:12px;
+      line-height:1.5;
+      color:var(--muted);
+      word-break:break-word;
+    }
+
+    .character-card-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
+
+    .character-chat-log{
+      display:grid;
+      gap:8px;
+      max-height:320px;
+      overflow:auto;
+      padding:10px;
+      margin-top:12px;
+      border-radius:18px;
+      background:rgba(248,250,252,.72);
+      border:1px solid var(--glass-line);
+    }
+
+    .character-chat-msg{
+      max-width:88%;
+      padding:9px 11px;
+      border-radius:16px;
+      font-size:14px;
+      line-height:1.55;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+
+    .character-chat-msg.user{
+      justify-self:end;
+      background:rgba(31,41,55,.88);
+      color:#fff;
+    }
+
+    .character-chat-msg.assistant{
+      justify-self:start;
+      background:rgba(255,255,255,.86);
+      color:#0f172a;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
+    }
+
     .tool-card-help{
       padding-left:12px;
     }
@@ -2939,6 +3050,75 @@
       }
     }
 
+
+    /* --- Patch v21: iPhone/iOS weekly day dock long capsule and liquid motion --- */
+    @supports (-webkit-touch-callout: none){
+      @media (max-width: 480px){
+        #dayTabs.day-tabs{
+          --day-tab-height: 48px !important;
+          --day-indicator-scale: 1.118 !important;
+          --day-indicator-edge-gap: 14px !important;
+          --day-drag-overflow: 0px !important;
+          --day-drag-extra-scale: 0.11 !important;
+          --day-liquid-preview-scale: 1.035;
+          --day-liquid-max-scale: 1.17;
+          padding-top: 6px !important;
+          padding-bottom: 6px !important;
+        }
+
+        #dayTabs .day-tab{
+          min-height: var(--day-tab-height) !important;
+          height: var(--day-tab-height) !important;
+        }
+
+        #dayTabs .day-tab-indicator,
+        #dayTabs.day-tabs.dragging .day-tab-indicator{
+          top: 12px !important;
+          bottom: 12px !important;
+          border-radius: 999px !important;
+          transform-origin: center center;
+          transition: transform .38s cubic-bezier(.16,.9,.22,1), width .38s cubic-bezier(.16,.9,.22,1), opacity .12s ease, box-shadow .2s ease, filter .2s ease;
+        }
+
+        #dayTabs.day-tabs.previewing .day-tab.active,
+        #dayTabs.day-tabs.previewing .day-tab.active .day-tab-label{
+          color:#334155 !important;
+        }
+
+        #dayTabs.day-tabs.previewing .day-tab.drag-active,
+        #dayTabs.day-tabs.previewing .day-tab.drag-active .day-tab-label{
+          color:#ffffff !important;
+        }
+
+        #dayTabs.day-tabs.dragging .day-tab-indicator{
+          transition:none !important;
+        }
+      }
+    }
+
+
+    /* --- Patch v22: iOS weekly day dock edge clamp + stable snap --- */
+    @supports (-webkit-touch-callout: none){
+      @media (max-width: 480px){
+        #dayTabs.day-tabs{
+          scroll-padding-left: var(--day-tab-side-padding) !important;
+          scroll-padding-right: var(--day-tab-side-padding) !important;
+          overflow-x: auto !important;
+          overflow-y: hidden !important;
+          overscroll-behavior-x: contain !important;
+        }
+
+        #dayTabs .day-tab{
+          scroll-snap-align: start !important;
+        }
+
+        #dayTabs .day-tab-indicator,
+        #dayTabs.day-tabs.dragging .day-tab-indicator{
+          max-width: calc(100% - (var(--day-tab-side-padding) * 2)) !important;
+        }
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -3358,6 +3538,25 @@
       </div>
 
       <div class="card">
+        <h2>角色卡管理</h2>
+        <div class="softbox">导入 SillyTavern / TavernAI 的 JSON 角色卡后，可以选择当前角色；启用后会随 AI 请求一起进入上下文。</div>
+        <div class="tool-row" style="margin-top:12px;">
+          <button class="btn" id="importCharacterCardBtn" type="button">导入角色卡 JSON</button>
+          <button class="btn-outline" id="clearActiveCharacterCardBtn" type="button">不使用角色</button>
+        </div>
+        <input type="file" id="characterCardFileInput" accept="application/json,.json" style="display:none" />
+        <div class="help" id="characterCardStatus">当前角色：未选择</div>
+        <div id="characterCardList" class="character-card-list"></div>
+        <div class="character-chat-log" id="characterChatLog"></div>
+        <textarea id="characterChatInput" placeholder="输入要对当前角色说的话"></textarea>
+        <div class="tool-row" style="margin-top:10px;">
+          <button class="btn" id="sendCharacterChatBtn" type="button">发送</button>
+          <button class="btn-outline" id="clearCharacterChatBtn" type="button">清空聊天</button>
+        </div>
+        <div class="help">当前只解析 .json；.png 角色卡解析 TODO。</div>
+      </div>
+
+      <div class="card">
         <h2>云同步（Supabase）</h2>
         <div class="softbox">首次使用：点“使用 GitHub 登录”；登录成功后，再点“立即同步到云端”。换设备时，用同一个 GitHub 账号登录，再点“从云端恢复到本机”把记录拉回来。</div>
         <div class="tool-row" style="margin-top:12px;">
@@ -3460,7 +3659,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.05.07-65-day-pill-width-60pct";
+    const APP_VERSION = "v2026.05.08-73-character-card-chat-mvp";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const DAILY_LOGS_KEY = "gain-daily-logs";
     const LAST_CLOUD_SYNC_AT_KEY = "gain-last-cloud-sync-at";
@@ -3484,6 +3683,9 @@
     const AI_PET_STATE_KEY = "gain-ai-pet-state";
     const AI_PET_ICON_KEY = "gain-ai-pet-icon";
     const AI_MILESTONE_KEY = "gain-ai-milestones";
+    const CHARACTER_CARDS_KEY = "gain-character-cards";
+    const ACTIVE_CHARACTER_CARD_ID_KEY = "gain-active-character-card-id";
+    const CHARACTER_CHAT_HISTORY_KEY = "gain-character-chat-history";
     const FORM_DRAFT_BACKUP_KEY = "gain-tracker-form-draft-backup";
     const AI_BUBBLE_MIN_INTERVAL = 10000;
 
@@ -4007,6 +4209,347 @@
       }
     }
 
+    function makeCharacterCardId(){
+      if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
+      return `character_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    }
+
+    function characterCardText(value, max = 5000){
+      let text = "";
+      if(Array.isArray(value)){
+        text = value.map((x) => String(x || "").trim()).filter(Boolean).join("\n");
+      }else if(value && typeof value === "object"){
+        text = JSON.stringify(value);
+      }else{
+        text = String(value || "");
+      }
+      return text.trim().slice(0, max);
+    }
+
+    function normalizeCharacterCard(raw, sourceName = ""){
+      const root = raw && typeof raw === "object" ? raw : {};
+      const data = root.data && typeof root.data === "object" ? root.data : root;
+      const get = (...keys) => {
+        for(const key of keys){
+          if(data[key] != null && data[key] !== "") return data[key];
+          if(root[key] != null && root[key] !== "") return root[key];
+        }
+        return "";
+      };
+      const sourceBaseName = String(sourceName || "").replace(/\.[^.]+$/, "").trim();
+      const name = characterCardText(get("name", "char_name", "display_name"), 120) || sourceBaseName || "未命名角色";
+      return {
+        id: characterCardText(root.id || data.id, 160) || makeCharacterCardId(),
+        name,
+        description: characterCardText(get("description"), 8000),
+        personality: characterCardText(get("personality"), 8000),
+        scenario: characterCardText(get("scenario"), 8000),
+        first_mes: characterCardText(get("first_mes", "first_message", "greeting"), 8000),
+        mes_example: characterCardText(get("mes_example", "example_dialogue", "example_messages"), 8000),
+        avatar: characterCardText(get("avatar", "avatar_url", "image"), 12000),
+        sourceName: characterCardText(sourceName || root.sourceName || data.sourceName || "", 240),
+        sourceFormat: characterCardText(root.sourceFormat || data.sourceFormat || root.spec || data.spec || (root.data ? "SillyTavern/TavernAI data" : "TavernAI JSON"), 120),
+        importedAt: root.importedAt || new Date().toISOString()
+      };
+    }
+
+    function normalizeCharacterCardList(value){
+      const list = Array.isArray(value) ? value : [];
+      const seen = new Set();
+      return list.map((item) => normalizeCharacterCard(item))
+        .filter((card) => {
+          if(!card.id || seen.has(card.id)) return false;
+          seen.add(card.id);
+          return true;
+        })
+        .slice(0, 30);
+    }
+
+    function getCharacterCards(){
+      return normalizeCharacterCardList(safeJsonParse(localStorage.getItem(CHARACTER_CARDS_KEY) || "[]", []));
+    }
+
+    function getActiveCharacterCardId(){
+      return localStorage.getItem(ACTIVE_CHARACTER_CARD_ID_KEY) || "";
+    }
+
+    function getActiveCharacterCard(){
+      const activeId = getActiveCharacterCardId();
+      return getCharacterCards().find((card) => card.id === activeId) || null;
+    }
+
+    function getCharacterChatHistory(){
+      const list = safeJsonParse(localStorage.getItem(CHARACTER_CHAT_HISTORY_KEY) || "[]", []);
+      return Array.isArray(list)
+        ? list.filter((item) => item && ["user","assistant"].includes(item.role)).slice(-40)
+        : [];
+    }
+
+    function setCharacterChatHistory(history, options = {}){
+      const safe = Array.isArray(history) ? history.filter((item) => item && ["user","assistant"].includes(item.role)).slice(-40) : [];
+      localStorage.setItem(CHARACTER_CHAT_HISTORY_KEY, JSON.stringify(safe));
+      renderCharacterChat();
+      if(options.sync) queueAutoSync("角色聊天记录更新");
+    }
+
+    function setCharacterCards(cards, options = {}){
+      const normalized = normalizeCharacterCardList(cards);
+      localStorage.setItem(CHARACTER_CARDS_KEY, JSON.stringify(normalized));
+      const activeId = getActiveCharacterCardId();
+      if(activeId && !normalized.some((card) => card.id === activeId)){
+        localStorage.removeItem(ACTIVE_CHARACTER_CARD_ID_KEY);
+        localStorage.removeItem(CHARACTER_CHAT_HISTORY_KEY);
+      }
+      renderCharacterCards();
+      if(options.sync !== false) queueAutoSync("角色卡更新");
+      return normalized;
+    }
+
+    function setActiveCharacterCardId(id, options = {}){
+      const previousId = getActiveCharacterCardId();
+      const exists = id && getCharacterCards().some((card) => card.id === id);
+      const nextId = exists ? id : "";
+      if(exists){
+        localStorage.setItem(ACTIVE_CHARACTER_CARD_ID_KEY, id);
+      }else{
+        localStorage.removeItem(ACTIVE_CHARACTER_CARD_ID_KEY);
+      }
+      if(previousId !== nextId){
+        localStorage.removeItem(CHARACTER_CHAT_HISTORY_KEY);
+      }
+      renderCharacterCards();
+      if(options.sync !== false) queueAutoSync("当前角色卡更新");
+    }
+
+    function isRenderableAvatar(value){
+      return /^(data:image\/|https?:\/\/|blob:)/i.test(String(value || "").trim());
+    }
+
+    function characterCardPromptBlock(card){
+      if(!card) return "";
+      const fields = [
+        ["name", card.name],
+        ["description", card.description],
+        ["personality", card.personality],
+        ["scenario", card.scenario],
+        ["first_mes", card.first_mes],
+        ["mes_example", card.mes_example],
+        ["avatar", card.avatar]
+      ].filter(([, value]) => String(value || "").trim());
+      if(!fields.length) return "";
+      return [
+        "当前启用角色卡。AI 回复时应优先保持角色卡设定、说话风格和场景，但仍必须遵守当前任务的输出格式与安全要求。",
+        ...fields.map(([key, value]) => `${key}: ${value}`)
+      ].join("\n");
+    }
+
+    function characterCardPromptPayload(card){
+      if(!card) return null;
+      return {
+        name: card.name,
+        description: card.description,
+        personality: card.personality,
+        scenario: card.scenario,
+        first_mes: card.first_mes,
+        mes_example: card.mes_example,
+        avatar: card.avatar
+      };
+    }
+
+    function renderCharacterCards(){
+      const listEl = $("characterCardList");
+      const statusEl = $("characterCardStatus");
+      if(!listEl && !statusEl) return;
+      const cards = getCharacterCards();
+      const activeId = getActiveCharacterCardId();
+      const active = cards.find((card) => card.id === activeId) || null;
+      if(statusEl){
+        statusEl.textContent = active ? `当前角色：${active.name} · 已联动 AI 教练` : "当前角色：未选择";
+      }
+      updateAiPetAvatar();
+      if(!listEl) return;
+      if(!cards.length){
+        listEl.innerHTML = `<div class="softbox">还没有角色卡。先导入 SillyTavern / TavernAI 的 .json 角色卡。</div>`;
+        renderCharacterChat();
+        return;
+      }
+      listEl.innerHTML = cards.map((card) => {
+        const isActive = card.id === activeId;
+        const avatar = isRenderableAvatar(card.avatar)
+          ? `<img src="${escapeHtml(card.avatar)}" alt="">`
+          : escapeHtml((card.name || "?").slice(0, 1));
+        const summary = card.description || card.personality || card.scenario || card.first_mes || "未填写描述";
+        return `
+          <div class="character-card-item">
+            <div class="character-card-avatar" aria-hidden="true">${avatar}</div>
+            <div>
+              <div class="character-card-title">
+                <span>${escapeHtml(card.name)}</span>
+                ${isActive ? `<span class="character-card-badge">使用中</span>` : ""}
+              </div>
+              <div class="character-card-summary">${escapeHtml(summary.slice(0, 120))}${summary.length > 120 ? "..." : ""}</div>
+              <div class="character-card-actions">
+                <button class="${isActive ? "btn" : "btn-outline"}" type="button" data-character-select="${escapeHtml(card.id)}">${isActive ? "已选择" : "选择"}</button>
+                <button class="btn-danger" type="button" data-character-delete="${escapeHtml(card.id)}">删除</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+      listEl.querySelectorAll("[data-character-select]").forEach((btn) => {
+        btn.onclick = () => setActiveCharacterCardId(btn.getAttribute("data-character-select") || "");
+      });
+      listEl.querySelectorAll("[data-character-delete]").forEach((btn) => {
+        btn.onclick = () => deleteCharacterCard(btn.getAttribute("data-character-delete") || "");
+      });
+      renderCharacterChat();
+    }
+
+    function renderCharacterChat(){
+      const log = $("characterChatLog");
+      if(!log) return;
+      const active = getActiveCharacterCard();
+      const history = getCharacterChatHistory();
+      if(!active){
+        log.innerHTML = `<div class="softbox">选择一个角色卡后开始聊天。</div>`;
+        return;
+      }
+      if(!history.length){
+        const first = active.first_mes || `你好，我是${active.name}。`;
+        log.innerHTML = `<div class="character-chat-msg assistant">${escapeHtml(first)}</div>`;
+        return;
+      }
+      log.innerHTML = history.map((item) => {
+        const roleClass = item.role === "user" ? "user" : "assistant";
+        return `<div class="character-chat-msg ${roleClass}">${escapeHtml(item.content || "")}</div>`;
+      }).join("");
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function deleteCharacterCard(id){
+      const cards = getCharacterCards();
+      const card = cards.find((item) => item.id === id);
+      if(!card) return;
+      if(!confirm(`删除角色卡「${card.name}」吗？`)) return;
+      setCharacterCards(cards.filter((item) => item.id !== id));
+    }
+
+    function importCharacterCard(file){
+      if(!file) return;
+      if(!/\.json$/i.test(file.name || "")){
+        alert("目前只支持 .json 角色卡；.png 角色卡解析留待后续实现。");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try{
+          const raw = JSON.parse(event.target.result);
+          const card = normalizeCharacterCard(raw, file.name);
+          const cards = getCharacterCards();
+          const saved = setCharacterCards([card, ...cards.filter((item) => item.id !== card.id)]);
+          setActiveCharacterCardId(saved[0]?.id || "", { sync:false });
+          queueAutoSync("导入角色卡");
+          alert(`已导入角色卡：${card.name}`);
+        }catch(err){
+          console.error(err);
+          alert("角色卡导入失败：JSON 格式不对");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function buildCharacterChatSystemPrompt(card){
+      return [
+        "你正在和用户进行角色聊天。请自然回复普通文本，不要返回 JSON，不要返回 Markdown 表格。",
+        "保持角色卡的人设、语气、关系和场景；不要跳出角色解释角色卡。",
+        "如果用户要求危险、违法或明显越界内容，拒绝并保持角色语气。",
+        characterCardPromptBlock(card)
+      ].filter(Boolean).join("\n");
+    }
+
+    async function callCharacterChat(userText){
+      const settings = getAiSettings();
+      const card = getActiveCharacterCard();
+      if(!card) throw new Error("请先选择角色卡");
+      if(settings.apiMode === "direct" && !settings.apiKey) throw new Error("请先在 AI 设置里填写 API Key");
+      if(settings.apiMode === "proxy" && !settings.proxyUrl) throw new Error("请先在 AI 设置里填写代理 URL");
+
+      const history = getCharacterChatHistory().slice(-12);
+      const messages = [
+        { role:"system", content:buildCharacterChatSystemPrompt(card) },
+        ...history.map((item) => ({ role:item.role, content:String(item.content || "") })),
+        { role:"user", content:userText }
+      ];
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 25000);
+      try{
+        let res;
+        if(settings.apiMode === "proxy"){
+          res = await fetch(settings.proxyUrl, {
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            signal: controller.signal,
+            body: JSON.stringify({
+              task:"character_chat",
+              payload:{ message:userText, history, characterCard:characterCardPromptPayload(card) },
+              settings:{
+                model:settings.model,
+                temperature:settings.temperature,
+                maxTokens:settings.maxTokens,
+                characterCardPrompt: characterCardPromptBlock(card)
+              }
+            })
+          });
+        }else{
+          res = await fetch(`${settings.apiBaseUrl.replace(/\/$/, "")}/chat/completions`, {
+            method:"POST",
+            headers:{
+              "Content-Type":"application/json",
+              "Authorization":`Bearer ${settings.apiKey}`
+            },
+            signal: controller.signal,
+            body: JSON.stringify({
+              model: settings.model || "deepseek-v4-flash",
+              temperature: settings.temperature ?? 0.7,
+              max_tokens: Math.max(300, settings.maxTokens ?? 700),
+              messages
+            })
+          });
+        }
+        if(!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        const content = json?.choices?.[0]?.message?.content || json?.message || json?.data?.message || json?.data || "";
+        return typeof content === "string" ? content.trim() : JSON.stringify(content);
+      }finally{
+        clearTimeout(timeout);
+      }
+    }
+
+    async function sendCharacterChat(){
+      const input = $("characterChatInput");
+      const btn = $("sendCharacterChatBtn");
+      const text = String(input?.value || "").trim();
+      if(!text) return;
+      const card = getActiveCharacterCard();
+      if(!card){
+        alert("请先选择一个角色卡");
+        return;
+      }
+      const history = getCharacterChatHistory();
+      setCharacterChatHistory([...history, { role:"user", content:text, at:new Date().toISOString() }]);
+      if(input) input.value = "";
+      if(btn) btn.disabled = true;
+      try{
+        const reply = await callCharacterChat(text);
+        setCharacterChatHistory([...getCharacterChatHistory(), { role:"assistant", content:reply || "（没有返回内容）", at:new Date().toISOString() }]);
+      }catch(err){
+        console.error(err);
+        setCharacterChatHistory([...getCharacterChatHistory(), { role:"assistant", content:`发送失败：${err.message || "请检查 AI 配置"}`, at:new Date().toISOString() }]);
+      }finally{
+        if(btn) btn.disabled = false;
+      }
+    }
+
     function getAiFeedbackHistory(){
       const list = safeJsonParse(localStorage.getItem(AI_FEEDBACK_HISTORY_KEY) || "[]", []);
       return Array.isArray(list) ? list : [];
@@ -4150,14 +4693,14 @@
       });
     }
 
-    function buildAiCoachSystemPrompt(settings){
+    function buildAiCoachSystemPrompt(settings, characterCard = null){
       const toneMap = {
         direct_warm:"语气直接但温暖，像认真负责的教练。",
         strict:"语气更严格，强调执行力和动作质量。",
         gentle:"语气温和，更多鼓励，少批评。",
         funny:"语气轻松一点，但不要油腻，不要卖萌过度。"
       };
-      return [
+      const lines = [
         "你是一个真实的中文健身教练，负责给用户提供训练反馈、鼓励和计划调整建议。",
         "用户目标以增肌、增重、提升引体向上、改善上肢体型为主。",
         "你说话要像真人教练，不要像客服。语气直接、简短、有鼓励，但不要过度夸张。",
@@ -4166,7 +4709,10 @@
         "不要编造用户没有提供的数据。不要给医疗诊断；疼痛持续时建议停止相关动作并咨询专业人士。",
         toneMap[settings.coachTone] || toneMap.direct_warm,
         "必须返回合法 JSON，不要返回 Markdown。"
-      ].join("\n");
+      ];
+      const cardBlock = characterCardPromptBlock(characterCard);
+      if(cardBlock) lines.push(cardBlock);
+      return lines.join("\n");
     }
 
     function buildAiCoachUserPrompt(task, payload, settings){
@@ -4246,6 +4792,10 @@
     async function callAiCoach(task, payload, options = {}){
       const settings = getAiSettings();
       const fallback = getFallbackCoachFeedback(task, payload);
+      const activeCharacterCard = getActiveCharacterCard();
+      const requestPayload = activeCharacterCard
+        ? { ...(payload || {}), activeCharacterCard: characterCardPromptPayload(activeCharacterCard) }
+        : payload;
       if(!settings.enabled && !options.force){
         return { ok:false, task, data:fallback, error:"AI 教练未开启" };
       }
@@ -4267,13 +4817,15 @@
             signal: controller.signal,
             body: JSON.stringify({
               task,
-              payload,
+              payload: requestPayload,
               settings:{
                 model:settings.model,
                 temperature:settings.temperature,
                 maxTokens:settings.maxTokens,
                 coachTone:settings.coachTone,
-                feedbackLength:settings.feedbackLength
+                feedbackLength:settings.feedbackLength,
+                activeCharacterCard: activeCharacterCard ? characterCardPromptPayload(activeCharacterCard) : null,
+                characterCardPrompt: characterCardPromptBlock(activeCharacterCard)
               }
             })
           });
@@ -4290,8 +4842,8 @@
               temperature: settings.temperature ?? 0.7,
               max_tokens: settings.maxTokens ?? 500,
               messages:[
-                { role:"system", content:buildAiCoachSystemPrompt(settings) },
-                { role:"user", content:buildAiCoachUserPrompt(task, payload, settings) }
+                { role:"system", content:buildAiCoachSystemPrompt(settings, activeCharacterCard) },
+                { role:"user", content:buildAiCoachUserPrompt(task, requestPayload, settings) }
               ],
               response_format:{ type:"json_object" }
             })
@@ -4503,23 +5055,40 @@
     function updateAiPetIconStatus(){
       const status = $("aiPetIconStatus");
       if(!status) return;
-      status.textContent = getAiPetIconData() ? "当前图标：已设置" : "当前图标：默认";
+      const card = getActiveCharacterCard();
+      if(getAiPetIconData()){
+        status.textContent = "当前图标：已手动设置";
+      }else if(card && card.avatar){
+        status.textContent = `当前图标：跟随角色卡「${card.name}」`;
+      }else if(card){
+        status.textContent = `当前图标：角色卡「${card.name}」首字`;
+      }else{
+        status.textContent = "当前图标：默认";
+      }
     }
 
     function updateAiPetAvatar(){
       const face = document.querySelector("#aiCoachAvatar .ai-coach-face");
       if(!face) return;
-      const dataUrl = String(getAiPetIconData() || "").trim();
+      const manualIcon = String(getAiPetIconData() || "").trim();
+      const card = getActiveCharacterCard();
+      const cardAvatar = card && isRenderableAvatar(card.avatar) ? String(card.avatar || "").trim() : "";
+      const imageSrc = manualIcon || cardAvatar;
       face.innerHTML = "";
-      if(dataUrl){
+      if(imageSrc){
         face.classList.add("has-image");
         const img = document.createElement("img");
-        img.alt = "AI教练图标";
-        img.src = dataUrl;
+        img.alt = card && !manualIcon ? `${card.name}头像` : "AI教练图标";
+        img.src = imageSrc;
         face.appendChild(img);
       }else{
         face.classList.remove("has-image");
-        face.textContent = "🏋️";
+        face.textContent = card ? (card.name || "?").slice(0, 1) : "🏋️";
+      }
+      const avatarBtn = $("aiCoachAvatar");
+      if(avatarBtn){
+        avatarBtn.setAttribute("aria-label", card ? `AI教练：${card.name}` : "AI教练");
+        avatarBtn.title = card ? `AI教练联动角色：${card.name}` : "AI教练";
       }
       updateAiPetIconStatus();
     }
@@ -4719,6 +5288,9 @@
       const embeddedAiLastFeedback = rawForm.__aiLastFeedback && typeof rawForm.__aiLastFeedback === "object" ? rawForm.__aiLastFeedback : null;
       const embeddedAiPetState = rawForm.__aiPetState && typeof rawForm.__aiPetState === "object" ? rawForm.__aiPetState : null;
       const embeddedAiMilestones = rawForm.__aiMilestones && typeof rawForm.__aiMilestones === "object" ? rawForm.__aiMilestones : {};
+      const embeddedCharacterCards = Array.isArray(rawForm.__characterCards) ? rawForm.__characterCards : [];
+      const embeddedActiveCharacterCardId = typeof rawForm.__activeCharacterCardId === "string" ? rawForm.__activeCharacterCardId : "";
+      const embeddedCharacterChatHistory = Array.isArray(rawForm.__characterChatHistory) ? rawForm.__characterChatHistory : [];
       return {
         id: row.id || row.uuid || row.row_id || null,
         user_id: row.user_id || "",
@@ -4732,6 +5304,9 @@
         ai_last_feedback_json: embeddedAiLastFeedback,
         ai_pet_state_json: embeddedAiPetState,
         ai_milestones_json: embeddedAiMilestones,
+        character_cards_json: embeddedCharacterCards,
+        active_character_card_id: embeddedActiveCharacterCardId,
+        character_chat_history_json: embeddedCharacterChatHistory,
         updated_at: rawForm.__updatedAt || row.updated_at || row.modified_at || row.created_at || ""
       };
     }
@@ -4848,6 +5423,9 @@
           __aiPetState: snapshot.aiPetState,
           __aiPetIcon: snapshot.aiPetIcon,
           __aiMilestones: snapshot.aiMilestones,
+          __characterCards: snapshot.characterCards,
+          __activeCharacterCardId: snapshot.activeCharacterCardId,
+          __characterChatHistory: snapshot.characterChatHistory,
           __lastCloudSyncAt: uploadUpdatedAt,
           __updatedAt: uploadUpdatedAt
         };
@@ -4967,6 +5545,9 @@
             aiLastFeedback: cloud.ai_last_feedback_json || null,
             aiPetState: cloud.ai_pet_state_json || null,
             aiMilestones: cloud.ai_milestones_json || {},
+            characterCards: cloud.character_cards_json || [],
+            activeCharacterCardId: cloud.active_character_card_id || "",
+            characterChatHistory: cloud.character_chat_history_json || [],
             updatedAt: cloud.updated_at || new Date().toISOString()
           });
           setCloudStatus(`云端状态：已自动恢复较新的云端版本（${getCloudUserLabel(user)}）`);
@@ -5032,6 +5613,9 @@
         aiPetState: getAiPetState(),
         aiPetIcon: getAiPetIconData(),
         aiMilestones: safeJsonParse(localStorage.getItem(AI_MILESTONE_KEY) || "{}", {}),
+        characterCards: getCharacterCards(),
+        activeCharacterCardId: getActiveCharacterCardId(),
+        characterChatHistory: getCharacterChatHistory(),
         updatedAt: getLocalUpdatedAt()
       };
     }
@@ -5051,6 +5635,9 @@
       const embeddedAiPetState = safeForm.__aiPetState;
       const embeddedAiPetIcon = safeForm.__aiPetIcon;
       const embeddedAiMilestones = safeForm.__aiMilestones;
+      const embeddedCharacterCards = safeForm.__characterCards;
+      const embeddedActiveCharacterCardId = safeForm.__activeCharacterCardId;
+      const embeddedCharacterChatHistory = safeForm.__characterChatHistory;
       delete safeForm.__pageBackground;
       delete safeForm.__dailyLogs;
       delete safeForm.__planChecks;
@@ -5063,6 +5650,9 @@
       delete safeForm.__aiPetState;
       delete safeForm.__aiPetIcon;
       delete safeForm.__aiMilestones;
+      delete safeForm.__characterCards;
+      delete safeForm.__activeCharacterCardId;
+      delete safeForm.__characterChatHistory;
 
       const safeHistory = payload && Array.isArray(payload.history) ? payload.history : [];
       const safeDailyLogs = payload && payload.dailyLogs ? payload.dailyLogs : (embeddedDailyLogs && typeof embeddedDailyLogs === "object" ? embeddedDailyLogs : {});
@@ -5075,6 +5665,9 @@
       const safeAiPetState = payload && payload.aiPetState ? payload.aiPetState : (embeddedAiPetState || null);
       const safeAiPetIcon = payload && typeof payload.aiPetIcon === "string" ? payload.aiPetIcon : (typeof embeddedAiPetIcon === "string" ? embeddedAiPetIcon : "");
       const safeAiMilestones = payload && payload.aiMilestones ? payload.aiMilestones : (embeddedAiMilestones || {});
+      const safeCharacterCards = normalizeCharacterCardList(payload && Array.isArray(payload.characterCards) ? payload.characterCards : (Array.isArray(embeddedCharacterCards) ? embeddedCharacterCards : []));
+      const safeActiveCharacterCardId = String((payload && payload.activeCharacterCardId) || embeddedActiveCharacterCardId || "");
+      const safeCharacterChatHistory = Array.isArray(payload && payload.characterChatHistory) ? payload.characterChatHistory : (Array.isArray(embeddedCharacterChatHistory) ? embeddedCharacterChatHistory : []);
       const updatedAt = (payload && payload.updatedAt) || embeddedUpdatedAt || new Date().toISOString();
 
       suppressAutoSync = true;
@@ -5090,6 +5683,13 @@
         if(safeAiPetState) localStorage.setItem(AI_PET_STATE_KEY, JSON.stringify(safeAiPetState));
         if(safeAiPetIcon) localStorage.setItem(AI_PET_ICON_KEY, safeAiPetIcon); else localStorage.removeItem(AI_PET_ICON_KEY);
         localStorage.setItem(AI_MILESTONE_KEY, JSON.stringify(safeAiMilestones));
+        localStorage.setItem(CHARACTER_CARDS_KEY, JSON.stringify(safeCharacterCards));
+        if(safeActiveCharacterCardId && safeCharacterCards.some((card) => card.id === safeActiveCharacterCardId)){
+          localStorage.setItem(ACTIVE_CHARACTER_CARD_ID_KEY, safeActiveCharacterCardId);
+        }else{
+          localStorage.removeItem(ACTIVE_CHARACTER_CARD_ID_KEY);
+        }
+        localStorage.setItem(CHARACTER_CHAT_HISTORY_KEY, JSON.stringify(safeCharacterChatHistory.slice(-40)));
         setLastCloudSyncAt((payload && payload.lastCloudSyncAt) || embeddedLastCloudSyncAt || updatedAt);
         applyPageBackground(pageBackground);
         markLocalStateChanged("从云端恢复到本机", updatedAt);
@@ -5099,6 +5699,8 @@
         renderPlan();
         updateAiSettingsUi();
         updateAiPetVisibility();
+        renderCharacterCards();
+        renderCharacterChat();
         updateRestoreDraftButton();
         updateSummary();
       }finally{
@@ -5194,6 +5796,9 @@
           aiLastFeedback: data.ai_last_feedback_json || null,
           aiPetState: data.ai_pet_state_json || null,
           aiMilestones: data.ai_milestones_json || {},
+          characterCards: data.character_cards_json || [],
+          activeCharacterCardId: data.active_character_card_id || "",
+          characterChatHistory: data.character_chat_history_json || [],
           updatedAt: data.updated_at || new Date().toISOString()
         });
         setCloudStatus(`云端状态：已从云端恢复（${getCloudUserLabel(user)}）`);
@@ -5519,6 +6124,82 @@
       return parseFloat(getComputedStyle(tabsEl).getPropertyValue("--day-drag-extra-scale")) || dayDockDrag.extraScale;
     }
 
+    function isIosDayDockMode(){
+      const tabsEl = $("dayTabs");
+      if(!tabsEl) return false;
+      const smallScreen = window.matchMedia ? window.matchMedia("(max-width: 480px)").matches : window.innerWidth <= 480;
+      const ua = navigator.userAgent || "";
+      const platform = navigator.platform || "";
+      const isiOS = /iPad|iPhone|iPod/.test(ua) || (platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      const supportsTouchCallout = !!(window.CSS && CSS.supports && (CSS.supports("-webkit-touch-callout: none") || CSS.supports("-webkit-touch-callout", "none")));
+      return !!(smallScreen && isiOS && supportsTouchCallout);
+    }
+
+    function getDayLiquidMaxScale(){
+      const tabsEl = $("dayTabs");
+      if(!tabsEl) return 1.17;
+      return parseFloat(getComputedStyle(tabsEl).getPropertyValue("--day-liquid-max-scale")) || 1.17;
+    }
+
+    function getDayLiquidDragScale(deltaX){
+      if(!isIosDayDockMode()) return 1;
+      const maxScale = getDayLiquidMaxScale();
+      return Math.min(maxScale, 1 + Math.min(maxScale - 1, Math.abs(deltaX) / 280));
+    }
+
+    function clampIosDayIndicatorLeftToVisible(left, indicatorWidth, tabsEl, edgeGap, scaleX = 1, direction = 0){
+      if(!isIosDayDockMode() || !tabsEl || !indicatorWidth) return left;
+      const clientWidth = tabsEl.clientWidth || tabsEl.offsetWidth || 0;
+      if(!clientWidth) return left;
+
+      const safeGap = Math.max(6, Number(edgeGap) || 0);
+      const scrollLeft = Math.max(0, tabsEl.scrollLeft || 0);
+      const visibleLeft = scrollLeft + safeGap;
+      const visibleRight = scrollLeft + clientWidth - safeGap;
+      const width = Math.max(1, indicatorWidth);
+      const scale = Math.max(1, Number(scaleX) || 1);
+      const extra = width * (scale - 1);
+
+      let minLeft = visibleLeft;
+      let maxLeft = visibleRight - width;
+      if(direction > 0){
+        maxLeft = visibleRight - width * scale;
+      }else if(direction < 0){
+        minLeft = visibleLeft + extra;
+      }else{
+        minLeft = visibleLeft + extra / 2;
+        maxLeft = visibleRight - width - extra / 2;
+      }
+
+      if(maxLeft < minLeft){
+        const centered = scrollLeft + Math.max(0, (clientWidth - width) / 2);
+        return Math.max(0, centered);
+      }
+      return Math.max(minLeft, Math.min(left, maxLeft));
+    }
+
+    function setDayIndicatorTransform(indicator, left, options = {}){
+      if(!indicator) return;
+      if(!isIosDayDockMode()){
+        indicator.style.transformOrigin = "";
+        indicator.style.transform = `translateX(${left}px)`;
+        return;
+      }
+
+      const direction = Number(options.direction || 0);
+      const scaleX = Math.max(1, Math.min(Number(options.scaleX || 1), getDayLiquidMaxScale()));
+      const tabsEl = indicator.closest ? indicator.closest("#dayTabs") : $("dayTabs");
+      if(tabsEl){
+        const styles = getComputedStyle(tabsEl);
+        const rawEdgeGap = parseFloat(styles.getPropertyValue("--day-indicator-edge-gap"));
+        const edgeGap = Number.isFinite(rawEdgeGap) ? rawEdgeGap : 8;
+        const indicatorWidth = parseFloat(indicator.style.width) || indicator.offsetWidth || 0;
+        left = clampIosDayIndicatorLeftToVisible(left, indicatorWidth, tabsEl, edgeGap, scaleX, direction);
+      }
+      indicator.style.transformOrigin = direction < 0 ? "right center" : direction > 0 ? "left center" : "center center";
+      indicator.style.transform = scaleX > 1.001 ? `translateX(${left}px) scaleX(${scaleX})` : `translateX(${left}px)`;
+    }
+
     function getDayDockMetrics(extraScale = 0){
       const tabsEl = $("dayTabs");
       const indicator = tabsEl ? tabsEl.querySelector(".day-tab-indicator") : null;
@@ -5529,7 +6210,8 @@
       const contentWidth = tabsEl.scrollWidth;
       const styles = getComputedStyle(tabsEl);
       const scale = (parseFloat(styles.getPropertyValue("--day-indicator-scale")) || 1.13) + extraScale;
-      const edgeGap = parseFloat(styles.getPropertyValue("--day-indicator-edge-gap")) || 8;
+      const rawEdgeGap = parseFloat(styles.getPropertyValue("--day-indicator-edge-gap"));
+      const edgeGap = Number.isFinite(rawEdgeGap) ? rawEdgeGap : 8;
       const width = activeTab.offsetWidth * scale;
       const maxLeft = Math.max(edgeGap, contentWidth - width - edgeGap);
       const activeCenter = activeTab.offsetLeft + activeTab.offsetWidth / 2;
@@ -5569,6 +6251,7 @@
       if(!tabsEl || !indicator) return;
       tabsEl.classList.remove("dragging");
       tabsEl.classList.remove("pressing");
+      tabsEl.classList.remove("previewing");
       tabsEl.classList.remove("bump");
       indicator.classList.remove("dragging");
       clearDayDragActiveTab();
@@ -5604,12 +6287,20 @@
       const extraScale = getDayDragExtraScale();
       const state = getDayButtonSnapState(button, extraScale);
       if(!state) return;
-      const { metrics, left } = state;
-      metrics.tabsEl.classList.add("pressing", "dragging");
+      const { metrics, index, left } = state;
+      const isiOS = isIosDayDockMode();
+      metrics.tabsEl.classList.add("pressing");
+      metrics.tabsEl.classList.toggle("dragging", !isiOS);
+      metrics.tabsEl.classList.toggle("previewing", isiOS);
       metrics.indicator.classList.remove("dragging");
       metrics.indicator.style.opacity = "1";
       metrics.indicator.style.width = metrics.width + "px";
-      metrics.indicator.style.transform = `translateX(${left}px)`;
+      const previewScale = isiOS ? (parseFloat(getComputedStyle(metrics.tabsEl).getPropertyValue("--day-liquid-preview-scale")) || 1.035) : 1;
+      const previewDirection = left <= metrics.edgeGap + 1 ? 1 : left >= metrics.maxLeft - 1 ? -1 : index - activePlanDay;
+      setDayIndicatorTransform(metrics.indicator, left, {
+        scaleX: previewScale,
+        direction: previewDirection
+      });
       clearDayDragActiveTab();
       button.classList.add("drag-active");
     }
@@ -5675,6 +6366,7 @@
       const metrics = getDayDockMetrics(dayDockDrag.extraScale);
       if(!metrics) return;
       const dragOverflow = parseFloat(getComputedStyle(metrics.tabsEl).getPropertyValue("--day-drag-overflow")) || 28;
+      const boundedDragOverflow = isIosDayDockMode() ? 0 : dragOverflow;
       stopDayDockAutoScroll();
       dayDockDrag.active = true;
       dayDockDrag.moved = false;
@@ -5682,13 +6374,15 @@
       dayDockDrag.lastClientX = clientX;
       dayDockDrag.startLeft = typeof startLeftOverride === "number" ? startLeftOverride : metrics.activeLeft;
       dayDockDrag.startScrollLeft = metrics.tabsEl.scrollLeft;
-      dayDockDrag.minLeft = -dragOverflow;
-      dayDockDrag.maxLeft = metrics.contentWidth - metrics.width + dragOverflow;
+      dayDockDrag.minLeft = metrics.edgeGap - boundedDragOverflow;
+      dayDockDrag.maxLeft = metrics.contentWidth - metrics.width - metrics.edgeGap + boundedDragOverflow;
+      dayDockDrag.lastLeft = dayDockDrag.startLeft;
+      metrics.tabsEl.classList.remove("previewing");
       metrics.tabsEl.classList.add("dragging", "pressing");
       metrics.indicator.classList.add("dragging");
       metrics.indicator.style.opacity = "1";
       metrics.indicator.style.width = metrics.width + "px";
-      metrics.indicator.style.transform = `translateX(${dayDockDrag.startLeft}px)`;
+      setDayIndicatorTransform(metrics.indicator, dayDockDrag.startLeft);
       updateDayDraggedTabHighlight(dayDockDrag.startLeft);
       document.body.style.userSelect = "none";
       triggerBestEffortHaptic(8);
@@ -5721,7 +6415,14 @@
       if(Math.abs(deltaX) > 4) dayDockDrag.moved = true;
       const scrollDelta = metrics.tabsEl.scrollLeft - dayDockDrag.startScrollLeft;
       const next = Math.max(dayDockDrag.minLeft, Math.min(dayDockDrag.startLeft + deltaX + scrollDelta, dayDockDrag.maxLeft));
-      metrics.indicator.style.transform = `translateX(${next}px)`;
+      let direction = next - dayDockDrag.lastLeft || deltaX;
+      if(next <= metrics.edgeGap + 1 && direction < 0) direction = 1;
+      if(next >= metrics.maxLeft - 1 && direction > 0) direction = -1;
+      setDayIndicatorTransform(metrics.indicator, next, {
+        scaleX: getDayLiquidDragScale(deltaX),
+        direction
+      });
+      dayDockDrag.lastLeft = next;
       updateDayDraggedTabHighlight(next);
     }
 
@@ -5801,6 +6502,7 @@
       dayDockDrag.active = false;
       dayDockDrag.moved = false;
       dayDockDrag.lastClientX = 0;
+      dayDockDrag.lastLeft = 0;
 
       if(moved){
         snapToNearestDayTab();
@@ -5811,6 +6513,9 @@
     }
 
     function updateDayTabIndicator(options = {}){
+      if(isIosDayDockMode() && activePlanDay === 0){
+        forceIosDayDockLeftEdge();
+      }
       const metrics = getDayDockMetrics();
       if(!metrics) return;
       const { tabsEl, indicator, width, activeLeft } = metrics;
@@ -5820,13 +6525,13 @@
         const oldTransition = indicator.style.transition;
         indicator.style.transition = "none";
         indicator.style.width = width + "px";
-        indicator.style.transform = `translateX(${activeLeft}px)`;
+        setDayIndicatorTransform(indicator, activeLeft);
         indicator.style.opacity = "1";
         void indicator.offsetWidth;
         indicator.style.transition = oldTransition || "";
       }else{
         indicator.style.width = width + "px";
-        indicator.style.transform = `translateX(${activeLeft}px)`;
+        setDayIndicatorTransform(indicator, activeLeft);
         indicator.style.opacity = "1";
       }
       tabsEl.classList.add("ready");
@@ -5838,6 +6543,116 @@
       if(active){
         active.scrollIntoView({ behavior, inline:"center", block:"nearest" });
       }
+    }
+
+    function positionIosDayDockScrollForIndex(dayIndex){
+      const tabs = $("dayTabs");
+      if(!tabs || !isIosDayDockMode()) return;
+      const buttons = Array.from(tabs.querySelectorAll(".day-tab"));
+      const button = buttons[dayIndex];
+      if(!button) return;
+
+      if(dayIndex === 0){
+        forceIosDayDockLeftEdge();
+        return;
+      }
+
+      const metrics = getDayDockMetrics();
+      const maxScroll = Math.max(0, tabs.scrollWidth - tabs.clientWidth);
+      const buttonCenter = button.offsetLeft + button.offsetWidth / 2;
+      let targetScroll = buttonCenter - tabs.clientWidth / 2;
+
+      if(dayIndex === buttons.length - 1){
+        targetScroll = maxScroll;
+      }
+
+      if(metrics && metrics.snapLefts[dayIndex] != null){
+        const safeGap = Math.max(12, metrics.edgeGap);
+        const indicatorLeft = metrics.snapLefts[dayIndex];
+        const indicatorRight = indicatorLeft + metrics.width;
+        const minScrollForIndicator = indicatorRight - tabs.clientWidth + safeGap;
+        const maxScrollForIndicator = indicatorLeft - safeGap;
+        targetScroll = Math.max(minScrollForIndicator, Math.min(targetScroll, maxScrollForIndicator));
+      }
+
+      const clampedScroll = Math.max(0, Math.min(targetScroll, maxScroll));
+      const oldScrollBehavior = tabs.style.scrollBehavior;
+      tabs.style.scrollBehavior = "auto";
+      tabs.scrollLeft = clampedScroll;
+      void tabs.offsetWidth;
+      tabs.style.scrollBehavior = oldScrollBehavior;
+    }
+
+    function forceIosDayDockLeftEdge(){
+      const tabs = $("dayTabs");
+      if(!tabs || !isIosDayDockMode()) return;
+
+      const oldScrollBehavior = tabs.style.scrollBehavior;
+      const oldScrollSnapType = tabs.style.scrollSnapType;
+      tabs.style.scrollBehavior = "auto";
+      tabs.style.scrollSnapType = "none";
+      tabs.scrollLeft = 0;
+      void tabs.offsetWidth;
+      tabs.scrollLeft = 0;
+
+      requestAnimationFrame(() => {
+        tabs.scrollLeft = 0;
+        requestAnimationFrame(() => {
+          tabs.scrollLeft = 0;
+          tabs.style.scrollBehavior = oldScrollBehavior;
+          tabs.style.scrollSnapType = oldScrollSnapType;
+        });
+      });
+    }
+
+    function preserveIosDayIndicatorVisualStart(oldVisualLeft){
+      const metrics = getDayDockMetrics();
+      if(!metrics || !isIosDayDockMode() || !Number.isFinite(oldVisualLeft)) return;
+
+      const { tabsEl, indicator, width, edgeGap } = metrics;
+      const maxVisualLeft = Math.max(edgeGap, tabsEl.clientWidth - width - edgeGap);
+      const visualLeft = Math.max(edgeGap, Math.min(oldVisualLeft, maxVisualLeft));
+      const oldTransition = indicator.style.transition;
+      indicator.style.transition = "none";
+      indicator.style.width = width + "px";
+      indicator.style.opacity = "1";
+      setDayIndicatorTransform(indicator, tabsEl.scrollLeft + visualLeft);
+      void indicator.offsetWidth;
+      indicator.style.transition = oldTransition || "";
+    }
+
+    function syncRenderedActivePlanDay(dayIndex){
+      const days = getPlanDays();
+      const tabs = $("dayTabs");
+      const container = $("planContainer");
+      if(!tabs || !container || !days.length) return false;
+
+      const buttons = Array.from(tabs.querySelectorAll("[data-plan-tab]"));
+      const panels = Array.from(container.querySelectorAll(".day-panel"));
+      if(buttons.length !== days.length || panels.length !== days.length) return false;
+
+      buttons.forEach((btn) => {
+        const isActive = Number(btn.getAttribute("data-plan-tab")) === dayIndex;
+        btn.classList.toggle("active", isActive);
+        btn.classList.remove("drag-active");
+        if(isActive){
+          btn.setAttribute("aria-current", "page");
+        }else{
+          btn.removeAttribute("aria-current");
+        }
+      });
+
+      panels.forEach((panel, index) => {
+        panel.classList.toggle("active", index === dayIndex);
+      });
+
+      tabs.classList.remove("dragging");
+      tabs.classList.remove("pressing");
+      tabs.classList.remove("previewing");
+      const indicator = tabs.querySelector(".day-tab-indicator");
+      if(indicator) indicator.classList.remove("dragging");
+      clearDayDragActiveTab();
+      return true;
     }
 
     function attachDayDockInteractions(){
@@ -5943,12 +6758,29 @@
 
     function setActivePlanDay(dayIndex){
       const days = getPlanDays();
+      const iosTabsEl = isIosDayDockMode() ? $("dayTabs") : null;
+      const iosIndicator = iosTabsEl ? iosTabsEl.querySelector(".day-tab-indicator") : null;
+      const oldIosIndicatorVisualLeft = iosTabsEl && iosIndicator ? getDayIndicatorLeft(iosIndicator) - iosTabsEl.scrollLeft : NaN;
+
       if(!days.length){
         activePlanDay = 0;
       }else{
         activePlanDay = Math.min(Math.max(dayIndex, 0), days.length - 1);
       }
       localStorage.setItem(ACTIVE_PLAN_DAY_KEY, String(activePlanDay));
+
+      if(isIosDayDockMode() && syncRenderedActivePlanDay(activePlanDay)){
+        positionIosDayDockScrollForIndex(activePlanDay);
+        if(activePlanDay !== 0){
+          preserveIosDayIndicatorVisualStart(oldIosIndicatorVisualLeft);
+        }
+        requestAnimationFrame(() => {
+          if(activePlanDay === 0) forceIosDayDockLeftEdge();
+          updateDayTabIndicator();
+        });
+        return;
+      }
+
       renderPlan();
       requestAnimationFrame(() => {
         updateDayTabIndicator();
@@ -6326,7 +7158,7 @@
       tabs.innerHTML = `
         <div class="day-tab-indicator" aria-hidden="true"></div>
         ${days.map((d, i) => {
-          return `<button class="day-tab ${i === activePlanDay ? "active" : ""}" data-plan-tab="${i}" type="button" aria-label="${escapeHtml(d.day)}"><span class="day-tab-content"><span class="day-tab-label">${escapeHtml(d.day)}</span></span></button>`;
+          return `<button class="day-tab ${i === activePlanDay ? "active" : ""}" data-plan-tab="${i}" type="button" aria-label="${escapeHtml(d.day)}" ${i === activePlanDay ? 'aria-current="page"' : ""}><span class="day-tab-content"><span class="day-tab-label">${escapeHtml(d.day)}</span></span></button>`;
         }).join("")}
       `;
 
@@ -6632,13 +7464,6 @@
         localStorage.setItem(LAST_CLOUD_SYNC_AT_KEY, value);
       }else{
         localStorage.removeItem(LAST_CLOUD_SYNC_AT_KEY);
-      localStorage.removeItem(AI_SETTINGS_KEY);
-      localStorage.removeItem(AI_LAST_FEEDBACK_KEY);
-      localStorage.removeItem(AI_FEEDBACK_HISTORY_KEY);
-      localStorage.removeItem(AI_PET_STATE_KEY);
-      localStorage.removeItem(AI_PET_ICON_KEY);
-      localStorage.removeItem(AI_MILESTONE_KEY);
-      localStorage.removeItem(FORM_DRAFT_BACKUP_KEY);
       }
     }
 
@@ -7063,6 +7888,7 @@
       startLeft:0,
       startScrollLeft:0,
       lastClientX:0,
+      lastLeft:0,
       minLeft:0,
       maxLeft:0,
       targetIndex:-1,
@@ -7611,7 +8437,10 @@
         aiLastFeedback: getAiLastFeedback(),
         aiPetState: getAiPetState(),
         aiPetIcon: getAiPetIconData(),
-        aiMilestones: getAiMilestones()
+        aiMilestones: getAiMilestones(),
+        characterCards: getCharacterCards(),
+        activeCharacterCardId: getActiveCharacterCardId(),
+        characterChatHistory: getCharacterChatHistory()
       };
       const ok = confirm("导出的备份可能包含 AI API Key，请不要发送给他人。继续导出吗？");
       if(!ok) return;
@@ -7630,7 +8459,19 @@
             if(nextForm.__pageBackground && !payload.pageBackground){
               payload.pageBackground = nextForm.__pageBackground;
             }
+            if(Array.isArray(nextForm.__characterCards) && !Array.isArray(payload.characterCards)){
+              payload.characterCards = nextForm.__characterCards;
+            }
+            if(typeof nextForm.__activeCharacterCardId === "string" && typeof payload.activeCharacterCardId !== "string"){
+              payload.activeCharacterCardId = nextForm.__activeCharacterCardId;
+            }
+            if(Array.isArray(nextForm.__characterChatHistory) && !Array.isArray(payload.characterChatHistory)){
+              payload.characterChatHistory = nextForm.__characterChatHistory;
+            }
             delete nextForm.__pageBackground;
+            delete nextForm.__characterCards;
+            delete nextForm.__activeCharacterCardId;
+            delete nextForm.__characterChatHistory;
             localStorage.setItem(FORM_KEY, JSON.stringify(nextForm));
           }
           if(Array.isArray(payload.history)){
@@ -7667,6 +8508,20 @@
           if(payload.aiMilestones){
             localStorage.setItem(AI_MILESTONE_KEY, JSON.stringify(payload.aiMilestones));
           }
+          if(Array.isArray(payload.characterCards)){
+            localStorage.setItem(CHARACTER_CARDS_KEY, JSON.stringify(normalizeCharacterCardList(payload.characterCards)));
+          }
+          if(typeof payload.activeCharacterCardId === "string"){
+            const cards = getCharacterCards();
+            if(cards.some((card) => card.id === payload.activeCharacterCardId)){
+              localStorage.setItem(ACTIVE_CHARACTER_CARD_ID_KEY, payload.activeCharacterCardId);
+            }else{
+              localStorage.removeItem(ACTIVE_CHARACTER_CARD_ID_KEY);
+            }
+          }
+          if(Array.isArray(payload.characterChatHistory)){
+            localStorage.setItem(CHARACTER_CHAT_HISTORY_KEY, JSON.stringify(payload.characterChatHistory.slice(-40)));
+          }
           applyPageBackground(payload.pageBackground || "");
 
           setForm(JSON.parse(localStorage.getItem(FORM_KEY) || JSON.stringify(defaultForm)));
@@ -7674,6 +8529,8 @@
           renderPlan();
           updateAiSettingsUi();
           updateAiPetVisibility();
+          renderCharacterCards();
+          renderCharacterChat();
           updateRestoreDraftButton();
           markLocalStateChanged("导入本地备份");
           alert(payload.aiSettings ? "导入成功。AI 设置已导入，如包含 API Key，请确认这是你自己的备份文件。" : "导入成功");
@@ -7710,6 +8567,9 @@
       localStorage.removeItem(AI_PET_STATE_KEY);
       localStorage.removeItem(AI_PET_ICON_KEY);
       localStorage.removeItem(AI_MILESTONE_KEY);
+      localStorage.removeItem(CHARACTER_CARDS_KEY);
+      localStorage.removeItem(ACTIVE_CHARACTER_CARD_ID_KEY);
+      localStorage.removeItem(CHARACTER_CHAT_HISTORY_KEY);
       localStorage.removeItem(FORM_DRAFT_BACKUP_KEY);
 
       activePlanDay = 0;
@@ -7735,6 +8595,8 @@
       applyPageBackground("");
       updateAiSettingsUi();
       updateAiPetVisibility();
+      renderCharacterCards();
+      renderCharacterChat();
       updateRestoreDraftButton();
       queueAutoSync("清空本地记录");
       alert("已清空全部本地记录");
@@ -8467,6 +9329,40 @@
       if(modal) modal.onclick = (e) => { if(e.target === modal) closeAiCoachPanel(); };
     }
 
+    function bindCharacterCardControls(){
+      if($("importCharacterCardBtn")){
+        $("importCharacterCardBtn").onclick = () => $("characterCardFileInput")?.click();
+      }
+      if($("characterCardFileInput")){
+        $("characterCardFileInput").addEventListener("change", (event) => {
+          const file = event.target.files && event.target.files[0];
+          if(file) importCharacterCard(file);
+          event.target.value = "";
+        });
+      }
+      if($("clearActiveCharacterCardBtn")){
+        $("clearActiveCharacterCardBtn").onclick = () => setActiveCharacterCardId("");
+      }
+      if($("sendCharacterChatBtn")){
+        $("sendCharacterChatBtn").onclick = () => sendCharacterChat();
+      }
+      if($("clearCharacterChatBtn")){
+        $("clearCharacterChatBtn").onclick = () => {
+          if(confirm("清空当前角色聊天记录吗？")){
+            setCharacterChatHistory([], { sync:true });
+          }
+        };
+      }
+      if($("characterChatInput")){
+        $("characterChatInput").addEventListener("keydown", (event) => {
+          if((event.ctrlKey || event.metaKey) && event.key === "Enter"){
+            event.preventDefault();
+            sendCharacterChat();
+          }
+        });
+      }
+    }
+
     function bindAiFeatureButtons(){
       if($("aiWeeklyBtn")) $("aiWeeklyBtn").onclick = () => generateAiWeeklyAnalysis({ force:true }).catch((err) => alert("AI 反馈生成失败：" + (err.message || "未知错误")));
       if($("aiNextPlanBtn")) $("aiNextPlanBtn").onclick = () => generateAiNextWeekPlan().catch((err) => alert("AI 计划生成失败：" + (err.message || "未知错误")));
@@ -8620,6 +9516,7 @@
     $("cloudAutoSyncBtn").onclick = toggleAutoSync;
 
     bindAiSettingsControls();
+    bindCharacterCardControls();
     bindAiFeatureButtons();
     bindHistoryModalControls();
 
@@ -8635,6 +9532,7 @@
     applyPageBackground(getPageBackgroundData());
     updateAiSettingsUi();
     updateAiPetVisibility();
+    renderCharacterCards();
     updateRestoreDraftButton();
     bindPlanSwipeNavigation();
     renderPlan();
