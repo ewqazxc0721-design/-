@@ -3539,7 +3539,7 @@
 
       <div class="card">
         <h2>角色卡管理</h2>
-        <div class="softbox">导入 SillyTavern / TavernAI 的 JSON 角色卡后，可以选择当前角色；启用后会随 AI 请求一起进入上下文。</div>
+        <div class="softbox">导入 SillyTavern / TavernAI 的 JSON 角色卡后，可以选择当前角色；聊天和 AI 教练会读取当前计划、打卡进度和历史训练记录。</div>
         <div class="tool-row" style="margin-top:12px;">
           <button class="btn" id="importCharacterCardBtn" type="button">导入角色卡 JSON</button>
           <button class="btn-outline" id="clearActiveCharacterCardBtn" type="button">不使用角色</button>
@@ -3659,8 +3659,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.05.08-73-character-card-chat-mvp";
+    const APP_VERSION = "v2026.05.11-75-character-chat-training-context";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
+    const TEMP_DAILY_PLAN_OVERRIDES_KEY = "gain-temp-daily-plan-overrides";
     const DAILY_LOGS_KEY = "gain-daily-logs";
     const LAST_CLOUD_SYNC_AT_KEY = "gain-last-cloud-sync-at";
     const FORM_KEY = "gain-tracker-form";
@@ -4356,6 +4357,123 @@
       };
     }
 
+    function getDayProgressContext(dayIndex, days = getPlanDays(), checks = getPlanChecks()){
+      const day = days[dayIndex];
+      if(!day) return null;
+      const items = normalizePlanItemsList(day.items || []);
+      const completedItems = items.filter((_, itemIndex) => checks[`d${dayIndex}_i${itemIndex}`]);
+      const missedItems = items.filter((_, itemIndex) => !checks[`d${dayIndex}_i${itemIndex}`]);
+      return {
+        dayIndex,
+        day: day.day || `第${dayIndex + 1}天`,
+        weekday: inferPlanWeekday(day, dayIndex),
+        date: getDateForPlanDayInCurrentWeek(day.day, dayIndex),
+        focus: day.focus || "",
+        items,
+        completedItems,
+        missedItems,
+        completedCount: completedItems.length,
+        totalCount: items.length,
+        completionRate: items.length ? Math.round(completedItems.length / items.length * 100) + "%" : "0%",
+        protein: day.protein || "",
+        isTemporary: !!day.isTemporary,
+        temporaryMessage: day.temporaryMessage || ""
+      };
+    }
+
+    function getRecentDailyLogsBrief(limit = 14){
+      return Object.values(getDailyLogs())
+        .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")))
+        .slice(0, limit)
+        .map((log) => ({
+          date: log.date || "",
+          planDay: log.planDay || "",
+          focus: log.focus || "",
+          completedCount: log.completedCount || 0,
+          totalItems: log.totalItems || 0,
+          completedItems: normalizePlanItemsList(log.completedItems || []).slice(0, 10),
+          weight: log.weight || "",
+          sleep: log.sleep || "",
+          note: characterCardText(log.note || "", 300),
+          isTemporaryPlan: !!log.isTemporaryPlan
+        }));
+    }
+
+    function getWeeklyRecordsForCharacterChat(limit = 5){
+      return getHistory().slice(0, limit).map((entry) => ({
+        weekLabel: entry.weekLabel || "",
+        createdAt: entry.createdAt || "",
+        avgWeight: entry.avgWeight || "",
+        avgSleep: entry.avgSleep || "",
+        latestSleep: entry.latestSleep || "",
+        trainingDays: entry.trainingDays || "",
+        completionPercent: entry.completionPercent || "",
+        completedCount: entry.completedCount || 0,
+        totalPlanItems: entry.totalPlanItems || 0,
+        pullupBest: entry.pullupBest || "",
+        pullupTotal: entry.pullupTotal || "",
+        diet: entry.diet || "",
+        status: entry.status || "",
+        notes: characterCardText(entry.notes || "", 260),
+        planSummary: characterCardText(entry.planSummary || "", 900),
+        aiCoachMessage: characterCardText(entry.aiWeeklyFeedback?.coach_message || entry.aiWeeklyFeedback?.summary || "", 400)
+      }));
+    }
+
+    function buildCharacterTrainingContext(){
+      const days = getPlanDays();
+      const checks = getPlanChecks();
+      const activeDayContext = getDayProgressContext(activePlanDay, days, checks);
+      const todayIndex = getTodayPlanDayIndex(days);
+      const todayDayContext = getDayProgressContext(todayIndex, days, checks);
+      const form = getForm();
+      return {
+        goal: "增肌增重、提升引体向上、稳定完成每周训练",
+        currentDate: formatDateKey(new Date()),
+        weekLabel: form.weekLabel || formatCurrentWeekLabel(),
+        activePlanDayIndex: activePlanDay,
+        activePlanDay: activeDayContext,
+        todayPlanDayIndex: todayIndex,
+        todayPlanDay: todayDayContext,
+        currentWeekBody: {
+          weights: [form.weight1, form.weight2, form.weight3, form.weight4, form.weight5, form.weight6, form.weight7].map((v) => v || ""),
+          averageWeightKg: calcAverage([form.weight1, form.weight2, form.weight3, form.weight4, form.weight5, form.weight6, form.weight7]) || "",
+          averageSleep: form.avgSleep || "",
+          latestSleep: form.latestSleep || "",
+          trainingDays: form.trainingDays || "",
+          pullupBest: form.pullupBest || "",
+          pullupTotal: form.pullupTotal || "",
+          diet: form.diet || "",
+          status: form.status || "",
+          notes: characterCardText(form.notes || "", 400)
+        },
+        currentPlan: days.map((day, index) => ({
+          dayIndex: index,
+          day: day.day || `第${index + 1}天`,
+          weekday: inferPlanWeekday(day, index),
+          focus: day.focus || "",
+          items: normalizePlanItemsList(day.items || []),
+          protein: day.protein || "",
+          isTemporary: !!day.isTemporary,
+          temporaryMessage: day.temporaryMessage || ""
+        })),
+        planCheckSummary: getPlanCheckSummaryJson(checks, days),
+        recentDailyLogs: getRecentDailyLogsBrief(14),
+        recentWeeklyRecords: getWeeklyRecordsForCharacterChat(5)
+      };
+    }
+
+    function buildCharacterTrainingContextPrompt(context){
+      if(!context) return "";
+      return [
+        "用户训练上下文如下。你可以读取这些数据来督促用户训练、提醒今天未完成动作、复盘历史表现、鼓励按计划执行。",
+        "不要逐字复述整段数据；只在回复中引用和当前对话有关的训练事实。",
+        "如果用户偷懒、拖延或想跳过训练，可以保持角色语气督促，但不要羞辱用户；如果数据提示疼痛、睡眠差或过度疲劳，先提醒降强度和安全。",
+        "训练上下文 JSON：",
+        JSON.stringify(context, null, 2)
+      ].join("\n");
+    }
+
     function renderCharacterCards(){
       const listEl = $("characterCardList");
       const statusEl = $("characterCardStatus");
@@ -4367,6 +4485,7 @@
         statusEl.textContent = active ? `当前角色：${active.name} · 已联动 AI 教练` : "当前角色：未选择";
       }
       updateAiPetAvatar();
+      updateAiSettingsUi();
       if(!listEl) return;
       if(!cards.length){
         listEl.innerHTML = `<div class="softbox">还没有角色卡。先导入 SillyTavern / TavernAI 的 .json 角色卡。</div>`;
@@ -4458,12 +4577,15 @@
       reader.readAsText(file);
     }
 
-    function buildCharacterChatSystemPrompt(card){
+    function buildCharacterChatSystemPrompt(card, trainingContext = null){
       return [
-        "你正在和用户进行角色聊天。请自然回复普通文本，不要返回 JSON，不要返回 Markdown 表格。",
+        "你正在和用户进行角色聊天。请自然回复普通文本，不要返回 JSON、Markdown 表格、代码块或接口原始响应。",
         "保持角色卡的人设、语气、关系和场景；不要跳出角色解释角色卡。",
+        "你也是用户的训练督促伙伴：可以结合本周计划、打卡进度、历史训练记录来提醒、鼓励、催促用户完成训练。",
+        "角色语气要在，但训练建议必须具体、可执行；不要编造训练数据，没记录就说还没看到记录。",
         "如果用户要求危险、违法或明显越界内容，拒绝并保持角色语气。",
-        characterCardPromptBlock(card)
+        characterCardPromptBlock(card),
+        buildCharacterTrainingContextPrompt(trainingContext)
       ].filter(Boolean).join("\n");
     }
 
@@ -4475,8 +4597,9 @@
       if(settings.apiMode === "proxy" && !settings.proxyUrl) throw new Error("请先在 AI 设置里填写代理 URL");
 
       const history = getCharacterChatHistory().slice(-12);
+      const trainingContext = buildCharacterTrainingContext();
       const messages = [
-        { role:"system", content:buildCharacterChatSystemPrompt(card) },
+        { role:"system", content:buildCharacterChatSystemPrompt(card, trainingContext) },
         ...history.map((item) => ({ role:item.role, content:String(item.content || "") })),
         { role:"user", content:userText }
       ];
@@ -4491,12 +4614,13 @@
             signal: controller.signal,
             body: JSON.stringify({
               task:"character_chat",
-              payload:{ message:userText, history, characterCard:characterCardPromptPayload(card) },
+              payload:{ message:userText, history, characterCard:characterCardPromptPayload(card), trainingContext },
               settings:{
                 model:settings.model,
                 temperature:settings.temperature,
                 maxTokens:settings.maxTokens,
-                characterCardPrompt: characterCardPromptBlock(card)
+                characterCardPrompt: characterCardPromptBlock(card),
+                trainingContextPrompt: buildCharacterTrainingContextPrompt(trainingContext)
               }
             })
           });
@@ -4518,8 +4642,9 @@
         }
         if(!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
-        const content = json?.choices?.[0]?.message?.content || json?.message || json?.data?.message || json?.data || "";
-        return typeof content === "string" ? content.trim() : JSON.stringify(content);
+        const content = normalizeChatReplyText(json);
+        if(!content) throw new Error("AI 没有返回可显示内容");
+        return content;
       }finally{
         clearTimeout(timeout);
       }
@@ -4556,11 +4681,12 @@
     }
 
     function saveAiFeedback(feedback, meta = {}){
+      const activeCharacterCard = getActiveCharacterCard();
       const item = {
         type: feedback?.type || "coach_feedback",
         title: feedback?.title || "AI 教练",
-        message: feedback?.message || feedback?.coach_message || feedback?.summary || "",
-        meta,
+        message: cleanAiDisplayText(feedback?.message || feedback?.coach_message || feedback?.summary || ""),
+        meta: activeCharacterCard ? { ...meta, characterCard:{ id:activeCharacterCard.id, name:activeCharacterCard.name } } : meta,
         createdAt: new Date().toISOString()
       };
       localStorage.setItem(AI_LAST_FEEDBACK_KEY, JSON.stringify(item));
@@ -4599,7 +4725,7 @@
     }
 
     function showCoachBubble(message, priority = "normal", durationMs = 4000, options = {}){
-      const text = String(message || "").trim();
+      const text = cleanAiDisplayText(message);
       if(!text) return;
       const settings = getAiSettings();
       if(!options.force && (!settings.enabled || !settings.deskPetEnabled || !settings.bubbleEnabled || settings.quietMode)) return;
@@ -4673,9 +4799,11 @@
       const status = $("aiSettingsStatus");
       if(status){
         const ready = settings.apiMode === "proxy" ? !!settings.proxyUrl : !!settings.apiKey;
+        const activeCharacterCard = getActiveCharacterCard();
+        const roleText = activeCharacterCard ? ` · 角色：${activeCharacterCard.name}` : "";
         status.textContent = settings.enabled
-          ? `AI 状态：已开启 · ${ready ? "接口已填写" : "等待填写接口"}`
-          : "AI 状态：已关闭";
+          ? `AI 状态：已开启 · ${ready ? "接口已填写" : "等待填写接口"}${roleText}`
+          : `AI 状态：已关闭${roleText}`;
       }
     }
 
@@ -4708,7 +4836,9 @@
         "如果发现睡眠不足、疼痛、过度训练、动作风险，要优先提醒安全和恢复。",
         "不要编造用户没有提供的数据。不要给医疗诊断；疼痛持续时建议停止相关动作并咨询专业人士。",
         toneMap[settings.coachTone] || toneMap.direct_warm,
-        "必须返回合法 JSON，不要返回 Markdown。"
+        "必须返回合法 JSON，不要返回 Markdown、代码块、表格或接口原始响应。",
+        "不要输出 id/object/model/choices/reasoning_content 等接口字段。",
+        "如果启用了角色卡，只把人物性格、口吻和关系感写进 message/summary/coach_message/recovery 等面向用户的中文字段；JSON 键名和结构必须保持任务要求。"
       ];
       const cardBlock = characterCardPromptBlock(characterCard);
       if(cardBlock) lines.push(cardBlock);
@@ -4726,14 +4856,29 @@
         trend_analysis: '{"type":"trend_analysis","title":"AI 趋势观察","observations":[],"risks":[],"suggestions":[],"coach_message":""}',
         test_connection: '{"type":"test_connection","title":"连接测试","message":"AI 教练连接成功。"}'
       };
+      const taskRules = {
+        daily_adjust: [
+          "今日调整必须真的改变训练：adjustedItems 不能完整照抄原 items；至少减少、替换或重排 1 个动作。",
+          "adjustedItems 只放最终执行动作文本数组，不要放对象、解释、原始计划或 Markdown。",
+          "message 用角色语气直接说明今天怎么练；不要说“输出 JSON”“任务要求”“角色卡”。",
+          "如果器材不足，必须按可用器材替换动作；如果睡眠差、能量累、明显酸痛或只有 20 分钟，必须降低训练量。"
+        ].join("\n"),
+        weekly_analysis: "面向用户的字段保留角色口吻，但不要把推理过程、任务说明或 JSON 要求写进内容。",
+        next_week_plan: "plan.days 必须是可执行的新计划；changes 说明具体改了什么，不要只返回“保留当前计划”。",
+        natural_language_log: "只返回能填入表单的 formPatch 和一句自然提示，不要展示解析过程。",
+        trend_analysis: "只给趋势观察和建议，不要展示推理过程或接口字段。",
+        test_connection: "只返回连接成功消息。"
+      };
       return [
         `任务类型：${task}`,
         `反馈长度：${settings.feedbackLength}`,
         "用户当前数据：",
         JSON.stringify(payload || {}, null, 2),
-        "输出要求：必须返回 JSON；不要 Markdown；不要解释 JSON 外内容；语气像真实中文健身教练。",
+        "输出要求：必须返回 JSON；不要 Markdown；不要代码块；不要解释 JSON 外内容；不要输出接口原始响应字段。",
+        "所有面向用户的中文内容要像真实中文健身教练。如果 payload.activeCharacterCard 存在，要参考该角色卡的人物性格和说话方式，但训练建议仍然专业、清楚、可执行。",
+        taskRules[task] || "",
         `返回格式参考：${formats[task] || "{}"}`
-      ].join("\n");
+      ].filter(Boolean).join("\n");
     }
 
     const LOCAL_COACH_LINES = {
@@ -4778,7 +4923,7 @@
     }
 
     function extractJsonFromText(text){
-      const raw = String(text || "").trim();
+      const raw = stripMarkdownFences(String(text || "").trim());
       if(!raw) return null;
       try{ return JSON.parse(raw); }catch(e){}
       const start = raw.indexOf("{");
@@ -4787,6 +4932,199 @@
         try{ return JSON.parse(raw.slice(start, end + 1)); }catch(e){}
       }
       return null;
+    }
+
+    function stripMarkdownFences(text){
+      let raw = String(text || "").trim();
+      raw = raw.replace(/^```(?:json|javascript|js|text|markdown)?\s*/i, "").replace(/\s*```$/i, "").trim();
+      return raw;
+    }
+
+    function cleanAiDisplayText(text){
+      return stripMarkdownFences(text)
+        .replace(/```[\s\S]*?```/g, "")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
+    }
+
+    function readContentBlocks(content){
+      if(typeof content === "string") return content;
+      if(Array.isArray(content)){
+        return content.map((part) => {
+          if(typeof part === "string") return part;
+          return part?.text || part?.content || "";
+        }).join("").trim();
+      }
+      return "";
+    }
+
+    function extractAssistantContentFromApiResponse(json){
+      if(!json || typeof json !== "object") return "";
+      if(Array.isArray(json.choices)){
+        const message = json.choices[0]?.message || {};
+        return readContentBlocks(message.content).trim();
+      }
+      if(json.data && typeof json.data === "object"){
+        const nested = extractAssistantContentFromApiResponse(json.data);
+        if(nested) return nested;
+      }
+      if(typeof json.message === "string") return json.message.trim();
+      if(typeof json.content === "string") return json.content.trim();
+      if(typeof json.reply === "string") return json.reply.trim();
+      if(typeof json.data?.message === "string") return json.data.message.trim();
+      return "";
+    }
+
+    function unwrapAiCoachEnvelope(value){
+      if(!value || typeof value !== "object") return value;
+      if(Array.isArray(value.choices)){
+        const content = extractAssistantContentFromApiResponse(value);
+        return content ? extractJsonFromText(content) : null;
+      }
+      if(typeof value.data === "string"){
+        const parsed = extractJsonFromText(value.data);
+        if(parsed) return parsed;
+      }
+      if(value.data && typeof value.data === "object"){
+        const unwrapped = unwrapAiCoachEnvelope(value.data);
+        if(unwrapped && typeof unwrapped === "object") return unwrapped;
+      }
+      if(value.result && typeof value.result === "object") return unwrapAiCoachEnvelope(value.result);
+      if(value.output && typeof value.output === "object") return unwrapAiCoachEnvelope(value.output);
+      if(typeof value.message === "string"){
+        const parsed = extractJsonFromText(value.message);
+        if(parsed) return parsed;
+      }
+      return value;
+    }
+
+    function normalizeChatReplyText(value){
+      let text = "";
+      if(typeof value === "string"){
+        text = value;
+      }else if(value && typeof value === "object"){
+        text = extractAssistantContentFromApiResponse(value);
+        if(!text && (value.message || value.content || value.reply)){
+          text = String(value.message || value.content || value.reply || "");
+        }
+      }
+      text = stripMarkdownFences(text);
+      const parsed = extractJsonFromText(text);
+      if(parsed && typeof parsed === "object"){
+        if(Array.isArray(parsed.choices)) return normalizeChatReplyText(parsed);
+        const nested = parsed.message || parsed.content || parsed.reply || parsed.text || parsed.coach_message;
+        if(typeof nested === "string") return stripMarkdownFences(nested);
+      }
+      return cleanAiDisplayText(text);
+    }
+
+    function planItemsSignature(items){
+      return normalizePlanItemsList(items).map((item) => item.replace(/[^\w\u4e00-\u9fff]+/g, "").toLowerCase()).join("|");
+    }
+
+    function reduceTrainingVolumeText(item, state = {}){
+      let text = String(item || "");
+      const needsReduction = /20分钟|差|累|明显/.test(`${state.time || ""}${state.sleep || ""}${state.energy || ""}${state.soreness || ""}`);
+      if(!needsReduction) return text;
+      text = text.replace(/6组/g, "4组").replace(/5组/g, "3组").replace(/4组/g, "3组").replace(/3组/g, "2组");
+      text = text.replace(/做到力竭|接近力竭/g, "保留 2 次余力");
+      return text;
+    }
+
+    function adaptItemForGear(item, state = {}){
+      const gear = String(state.gear || "");
+      let text = String(item || "");
+      if(gear === "完整" || !gear) return text;
+      if(gear === "无器械"){
+        if(/哑铃地板卧推|哑铃卧推/.test(text)) return "俯卧撑 3组 × 8–15次（保留 2 次余力）";
+        if(/哑铃飞鸟/.test(text)) return "宽距俯卧撑 2组 × 10–15次";
+        if(/哑铃肩推|肩推/.test(text)) return "下犬式俯卧撑 3组 × 6–10次";
+        if(/侧平举|前平举/.test(text)) return "徒手肩部小幅侧平举 2组 × 20次";
+        if(/单臂哑铃划船|俯身双哑铃划船|弹力绳划船/.test(text)) return "俯身 Y-T-W 3组 × 10次";
+        if(/弹力绳高位下拉|弹力绳下拉|引体向上|离心引体/.test(text)) return "俯卧背部挺身 3组 × 12–15次";
+        if(/弯举|臂屈伸/.test(text)) return "窄距俯卧撑 2组 × 8–12次";
+        if(/杯式深蹲|罗马尼亚硬拉/.test(text)) return "徒手深蹲 3组 × 15–20次";
+      }
+      if(gear === "只有哑铃"){
+        if(/弹力绳高位下拉|弹力绳下拉/.test(text)) return "单臂哑铃划船 4组 × 每侧12次";
+        if(/弹力绳划船/.test(text)) return "俯身双哑铃划船 3组 × 12–15次";
+        if(/弹力绳面拉/.test(text)) return "俯身反向飞鸟 3组 × 15次";
+        if(/引体向上|离心引体/.test(text)) return "单臂哑铃划船 4组 × 每侧12次";
+      }
+      if(gear === "只有弹力绳"){
+        if(/哑铃地板卧推|哑铃卧推/.test(text)) return "弹力绳胸推 4组 × 12–15次";
+        if(/哑铃飞鸟/.test(text)) return "弹力绳夹胸 3组 × 12–15次";
+        if(/哑铃肩推/.test(text)) return "弹力绳肩推 3组 × 10–12次";
+        if(/侧平举|前平举/.test(text)) return "弹力绳侧平举 3组 × 15次";
+        if(/单臂哑铃划船|俯身双哑铃划船/.test(text)) return "弹力绳划船 4组 × 15次";
+        if(/弯举/.test(text)) return "弹力绳弯举 3组 × 12–15次";
+        if(/臂屈伸/.test(text)) return "弹力绳下压 3组 × 12–15次";
+        if(/杯式深蹲/.test(text)) return "弹力绳深蹲 3组 × 15次";
+        if(/罗马尼亚硬拉/.test(text)) return "弹力绳罗马尼亚硬拉 3组 × 12次";
+      }
+      return text;
+    }
+
+    function buildLocalDailyAdjustment(day, state = {}){
+      const original = normalizePlanItemsList(day?.items || []);
+      const needsReduction = /20分钟|差|累|明显/.test(`${state.time || ""}${state.sleep || ""}${state.energy || ""}${state.soreness || ""}`);
+      const targetCount = String(state.time || "").includes("20")
+        ? Math.min(4, original.length)
+        : needsReduction
+          ? Math.max(3, Math.ceil(original.length * 0.65))
+          : Math.max(3, Math.min(original.length, Math.ceil(original.length * 0.8)));
+      let adjusted = original
+        .map((item) => reduceTrainingVolumeText(adaptItemForGear(item, state), state))
+        .filter(Boolean);
+      adjusted = normalizePlanItemsList(adjusted).slice(0, Math.max(1, targetCount));
+      if(planItemsSignature(adjusted) === planItemsSignature(original)){
+        adjusted = normalizePlanItemsList([
+          ...adjusted.slice(0, Math.max(1, adjusted.length - 1)),
+          "全身轻拉伸 5–8分钟"
+        ]);
+      }
+      return {
+        type:"daily_adjust",
+        title:"今日训练调整",
+        mode: needsReduction ? "reduced" : "adjusted",
+        message: needsReduction ? "今天先降一档，保留主项和动作质量。" : "今天做小幅调整，别照搬原计划硬冲。",
+        adjustedItems: adjusted,
+        warnings: ["不要做到力竭", "有明显疼痛就停止相关动作"],
+        recovery: "训练后补蛋白和主食，今晚尽量早点睡。"
+      };
+    }
+
+    function normalizeDailyAdjustResponse(data, payload = {}){
+      const day = {
+        day: payload.dayName || "",
+        focus: payload.focus || "",
+        items: normalizePlanItemsList(payload.items || [])
+      };
+      const fallback = buildLocalDailyAdjustment(day, payload.state || {});
+      const next = data && typeof data === "object" ? { ...data } : {};
+      next.type = "daily_adjust";
+      next.title = String(next.title || "今日训练调整");
+      next.message = cleanAiDisplayText(next.message || next.coach_message || fallback.message || "");
+      next.mode = String(next.mode || fallback.mode || "adjusted");
+      next.adjustedItems = normalizePlanItemsList(next.adjustedItems || next.items || next.planItems);
+      next.warnings = Array.isArray(next.warnings) ? next.warnings.map((item) => cleanAiDisplayText(normalizePlanItemText(item))).filter(Boolean) : [];
+      next.recovery = cleanAiDisplayText(next.recovery || "");
+
+      if(!next.adjustedItems.length || planItemsSignature(next.adjustedItems) === planItemsSignature(day.items)){
+        next.adjustedItems = fallback.adjustedItems;
+        next.mode = fallback.mode;
+        next.message = next.message || fallback.message;
+        next.warnings = Array.from(new Set([...(next.warnings || []), ...fallback.warnings]));
+        next.recovery = next.recovery || fallback.recovery;
+      }
+      return next;
+    }
+
+    function normalizeAiCoachResponseData(task, data, payload = {}){
+      const unwrapped = unwrapAiCoachEnvelope(data);
+      if(!unwrapped || typeof unwrapped !== "object") return null;
+      if(task === "daily_adjust") return normalizeDailyAdjustResponse(unwrapped, payload);
+      return unwrapped;
     }
 
     async function callAiCoach(task, payload, options = {}){
@@ -4851,10 +5189,11 @@
         }
         if(!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
-        const content = json?.choices?.[0]?.message?.content || json?.message || json?.data || json;
-        const data = typeof content === "string" ? extractJsonFromText(content) : content;
+        const assistantContent = extractAssistantContentFromApiResponse(json);
+        const parsedContent = assistantContent ? extractJsonFromText(assistantContent) : null;
+        const data = normalizeAiCoachResponseData(task, parsedContent || json, payload);
         if(!data || typeof data !== "object") throw new Error("AI 返回不是合法 JSON");
-        return { ok:true, task, data, raw: typeof content === "string" ? content : JSON.stringify(content) };
+        return { ok:true, task, data, raw: assistantContent || JSON.stringify(data) };
       }catch(err){
         console.error("AI 调用失败", err);
         return { ok:false, task, data:fallback, error:err.message || "AI 调用失败" };
@@ -4938,23 +5277,28 @@
 
     function renderAiObject(data){
       if(!data) return "暂无内容";
+      if(data && typeof data === "object" && Array.isArray(data.choices)){
+        const text = normalizeChatReplyText(data);
+        return text ? `<div>${escapeHtml(text)}</div>` : `<div>AI 返回格式不稳定，已拦截原始接口内容。请重新生成一次。</div>`;
+      }
       const lines = [];
-      if(data.title) lines.push(`<b>${escapeHtml(data.title)}</b>`);
-      if(data.summary) lines.push(`<div style="margin-top:8px;">${escapeHtml(data.summary)}</div>`);
-      if(data.message) lines.push(`<div style="margin-top:8px;">${escapeHtml(data.message)}</div>`);
-      if(data.coach_message) lines.push(`<div style="margin-top:8px;"><b>教练话：</b>${escapeHtml(data.coach_message)}</div>`);
+      if(data.title) lines.push(`<b>${escapeHtml(cleanAiDisplayText(data.title))}</b>`);
+      if(data.summary) lines.push(`<div style="margin-top:8px;">${escapeHtml(cleanAiDisplayText(data.summary))}</div>`);
+      if(data.message) lines.push(`<div style="margin-top:8px;">${escapeHtml(cleanAiDisplayText(data.message))}</div>`);
+      if(data.coach_message) lines.push(`<div style="margin-top:8px;"><b>教练话：</b>${escapeHtml(cleanAiDisplayText(data.coach_message))}</div>`);
       ["progress","problems","next_week_advice","changes","observations","risks","suggestions","warnings","adjustedItems"].forEach((key) => {
         if(Array.isArray(data[key]) && data[key].length){
           const labelMap = {progress:"做得好的地方",problems:"需要注意",next_week_advice:"下周建议",changes:"计划变化",observations:"观察",risks:"风险",suggestions:"建议",warnings:"注意事项",adjustedItems:"调整动作"};
-          lines.push(`<div class="label">${labelMap[key] || key}</div><ul class="calendar-items">${data[key].map((x) => `<li>${escapeHtml(x)}</li>`).join("")}</ul>`);
+          lines.push(`<div class="label">${labelMap[key] || key}</div><ul class="calendar-items">${data[key].map((x) => `<li>${escapeHtml(cleanAiDisplayText(normalizePlanItemText(x)))}</li>`).join("")}</ul>`);
         }
       });
-      if(data.reason) lines.push(`<div class="label">修改原因</div><div>${escapeHtml(data.reason)}</div>`);
+      if(data.reason) lines.push(`<div class="label">修改原因</div><div>${escapeHtml(cleanAiDisplayText(data.reason))}</div>`);
       if(data.plan && Array.isArray(data.plan.days)){
         lines.push(`<div class="label">训练安排</div>`);
-        lines.push(data.plan.days.map((d) => `<div class="mini" style="margin-top:8px;"><b>${escapeHtml(d.day || "")}</b> · ${escapeHtml(d.focus || "")}<br>${escapeHtml((d.items || []).join("；"))}</div>`).join(""));
+        lines.push(data.plan.days.map((d) => `<div class="mini" style="margin-top:8px;"><b>${escapeHtml(d.day || "")}</b> · ${escapeHtml(d.focus || "")}<br>${escapeHtml(normalizePlanItemsList(d.items || []).join("；"))}</div>`).join(""));
       }
-      return lines.join("") || `<pre>${escapeHtml(JSON.stringify(data, null, 2))}</pre>`;
+      const fallbackText = normalizeChatReplyText(data) || cleanAiDisplayText(data.message || data.summary || data.coach_message || "");
+      return lines.join("") || (fallbackText ? `<div>${escapeHtml(fallbackText)}</div>` : `<div>AI 返回格式不稳定，已隐藏原始代码内容。请重新生成一次。</div>`);
     }
 
     function downloadJson(filename, data){
@@ -5283,6 +5627,7 @@
       const embeddedDailyLogs = rawForm.__dailyLogs && typeof rawForm.__dailyLogs === "object" ? rawForm.__dailyLogs : {};
       const embeddedPlanChecks = rawForm.__planChecks && typeof rawForm.__planChecks === "object" ? rawForm.__planChecks : {};
       const embeddedPlanTemplate = rawForm.__planTemplate && typeof rawForm.__planTemplate === "object" ? rawForm.__planTemplate : DEFAULT_PLAN_TEMPLATE;
+      const embeddedTempDailyPlanOverrides = rawForm.__tempDailyPlanOverrides && typeof rawForm.__tempDailyPlanOverrides === "object" ? rawForm.__tempDailyPlanOverrides : {};
       const embeddedAiSettings = rawForm.__aiSettings && typeof rawForm.__aiSettings === "object" ? rawForm.__aiSettings : null;
       const embeddedAiFeedbackHistory = Array.isArray(rawForm.__aiFeedbackHistory) ? rawForm.__aiFeedbackHistory : [];
       const embeddedAiLastFeedback = rawForm.__aiLastFeedback && typeof rawForm.__aiLastFeedback === "object" ? rawForm.__aiLastFeedback : null;
@@ -5299,6 +5644,7 @@
         daily_logs_json: row.daily_logs_json && typeof row.daily_logs_json === "object" ? row.daily_logs_json : embeddedDailyLogs,
         plan_checks_json: row.plan_checks_json && typeof row.plan_checks_json === "object" ? row.plan_checks_json : embeddedPlanChecks,
         plan_template_json: row.plan_template_json && typeof row.plan_template_json === "object" ? row.plan_template_json : embeddedPlanTemplate,
+        temp_daily_plan_overrides_json: embeddedTempDailyPlanOverrides,
         ai_settings_json: embeddedAiSettings,
         ai_feedback_history_json: embeddedAiFeedbackHistory,
         ai_last_feedback_json: embeddedAiLastFeedback,
@@ -5416,6 +5762,7 @@
           __dailyLogs: snapshot.dailyLogs,
           __planChecks: snapshot.planChecks,
           __planTemplate: snapshot.planTemplate,
+          __tempDailyPlanOverrides: snapshot.tempDailyPlanOverrides,
           __pageBackground: getPageBackgroundData(),
           __aiSettings: snapshot.aiSettings,
           __aiFeedbackHistory: snapshot.aiFeedbackHistory,
@@ -5540,6 +5887,7 @@
             lastCloudSyncAt: cloud.updated_at || new Date().toISOString(),
             planChecks: cloud.plan_checks_json || {},
             planTemplate: cloud.plan_template_json || DEFAULT_PLAN_TEMPLATE,
+            tempDailyPlanOverrides: cloud.temp_daily_plan_overrides_json || {},
             aiSettings: cloud.ai_settings_json || undefined,
             aiFeedbackHistory: cloud.ai_feedback_history_json || [],
             aiLastFeedback: cloud.ai_last_feedback_json || null,
@@ -5607,6 +5955,7 @@
         lastCloudSyncAt: getLastCloudSyncAt(),
         planChecks: getPlanChecks(),
         planTemplate: getPlanTemplate(),
+        tempDailyPlanOverrides: getTempDailyPlanOverrides(),
         aiSettings: getAiSettingsForBackup(),
         aiFeedbackHistory: getAiFeedbackHistory(),
         aiLastFeedback: getAiLastFeedback(),
@@ -5627,6 +5976,7 @@
       const embeddedDailyLogs = safeForm.__dailyLogs;
       const embeddedPlanChecks = safeForm.__planChecks;
       const embeddedPlanTemplate = safeForm.__planTemplate;
+      const embeddedTempDailyPlanOverrides = safeForm.__tempDailyPlanOverrides;
       const embeddedLastCloudSyncAt = safeForm.__lastCloudSyncAt;
       const embeddedUpdatedAt = safeForm.__updatedAt;
       const embeddedAiSettings = safeForm.__aiSettings;
@@ -5642,6 +5992,7 @@
       delete safeForm.__dailyLogs;
       delete safeForm.__planChecks;
       delete safeForm.__planTemplate;
+      delete safeForm.__tempDailyPlanOverrides;
       delete safeForm.__lastCloudSyncAt;
       delete safeForm.__updatedAt;
       delete safeForm.__aiSettings;
@@ -5659,6 +6010,7 @@
       const safePlanChecks = payload && payload.planChecks ? payload.planChecks : (embeddedPlanChecks && typeof embeddedPlanChecks === "object" ? embeddedPlanChecks : {});
       const planTemplateSource = payload && payload.planTemplate ? payload.planTemplate : (embeddedPlanTemplate && typeof embeddedPlanTemplate === "object" ? embeddedPlanTemplate : getPlanTemplate());
       const safePlanTemplate = normalizePlanTemplate(planTemplateSource);
+      const safeTempDailyPlanOverrides = normalizeTempDailyPlanOverrides(payload && payload.tempDailyPlanOverrides ? payload.tempDailyPlanOverrides : (embeddedTempDailyPlanOverrides && typeof embeddedTempDailyPlanOverrides === "object" ? embeddedTempDailyPlanOverrides : {}));
       const safeAiSettings = payload && payload.aiSettings ? payload.aiSettings : (embeddedAiSettings || null);
       const safeAiFeedbackHistory = payload && Array.isArray(payload.aiFeedbackHistory) ? payload.aiFeedbackHistory : (Array.isArray(embeddedAiFeedbackHistory) ? embeddedAiFeedbackHistory : []);
       const safeAiLastFeedback = payload && payload.aiLastFeedback ? payload.aiLastFeedback : (embeddedAiLastFeedback || null);
@@ -5677,6 +6029,7 @@
         localStorage.setItem(DAILY_LOGS_KEY, JSON.stringify(safeDailyLogs));
         localStorage.setItem(PLAN_CHECKS_KEY, JSON.stringify(safePlanChecks));
         localStorage.setItem(PLAN_TEMPLATE_KEY, JSON.stringify(safePlanTemplate));
+        localStorage.setItem(TEMP_DAILY_PLAN_OVERRIDES_KEY, JSON.stringify(safeTempDailyPlanOverrides));
         if(safeAiSettings) localStorage.setItem(AI_SETTINGS_KEY, JSON.stringify(normalizeAiSettings(safeAiSettings)));
         localStorage.setItem(AI_FEEDBACK_HISTORY_KEY, JSON.stringify(safeAiFeedbackHistory));
         if(safeAiLastFeedback) localStorage.setItem(AI_LAST_FEEDBACK_KEY, JSON.stringify(safeAiLastFeedback));
@@ -5791,6 +6144,7 @@
           lastCloudSyncAt: data.updated_at || new Date().toISOString(),
           planChecks: data.plan_checks_json || {},
           planTemplate: data.plan_template_json || DEFAULT_PLAN_TEMPLATE,
+          tempDailyPlanOverrides: data.temp_daily_plan_overrides_json || {},
           aiSettings: data.ai_settings_json || undefined,
           aiFeedbackHistory: data.ai_feedback_history_json || [],
           aiLastFeedback: data.ai_last_feedback_json || null,
@@ -5849,6 +6203,7 @@
     function setPlanTemplate(template, clearChecks = false){
       const normalized = normalizePlanTemplate(template);
       localStorage.setItem(PLAN_TEMPLATE_KEY, JSON.stringify(normalized));
+      clearTempDailyPlanOverrides();
       if(clearChecks){
         localStorage.removeItem(PLAN_CHECKS_KEY);
         localStorage.removeItem(AI_MILESTONE_KEY);
@@ -5856,8 +6211,95 @@
       queueAutoSync(clearChecks ? "训练模板更新并重置打卡" : "训练模板更新");
     }
 
+    function normalizePlanItemText(item){
+      if(item == null) return "";
+      if(typeof item === "string" || typeof item === "number") return String(item).trim();
+      if(typeof item !== "object") return String(item || "").trim();
+      const name = String(item.name || item.title || item.exercise || item.item || item.text || "").trim();
+      const detailKeys = ["sets", "reps", "duration", "weight", "intensity", "note"];
+      const details = detailKeys
+        .map((key) => String(item[key] || "").trim())
+        .filter(Boolean);
+      if(name) return [name, details.join(" · ")].filter(Boolean).join(" ");
+      return Object.values(item).map((value) => String(value || "").trim()).filter(Boolean).join(" ").trim();
+    }
+
+    function normalizePlanItemsList(items){
+      const list = Array.isArray(items) ? items : String(items || "").split(/\n|；|;/);
+      const seen = new Set();
+      return list
+        .map((item) => normalizePlanItemText(item))
+        .filter(Boolean)
+        .filter((item) => {
+          if(seen.has(item)) return false;
+          seen.add(item);
+          return true;
+        });
+    }
+
+    function normalizeTempDailyPlanOverrides(raw = {}){
+      const source = raw && typeof raw === "object" ? raw : {};
+      const normalized = {};
+      Object.entries(source).forEach(([key, value]) => {
+        const dayIndex = Number(key);
+        if(!Number.isInteger(dayIndex) || dayIndex < 0 || dayIndex > 6 || !value || typeof value !== "object") return;
+        const items = normalizePlanItemsList(value.items || value.adjustedItems);
+        if(!items.length) return;
+        normalized[String(dayIndex)] = {
+          day: String(value.day || value.dayName || "").trim(),
+          weekday: Number(value.weekday) || dayIndex + 1,
+          focus: String(value.focus || "").trim(),
+          items,
+          protein: String(value.protein || "").trim(),
+          source: String(value.source || "ai_daily_adjust"),
+          message: String(value.message || "").trim(),
+          createdAt: value.createdAt || new Date().toISOString()
+        };
+      });
+      return normalized;
+    }
+
+    function getTempDailyPlanOverrides(){
+      return normalizeTempDailyPlanOverrides(safeJsonParse(localStorage.getItem(TEMP_DAILY_PLAN_OVERRIDES_KEY) || "{}", {}));
+    }
+
+    function setTempDailyPlanOverrides(overrides, options = {}){
+      const normalized = normalizeTempDailyPlanOverrides(overrides);
+      localStorage.setItem(TEMP_DAILY_PLAN_OVERRIDES_KEY, JSON.stringify(normalized));
+      if(options.sync !== false) queueAutoSync("AI 临时训练计划更新");
+      return normalized;
+    }
+
+    function clearTempDailyPlanOverrides(options = {}){
+      localStorage.removeItem(TEMP_DAILY_PLAN_OVERRIDES_KEY);
+      if(options.sync) queueAutoSync("清空 AI 临时训练计划");
+    }
+
+    function clearTempDailyPlanOverride(dayIndex, options = {}){
+      const overrides = getTempDailyPlanOverrides();
+      delete overrides[String(dayIndex)];
+      setTempDailyPlanOverrides(overrides, options);
+    }
+
     function getPlanDays(){
-      return getPlanTemplate().days;
+      const template = getPlanTemplate();
+      const overrides = getTempDailyPlanOverrides();
+      return template.days.map((day, index) => {
+        const override = overrides[String(index)];
+        if(!override) return day;
+        return {
+          ...day,
+          ...override,
+          day: override.day || day.day,
+          weekday: override.weekday || day.weekday,
+          focus: override.focus || day.focus,
+          protein: override.protein || day.protein,
+          isTemporary: true,
+          baseItems: day.items || [],
+          baseFocus: day.focus || "",
+          temporaryMessage: override.message || ""
+        };
+      });
     }
 
     function getPlanChecks(){
@@ -6133,6 +6575,21 @@
       const isiOS = /iPad|iPhone|iPod/.test(ua) || (platform === "MacIntel" && navigator.maxTouchPoints > 1);
       const supportsTouchCallout = !!(window.CSS && CSS.supports && (CSS.supports("-webkit-touch-callout: none") || CSS.supports("-webkit-touch-callout", "none")));
       return !!(smallScreen && isiOS && supportsTouchCallout);
+    }
+
+    function getTodayPlanDayIndex(days = getPlanDays()){
+      if(!days.length) return 0;
+      const todayWeekday = ((new Date().getDay() + 6) % 7) + 1;
+      const matchedIndex = days.findIndex((day, index) => inferPlanWeekday(day, index) === todayWeekday);
+      return matchedIndex >= 0 ? matchedIndex : Math.min(todayWeekday - 1, days.length - 1);
+    }
+
+    function normalizeInitialActivePlanDayForIos(){
+      if(!isIosDayDockMode()) return;
+      const days = getPlanDays();
+      if(!days.length) return;
+      activePlanDay = getTodayPlanDayIndex(days);
+      localStorage.setItem(ACTIVE_PLAN_DAY_KEY, String(activePlanDay));
     }
 
     function getDayLiquidMaxScale(){
@@ -6540,8 +6997,14 @@
     function scrollActiveDayTabIntoView(behavior = "smooth"){
       const tabs = $("dayTabs");
       const active = tabs ? tabs.querySelector(".day-tab.active") : null;
+      const safeBehavior = behavior === "auto" || behavior === "smooth" ? behavior : "smooth";
+      if(isIosDayDockMode()){
+        positionIosDayDockScrollForIndex(activePlanDay);
+        requestAnimationFrame(() => updateDayTabIndicator({ immediate: safeBehavior === "auto" }));
+        return;
+      }
       if(active){
-        active.scrollIntoView({ behavior, inline:"center", block:"nearest" });
+        active.scrollIntoView({ behavior: safeBehavior, inline:"center", block:"nearest" });
       }
     }
 
@@ -6602,6 +7065,16 @@
           tabs.style.scrollBehavior = oldScrollBehavior;
           tabs.style.scrollSnapType = oldScrollSnapType;
         });
+      });
+    }
+
+    function repairIosDayDockLayout(options = {}){
+      if(!isIosDayDockMode()) return;
+      if(!syncRenderedActivePlanDay(activePlanDay)) return;
+      positionIosDayDockScrollForIndex(activePlanDay);
+      requestAnimationFrame(() => {
+        positionIosDayDockScrollForIndex(activePlanDay);
+        updateDayTabIndicator({ immediate: options.immediate !== false });
       });
     }
 
@@ -7055,6 +7528,50 @@
       showCoachBubble(data.message || "已帮你填入能识别的信息。", "normal", 3500);
     }
 
+    function clearPlanChecksForDay(dayIndex){
+      const checks = getPlanChecks();
+      Object.keys(checks).forEach((key) => {
+        if(key.startsWith(`d${dayIndex}_i`)) delete checks[key];
+      });
+      setPlanChecks(checks);
+    }
+
+    function applyDailyAdjustToTempPlan(adjust, options = {}){
+      const dayIndex = Number.isInteger(Number(adjust?.dayIndex)) ? Number(adjust.dayIndex) : activePlanDay;
+      const baseDay = getPlanTemplate().days[dayIndex] || getPlanDays()[dayIndex];
+      if(!baseDay) return "";
+      const adjustedItems = normalizePlanItemsList(adjust?.adjustedItems || []);
+      if(!adjustedItems.length){
+        alert("AI 调整里没有可用动作，暂时不能应用。");
+        return "";
+      }
+      const overrides = getTempDailyPlanOverrides();
+      overrides[String(dayIndex)] = {
+        day: baseDay.day,
+        weekday: inferPlanWeekday(baseDay, dayIndex),
+        focus: adjust.focus || baseDay.focus,
+        items: adjustedItems,
+        protein: adjust.protein || baseDay.protein,
+        source: "ai_daily_adjust",
+        message: adjust.message || adjust.coach_message || "AI 临时调整",
+        createdAt: new Date().toISOString()
+      };
+      setTempDailyPlanOverrides(overrides, { sync:true });
+      clearPlanChecksForDay(dayIndex);
+      activePlanDay = dayIndex;
+      localStorage.setItem(ACTIVE_PLAN_DAY_KEY, String(activePlanDay));
+      renderPlan();
+      updateSummary();
+      syncToCloud(false).catch(() => {});
+      if(options.record){
+        const dateKey = recordPlanDayToToday(dayIndex, { silent:true });
+        alert(`已临时替换 ${baseDay.day} 的训练计划，并记录到日历：${dateKey}`);
+        return dateKey;
+      }
+      alert(`已临时替换 ${baseDay.day} 的训练计划，打卡、日历和本周记录都会使用这份调整。`);
+      return "";
+    }
+
     async function generateDailyAdjust(){
       const day = getPlanDays()[activePlanDay] || { items:[] };
       const payload = {
@@ -7072,17 +7589,19 @@
         }
       };
       const res = await callAiCoach("daily_adjust", payload, { timeoutMs:22000, force:true });
-      latestAiDailyAdjust = res.data || getFallbackCoachFeedback("daily_adjust", payload);
+      latestAiDailyAdjust = normalizeDailyAdjustResponse(res.data || getFallbackCoachFeedback("daily_adjust", payload), payload);
+      latestAiDailyAdjust.dayIndex = activePlanDay;
+      latestAiDailyAdjust.dayName = day.day || "";
       const box = $("aiDailyAdjustResult");
       if(box){
         box.style.display = "block";
-        box.innerHTML = renderAiObject(latestAiDailyAdjust) + `<div class="btns"><button class="btn-outline" id="copyDailyAdjustBtn" type="button">复制建议</button><button class="btn-outline" id="useDailyAdjustBtn" type="button">临时使用此计划</button></div>`;
+        box.innerHTML = renderAiObject(latestAiDailyAdjust) + `<div class="btns"><button class="btn-outline" id="copyDailyAdjustBtn" type="button">复制建议</button><button class="btn" id="useDailyAdjustBtn" type="button">临时使用此计划</button><button class="btn-outline" id="recordDailyAdjustBtn" type="button">使用并记到日历</button></div>`;
         const copyBtn = $("copyDailyAdjustBtn");
         if(copyBtn) copyBtn.onclick = () => copyText(JSON.stringify(latestAiDailyAdjust, null, 2), "已复制今日调整建议");
         const useBtn = $("useDailyAdjustBtn");
-        if(useBtn) useBtn.onclick = () => {
-          alert("已生成临时计划。为避免覆盖周计划，请按上方调整动作执行。原计划不变。 ");
-        };
+        if(useBtn) useBtn.onclick = () => applyDailyAdjustToTempPlan(latestAiDailyAdjust);
+        const recordBtn = $("recordDailyAdjustBtn");
+        if(recordBtn) recordBtn.onclick = () => applyDailyAdjustToTempPlan(latestAiDailyAdjust, { record:true });
       }
       showCoachBubble(latestAiDailyAdjust.message || "今日训练调整已生成。", "high", 5000);
     }
@@ -7175,16 +7694,26 @@
             </div>
           `;
         }).join("");
+        const tempNotice = d.isTemporary ? `
+          <div class="softbox" style="margin-top:12px;">
+            正在使用 AI 临时调整计划：${escapeHtml(d.temporaryMessage || "本次调整会参与今天打卡、日历日志和本周记录，不覆盖周计划模板。")}
+          </div>
+        ` : "";
+        const restoreTempButton = d.isTemporary
+          ? `<button class="btn-outline" data-clear-temp-plan="${dayIndex}">恢复原计划</button>`
+          : "";
 
         return `
           <div class="day-panel ${dayIndex === activePlanDay ? "active" : ""}">
             <h2>${escapeHtml(d.day)}</h2>
             <div class="badge">${escapeHtml(d.focus)}</div>
+            ${tempNotice}
             <div style="margin-top:12px">${itemsHtml}</div>
             <div class="greenbox"><b>蛋白粉安排：</b>${escapeHtml(d.protein || "暂无")}</div>
             <div class="plan-actions">
               <button class="btn-outline" data-day-complete="${dayIndex}">一键完成今天</button>
               <button class="btn-outline" data-record-daily-log="${dayIndex}">记录到本周对应日期</button>
+              ${restoreTempButton}
             </div>
           </div>
         `;
@@ -7230,10 +7759,25 @@
         btn.onclick = () => recordPlanDayToToday(Number(btn.getAttribute("data-record-daily-log")));
       });
 
+      container.querySelectorAll("[data-clear-temp-plan]").forEach((btn) => {
+        btn.onclick = () => {
+          const dayIndex = Number(btn.getAttribute("data-clear-temp-plan"));
+          clearTempDailyPlanOverride(dayIndex, { sync:true });
+          const checks = getPlanChecks();
+          Object.keys(checks).forEach((key) => {
+            if(key.startsWith(`d${dayIndex}_i`)) delete checks[key];
+          });
+          setPlanChecks(checks);
+          renderPlan();
+          updateSummary();
+          alert("已恢复这一天的原计划，并清空该天临时打卡。");
+        };
+      });
+
       fillPlanEditorFromActiveDay();
       renderInlinePlanGuidePanel();
       renderPlanGuideSearchResults();
-      requestAnimationFrame(scrollActiveDayTabIntoView);
+      requestAnimationFrame(() => scrollActiveDayTabIntoView("smooth"));
     }
 
     function saveCurrentPlanDay(){
@@ -7554,6 +8098,7 @@
       box.innerHTML = `
         <div style="font-weight:800;font-size:18px;">${escapeHtml(selectedCalendarDate)} · ${escapeHtml(log.planDay || "")}</div>
         <div class="help" style="margin-top:6px;">训练重点：${escapeHtml(log.focus || "-")}</div>
+        ${log.isTemporaryPlan ? `<div class="softbox" style="margin-top:10px;">这一天记录的是 AI 临时调整计划。${escapeHtml(log.aiAdjustMessage || "")}</div>` : ""}
         <div class="mini-grid" style="margin-top:12px;">
           <div class="mini">完成项：${escapeHtml(String(log.completedCount || 0))}/${escapeHtml(String(log.totalItems || 0))}</div>
           <div class="mini">云端：${escapeHtml(getDailyLogCloudStatus(log))}</div>
@@ -7604,7 +8149,7 @@
       };
     }
 
-    function recordPlanDayToToday(dayIndex){
+    function recordPlanDayToToday(dayIndex, options = {}){
       const days = getPlanDays();
       const day = days[dayIndex];
       if(!day) return;
@@ -7618,6 +8163,9 @@
         planDay: day.day,
         focus: day.focus,
         allItems: day.items || [],
+        baseItems: day.baseItems || [],
+        isTemporaryPlan: !!day.isTemporary,
+        aiAdjustMessage: day.temporaryMessage || "",
         completedItems,
         completedCount: completedItems.length,
         totalItems: (day.items || []).length,
@@ -7631,9 +8179,12 @@
 
       selectedCalendarDate = dateKey;
       setDailyLogs(logs, { syncToCloud: true });
-      switchTab("history");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      alert(`已保存到本周对应日期：${dateKey}`);
+      if(!options.silent){
+        switchTab("history");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        alert(`已保存到本周对应日期：${dateKey}`);
+      }
+      return dateKey;
     }
 
     function getHistory(){
@@ -7672,7 +8223,8 @@
         totalPlanItems,
         completionPercent,
         planSummary,
-        planChecksSnapshot: checks
+        planChecksSnapshot: checks,
+        tempDailyPlanOverridesSnapshot: getTempDailyPlanOverrides()
       };
 
       const list = getHistory();
@@ -7714,6 +8266,7 @@
       const backup = {
         form: getForm(),
         planChecks: getPlanChecks(),
+        tempDailyPlanOverrides: getTempDailyPlanOverrides(),
         dailyLogs: getDailyLogs(),
         createdAt: new Date().toISOString(),
         reason
@@ -7739,6 +8292,7 @@
       if(!ok) return;
       setForm(backup.form || {});
       localStorage.setItem(PLAN_CHECKS_KEY, JSON.stringify(backup.planChecks || {}));
+      setTempDailyPlanOverrides(backup.tempDailyPlanOverrides || {}, { sync:false });
       localStorage.setItem(DAILY_LOGS_KEY, JSON.stringify(backup.dailyLogs || {}));
       renderPlan();
       renderHistory();
@@ -7801,6 +8355,11 @@
       setForm(entry);
       if(entry.planChecksSnapshot){
         setPlanChecks(entry.planChecksSnapshot);
+      }
+      if(entry.tempDailyPlanOverridesSnapshot){
+        setTempDailyPlanOverrides(entry.tempDailyPlanOverridesSnapshot, { sync:false });
+      }else{
+        clearTempDailyPlanOverrides();
       }
       renderPlan();
       updateSummary();
@@ -8431,6 +8990,7 @@
         lastCloudSyncAt: getLastCloudSyncAt(),
         planChecks: getPlanChecks(),
         planTemplate: getPlanTemplate(),
+        tempDailyPlanOverrides: getTempDailyPlanOverrides(),
         pageBackground: getPageBackgroundData(),
         aiSettings: getAiSettingsForBackup(),
         aiFeedbackHistory: getAiFeedbackHistory(),
@@ -8468,7 +9028,11 @@
             if(Array.isArray(nextForm.__characterChatHistory) && !Array.isArray(payload.characterChatHistory)){
               payload.characterChatHistory = nextForm.__characterChatHistory;
             }
+            if(nextForm.__tempDailyPlanOverrides && typeof nextForm.__tempDailyPlanOverrides === "object" && !payload.tempDailyPlanOverrides){
+              payload.tempDailyPlanOverrides = nextForm.__tempDailyPlanOverrides;
+            }
             delete nextForm.__pageBackground;
+            delete nextForm.__tempDailyPlanOverrides;
             delete nextForm.__characterCards;
             delete nextForm.__activeCharacterCardId;
             delete nextForm.__characterChatHistory;
@@ -8488,6 +9052,11 @@
           }
           if(payload.planChecks){
             localStorage.setItem(PLAN_CHECKS_KEY, JSON.stringify(payload.planChecks));
+          }
+          if(payload.tempDailyPlanOverrides){
+            localStorage.setItem(TEMP_DAILY_PLAN_OVERRIDES_KEY, JSON.stringify(normalizeTempDailyPlanOverrides(payload.tempDailyPlanOverrides)));
+          }else{
+            localStorage.removeItem(TEMP_DAILY_PLAN_OVERRIDES_KEY);
           }
           if(payload.aiSettings){
             localStorage.setItem(AI_SETTINGS_KEY, JSON.stringify(normalizeAiSettings(payload.aiSettings)));
@@ -8550,6 +9119,7 @@
       localStorage.removeItem(HISTORY_KEY);
       localStorage.removeItem(PLAN_CHECKS_KEY);
       localStorage.removeItem(PLAN_TEMPLATE_KEY);
+      localStorage.removeItem(TEMP_DAILY_PLAN_OVERRIDES_KEY);
       localStorage.removeItem(ACTIVE_PLAN_DAY_KEY);
       localStorage.removeItem(COUNTER_KEY);
       localStorage.removeItem(TIMER_REMAINING_KEY);
@@ -9235,9 +9805,12 @@
       if(!modal || !content) return;
       const last = getAiLastFeedback();
       const history = getAiFeedbackHistory();
+      const activeCharacterCard = getActiveCharacterCard();
+      const roleLine = activeCharacterCard ? `<div class="softbox" style="margin-bottom:10px;">当前联动角色：${escapeHtml(activeCharacterCard.name)}。训练建议会保留角色语气，但仍按教练逻辑输出。</div>` : "";
       if(showHistory){
         content.innerHTML = `
           <div style="font-size:22px;font-weight:800;margin-bottom:10px;">AI 教练反馈历史</div>
+          ${roleLine}
           ${history.length ? history.map((item) => `
             <div class="softbox">
               <b>${escapeHtml(item.title || "AI 教练")}</b>
@@ -9248,7 +9821,8 @@
         `;
       }else{
         content.innerHTML = `
-          <div style="font-size:22px;font-weight:800;margin-bottom:10px;">AI 教练</div>
+          <div style="font-size:22px;font-weight:800;margin-bottom:10px;">AI 教练${activeCharacterCard ? ` · ${escapeHtml(activeCharacterCard.name)}` : ""}</div>
+          ${roleLine}
           <div class="softbox">
             <b>最近反馈：</b><br>
             ${escapeHtml(last?.message || "还没有反馈。完成一个动作后，这里会显示最近一次教练提醒。")}
@@ -9418,6 +9992,7 @@
 
     window.addEventListener("resize", () => {
       updateTabIndicator();
+      repairIosDayDockLayout({ immediate:true });
       attachTabPress();
       attachTabHold();
       attachTabDrag();
@@ -9535,8 +10110,10 @@
     renderCharacterCards();
     updateRestoreDraftButton();
     bindPlanSwipeNavigation();
+    normalizeInitialActivePlanDayForIos();
     renderPlan();
     attachDayDockInteractions();
+    repairIosDayDockLayout({ immediate:true });
     setForm(JSON.parse(localStorage.getItem(FORM_KEY) || JSON.stringify(defaultForm)));
     renderHistory();
     initPortableTools();
@@ -9567,11 +10144,18 @@
         updateSummary();
       }else{
         handleTimerWakeCheck();
+        repairIosDayDockLayout({ immediate:true });
       }
     });
 
-    window.addEventListener("pageshow", handleTimerWakeCheck);
-    window.addEventListener("focus", handleTimerWakeCheck);
+    window.addEventListener("pageshow", () => {
+      handleTimerWakeCheck();
+      repairIosDayDockLayout({ immediate:true });
+    });
+    window.addEventListener("focus", () => {
+      handleTimerWakeCheck();
+      repairIosDayDockLayout({ immediate:true });
+    });
 
     if("serviceWorker" in navigator){
       window.addEventListener("load", () => {
