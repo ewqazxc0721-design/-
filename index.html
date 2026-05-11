@@ -2128,22 +2128,21 @@
 
     .character-chat-log{
       display:grid;
-      gap:8px;
-      max-height:320px;
+      gap:10px;
       overflow:auto;
-      padding:10px;
+      padding:12px;
       margin-top:12px;
-      border-radius:18px;
+      border-radius:20px;
       background:rgba(248,250,252,.72);
       border:1px solid var(--glass-line);
     }
 
     .character-chat-msg{
-      max-width:88%;
-      padding:9px 11px;
-      border-radius:16px;
+      max-width:90%;
+      padding:10px 12px;
+      border-radius:18px;
       font-size:14px;
-      line-height:1.55;
+      line-height:1.58;
       white-space:pre-wrap;
       word-break:break-word;
     }
@@ -2212,8 +2211,8 @@
     }
 
     .ai-coach-chat-box{
-      margin-top:14px;
-      padding-top:14px;
+      margin-top:12px;
+      padding-top:12px;
       border-top:1px solid rgba(148,163,184,.18);
       flex:1 1 auto;
       min-height:0;
@@ -2242,9 +2241,13 @@
       max-height:min(86dvh, calc(100vh - 40px)) !important;
     }
 
+    .ai-coach-panel-card.chat-mode{
+      height:min(86dvh, 760px);
+    }
+
     .ai-coach-panel-card.chat-mode #aiCoachPanelContent{
-      flex:0 1 auto;
-      max-height:30dvh;
+      flex:0 0 auto;
+      max-height:18dvh;
       overflow:auto;
     }
 
@@ -2255,111 +2258,159 @@
       overflow:auto;
     }
 
-    .ai-coach-chat-box .help{
-      flex:0 0 auto;
-    }
-
     .ai-coach-chat-box .character-chat-log{
       flex:1 1 auto;
-      min-height:0;
-      max-height:min(34dvh, 320px);
+      min-height:clamp(240px, 38dvh, 420px);
+      max-height:none;
     }
 
     .character-chat-composer{
       flex:0 0 auto;
-      position:sticky;
-      bottom:0;
+      position:relative;
+      bottom:auto;
       z-index:30;
-      display:grid;
-      grid-template-rows:auto auto;
-      gap:10px;
-      margin-top:10px;
-      padding:10px 0 0;
+      display:block;
+      margin-top:12px;
+      padding:10px;
       min-width:0;
       isolation:isolate;
-      background:linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.94) 42%);
+      border-radius:34px;
+      background:rgba(255,255,255,.76);
+      border:1px solid rgba(255,255,255,.58);
+      box-shadow:
+        0 16px 36px rgba(15,23,42,.12),
+        0 5px 14px rgba(15,23,42,.06),
+        inset 0 1px 0 rgba(255,255,255,.78),
+        inset 0 -1px 0 rgba(15,23,42,.05);
+      backdrop-filter:blur(28px) saturate(190%) brightness(1.06);
+      -webkit-backdrop-filter:blur(28px) saturate(190%) brightness(1.06);
+    }
+
+    .character-chat-input-row{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 54px;
+      gap:10px;
+      align-items:end;
+      min-width:0;
     }
 
     #characterChatInput{
       flex:0 0 auto;
       position:relative;
-      z-index:40;
+      z-index:1;
       width:100%;
       box-sizing:border-box;
-      min-height:60px;
-      max-height:96px;
-      margin-top:0;
+      min-height:58px;
+      max-height:120px;
+      margin:0;
       display:block;
       resize:none;
+      border-radius:30px;
+      padding:16px 18px;
+      overflow:auto;
+      background:rgba(255,255,255,.72);
+      border:1px solid rgba(226,232,240,.92);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.88);
+      backdrop-filter:none;
+      -webkit-backdrop-filter:none;
+    }
+
+    .character-chat-send-btn{
+      width:54px;
+      height:54px;
+      min-height:54px;
+      min-width:54px;
+      padding:0;
       border-radius:999px;
-      padding:17px 18px;
-      background:rgba(255,255,255,.34);
-      border:1px solid rgba(255,255,255,.56);
-      box-shadow:
-        0 16px 36px rgba(15,23,42,.13),
-        0 5px 14px rgba(15,23,42,.06),
-        inset 0 1px 0 rgba(255,255,255,.78),
-        inset 0 -1px 0 rgba(15,23,42,.06);
-      backdrop-filter:blur(28px) saturate(190%) brightness(1.06);
-      -webkit-backdrop-filter:blur(28px) saturate(190%) brightness(1.06);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:24px;
+      line-height:1;
+      white-space:nowrap;
     }
 
-    .character-chat-actions{
-      position:relative;
-      z-index:10;
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
+    .ai-coach-panel-actions{
+      grid-template-columns:repeat(3,minmax(0,1fr));
       gap:10px;
-      margin-top:0 !important;
-      padding:10px;
-      min-width:0;
-      border-radius:18px;
-      background:rgba(248,250,252,.78);
-      border:1px solid rgba(148,163,184,.18);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.70),
-        0 8px 20px rgba(15,23,42,.06);
+      margin-top:12px;
     }
 
-    .character-chat-actions .btn,
-    .character-chat-actions .btn-outline{
+    .ai-coach-panel-actions .btn,
+    .ai-coach-panel-actions .btn-outline,
+    .ai-coach-panel-actions .btn-danger{
       width:100%;
       min-width:0;
+      padding-left:10px;
+      padding-right:10px;
     }
 
     .ai-coach-panel-card > .btns,
-    .ai-coach-panel-card > .btn{
+    .ai-coach-panel-card > .btn,
+    .ai-coach-panel-card > .character-chat-composer{
       flex:0 0 auto;
     }
 
     @media (max-width:480px){
       .ai-coach-panel-modal{
-        align-items:flex-end !important;
-        padding:10px 12px calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+        align-items:flex-start !important;
+        padding:calc(52px + env(safe-area-inset-top, 0px)) 12px calc(10px + env(safe-area-inset-bottom, 0px)) !important;
       }
 
       .ai-coach-panel-card{
-        max-height:min(84dvh, calc(100dvh - 26px - env(safe-area-inset-bottom, 0px))) !important;
+        width:100% !important;
+        height:calc(100dvh - 62px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+        max-height:calc(100dvh - 62px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+        padding:18px !important;
       }
 
       .ai-coach-panel-card.chat-mode #aiCoachPanelContent{
-        max-height:26dvh;
+        max-height:16dvh;
+      }
+
+      .ai-coach-chat-box{
+        margin-top:10px;
+        padding-top:10px;
       }
 
       .ai-coach-chat-box .character-chat-log{
-        min-height:0;
-        max-height:30dvh;
+        min-height:clamp(230px, 38dvh, 360px);
+        max-height:none;
+      }
+
+      .ai-coach-panel-actions{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:9px;
+        margin-top:10px;
+      }
+
+      #clearCharacterChatBtn{
+        grid-column:1 / -1;
       }
 
       #characterChatInput{
         min-height:56px;
-        max-height:88px;
-        padding:16px 17px;
+        max-height:104px;
+        padding:15px 16px;
+      }
+
+      .character-chat-input-row{
+        grid-template-columns:minmax(0,1fr) 52px;
+        gap:8px;
+      }
+
+      .character-chat-send-btn{
+        width:52px;
+        height:52px;
+        min-height:52px;
+        min-width:52px;
+        font-size:23px;
       }
 
       .character-chat-composer{
-        gap:9px;
-        padding-top:9px;
+        margin-top:10px;
+        padding:8px;
+        border-radius:30px;
       }
     }
 
@@ -3903,22 +3954,20 @@
       <div id="aiCoachPanelContent"></div>
       <div id="aiCoachChatBox" class="ai-coach-chat-box">
         <div class="ai-coach-chat-title">角色聊天</div>
-        <div class="help">聊天会读取当前角色卡、本周计划、打卡进度和历史训练记录。</div>
         <div class="character-chat-log" id="characterChatLog"></div>
-        <div class="character-chat-composer">
-        <textarea id="characterChatInput" placeholder="输入要对当前角色说的话"></textarea>
-          <div class="tool-row character-chat-actions">
-          <button class="btn" id="sendCharacterChatBtn" type="button">发送</button>
-          <button class="btn-outline" id="clearCharacterChatBtn" type="button">清空聊天</button>
-          </div>
-        </div>
       </div>
-      <div class="btns">
+      <div class="btns ai-coach-panel-actions">
         <button id="aiPanelChatBtn" class="btn-outline" type="button">角色聊天</button>
         <button id="aiPanelHistoryBtn" class="btn-outline" type="button">查看反馈历史</button>
-        <button id="aiPanelQuietBtn" class="btn-outline" type="button">安静模式</button>
+        <button id="clearCharacterChatBtn" class="btn-outline" type="button">清空聊天</button>
       </div>
       <button id="closeAiCoachPanelBtn" class="btn full" type="button">关闭</button>
+      <div id="aiCoachChatComposer" class="character-chat-composer">
+        <div class="character-chat-input-row">
+          <textarea id="characterChatInput" placeholder="输入要对当前角色说的话" rows="1"></textarea>
+          <button class="btn character-chat-send-btn" id="sendCharacterChatBtn" type="button" aria-label="发送角色聊天" title="发送">↵</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -10501,12 +10550,11 @@
       const last = getAiLastFeedback();
       const history = getAiFeedbackHistory();
       const activeCharacterCard = getActiveCharacterCard();
-      const roleLine = activeCharacterCard ? `<div class="softbox" style="margin-bottom:10px;">当前联动角色：${escapeHtml(activeCharacterCard.name)}。训练建议会保留角色语气，但仍按教练逻辑输出。</div>` : "";
       const chatBox = $("aiCoachChatBox");
+      const composer = $("aiCoachChatComposer");
       if(showHistory){
         content.innerHTML = `
           <div style="font-size:22px;font-weight:800;margin-bottom:10px;">AI 教练反馈历史</div>
-          ${roleLine}
           ${history.length ? history.map((item) => `
             <div class="softbox">
               <b>${escapeHtml(item.title || "AI 教练")}</b>
@@ -10516,10 +10564,10 @@
           `).join("") : `<div class="softbox">还没有 AI 反馈。</div>`}
         `;
         if(chatBox) chatBox.style.display = "none";
+        if(composer) composer.style.display = "none";
       }else{
         content.innerHTML = `
           <div style="font-size:22px;font-weight:800;margin-bottom:10px;">AI 教练${activeCharacterCard ? ` · ${escapeHtml(activeCharacterCard.name)}` : ""}</div>
-          ${roleLine}
           <div class="softbox">
             <b>最近反馈：</b><br>
             ${escapeHtml(last?.message || "还没有反馈。完成一个动作后，这里会显示最近一次教练提醒。")}
@@ -10529,15 +10577,12 @@
           chatBox.style.display = "flex";
           renderCharacterChat();
         }
+        if(composer) composer.style.display = "block";
       }
       const chatBtn = $("aiPanelChatBtn");
       if(chatBtn) chatBtn.className = showHistory ? "btn-outline" : "btn";
       const historyBtn = $("aiPanelHistoryBtn");
       if(historyBtn) historyBtn.className = showHistory ? "btn" : "btn-outline";
-      const quietBtn = $("aiPanelQuietBtn");
-      if(quietBtn){
-        quietBtn.textContent = `安静模式：${getAiSettings().quietMode ? "开启" : "关闭"}`;
-      }
       modal.style.display = "flex";
       if(options.focusChat){
         setTimeout(() => $("characterChatInput")?.focus(), 60);
@@ -10614,11 +10659,6 @@
       if($("closeAiCoachPanelBtn")) $("closeAiCoachPanelBtn").onclick = closeAiCoachPanel;
       if($("aiPanelChatBtn")) $("aiPanelChatBtn").onclick = () => openAiCoachPanel(false, { focusChat:true });
       if($("aiPanelHistoryBtn")) $("aiPanelHistoryBtn").onclick = () => openAiCoachPanel(true);
-      if($("aiPanelQuietBtn")) $("aiPanelQuietBtn").onclick = () => {
-        toggle("quietMode");
-        const quietBtn = $("aiPanelQuietBtn");
-        if(quietBtn) quietBtn.textContent = `安静模式：${getAiSettings().quietMode ? "开启" : "关闭"}`;
-      };
       const modal = $("aiCoachPanelModal");
       if(modal) modal.onclick = (e) => { if(e.target === modal) closeAiCoachPanel(); };
     }
