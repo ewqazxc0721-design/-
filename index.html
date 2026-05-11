@@ -3834,7 +3834,7 @@
     <section id="history" class="section">
       <div class="card">
         <h2>AI 趋势观察</h2>
-        <div class="softbox">根据最近周记录、训练日历和当前计划完成度，观察体重、睡眠和训练趋势。</div>
+        <div class="softbox">提取训练日历中近三个月数据，结合饮食备注、体重、睡眠和训练完成记录生成趋势分析。</div>
         <button class="btn-outline full" id="aiTrendBtn" type="button">分析最近记录</button>
         <div id="aiTrendResult" class="softbox" style="display:none;"></div>
       </div>
@@ -3879,6 +3879,7 @@
 
       <div class="card">
         <h2>倒计时器</h2>
+        <div class="softbox">适合训练组间休息。设置分钟和秒数后，开始倒计时；暂停后可以继续，重置会回到你设定的时间。</div>
         <div class="grid2">
           <div>
             <label class="label">分钟</label>
@@ -4103,7 +4104,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.05.12-92-late-night-sleep-reminder";
+    const APP_VERSION = "v2026.05.12-93-trend-calendar-roles";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const TEMP_DAILY_PLAN_OVERRIDES_KEY = "gain-temp-daily-plan-overrides";
     const DAILY_LOGS_KEY = "gain-daily-logs";
@@ -4935,6 +4936,340 @@
         }));
     }
 
+    function formatTrendDateKey(date){
+      const d = date instanceof Date ? date : new Date(date);
+      if(!Number.isFinite(d.getTime())) return "";
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
+
+    function parseTrendDateKey(key){
+      const parts = String(key || "").trim().split("-").map((x) => parseInt(x, 10));
+      if(parts.length !== 3 || parts.some((x) => !Number.isFinite(x))) return null;
+      const date = new Date(parts[0], parts[1] - 1, parts[2]);
+      if(date.getFullYear() !== parts[0] || date.getMonth() !== parts[1] - 1 || date.getDate() !== parts[2]) return null;
+      return date;
+    }
+
+    function shiftTrendMonths(date, monthOffset){
+      const base = date instanceof Date && Number.isFinite(date.getTime()) ? date : new Date();
+      const day = base.getDate();
+      const target = new Date(base.getFullYear(), base.getMonth() + Number(monthOffset || 0), 1);
+      const daysInTargetMonth = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+      target.setDate(Math.min(day, daysInTargetMonth));
+      return new Date(target.getFullYear(), target.getMonth(), target.getDate());
+    }
+
+    function parseTrendNumber(value){
+      const text = String(value ?? "").replace(/,/g, ".").trim();
+      const match = text.match(/-?\d+(?:\.\d+)?/);
+      if(!match) return null;
+      const num = Number(match[0]);
+      return Number.isFinite(num) ? num : null;
+    }
+
+    function parseTrendWeightKg(value){
+      const num = parseTrendNumber(value);
+      return num != null && num >= 30 && num <= 200 ? num : null;
+    }
+
+    function parseTrendSleepHours(value){
+      const text = String(value ?? "").trim();
+      if(!text) return null;
+      const hourMatch = text.match(/(\d+(?:\.\d+)?)\s*(?:小时|时|h|hr|hrs)/i);
+      const minuteMatch = text.match(/(\d+(?:\.\d+)?)\s*(?:分钟|分|min|m)/i);
+      if(hourMatch || minuteMatch){
+        const hours = hourMatch ? Number(hourMatch[1]) : 0;
+        const minutes = minuteMatch ? Number(minuteMatch[1]) : 0;
+        const total = hours + minutes / 60;
+        return total >= 0 && total <= 16 ? Number(total.toFixed(2)) : null;
+      }
+      const colonMatch = text.match(/^(\d{1,2}):(\d{1,2})$/);
+      if(colonMatch){
+        const total = Number(colonMatch[1]) + Number(colonMatch[2]) / 60;
+        return total >= 0 && total <= 16 ? Number(total.toFixed(2)) : null;
+      }
+      const num = parseTrendNumber(text);
+      return num != null && num >= 0 && num <= 16 ? num : null;
+    }
+
+    function averageTrendNumbers(values, digits = 2){
+      const nums = values.filter((value) => Number.isFinite(value));
+      if(!nums.length) return null;
+      const avg = nums.reduce((sum, value) => sum + value, 0) / nums.length;
+      return Number(avg.toFixed(digits));
+    }
+
+    function roundTrendNumber(value, digits = 1){
+      return Number.isFinite(value) ? Number(value.toFixed(digits)) : null;
+    }
+
+    function getRecentCalendarLogsForTrend(months = 3, now = new Date(), logs = getDailyLogs()){
+      const safeMonths = Math.max(1, Number(months) || 3);
+      const end = now instanceof Date && Number.isFinite(now.getTime())
+        ? new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        : new Date();
+      const start = shiftTrendMonths(end, -safeMonths);
+      return Object.entries(logs || {})
+        .map(([key, raw]) => {
+          const log = raw && typeof raw === "object" ? raw : {};
+          const parsed = parseTrendDateKey(log.date || key) || parseTrendDateKey(key);
+          if(!parsed) return null;
+          const dateKey = formatTrendDateKey(parsed);
+          return { ...log, date: dateKey, _trendTime: parsed.getTime() };
+        })
+        .filter((log) => log && log._trendTime >= start.getTime() && log._trendTime <= end.getTime())
+        .sort((a, b) => a._trendTime - b._trendTime)
+        .map(({ _trendTime, ...log }) => log);
+    }
+
+    function summarizeTrendFocusCounts(records){
+      const counts = {};
+      records.forEach((log) => {
+        const label = String(log.focus || log.planDay || "未标注").trim() || "未标注";
+        counts[label] = (counts[label] || 0) + 1;
+      });
+      return Object.entries(counts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6)
+        .map(([name, count]) => ({ name, count }));
+    }
+
+    function collectTrendDietSignals(calendarRecords = [], weeklySnapshots = [], currentForm = {}){
+      const dietKeyword = /饮食|蛋白|蛋白粉|主食|碳水|热量|加餐|牛奶|香蕉|鸡蛋|肉|米饭|面|吃|饭|外卖|胃口|饿|撑|奶/i;
+      const signals = [];
+      calendarRecords.forEach((log) => {
+        const text = [log.note, log.diet, log.status].map((x) => String(x || "").trim()).filter(Boolean).join("；");
+        if(text && dietKeyword.test(text)){
+          signals.push({ source:"calendar", date:log.date, text:text.slice(0, 140) });
+        }
+      });
+      weeklySnapshots.forEach((entry) => {
+        const text = [entry.diet, entry.notes, entry.status].map((x) => String(x || "").trim()).filter(Boolean).join("；");
+        if(text && dietKeyword.test(text)){
+          signals.push({ source:"weekly", weekLabel:entry.weekLabel || "", text:text.slice(0, 140) });
+        }
+      });
+      const currentDiet = [currentForm.diet, currentForm.notes, currentForm.status].map((x) => String(x || "").trim()).filter(Boolean).join("；");
+      if(currentDiet && dietKeyword.test(currentDiet)){
+        signals.push({ source:"current_form", weekLabel:currentForm.weekLabel || "当前填写", text:currentDiet.slice(0, 140) });
+      }
+      return signals.slice(0, 12);
+    }
+
+    function buildTrendAnalysisContext({ now = new Date(), calendarLogs = [], history = [], currentForm = {}, planCheckSummary = {} } = {}){
+      const end = now instanceof Date && Number.isFinite(now.getTime())
+        ? new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        : new Date();
+      const start = shiftTrendMonths(end, -3);
+      const records = Array.isArray(calendarLogs) ? calendarLogs : [];
+
+      const calendarRecords = records.map((log) => {
+        const completedItems = Array.isArray(log.completedItems) ? log.completedItems : [];
+        const allItems = Array.isArray(log.allItems) ? log.allItems : [];
+        const completedCount = Number.isFinite(Number(log.completedCount)) ? Number(log.completedCount) : completedItems.length;
+        const inferredTotal = allItems.length || completedItems.length || completedCount;
+        const totalItems = Number.isFinite(Number(log.totalItems)) ? Number(log.totalItems) : inferredTotal;
+        const weightKg = parseTrendWeightKg(log.weight);
+        const sleepHours = parseTrendSleepHours(log.sleep);
+        return {
+          date: String(log.date || "").trim(),
+          planDay: String(log.planDay || "").trim(),
+          focus: String(log.focus || "").trim(),
+          completedCount,
+          totalItems,
+          completionRatePercent: totalItems ? Math.round(completedCount / totalItems * 100) : null,
+          completedItems: completedItems.slice(0, 12),
+          weight: String(log.weight || "").trim(),
+          weightKg,
+          sleep: String(log.sleep || "").trim(),
+          sleepHours,
+          note: String(log.note || "").trim().slice(0, 300),
+          isTemporaryPlan: !!log.isTemporaryPlan
+        };
+      });
+
+      const weeklySnapshots = (Array.isArray(history) ? history : []).slice(0, 12).map((entry) => ({
+        weekLabel: entry.weekLabel || "",
+        avgWeight: entry.avgWeight || "",
+        averageSleep: entry.avgSleep || "",
+        latestSleep: entry.latestSleep || "",
+        trainingDays: entry.trainingDays || "",
+        diet: entry.diet || "",
+        status: entry.status || "",
+        notes: entry.notes || "",
+        completionPercent: entry.completionPercent || "",
+        completedCount: entry.completedCount ?? "",
+        totalPlanItems: entry.totalPlanItems ?? ""
+      }));
+
+      const weightSamples = calendarRecords
+        .filter((log) => log.weightKg != null)
+        .map((log) => ({ date:log.date, valueKg:log.weightKg, source:"calendar" }));
+      if(!weightSamples.length){
+        weeklySnapshots.forEach((entry, index) => {
+          const avgWeight = parseTrendWeightKg(entry.avgWeight);
+          if(avgWeight != null) weightSamples.push({ date:entry.weekLabel || `历史周记录${index + 1}`, valueKg:avgWeight, source:"weekly" });
+        });
+      }
+      const sleepSamples = calendarRecords
+        .filter((log) => log.sleepHours != null)
+        .map((log) => ({ date:log.date, hours:log.sleepHours, source:"calendar" }));
+      if(!sleepSamples.length){
+        weeklySnapshots.forEach((entry, index) => {
+          const avgSleep = parseTrendSleepHours(entry.averageSleep);
+          if(avgSleep != null) sleepSamples.push({ date:entry.weekLabel || `历史周记录${index + 1}`, hours:avgSleep, source:"weekly" });
+        });
+      }
+
+      const completedItems = calendarRecords.reduce((sum, log) => sum + (Number(log.completedCount) || 0), 0);
+      const totalItems = calendarRecords.reduce((sum, log) => sum + (Number(log.totalItems) || 0), 0);
+      const firstWeight = weightSamples[0] || null;
+      const lastWeight = weightSamples[weightSamples.length - 1] || null;
+      const weightValues = weightSamples.map((item) => item.valueKg);
+      const sleepValues = sleepSamples.map((item) => item.hours);
+      const dietSignals = collectTrendDietSignals(calendarRecords, weeklySnapshots, currentForm);
+      const lowSleepDays = sleepSamples.filter((item) => item.hours < 7);
+
+      return {
+        window:{
+          months:3,
+          startDate:formatTrendDateKey(start),
+          endDate:formatTrendDateKey(end),
+          calendarLogDays:calendarRecords.length,
+          source:"calendar_daily_logs"
+        },
+        calendarRecords,
+        weeklySnapshots,
+        planCheckSummary,
+        weight:{
+          source:weightSamples[0]?.source || "none",
+          sampleCount:weightSamples.length,
+          first:firstWeight,
+          last:lastWeight,
+          averageKg:averageTrendNumbers(weightValues, 2),
+          minKg:weightValues.length ? Math.min(...weightValues) : null,
+          maxKg:weightValues.length ? Math.max(...weightValues) : null,
+          changeKg:firstWeight && lastWeight ? roundTrendNumber(lastWeight.valueKg - firstWeight.valueKg, 2) : null
+        },
+        sleep:{
+          source:sleepSamples[0]?.source || "none",
+          sampleCount:sleepSamples.length,
+          averageHours:averageTrendNumbers(sleepValues, 2),
+          minHours:sleepValues.length ? Math.min(...sleepValues) : null,
+          maxHours:sleepValues.length ? Math.max(...sleepValues) : null,
+          lowSleepDays:lowSleepDays.slice(0, 8)
+        },
+        training:{
+          sessions:calendarRecords.length,
+          completedItems,
+          totalItems,
+          completionRatePercent:totalItems ? Math.round(completedItems / totalItems * 100) : null,
+          focusCounts:summarizeTrendFocusCounts(calendarRecords),
+          temporaryPlanDays:calendarRecords.filter((log) => log.isTemporaryPlan).length
+        },
+        diet:{
+          signalCount:dietSignals.length,
+          signals:dietSignals,
+          calendarNoteCount:dietSignals.filter((item) => item.source === "calendar").length,
+          weeklyRecordCount:dietSignals.filter((item) => item.source === "weekly").length
+        },
+        dataQuality:{
+          missing:[
+            !calendarRecords.length ? "近三个月日历训练日志" : "",
+            !weightSamples.length ? "体重记录" : "",
+            !sleepSamples.length ? "睡眠记录" : "",
+            !dietSignals.length ? "饮食/备注记录" : ""
+          ].filter(Boolean)
+        }
+      };
+    }
+
+    function buildLocalTrendAnalysis(payload = {}){
+      const context = payload.trendContext || buildTrendAnalysisContext({
+        calendarLogs: payload.calendarDailyLogs || payload.dailyLogs || [],
+        history: payload.recentHistory || [],
+        currentForm: payload.currentForm || {},
+        planCheckSummary: payload.planCheckSummary || {}
+      });
+      const observations = [];
+      const risks = [];
+      const suggestions = [];
+      const windowText = `${context.window?.startDate || "近三个月"} 至 ${context.window?.endDate || "今天"}`;
+      const training = context.training || {};
+      const weight = context.weight || {};
+      const sleep = context.sleep || {};
+      const diet = context.diet || {};
+      const roleName = String(payload.activeCharacterCard?.name || "").trim();
+
+      if(training.sessions){
+        const rateText = training.completionRatePercent != null ? `，动作完成率约 ${training.completionRatePercent}%` : "";
+        observations.push(`${windowText} 的日历里有 ${training.sessions} 天训练日志，完成 ${training.completedItems || 0}/${training.totalItems || 0} 个动作${rateText}。`);
+        if(Array.isArray(training.focusCounts) && training.focusCounts.length){
+          observations.push(`训练重点最多的是 ${training.focusCounts.map((item) => `${item.name} ${item.count}天`).join("、")}。`);
+        }
+      }else{
+        observations.push(`${windowText} 日历里还没有训练日志，当前无法判断训练连续性。`);
+        risks.push("没有日历训练记录时，AI 只能泛化建议，无法判断训练量是否真的执行。");
+        suggestions.push("先把每次训练保存到日历，再补当天体重、睡眠和备注。");
+      }
+
+      if(weight.sampleCount){
+        const change = Number.isFinite(weight.changeKg) ? `${weight.changeKg >= 0 ? "+" : ""}${weight.changeKg}kg` : "暂无变化值";
+        observations.push(`体重记录 ${weight.sampleCount} 次：${weight.first?.date || "-"} 为 ${weight.first?.valueKg}kg，${weight.last?.date || "-"} 为 ${weight.last?.valueKg}kg，区间变化 ${change}，均值 ${weight.averageKg ?? "-"}kg。`);
+        if(Number.isFinite(weight.changeKg) && weight.changeKg <= 0){
+          risks.push(`近三个月体重没有上升（${change}），对增肌增重目标不利。`);
+          suggestions.push("饮食优先加主食和蛋白：训练后蛋白粉保留，晚饭少时加牛奶、香蕉或一份主食。");
+        }else if(Number.isFinite(weight.changeKg) && weight.changeKg > 0){
+          suggestions.push("体重在往上走，先保持当前加餐节奏，不要突然大幅加训练量。");
+        }
+      }else{
+        risks.push("缺少体重记录，无法判断增重是否有效。");
+        suggestions.push("每周至少记录 2–3 次空腹体重，趋势比单日数字更重要。");
+      }
+
+      if(sleep.sampleCount){
+        observations.push(`睡眠记录 ${sleep.sampleCount} 次，平均约 ${sleep.averageHours ?? "-"} 小时，最低 ${sleep.minHours ?? "-"} 小时。`);
+        if(Number(sleep.averageHours) < 7 || (sleep.lowSleepDays || []).length){
+          risks.push(`睡眠偏少：${(sleep.lowSleepDays || []).length} 天低于 7 小时，恢复可能拖住训练表现。`);
+          suggestions.push("睡眠低于 7 小时的第二天不要硬冲容量，主项保留，辅助动作减量。");
+        }
+      }else{
+        risks.push("缺少睡眠记录，无法判断恢复质量。");
+        suggestions.push("日历里补睡眠时长；睡眠差的训练日要主动降低强度。");
+      }
+
+      if(diet.signalCount){
+        const latestDiet = diet.signals?.[0]?.text || "";
+        observations.push(`饮食/备注有效记录 ${diet.signalCount} 条，最近可用线索：${latestDiet || "已记录但信息较短"}。`);
+      }else{
+        risks.push("饮食记录太少，无法判断热量和蛋白是否稳定。");
+        suggestions.push("日历备注里直接写“主食/蛋白/加餐/胃口”，趋势分析才能把饮食和体重联系起来。");
+      }
+
+      if(training.completionRatePercent != null && training.completionRatePercent < 70){
+        risks.push(`训练完成率约 ${training.completionRatePercent}%，计划可能偏满或执行被恢复/时间影响。`);
+        suggestions.push("下次计划先保留主项，把最容易漏的辅助动作后移或减组。");
+      }
+
+      if(!suggestions.length){
+        suggestions.push("继续按日历记录训练、体重、睡眠和饮食；下一轮重点看体重是否稳定上升。");
+      }
+
+      const coachCore = suggestions[0] || "先把记录补齐，再根据趋势调整。";
+      return {
+        type:"trend_analysis",
+        title:"AI 趋势观察",
+        observations:observations.slice(0, 5),
+        risks:risks.slice(0, 5),
+        suggestions:suggestions.slice(0, 5),
+        coach_message: roleName ? `${roleName}会盯着你执行：${coachCore}` : coachCore
+      };
+    }
+
+
     function isLateNightSleepReminderTime(date = new Date()){
       const hour = date.getHours();
       const minute = date.getMinutes();
@@ -5531,7 +5866,13 @@
         weekly_analysis: "面向用户的字段保留角色口吻，但不要把推理过程、任务说明或 JSON 要求写进内容。",
         next_week_plan: "plan.days 必须是可执行的新计划；changes 说明具体改了什么，不要只返回“保留当前计划”。",
         natural_language_log: "只返回能填入表单的 formPatch 和一句自然提示，不要展示解析过程。",
-        trend_analysis: "只给趋势观察和建议，不要展示推理过程或接口字段。",
+        trend_analysis: [
+          "必须优先基于 payload.trendContext 与 payload.calendarDailyLogs：这是日历中近三个月的真实训练、体重、睡眠和备注数据。",
+          "必须分别总结饮食、体重、睡眠、训练记录；至少引用 2 个具体数字、日期范围或完成率。",
+          "不要用“记录越完整趋势越准”“需要补齐记录”这类模板空话替代分析；数据不足时要明确指出是哪类数据不足。",
+          "如果 payload.activeCharacterCard 存在，observations/risks/suggestions/coach_message 的中文表达必须带入角色卡的性格和说话方式，但不要写“角色卡”三个字给用户看。",
+          "只给趋势观察和建议，不要展示推理过程或接口字段。"
+        ].join("\n"),
         late_night_sleep_reminder: "现在已经超过 01:30；用角色卡口吻提醒用户立刻收尾睡觉，语气坚定但关心；不要安排训练，不要展开分析；不超过 80 个中文字符，可以补一句明天再练。",
         test_connection: "只返回连接成功消息。"
       };
@@ -5586,7 +5927,7 @@
         return parseNaturalLogFallback(payload.text || "");
       }
       if(task === "trend_analysis"){
-        return { type:"trend_analysis", title:"AI 趋势观察", observations:["最近记录越完整，趋势判断越准。"], risks:["如果连续两周体重不涨，需要增加热量。"], suggestions:["每周至少保留体重、睡眠、训练完成度三类数据。"], coach_message:"先把记录补齐，训练和饮食调整会更稳。" };
+        return buildLocalTrendAnalysis(payload);
       }
       return { type:task, title:"AI 教练", message:"AI 教练连接成功。" };
     }
@@ -5798,11 +6139,11 @@
 
     async function callAiCoach(task, payload, options = {}){
       const settings = getAiSettings();
-      const fallback = getFallbackCoachFeedback(task, payload);
       const activeCharacterCard = getActiveCharacterCard();
       const requestPayload = activeCharacterCard
         ? { ...(payload || {}), activeCharacterCard: characterCardPromptPayload(activeCharacterCard) }
         : payload;
+      const fallback = getFallbackCoachFeedback(task, requestPayload);
       if(!settings.enabled && !options.force){
         return { ok:false, task, data:fallback, error:"AI 教练未开启" };
       }
@@ -8532,11 +8873,25 @@
     }
 
     async function generateTrendAnalysis(){
+      const now = new Date();
+      const calendarDailyLogs = getRecentCalendarLogsForTrend(3, now, getDailyLogs());
+      const currentForm = getForm();
+      const recentHistory = getHistory().slice(0, 12);
+      const planCheckSummary = getPlanCheckSummaryJson();
+      const trendContext = buildTrendAnalysisContext({
+        now,
+        calendarLogs: calendarDailyLogs,
+        history: recentHistory,
+        currentForm,
+        planCheckSummary
+      });
       const payload = {
-        recentHistory:getHistory().slice(0, 4),
-        dailyLogs:Object.values(getDailyLogs()).slice(-14),
-        planCheckSummary:getPlanCheckSummaryJson(),
-        currentForm:getForm()
+        analysisWindow:"calendar_last_3_months",
+        trendContext,
+        calendarDailyLogs,
+        recentHistory,
+        planCheckSummary,
+        currentForm
       };
       const res = await callAiCoach("trend_analysis", payload, { timeoutMs:25000, force:true });
       latestAiTrendResult = res.data || getFallbackCoachFeedback("trend_analysis", payload);
