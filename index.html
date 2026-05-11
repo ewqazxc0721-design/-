@@ -4104,7 +4104,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.05.12-91-chat-title-no-scrollbar";
+    const APP_VERSION = "v2026.05.12-92-late-night-sleep-reminder";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const TEMP_DAILY_PLAN_OVERRIDES_KEY = "gain-temp-daily-plan-overrides";
     const DAILY_LOGS_KEY = "gain-daily-logs";
@@ -4134,6 +4134,8 @@
     const ACTIVE_CHARACTER_CARD_ID_KEY = "gain-active-character-card-id";
     const CHARACTER_CHAT_HISTORY_KEY = "gain-character-chat-history";
     const FORM_DRAFT_BACKUP_KEY = "gain-tracker-form-draft-backup";
+    const LATE_NIGHT_SLEEP_REMINDER_KEY = "gain-late-night-sleep-reminder-date";
+    const LATE_NIGHT_SLEEP_REMINDER_CHECK_MS = 60000;
     const AI_BUBBLE_MIN_INTERVAL = 10000;
 
     const SUPABASE_URL = "https://bzzbdchqrvwdaenydoqm.supabase.co";
@@ -4562,6 +4564,8 @@
     let planSwipeStartX = 0;
     let planSwipeStartY = 0;
     let planSwipeTracking = false;
+    let lateNightSleepReminderInterval = 0;
+    let lateNightSleepReminderRunning = false;
 
     function $(id){
       return document.getElementById(id);
@@ -4931,6 +4935,83 @@
           isTemporaryPlan: !!log.isTemporaryPlan
         }));
     }
+
+    function isLateNightSleepReminderTime(date = new Date()){
+      const hour = date.getHours();
+      const minute = date.getMinutes();
+      return (hour === 1 && minute >= 30) || (hour > 1 && hour < 6);
+    }
+
+    function getLateNightSleepReminderDateKey(date = new Date()){
+      return formatDateKey(date);
+    }
+
+    function buildLateNightSleepReminderPayload(date = new Date()){
+      const form = getForm();
+      return {
+        currentTime: date.toLocaleTimeString("zh-CN", { hour:"2-digit", minute:"2-digit", hour12:false }),
+        date: formatDateKey(date),
+        threshold:"01:30",
+        activePlanDayIndex: activePlanDay,
+        activePlanDay: getDayProgressContext(activePlanDay),
+        recentDailyLogs:getRecentDailyLogsBrief(3),
+        latestSleep: form.latestSleep || "",
+        averageSleep: form.avgSleep || "",
+        status: form.status || "",
+        notes: form.notes || ""
+      };
+    }
+
+    async function generateLateNightSleepReminder(date = new Date()){
+      const payload = buildLateNightSleepReminderPayload(date);
+      const result = await callAiCoach("late_night_sleep_reminder", payload, { timeoutMs:12000 });
+      const feedback = {
+        ...(result.data || {}),
+        type:"late_night_sleep_reminder",
+        title:(result.data && result.data.title) || "深夜睡觉提醒",
+        priority:(result.data && result.data.priority) || "high",
+        durationMs:Number((result.data && result.data.durationMs) || 7000)
+      };
+      const message = cleanAiDisplayText(feedback.message || feedback.coach_message || feedback.recovery || "已经超过 1 点半了，该睡觉了。训练和增肌都要靠恢复，手机放下，明天再练。");
+      feedback.message = message;
+      showCoachBubble(message, feedback.priority || "high", feedback.durationMs || 7000, { force:true });
+      saveAiFeedback(feedback, {
+        task:"late_night_sleep_reminder",
+        date:payload.date,
+        currentTime:payload.currentTime,
+        threshold:payload.threshold
+      });
+      return feedback;
+    }
+
+    async function maybeTriggerLateNightSleepReminder(date = new Date()){
+      if(lateNightSleepReminderRunning) return false;
+      if(!isLateNightSleepReminderTime(date)) return false;
+      const reminderKey = getLateNightSleepReminderDateKey(date);
+      if(localStorage.getItem(LATE_NIGHT_SLEEP_REMINDER_KEY) === reminderKey) return false;
+
+      lateNightSleepReminderRunning = true;
+      localStorage.setItem(LATE_NIGHT_SLEEP_REMINDER_KEY, reminderKey);
+      try{
+        await generateLateNightSleepReminder(date);
+        return true;
+      }catch(err){
+        console.error("深夜睡觉提醒失败", err);
+        localStorage.removeItem(LATE_NIGHT_SLEEP_REMINDER_KEY);
+        return false;
+      }finally{
+        lateNightSleepReminderRunning = false;
+      }
+    }
+
+    function startLateNightSleepReminderWatcher(){
+      if(lateNightSleepReminderInterval) return;
+      maybeTriggerLateNightSleepReminder().catch((err) => console.error("深夜睡觉提醒检查失败", err));
+      lateNightSleepReminderInterval = setInterval(() => {
+        maybeTriggerLateNightSleepReminder().catch((err) => console.error("深夜睡觉提醒检查失败", err));
+      }, LATE_NIGHT_SLEEP_REMINDER_CHECK_MS);
+    }
+
 
     function getWeeklyRecordsForCharacterChat(limit = 5){
       return getHistory().slice(0, limit).map((entry) => ({
@@ -5436,6 +5517,7 @@
         daily_adjust: '{"type":"daily_adjust","title":"今日训练调整","mode":"normal","message":"","adjustedItems":[],"warnings":[],"recovery":""}',
         natural_language_log: '{"type":"natural_language_log","formPatch":{},"confidence":"medium","missingFields":[],"message":""}',
         trend_analysis: '{"type":"trend_analysis","title":"AI 趋势观察","observations":[],"risks":[],"suggestions":[],"coach_message":""}',
+        late_night_sleep_reminder: '{"type":"late_night_sleep_reminder","title":"深夜睡觉提醒","message":"","priority":"high","recovery":"","durationMs":7000}',
         test_connection: '{"type":"test_connection","title":"连接测试","message":"AI 教练连接成功。"}'
       };
       const taskRules = {
@@ -5451,6 +5533,7 @@
         next_week_plan: "plan.days 必须是可执行的新计划；changes 说明具体改了什么，不要只返回“保留当前计划”。",
         natural_language_log: "只返回能填入表单的 formPatch 和一句自然提示，不要展示解析过程。",
         trend_analysis: "只给趋势观察和建议，不要展示推理过程或接口字段。",
+        late_night_sleep_reminder: "现在已经超过 01:30；用角色卡口吻提醒用户立刻收尾睡觉，语气坚定但关心；不要安排训练，不要展开分析；不超过 80 个中文字符，可以补一句明天再练。",
         test_connection: "只返回连接成功消息。"
       };
       return [
@@ -5496,6 +5579,9 @@
       if(task === "daily_adjust"){
         const day = getPlanDays()[activePlanDay] || { items:[] };
         return { type:"daily_adjust", title:"今日训练调整", mode:"reduced", message:"今天按状态保守一点，保留主项，训练量减少约三成。", adjustedItems:(day.items || []).slice(0, Math.max(3, Math.ceil((day.items || []).length * .65))), warnings:["不要做到力竭","有明显疼痛就停止相关动作"], recovery:"训练后补蛋白，今晚尽量早点睡。" };
+      }
+      if(task === "late_night_sleep_reminder"){
+        return { type:"late_night_sleep_reminder", title:"深夜睡觉提醒", message:"已经超过 1 点半了，该睡觉了。训练和增肌都要靠恢复，手机放下，明天再练。", priority:"high", recovery:"现在先睡，明天状态会更稳。", durationMs:7000 };
       }
       if(task === "natural_language_log"){
         return parseNaturalLogFallback(payload.text || "");
@@ -11021,6 +11107,7 @@
     applyPageBackground(getPageBackgroundData());
     updateAiSettingsUi();
     updateAiPetVisibility();
+    startLateNightSleepReminderWatcher();
     renderCharacterCards();
     updateRestoreDraftButton();
     bindPlanSwipeNavigation();
@@ -11058,16 +11145,19 @@
         updateSummary();
       }else{
         handleTimerWakeCheck();
+        maybeTriggerLateNightSleepReminder().catch((err) => console.error("深夜睡觉提醒检查失败", err));
         repairIosDayDockLayout({ immediate:true });
       }
     });
 
     window.addEventListener("pageshow", () => {
       handleTimerWakeCheck();
+      maybeTriggerLateNightSleepReminder().catch((err) => console.error("深夜睡觉提醒检查失败", err));
       repairIosDayDockLayout({ immediate:true });
     });
     window.addEventListener("focus", () => {
       handleTimerWakeCheck();
+      maybeTriggerLateNightSleepReminder().catch((err) => console.error("深夜睡觉提醒检查失败", err));
       repairIosDayDockLayout({ immediate:true });
     });
 
