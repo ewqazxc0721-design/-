@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <title>一周训练记录</title>
 
   <meta name="theme-color" content="#0f172a" />
@@ -51,6 +51,7 @@
     html{
       -webkit-text-size-adjust:100%;
       text-size-adjust:100%;
+      touch-action:manipulation;
     }
 
     body{
@@ -61,6 +62,25 @@
       color:var(--text);
       padding-bottom:env(safe-area-inset-bottom,0px);
       overscroll-behavior-y:contain;
+      touch-action:manipulation;
+    }
+
+    button,
+    [role="button"],
+    .btn,
+    .btn-outline,
+    .btn-danger,
+    .mini-btn,
+    .check-btn,
+    .tab,
+    .day-tab,
+    .timer-adjust-btn{
+      -webkit-touch-callout:none !important;
+      -webkit-user-select:none !important;
+      user-select:none !important;
+      -webkit-user-drag:none !important;
+      caret-color:transparent;
+      touch-action:manipulation;
     }
 
     #pageBgLayer{
@@ -1259,7 +1279,8 @@
       word-break:break-word;
       opacity:0;
       transform:translateY(6px) scale(.98);
-      pointer-events:none;
+      pointer-events:auto;
+      cursor:pointer;
       transition:opacity .22s ease, transform .22s var(--glass-spring);
     }
 
@@ -2138,6 +2159,69 @@
       background:rgba(255,255,255,.86);
       color:#0f172a;
       box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
+    }
+
+    .ai-settings-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+    }
+
+    .collapsible-card-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .ai-settings-head h2,
+    .collapsible-card-head h2{
+      margin:0;
+    }
+
+    .ai-settings-collapse-btn,
+    .collapsible-toggle-btn{
+      width:auto;
+      min-width:74px;
+      padding:9px 12px;
+      white-space:nowrap;
+    }
+
+    .ai-settings-body,
+    .collapsible-card-body{
+      display:block;
+    }
+
+    .ai-settings-body.collapsed,
+    .collapsible-card-body.collapsed{
+      display:none;
+    }
+
+    .ai-settings-subsection{
+      margin-top:16px;
+      padding-top:14px;
+      border-top:1px solid rgba(148,163,184,.18);
+    }
+
+    .ai-settings-subsection h3{
+      margin:0 0 10px;
+      font-size:18px;
+      color:#0f172a;
+    }
+
+    .ai-coach-chat-box{
+      margin-top:14px;
+      padding-top:14px;
+      border-top:1px solid rgba(148,163,184,.18);
+    }
+
+    .ai-coach-chat-title{
+      font-size:18px;
+      font-weight:800;
+      color:#0f172a;
+      margin-bottom:6px;
     }
 
     .tool-card-help{
@@ -3106,15 +3190,25 @@
           overflow-x: auto !important;
           overflow-y: hidden !important;
           overscroll-behavior-x: contain !important;
+          scroll-snap-type: none !important;
+          -webkit-user-select: none !important;
+          user-select: none !important;
+          -webkit-touch-callout: none !important;
+          touch-action: manipulation !important;
         }
 
         #dayTabs .day-tab{
-          scroll-snap-align: start !important;
+          scroll-snap-align: none !important;
+          -webkit-user-select: none !important;
+          user-select: none !important;
+          -webkit-touch-callout: none !important;
         }
 
         #dayTabs .day-tab-indicator,
         #dayTabs.day-tabs.dragging .day-tab-indicator{
           max-width: calc(100% - (var(--day-tab-side-padding) * 2)) !important;
+          min-width: 68px;
+          transform: translateX(0);
         }
       }
     }
@@ -3219,34 +3313,39 @@
       </div>
 
       <div class="card">
-        <h2>今天状态不一样？</h2>
-        <div class="softbox">睡眠、酸痛或器材临时变化时，可以让 AI 按当前计划给今天做一个轻量调整，不会覆盖周计划模板。</div>
-        <div class="grid2">
-          <div>
-            <label class="label">昨晚睡眠</label>
-            <select id="aiDailySleep"><option>好</option><option selected>一般</option><option>差</option></select>
-          </div>
-          <div>
-            <label class="label">身体酸痛</label>
-            <select id="aiDailySoreness"><option selected>无</option><option>轻微</option><option>明显</option></select>
-          </div>
+        <div class="collapsible-card-head">
+          <h2>今天状态不一样？</h2>
+          <button class="btn-outline collapsible-toggle-btn" id="dailyAdjustCollapseBtn" type="button" aria-expanded="false" aria-controls="dailyAdjustBody">展开</button>
         </div>
-        <div class="grid2">
-          <div>
-            <label class="label">今天时间</label>
-            <select id="aiDailyTime"><option>20分钟</option><option selected>40分钟</option><option>60分钟</option></select>
+        <div id="dailyAdjustBody" class="collapsible-card-body collapsed">
+          <div class="softbox">睡眠、酸痛或器材临时变化时，可以让 AI 按当前计划给今天做一个轻量调整，不会覆盖周计划模板。</div>
+          <div class="grid2">
+            <div>
+              <label class="label">昨晚睡眠</label>
+              <select id="aiDailySleep"><option>好</option><option selected>一般</option><option>差</option></select>
+            </div>
+            <div>
+              <label class="label">身体酸痛</label>
+              <select id="aiDailySoreness"><option selected>无</option><option>轻微</option><option>明显</option></select>
+            </div>
           </div>
-          <div>
-            <label class="label">器材</label>
-            <select id="aiDailyGear"><option selected>完整</option><option>只有哑铃</option><option>只有弹力绳</option><option>无器械</option></select>
+          <div class="grid2">
+            <div>
+              <label class="label">今天时间</label>
+              <select id="aiDailyTime"><option>20分钟</option><option selected>40分钟</option><option>60分钟</option></select>
+            </div>
+            <div>
+              <label class="label">器材</label>
+              <select id="aiDailyGear"><option selected>完整</option><option>只有哑铃</option><option>只有弹力绳</option><option>无器械</option></select>
+            </div>
           </div>
+          <label class="label">精神状态</label>
+          <select id="aiDailyEnergy"><option>好</option><option selected>一般</option><option>累</option></select>
+          <label class="label">备注</label>
+          <textarea id="aiDailyNotes" placeholder="例如：肩前侧有点紧，今天时间比较赶"></textarea>
+          <button class="btn-outline full" id="aiDailyAdjustBtn" type="button">让 AI 调整今天训练</button>
+          <div id="aiDailyAdjustResult" class="softbox" style="display:none;"></div>
         </div>
-        <label class="label">精神状态</label>
-        <select id="aiDailyEnergy"><option>好</option><option selected>一般</option><option>累</option></select>
-        <label class="label">备注</label>
-        <textarea id="aiDailyNotes" placeholder="例如：肩前侧有点紧，今天时间比较赶"></textarea>
-        <button class="btn-outline full" id="aiDailyAdjustBtn" type="button">让 AI 调整今天训练</button>
-        <div id="aiDailyAdjustResult" class="softbox" style="display:none;"></div>
       </div>
 
       <div class="card">
@@ -3258,36 +3357,41 @@
       </div>
 
       <div class="card">
-        <h2>训练计划模板管理</h2>
-        <div class="softbox">
-          支持导入 / 导出每周训练计划 JSON，也可以直接修改当前选中这一天的训练项目。
-          为了避免训练项目顺序变化后打卡错位，保存模板时会自动清空旧打卡。
+        <div class="collapsible-card-head">
+          <h2>训练计划模板管理</h2>
+          <button class="btn-outline collapsible-toggle-btn" id="planTemplateCollapseBtn" type="button" aria-expanded="false" aria-controls="planTemplateBody">展开</button>
         </div>
+        <div id="planTemplateBody" class="collapsible-card-body collapsed">
+          <div class="softbox">
+            支持导入 / 导出每周训练计划 JSON，也可以直接修改当前选中这一天的训练项目。
+            为了避免训练项目顺序变化后打卡错位，保存模板时会自动清空旧打卡。
+          </div>
 
-        <div class="softbox">当前编辑：<b id="editorDayLabel">周一</b></div>
+          <div class="softbox">当前编辑：<b id="editorDayLabel">周一</b></div>
 
-        <label class="label">当天名称</label>
-        <input id="planDayNameEdit" placeholder="例如：周一" />
+          <label class="label">当天名称</label>
+          <input id="planDayNameEdit" placeholder="例如：周一" />
 
-        <label class="label">训练重点</label>
-        <input id="planFocusEdit" placeholder="例如：胸部主练 + 肩前中束 + 三头 + 腹" />
+          <label class="label">训练重点</label>
+          <input id="planFocusEdit" placeholder="例如：胸部主练 + 肩前中束 + 三头 + 腹" />
 
-        <label class="label">训练项目（每行一项）</label>
-        <textarea id="planItemsEdit" placeholder="每行一个训练项目"></textarea>
+          <label class="label">训练项目（每行一项）</label>
+          <textarea id="planItemsEdit" placeholder="每行一个训练项目"></textarea>
 
-        <label class="label">蛋白安排</label>
-        <textarea id="planProteinEdit" placeholder="例如：训练后 1 份蛋白粉"></textarea>
+          <label class="label">蛋白安排</label>
+          <textarea id="planProteinEdit" placeholder="例如：训练后 1 份蛋白粉"></textarea>
 
-        <div class="btns">
-          <button class="btn" id="savePlanDayBtn">保存当前天设置</button>
-          <button class="btn-outline" id="resetPlanTemplateBtn">恢复默认模板</button>
+          <div class="btns">
+            <button class="btn" id="savePlanDayBtn">保存当前天设置</button>
+            <button class="btn-outline" id="resetPlanTemplateBtn">恢复默认模板</button>
+          </div>
+
+          <button class="btn-outline full" id="exportPlanTemplateBtn">导出训练计划模板（JSON）</button>
+          <button class="btn-outline full" id="importPlanTemplateBtn">导入训练计划模板（JSON）</button>
+          <input type="file" id="planTemplateFile" accept="application/json" style="display:none" />
+
+          <div class="help">模板结构：days 为数组；每一天包含 day、focus、items、protein 四个字段。</div>
         </div>
-
-        <button class="btn-outline full" id="exportPlanTemplateBtn">导出训练计划模板（JSON）</button>
-        <button class="btn-outline full" id="importPlanTemplateBtn">导入训练计划模板（JSON）</button>
-        <input type="file" id="planTemplateFile" accept="application/json" style="display:none" />
-
-        <div class="help">模板结构：days 为数组；每一天包含 day、focus、items、protein 四个字段。</div>
       </div>
 
       <div class="card">
@@ -3483,98 +3587,103 @@
 
 
       <div class="card">
-        <h2>AI 教练设置</h2>
-        <div class="softbox">开启后，AI 会在你完成训练动作、保存周记录或生成下周计划时，像教练一样给出反馈。桌宠会用短气泡提醒，不会打断当前操作。</div>
-        <div class="tool-row" style="margin-top:12px;">
-          <button class="btn-outline" id="aiEnabledBtn" type="button">AI 教练：关闭</button>
-          <button class="btn-outline" id="aiPetEnabledBtn" type="button">桌宠反馈：关闭</button>
+        <div class="ai-settings-head">
+          <h2>AI 教练设置</h2>
+          <button class="btn-outline ai-settings-collapse-btn" id="aiSettingsCollapseBtn" type="button" aria-expanded="true" aria-controls="aiSettingsBody">收起</button>
         </div>
-        <div class="tool-row" style="margin-top:10px;">
-          <button class="btn-outline" id="aiBubbleEnabledBtn" type="button">聊天气泡：关闭</button>
-          <button class="btn-outline" id="aiQuietModeBtn" type="button">安静模式：关闭</button>
-        </div>
-        <div class="grid2">
-          <div>
-            <label class="label">API 调用模式</label>
-            <select id="aiApiMode"><option value="direct">前端直连 DeepSeek</option><option value="proxy">代理接口</option></select>
+        <div id="aiSettingsBody" class="ai-settings-body">
+          <div class="softbox">开启后，AI 会在你完成训练动作、保存周记录或生成下周计划时，像教练一样给出反馈。桌宠会用短气泡提醒，不会打断当前操作。</div>
+          <div class="tool-row" style="margin-top:12px;">
+            <button class="btn-outline" id="aiEnabledBtn" type="button">AI 教练：关闭</button>
+            <button class="btn-outline" id="aiPetEnabledBtn" type="button">桌宠反馈：关闭</button>
           </div>
-          <div>
-            <label class="label">模型名称</label>
-            <select id="aiModel"><option value="deepseek-v4-flash">deepseek-v4-flash</option><option value="deepseek-v4-pro">deepseek-v4-pro</option></select>
+          <div class="tool-row" style="margin-top:10px;">
+            <button class="btn-outline" id="aiBubbleEnabledBtn" type="button">聊天气泡：关闭</button>
+            <button class="btn-outline" id="aiQuietModeBtn" type="button">安静模式：关闭</button>
+          </div>
+          <div class="grid2">
+            <div>
+              <label class="label">API 调用模式</label>
+              <select id="aiApiMode"><option value="direct">前端直连 DeepSeek</option><option value="proxy">代理接口</option></select>
+            </div>
+            <div>
+              <label class="label">模型名称</label>
+              <select id="aiModel"><option value="deepseek-v4-flash">deepseek-v4-flash</option><option value="deepseek-v4-pro">deepseek-v4-pro</option></select>
+            </div>
+          </div>
+          <label class="label ai-direct-field">API Base URL</label>
+          <input class="ai-direct-field" id="aiApiBaseUrl" placeholder="https://api.deepseek.com" />
+          <label class="label ai-direct-field">API Key</label>
+          <div class="tool-row ai-direct-field">
+            <input id="aiApiKey" type="password" placeholder="sk-..." />
+            <button class="btn-outline" id="aiToggleKeyBtn" type="button">显示</button>
+          </div>
+          <button class="btn-outline full ai-direct-field" id="aiClearKeyBtn" type="button">清除 Key</button>
+          <label class="label ai-proxy-field">代理 URL</label>
+          <input class="ai-proxy-field" id="aiProxyUrl" placeholder="https://your-domain.com/api/ai-coach" />
+          <div class="grid2">
+            <div>
+              <label class="label">反馈长度</label>
+              <select id="aiFeedbackLength"><option value="short">短反馈</option><option value="medium">中等反馈</option><option value="detailed">详细分析</option></select>
+            </div>
+            <div>
+              <label class="label">教练语气</label>
+              <select id="aiCoachTone"><option value="direct_warm">直接但鼓励</option><option value="strict">严格教练</option><option value="gentle">温和陪练</option><option value="funny">轻松一点</option></select>
+            </div>
+          </div>
+          <label class="label">AI 教练图标</label>
+          <div class="tool-row" style="margin-top:6px;">
+            <button class="btn-outline" id="uploadAiPetIconBtn" type="button">上传图标</button>
+            <button class="btn-outline" id="clearAiPetIconBtn" type="button">恢复默认图标</button>
+          </div>
+          <input type="file" id="aiPetIconFileInput" accept="image/*" style="display:none" />
+          <div class="help" id="aiPetIconStatus">当前图标：默认</div>
+          <div class="btns">
+            <button class="btn-outline" id="aiTestBtn" type="button">测试 AI 连接</button>
+            <button class="btn" id="aiSaveSettingsBtn" type="button">保存 AI 设置</button>
+          </div>
+          <div class="help" id="aiSettingsStatus">AI 状态：未配置</div>
+
+          <div class="ai-settings-subsection">
+            <h3>角色卡管理</h3>
+            <div class="softbox">导入 SillyTavern / TavernAI 的 JSON 角色卡后，可以选择当前角色；聊天和 AI 教练会读取当前计划、打卡进度和历史训练记录。</div>
+            <div class="tool-row" style="margin-top:12px;">
+              <button class="btn" id="importCharacterCardBtn" type="button">导入角色卡 JSON</button>
+              <button class="btn-outline" id="clearActiveCharacterCardBtn" type="button">不使用角色</button>
+            </div>
+            <input type="file" id="characterCardFileInput" accept="application/json,.json" style="display:none" />
+            <div class="help" id="characterCardStatus">当前角色：未选择</div>
+            <div id="characterCardList" class="character-card-list"></div>
+            <div class="softbox">聊天入口在右下角 AI 气泡里。选择角色后，点按气泡或头像就能打开聊天框。</div>
+            <div class="help">当前只解析 .json；.png 角色卡解析 TODO。</div>
           </div>
         </div>
-        <label class="label ai-direct-field">API Base URL</label>
-        <input class="ai-direct-field" id="aiApiBaseUrl" placeholder="https://api.deepseek.com" />
-        <label class="label ai-direct-field">API Key</label>
-        <div class="tool-row ai-direct-field">
-          <input id="aiApiKey" type="password" placeholder="sk-..." />
-          <button class="btn-outline" id="aiToggleKeyBtn" type="button">显示</button>
-        </div>
-        <button class="btn-outline full ai-direct-field" id="aiClearKeyBtn" type="button">清除 Key</button>
-        <label class="label ai-proxy-field">代理 URL</label>
-        <input class="ai-proxy-field" id="aiProxyUrl" placeholder="https://your-domain.com/api/ai-coach" />
-        <div class="grid2">
-          <div>
-            <label class="label">反馈长度</label>
-            <select id="aiFeedbackLength"><option value="short">短反馈</option><option value="medium">中等反馈</option><option value="detailed">详细分析</option></select>
-          </div>
-          <div>
-            <label class="label">教练语气</label>
-            <select id="aiCoachTone"><option value="direct_warm">直接但鼓励</option><option value="strict">严格教练</option><option value="gentle">温和陪练</option><option value="funny">轻松一点</option></select>
-          </div>
-        </div>
-        <label class="label">AI 教练图标</label>
-        <div class="tool-row" style="margin-top:6px;">
-          <button class="btn-outline" id="uploadAiPetIconBtn" type="button">上传图标</button>
-          <button class="btn-outline" id="clearAiPetIconBtn" type="button">恢复默认图标</button>
-        </div>
-        <input type="file" id="aiPetIconFileInput" accept="image/*" style="display:none" />
-        <div class="help" id="aiPetIconStatus">当前图标：默认</div>
-        <div class="btns">
-          <button class="btn-outline" id="aiTestBtn" type="button">测试 AI 连接</button>
-          <button class="btn" id="aiSaveSettingsBtn" type="button">保存 AI 设置</button>
-        </div>
-        <div class="help" id="aiSettingsStatus">AI 状态：未配置</div>
       </div>
 
       <div class="card">
-        <h2>角色卡管理</h2>
-        <div class="softbox">导入 SillyTavern / TavernAI 的 JSON 角色卡后，可以选择当前角色；聊天和 AI 教练会读取当前计划、打卡进度和历史训练记录。</div>
-        <div class="tool-row" style="margin-top:12px;">
-          <button class="btn" id="importCharacterCardBtn" type="button">导入角色卡 JSON</button>
-          <button class="btn-outline" id="clearActiveCharacterCardBtn" type="button">不使用角色</button>
+        <div class="collapsible-card-head">
+          <h2>云同步（Supabase）</h2>
+          <button class="btn-outline collapsible-toggle-btn" id="cloudSyncCollapseBtn" type="button" aria-expanded="false" aria-controls="cloudSyncBody">展开</button>
         </div>
-        <input type="file" id="characterCardFileInput" accept="application/json,.json" style="display:none" />
-        <div class="help" id="characterCardStatus">当前角色：未选择</div>
-        <div id="characterCardList" class="character-card-list"></div>
-        <div class="character-chat-log" id="characterChatLog"></div>
-        <textarea id="characterChatInput" placeholder="输入要对当前角色说的话"></textarea>
-        <div class="tool-row" style="margin-top:10px;">
-          <button class="btn" id="sendCharacterChatBtn" type="button">发送</button>
-          <button class="btn-outline" id="clearCharacterChatBtn" type="button">清空聊天</button>
+        <div id="cloudSyncBody" class="collapsible-card-body collapsed">
+          <div class="softbox">首次使用：点“使用 GitHub 登录”；登录成功后，再点“立即同步到云端”。换设备时，用同一个 GitHub 账号登录，再点“从云端恢复到本机”把记录拉回来。</div>
+          <div class="tool-row" style="margin-top:12px;">
+            <button class="btn" id="cloudLoginBtn">使用 GitHub 登录</button>
+            <button class="btn-outline" id="cloudLogoutBtn">退出登录</button>
+          </div>
+          <div class="tool-row" style="margin-top:12px;">
+            <button class="btn" id="cloudSyncBtn">立即同步到云端</button>
+            <button class="btn-outline" id="cloudRestoreBtn">从云端恢复到本机</button>
+          </div>
+          <div class="tool-row" style="margin-top:12px;">
+            <button class="btn-outline" id="cloudAutoSyncBtn">自动同步：关闭</button>
+            <button class="btn-outline" id="aiSyncKeyBtn" type="button">同步key：开启</button>
+          </div>
+          <div class="help">API Key 会随你的云端存档同步。请只在你自己的账号和设备中使用，不要把包含 Key 的备份文件或云端账号共享给他人。公开部署网页时，仍建议使用代理接口模式。</div>
+          <div class="help" id="cloudStatusText">云端状态：未登录</div>
+          <div class="help" id="cloudSyncHint">提示：本地导出 JSON 备份建议继续保留。</div>
+          <div class="help" id="cloudAutoSyncHint">自动同步关闭时，仍可手动同步；开启后，本机数据变化会在已登录状态下自动上传，不会自动从云端覆盖本机。</div>
         </div>
-        <div class="help">当前只解析 .json；.png 角色卡解析 TODO。</div>
-      </div>
-
-      <div class="card">
-        <h2>云同步（Supabase）</h2>
-        <div class="softbox">首次使用：点“使用 GitHub 登录”；登录成功后，再点“立即同步到云端”。换设备时，用同一个 GitHub 账号登录，再点“从云端恢复到本机”把记录拉回来。</div>
-        <div class="tool-row" style="margin-top:12px;">
-          <button class="btn" id="cloudLoginBtn">使用 GitHub 登录</button>
-          <button class="btn-outline" id="cloudLogoutBtn">退出登录</button>
-        </div>
-        <div class="tool-row" style="margin-top:12px;">
-          <button class="btn" id="cloudSyncBtn">立即同步到云端</button>
-          <button class="btn-outline" id="cloudRestoreBtn">从云端恢复到本机</button>
-        </div>
-        <div class="tool-row" style="margin-top:12px;">
-          <button class="btn-outline" id="cloudAutoSyncBtn">自动同步：关闭</button>
-          <button class="btn-outline" id="aiSyncKeyBtn" type="button">同步key：开启</button>
-        </div>
-        <div class="help">API Key 会随你的云端存档同步。请只在你自己的账号和设备中使用，不要把包含 Key 的备份文件或云端账号共享给他人。公开部署网页时，仍建议使用代理接口模式。</div>
-        <div class="help" id="cloudStatusText">云端状态：未登录</div>
-        <div class="help" id="cloudSyncHint">提示：本地导出 JSON 备份建议继续保留。</div>
-        <div class="help" id="cloudAutoSyncHint">自动同步关闭时，仍可手动同步；开启后，本机数据变化会在已登录状态下自动上传，不会自动从云端覆盖本机。</div>
       </div>
 
       <div class="card">
@@ -3616,7 +3725,18 @@
   <div id="aiCoachPanelModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:998;align-items:center;justify-content:center;padding:20px;">
     <div style="width:min(520px,100%);max-height:min(80vh,760px);overflow:auto;background:rgba(255,255,255,.94);backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);border-radius:24px;padding:22px;box-shadow:0 20px 50px rgba(15,23,42,.2);">
       <div id="aiCoachPanelContent"></div>
+      <div id="aiCoachChatBox" class="ai-coach-chat-box">
+        <div class="ai-coach-chat-title">角色聊天</div>
+        <div class="help">聊天会读取当前角色卡、本周计划、打卡进度和历史训练记录。</div>
+        <div class="character-chat-log" id="characterChatLog"></div>
+        <textarea id="characterChatInput" placeholder="输入要对当前角色说的话"></textarea>
+        <div class="tool-row" style="margin-top:10px;">
+          <button class="btn" id="sendCharacterChatBtn" type="button">发送</button>
+          <button class="btn-outline" id="clearCharacterChatBtn" type="button">清空聊天</button>
+        </div>
+      </div>
       <div class="btns">
+        <button id="aiPanelChatBtn" class="btn-outline" type="button">角色聊天</button>
         <button id="aiPanelHistoryBtn" class="btn-outline" type="button">查看反馈历史</button>
         <button id="aiPanelQuietBtn" class="btn-outline" type="button">安静模式</button>
       </div>
@@ -3659,7 +3779,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.05.11-75-character-chat-training-context";
+    const APP_VERSION = "v2026.05.11-79-collapsed-tools";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const TEMP_DAILY_PLAN_OVERRIDES_KEY = "gain-temp-daily-plan-overrides";
     const DAILY_LOGS_KEY = "gain-daily-logs";
@@ -3684,6 +3804,7 @@
     const AI_PET_STATE_KEY = "gain-ai-pet-state";
     const AI_PET_ICON_KEY = "gain-ai-pet-icon";
     const AI_MILESTONE_KEY = "gain-ai-milestones";
+    const AI_SETTINGS_COLLAPSED_KEY = "gain-ai-settings-collapsed";
     const CHARACTER_CARDS_KEY = "gain-character-cards";
     const ACTIVE_CHARACTER_CARD_ID_KEY = "gain-active-character-card-id";
     const CHARACTER_CHAT_HISTORY_KEY = "gain-character-chat-history";
@@ -4716,12 +4837,57 @@
       localStorage.setItem(AI_PET_STATE_KEY, JSON.stringify({ ...getAiPetState(), ...(petState || {}) }));
     }
 
+    function isAiSettingsCollapsed(){
+      return localStorage.getItem(AI_SETTINGS_COLLAPSED_KEY) === "1";
+    }
+
+    function setAiSettingsCollapsed(collapsed){
+      localStorage.setItem(AI_SETTINGS_COLLAPSED_KEY, collapsed ? "1" : "0");
+      updateAiSettingsCollapseUi();
+    }
+
+    function updateAiSettingsCollapseUi(){
+      const body = $("aiSettingsBody");
+      const btn = $("aiSettingsCollapseBtn");
+      const collapsed = isAiSettingsCollapsed();
+      if(body) body.classList.toggle("collapsed", collapsed);
+      if(btn){
+        btn.textContent = collapsed ? "展开" : "收起";
+        btn.setAttribute("aria-expanded", collapsed ? "false" : "true");
+      }
+    }
+
+    function setCollapsibleCardState(btn, body, collapsed){
+      if(body) body.classList.toggle("collapsed", collapsed);
+      if(btn){
+        btn.textContent = collapsed ? "展开" : "收起";
+        btn.setAttribute("aria-expanded", collapsed ? "false" : "true");
+      }
+    }
+
+    function bindDefaultCollapsedCard(btnId, bodyId){
+      const btn = $(btnId);
+      const body = $(bodyId);
+      if(!btn || !body) return;
+      setCollapsibleCardState(btn, body, true);
+      btn.onclick = () => {
+        setCollapsibleCardState(btn, body, !body.classList.contains("collapsed"));
+      };
+    }
+
+    function bindDefaultCollapsedCards(){
+      bindDefaultCollapsedCard("dailyAdjustCollapseBtn", "dailyAdjustBody");
+      bindDefaultCollapsedCard("planTemplateCollapseBtn", "planTemplateBody");
+      bindDefaultCollapsedCard("cloudSyncCollapseBtn", "cloudSyncBody");
+    }
+
     function updateAiPetVisibility(){
       const settings = getAiSettings();
       const pet = $("aiCoachPet");
       updateAiPetAvatar();
       if(!pet) return;
-      pet.classList.toggle("show", !!(settings.enabled && settings.deskPetEnabled));
+      const hasCharacterChat = !!getActiveCharacterCard();
+      pet.classList.toggle("show", !!(settings.deskPetEnabled && (settings.enabled || hasCharacterChat)));
     }
 
     function showCoachBubble(message, priority = "normal", durationMs = 4000, options = {}){
@@ -4762,6 +4928,7 @@
 
     function updateAiSettingsUi(){
       const settings = getAiSettings();
+      updateAiSettingsCollapseUi();
       const setBtn = (id, label, enabled) => {
         const btn = $(id);
         if(!btn) return;
@@ -4857,6 +5024,8 @@
         test_connection: '{"type":"test_connection","title":"连接测试","message":"AI 教练连接成功。"}'
       };
       const taskRules = {
+        exercise_completed: "如果 payload.encouragementContext 存在，可以结合计数器、今日体重、今日睡眠和当天计划进度给一句短鼓励；不要机械复述所有数据。",
+        day_complete: "结合 payload.encouragementContext 的计数器、今日体重、今日睡眠、当天完成情况给收尾建议；睡眠差或体重持续偏低时优先提醒恢复和进食。",
         daily_adjust: [
           "今日调整必须真的改变训练：adjustedItems 不能完整照抄原 items；至少减少、替换或重排 1 个动作。",
           "adjustedItems 只放最终执行动作文本数组，不要放对象、解释、原始计划或 Markdown。",
@@ -6657,6 +6826,32 @@
       indicator.style.transform = scaleX > 1.001 ? `translateX(${left}px) scaleX(${scaleX})` : `translateX(${left}px)`;
     }
 
+    function getDayTabFallbackWidth(tabsEl, buttons){
+      if(!tabsEl) return 72;
+      const styles = getComputedStyle(tabsEl);
+      const sidePadding = parseFloat(styles.getPropertyValue("--day-tab-side-padding")) || 0;
+      const visibleSlots = Math.max(1, Math.min(4, buttons?.length || 4));
+      const width = ((tabsEl.clientWidth || tabsEl.offsetWidth || 0) - sidePadding * 2) / visibleSlots;
+      return Math.max(68, Number.isFinite(width) ? width : 72);
+    }
+
+    function getDayButtonBox(tabsEl, button, index, fallbackWidth){
+      const tabsRect = tabsEl.getBoundingClientRect();
+      const rect = button.getBoundingClientRect();
+      const width = Math.max(button.offsetWidth || 0, rect.width || 0, fallbackWidth || 0, 68);
+      let left = button.offsetLeft;
+      const rectLeft = rect.left - tabsRect.left + (tabsEl.scrollLeft || 0);
+      if(Number.isFinite(rectLeft) && rect.width > 1){
+        left = rectLeft;
+      }
+      if(!Number.isFinite(left) || (left === 0 && index > 0)){
+        const styles = getComputedStyle(tabsEl);
+        const sidePadding = parseFloat(styles.getPropertyValue("--day-tab-side-padding")) || 0;
+        left = sidePadding + index * width;
+      }
+      return { left, width, center:left + width / 2 };
+    }
+
     function getDayDockMetrics(extraScale = 0){
       const tabsEl = $("dayTabs");
       const indicator = tabsEl ? tabsEl.querySelector(".day-tab-indicator") : null;
@@ -6664,23 +6859,27 @@
       const activeTab = tabsEl ? tabsEl.querySelector(".day-tab.active") : null;
       if(!tabsEl || !indicator || !buttons.length || !activeTab) return null;
 
-      const contentWidth = tabsEl.scrollWidth;
       const styles = getComputedStyle(tabsEl);
       const scale = (parseFloat(styles.getPropertyValue("--day-indicator-scale")) || 1.13) + extraScale;
       const rawEdgeGap = parseFloat(styles.getPropertyValue("--day-indicator-edge-gap"));
       const edgeGap = Number.isFinite(rawEdgeGap) ? rawEdgeGap : 8;
-      const width = activeTab.offsetWidth * scale;
+      const fallbackWidth = getDayTabFallbackWidth(tabsEl, buttons);
+      const buttonBoxes = buttons.map((btn, index) => getDayButtonBox(tabsEl, btn, index, fallbackWidth));
+      const activeIndex = Math.max(0, buttons.indexOf(activeTab));
+      const activeBox = buttonBoxes[activeIndex] || buttonBoxes[0];
+      const contentRight = buttonBoxes.reduce((max, box) => Math.max(max, box.left + box.width), 0) + edgeGap;
+      const contentWidth = Math.max(tabsEl.scrollWidth || 0, contentRight, tabsEl.clientWidth || 0);
+      const width = Math.max(isIosDayDockMode() ? 68 : 1, activeBox.width * scale);
       const maxLeft = Math.max(edgeGap, contentWidth - width - edgeGap);
-      const activeCenter = activeTab.offsetLeft + activeTab.offsetWidth / 2;
+      const activeCenter = activeBox.center;
       const activeLeft = Math.max(edgeGap, Math.min(activeCenter - width / 2, maxLeft));
 
-      const snapLefts = buttons.map((btn) => {
-        const center = btn.offsetLeft + btn.offsetWidth / 2;
-        const left = center - width / 2;
+      const snapLefts = buttonBoxes.map((box) => {
+        const left = box.center - width / 2;
         return Math.max(edgeGap, Math.min(left, maxLeft));
       });
 
-      return { tabsEl, indicator, buttons, contentWidth, width, edgeGap, maxLeft, activeLeft, snapLefts };
+      return { tabsEl, indicator, buttons, buttonBoxes, contentWidth, width, edgeGap, maxLeft, activeLeft, snapLefts };
     }
 
     function getDayIndicatorLeft(indicator){
@@ -6804,9 +7003,10 @@
       let bestButton = metrics.buttons[0] || null;
       let bestOverlap = -1;
 
-      metrics.buttons.forEach((btn) => {
-        const btnStart = btn.offsetLeft;
-        const btnEnd = btnStart + btn.offsetWidth;
+      metrics.buttons.forEach((btn, index) => {
+        const box = metrics.buttonBoxes?.[index] || { left:btn.offsetLeft, width:btn.offsetWidth };
+        const btnStart = box.left;
+        const btnEnd = btnStart + box.width;
         const overlap = Math.max(0, Math.min(pillEnd, btnEnd) - Math.max(pillStart, btnStart));
         if(overlap > bestOverlap){
           bestOverlap = overlap;
@@ -6970,7 +7170,7 @@
     }
 
     function updateDayTabIndicator(options = {}){
-      if(isIosDayDockMode() && activePlanDay === 0){
+      if(isIosDayDockMode() && activePlanDay === 0 && !options.noForce){
         forceIosDayDockLeftEdge();
       }
       const metrics = getDayDockMetrics();
@@ -7063,8 +7263,17 @@
         requestAnimationFrame(() => {
           tabs.scrollLeft = 0;
           tabs.style.scrollBehavior = oldScrollBehavior;
-          tabs.style.scrollSnapType = oldScrollSnapType;
+          tabs.style.scrollSnapType = oldScrollSnapType || "none";
         });
+      });
+      [60, 180, 360].forEach((delay) => {
+        setTimeout(() => {
+          if(!isIosDayDockMode()) return;
+          tabs.style.scrollBehavior = "auto";
+          tabs.style.scrollSnapType = "none";
+          tabs.scrollLeft = 0;
+          if(activePlanDay === 0) updateDayTabIndicator({ immediate:true, noForce:true });
+        }, delay);
       });
     }
 
@@ -7075,6 +7284,14 @@
       requestAnimationFrame(() => {
         positionIosDayDockScrollForIndex(activePlanDay);
         updateDayTabIndicator({ immediate: options.immediate !== false });
+      });
+      [120, 320].forEach((delay) => {
+        setTimeout(() => {
+          if(!isIosDayDockMode()) return;
+          if(activePlanDay === 0) forceIosDayDockLeftEdge();
+          positionIosDayDockScrollForIndex(activePlanDay);
+          updateDayTabIndicator({ immediate:true, noForce: activePlanDay === 0 });
+        }, delay);
       });
     }
 
@@ -7335,6 +7552,115 @@
       }));
     }
 
+    function getWeeklyFormWeights(form = getForm()){
+      return [form.weight1, form.weight2, form.weight3, form.weight4, form.weight5, form.weight6, form.weight7]
+        .map((value) => String(value || "").trim());
+    }
+
+    function getCounterSnapshotValue(){
+      const current = Number(counterValue);
+      if(Number.isFinite(current)) return current;
+      const stored = Number(localStorage.getItem(COUNTER_KEY) || "0");
+      return Number.isFinite(stored) ? stored : 0;
+    }
+
+    function buildAiCoachEncouragementContext(dayIndex = activePlanDay, options = {}){
+      const baseDate = options.baseDate || new Date();
+      const days = getPlanDays();
+      const safeDayIndex = days.length
+        ? Math.max(0, Math.min(Number(dayIndex) || 0, days.length - 1))
+        : 0;
+      const day = days[safeDayIndex] || null;
+      const checks = getPlanChecks();
+      const form = getForm();
+      const weights = getWeeklyFormWeights(form);
+      const weekday = day ? inferPlanWeekday(day, safeDayIndex) : ((baseDate.getDay() + 6) % 7) + 1;
+      const date = day
+        ? getDateForPlanDayInCurrentWeek(day.day, safeDayIndex, baseDate)
+        : formatDateKey(baseDate);
+      const dailyLogs = getDailyLogs();
+      const log = dailyLogs[date] || {};
+      const dailyWeight = String(log.weight || "").trim();
+      const dailySleep = String(log.sleep || "").trim();
+      const weeklyWeight = weights[Math.max(0, Math.min(6, weekday - 1))] || "";
+      const weeklyAverageSleep = String(form.avgSleep || "").trim();
+      const latestSleep = String(form.latestSleep || "").trim();
+
+      return {
+        version: 1,
+        counter: {
+          value: getCounterSnapshotValue(),
+          source: "portableCounter"
+        },
+        today: {
+          date,
+          dayIndex: safeDayIndex,
+          dayName: day?.day || "",
+          weekday,
+          focus: day?.focus || "",
+          weight: dailyWeight || weeklyWeight,
+          weightSource: dailyWeight ? "dailyLog" : (weeklyWeight ? "weeklyForm" : ""),
+          sleep: dailySleep || weeklyAverageSleep,
+          sleepSource: dailySleep ? "dailyLog" : (weeklyAverageSleep ? "weeklyAverage" : ""),
+          latestSleep,
+          note: String(log.note || "").trim(),
+          calendarLogExists: !!dailyLogs[date]
+        },
+        weeklyBody: {
+          weights,
+          averageWeightKg: calcAverage(weights) || "",
+          averageSleep: weeklyAverageSleep,
+          latestSleep,
+          trainingDays: String(form.trainingDays || "").trim(),
+          status: String(form.status || "").trim(),
+          notes: String(form.notes || "").trim()
+        },
+        planDay: day ? getDayProgressContext(safeDayIndex, days, checks) : null,
+        recentDailyLogs: getRecentDailyLogsBrief(7),
+        recentHistoryBrief: getRecentHistoryBrief(3)
+      };
+    }
+
+    function buildAiExerciseCompletedPayload(parsed, day, item, checks = getPlanChecks(), options = {}){
+      if(!parsed || !day || !item) return null;
+      const dayIndex = Number(parsed.dayIndex) || 0;
+      const completedItems = (day.items || []).filter((_, index) => checks[`d${dayIndex}_i${index}`]);
+      const totalCount = (day.items || []).length;
+      const completedCount = completedItems.length;
+      const progressPercent = totalCount ? Math.round(completedCount / totalCount * 100) : 0;
+      return {
+        currentDayIndex: dayIndex,
+        currentDayName: day.day || "",
+        focus: day.focus || "",
+        completedExercise: item,
+        completedCount,
+        totalCount,
+        progressPercent,
+        completedItems,
+        allItems: day.items || [],
+        weeklyForm: getForm(),
+        encouragementContext: buildAiCoachEncouragementContext(dayIndex, options),
+        recentHistoryBrief: getRecentHistoryBrief()
+      };
+    }
+
+    function buildAiDayCompletePayload(dayIndex, day, checks = getPlanChecks(), options = {}){
+      if(!day) return null;
+      const safeDayIndex = Number(dayIndex) || 0;
+      const completedItems = (day.items || []).filter((_, index) => checks[`d${safeDayIndex}_i${index}`]);
+      return {
+        dayName: day.day,
+        focus: day.focus,
+        completedItems,
+        totalCount: (day.items || []).length,
+        weeklyForm: getForm(),
+        sleep: $("avgSleep")?.value || "",
+        latestSleep: $("latestSleep")?.value || "",
+        notes: $("notes")?.value || "",
+        encouragementContext: buildAiCoachEncouragementContext(safeDayIndex, options)
+      };
+    }
+
     function getAiMilestones(){
       return safeJsonParse(localStorage.getItem(AI_MILESTONE_KEY) || "{}", {});
     }
@@ -7353,23 +7679,9 @@
       const item = day?.items?.[parsed.itemIndex];
       if(!day || !item) return;
       const checks = getPlanChecks();
-      const completedItems = (day.items || []).filter((_, index) => checks[`d${parsed.dayIndex}_i${index}`]);
-      const totalCount = (day.items || []).length;
-      const completedCount = completedItems.length;
-      const progressPercent = totalCount ? Math.round(completedCount / totalCount * 100) : 0;
-      const payload = {
-        currentDayIndex: parsed.dayIndex,
-        currentDayName: day.day || "",
-        focus: day.focus || "",
-        completedExercise: item,
-        completedCount,
-        totalCount,
-        progressPercent,
-        completedItems,
-        allItems: day.items || [],
-        weeklyForm: getForm(),
-        recentHistoryBrief: getRecentHistoryBrief()
-      };
+      const payload = buildAiExerciseCompletedPayload(parsed, day, item, checks);
+      if(!payload) return;
+      const progressPercent = payload.progressPercent;
       const res = await callAiCoach("exercise_completed", payload, { timeoutMs:12000 });
       const feedback = res.data || getFallbackCoachFeedback("exercise_completed", payload);
       saveAiFeedback(feedback, { day: day.day, exercise:item });
@@ -7409,17 +7721,8 @@
       const day = days[dayIndex];
       if(!day) return;
       const checks = getPlanChecks();
-      const completedItems = (day.items || []).filter((_, index) => checks[`d${dayIndex}_i${index}`]);
-      const payload = {
-        dayName: day.day,
-        focus: day.focus,
-        completedItems,
-        totalCount: (day.items || []).length,
-        weeklyForm: getForm(),
-        sleep: $("avgSleep")?.value || "",
-        latestSleep: $("latestSleep")?.value || "",
-        notes: $("notes")?.value || ""
-      };
+      const payload = buildAiDayCompletePayload(dayIndex, day, checks);
+      if(!payload) return;
       const res = await callAiCoach("day_complete", payload, { timeoutMs:16000 });
       const feedback = res.data || getFallbackCoachFeedback("day_complete", payload);
       saveAiFeedback(feedback, { day: day.day, ...meta });
@@ -8708,6 +9011,55 @@
       return event.clientY || 0;
     }
 
+    function isEditableTarget(target){
+      const el = target instanceof Element ? target : null;
+      return !!(el && el.closest("input, textarea, select, [contenteditable='true']"));
+    }
+
+    function isButtonLikeTarget(target){
+      const el = target instanceof Element ? target : null;
+      return !!(el && el.closest("button, [role='button'], .btn, .btn-outline, .btn-danger, .mini-btn, .check-btn, .tab, .day-tab, .timer-adjust-btn"));
+    }
+
+    function bindIosInteractionGuards(){
+      const root = document.documentElement;
+      if(root.dataset.iosInteractionGuardsBound === "1") return;
+      root.dataset.iosInteractionGuardsBound = "1";
+
+      let lastTapAt = 0;
+      let lastTapX = 0;
+      let lastTapY = 0;
+
+      document.addEventListener("touchend", (event) => {
+        const touch = event.changedTouches && event.changedTouches[0];
+        if(!touch || isEditableTarget(event.target)) return;
+        const now = Date.now();
+        const dx = touch.clientX - lastTapX;
+        const dy = touch.clientY - lastTapY;
+        const isDoubleTap = now - lastTapAt < 340 && Math.hypot(dx, dy) < 26;
+        if(isDoubleTap && event.cancelable){
+          event.preventDefault();
+        }
+        lastTapAt = now;
+        lastTapX = touch.clientX;
+        lastTapY = touch.clientY;
+      }, { passive:false, capture:true });
+
+      document.addEventListener("dblclick", (event) => {
+        if(!isEditableTarget(event.target)){
+          event.preventDefault();
+        }
+      }, true);
+
+      ["contextmenu", "selectstart", "dragstart"].forEach((type) => {
+        document.addEventListener(type, (event) => {
+          if(isButtonLikeTarget(event.target)){
+            event.preventDefault();
+          }
+        }, true);
+      });
+    }
+
     function startTabDrag(clientX, startLeftOverride = null){
       tabDrag.extraScale = getDragExtraScale();
       const metrics = getTabMetrics(tabDrag.extraScale);
@@ -9799,7 +10151,7 @@
       handleTimerWakeCheck();
     }
 
-    function openAiCoachPanel(showHistory = false){
+    function openAiCoachPanel(showHistory = false, options = {}){
       const modal = $("aiCoachPanelModal");
       const content = $("aiCoachPanelContent");
       if(!modal || !content) return;
@@ -9807,6 +10159,7 @@
       const history = getAiFeedbackHistory();
       const activeCharacterCard = getActiveCharacterCard();
       const roleLine = activeCharacterCard ? `<div class="softbox" style="margin-bottom:10px;">当前联动角色：${escapeHtml(activeCharacterCard.name)}。训练建议会保留角色语气，但仍按教练逻辑输出。</div>` : "";
+      const chatBox = $("aiCoachChatBox");
       if(showHistory){
         content.innerHTML = `
           <div style="font-size:22px;font-weight:800;margin-bottom:10px;">AI 教练反馈历史</div>
@@ -9819,6 +10172,7 @@
             </div>
           `).join("") : `<div class="softbox">还没有 AI 反馈。</div>`}
         `;
+        if(chatBox) chatBox.style.display = "none";
       }else{
         content.innerHTML = `
           <div style="font-size:22px;font-weight:800;margin-bottom:10px;">AI 教练${activeCharacterCard ? ` · ${escapeHtml(activeCharacterCard.name)}` : ""}</div>
@@ -9828,12 +10182,23 @@
             ${escapeHtml(last?.message || "还没有反馈。完成一个动作后，这里会显示最近一次教练提醒。")}
           </div>
         `;
+        if(chatBox){
+          chatBox.style.display = "block";
+          renderCharacterChat();
+        }
       }
+      const chatBtn = $("aiPanelChatBtn");
+      if(chatBtn) chatBtn.className = showHistory ? "btn-outline" : "btn";
+      const historyBtn = $("aiPanelHistoryBtn");
+      if(historyBtn) historyBtn.className = showHistory ? "btn" : "btn-outline";
       const quietBtn = $("aiPanelQuietBtn");
       if(quietBtn){
         quietBtn.textContent = `安静模式：${getAiSettings().quietMode ? "开启" : "关闭"}`;
       }
       modal.style.display = "flex";
+      if(options.focusChat){
+        setTimeout(() => $("characterChatInput")?.focus(), 60);
+      }
     }
 
     function closeAiCoachPanel(){
@@ -9866,6 +10231,7 @@
       if($("aiPetEnabledBtn")) $("aiPetEnabledBtn").onclick = () => toggle("deskPetEnabled");
       if($("aiBubbleEnabledBtn")) $("aiBubbleEnabledBtn").onclick = () => toggle("bubbleEnabled");
       if($("aiQuietModeBtn")) $("aiQuietModeBtn").onclick = () => toggle("quietMode");
+      if($("aiSettingsCollapseBtn")) $("aiSettingsCollapseBtn").onclick = () => setAiSettingsCollapsed(!isAiSettingsCollapsed());
       if($("aiSyncKeyBtn")) $("aiSyncKeyBtn").onclick = () => toggle("syncApiKeyToCloud");
       if($("aiSaveSettingsBtn")) $("aiSaveSettingsBtn").onclick = () => saveAiSettings(collectAiSettingsFromUi(), { bubble:true });
       if($("aiTestBtn")) $("aiTestBtn").onclick = () => testAiConnection().catch((err) => {
@@ -9895,10 +10261,21 @@
         }
       });
       const pet = $("aiCoachAvatar");
-      if(pet) pet.onclick = () => openAiCoachPanel(false);
+      if(pet) pet.onclick = () => openAiCoachPanel(false, { focusChat:true });
+      const bubble = $("aiCoachBubble");
+      if(bubble) bubble.onclick = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        openAiCoachPanel(false, { focusChat:true });
+      };
       if($("closeAiCoachPanelBtn")) $("closeAiCoachPanelBtn").onclick = closeAiCoachPanel;
+      if($("aiPanelChatBtn")) $("aiPanelChatBtn").onclick = () => openAiCoachPanel(false, { focusChat:true });
       if($("aiPanelHistoryBtn")) $("aiPanelHistoryBtn").onclick = () => openAiCoachPanel(true);
-      if($("aiPanelQuietBtn")) $("aiPanelQuietBtn").onclick = () => toggle("quietMode");
+      if($("aiPanelQuietBtn")) $("aiPanelQuietBtn").onclick = () => {
+        toggle("quietMode");
+        const quietBtn = $("aiPanelQuietBtn");
+        if(quietBtn) quietBtn.textContent = `安静模式：${getAiSettings().quietMode ? "开启" : "关闭"}`;
+      };
       const modal = $("aiCoachPanelModal");
       if(modal) modal.onclick = (e) => { if(e.target === modal) closeAiCoachPanel(); };
     }
@@ -10094,6 +10471,8 @@
     bindCharacterCardControls();
     bindAiFeatureButtons();
     bindHistoryModalControls();
+    bindDefaultCollapsedCards();
+    bindIosInteractionGuards();
 
     sb.auth.onAuthStateChange((event) => {
       refreshCloudUi().catch(() => {});
