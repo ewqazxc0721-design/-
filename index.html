@@ -4092,7 +4092,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.05.12-85-chat-input-radius";
+    const APP_VERSION = "v2026.05.12-86-weekly-day-pill-center";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const TEMP_DAILY_PLAN_OVERRIDES_KEY = "gain-temp-daily-plan-overrides";
     const DAILY_LOGS_KEY = "gain-daily-logs";
@@ -7263,7 +7263,8 @@
     function getDayButtonBox(tabsEl, button, index, fallbackWidth){
       const tabsRect = tabsEl.getBoundingClientRect();
       const rect = button.getBoundingClientRect();
-      const width = Math.max(button.offsetWidth || 0, rect.width || 0, fallbackWidth || 0, 68);
+      const measuredWidth = rect.width > 1 ? rect.width : (button.offsetWidth || 0);
+      const width = measuredWidth > 1 ? measuredWidth : Math.max(fallbackWidth || 0, 68);
       let left = button.offsetLeft;
       const rectLeft = rect.left - tabsRect.left + (tabsEl.scrollLeft || 0);
       if(Number.isFinite(rectLeft) && rect.width > 1){
