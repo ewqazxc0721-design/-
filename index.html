@@ -4754,6 +4754,29 @@
         const text = list.map((item) => cleanAiDisplayText(normalizePlanItemText(item))).filter(Boolean).join("；");
         if(text) addLine(text, label);
       };
+      const addObject = (value, label) => {
+        if(!value || typeof value !== "object" || Array.isArray(value)) return;
+        const text = Object.entries(value)
+          .map(([key, val]) => {
+            const cleaned = cleanAiDisplayText(Array.isArray(val) ? val.join("、") : String(val || ""));
+            return cleaned ? `${key}=${cleaned}` : "";
+          })
+          .filter(Boolean)
+          .join("；");
+        if(text) addLine(text, label);
+      };
+      const addPlan = (plan) => {
+        const days = Array.isArray(plan?.days) ? plan.days : [];
+        const planLines = days.map((day, index) => {
+          const name = cleanAiDisplayText(day?.day || day?.weekday || `第${index + 1}天`);
+          const focus = cleanAiDisplayText(day?.focus || "");
+          const items = Array.isArray(day?.items)
+            ? day.items.map((item) => cleanAiDisplayText(normalizePlanItemText(item))).filter(Boolean).join("；")
+            : "";
+          return [name, focus].filter(Boolean).join("｜") + (items ? `：${items}` : "");
+        }).filter(Boolean);
+        addList(planLines, "计划");
+      };
 
       addLine(feedback.message || feedback.coach_message || feedback.summary || feedback.reason || "");
       addLine(feedback.praise, "鼓励");
@@ -4768,6 +4791,9 @@
       addList(feedback.changes, "变化");
       addList(feedback.warnings, "提醒");
       addList(feedback.adjustedItems, "今日调整");
+      addPlan(feedback.plan);
+      addObject(feedback.formPatch, "已填入");
+      addList(feedback.missingFields, "待补充");
 
       return lines.join("\n").trim();
     }
@@ -8233,7 +8259,12 @@
         const content = $("aiWeeklyFeedbackContent");
         if(card) card.style.display = "block";
         if(content) content.innerHTML = renderAiObject(latestAiWeeklyResult);
-        saveAiFeedback({ type:"weekly_analysis", title:"本周教练反馈", message:latestAiWeeklyResult.coach_message || latestAiWeeklyResult.summary || "本周反馈已生成。" }, { weekLabel: $("weekLabel")?.value || "" });
+        saveAiFeedback({
+          ...latestAiWeeklyResult,
+          type:"weekly_analysis",
+          title:latestAiWeeklyResult.title || "本周教练反馈",
+          message:latestAiWeeklyResult.coach_message || latestAiWeeklyResult.summary || latestAiWeeklyResult.message || "本周反馈已生成。"
+        }, { weekLabel: $("weekLabel")?.value || "" });
         showCoachBubble(latestAiWeeklyResult.coach_message || latestAiWeeklyResult.summary || "本周教练反馈已生成。", "high", 5000);
       }finally{
         if(btn) btn.disabled = false;
@@ -8256,6 +8287,12 @@
         const content = $("aiNextPlanContent");
         if(card) card.style.display = "block";
         if(content) content.innerHTML = renderAiObject(latestAiPlanResult);
+        appendAiCoachOutputToCharacterChat({
+          ...latestAiPlanResult,
+          type:"next_week_plan",
+          title:latestAiPlanResult.title || "下周训练计划",
+          message:latestAiPlanResult.coach_message || latestAiPlanResult.message || latestAiPlanResult.reason || "下周计划已生成。"
+        }, { weekLabel:$("weekLabel")?.value || formatCurrentWeekLabel() });
         showCoachBubble("下周计划已生成，先看预览，确认后再采用。", "high", 4500);
       }finally{
         if(btn) btn.disabled = false;
@@ -8316,6 +8353,12 @@
       const data = res.data || parseNaturalLogFallback(text);
       applyFormPatchWithoutOverwriting(data.formPatch || {});
       if(status) status.textContent = data.message || "已填入能识别的信息。";
+      appendAiCoachOutputToCharacterChat({
+        ...data,
+        type:"natural_language_log",
+        title:data.title || "自然记录解析",
+        message:data.message || "已帮你填入能识别的信息。"
+      }, { source:"natural_language_log" });
       showCoachBubble(data.message || "已帮你填入能识别的信息。", "normal", 3500);
     }
 
@@ -8394,6 +8437,12 @@
         const recordBtn = $("recordDailyAdjustBtn");
         if(recordBtn) recordBtn.onclick = () => applyDailyAdjustToTempPlan(latestAiDailyAdjust, { record:true });
       }
+      appendAiCoachOutputToCharacterChat({
+        ...latestAiDailyAdjust,
+        type:"daily_adjust",
+        title:latestAiDailyAdjust.title || "今日训练调整",
+        message:latestAiDailyAdjust.message || latestAiDailyAdjust.coach_message || "今日训练调整已生成。"
+      }, { day:latestAiDailyAdjust.dayName || day.day || "", dayIndex:activePlanDay });
       showCoachBubble(latestAiDailyAdjust.message || "今日训练调整已生成。", "high", 5000);
     }
 
@@ -8411,6 +8460,12 @@
         box.style.display = "block";
         box.innerHTML = renderAiObject(latestAiTrendResult);
       }
+      appendAiCoachOutputToCharacterChat({
+        ...latestAiTrendResult,
+        type:"trend_analysis",
+        title:latestAiTrendResult.title || "AI 趋势观察",
+        message:latestAiTrendResult.coach_message || latestAiTrendResult.message || latestAiTrendResult.summary || "趋势观察已生成。"
+      }, { source:"trend_analysis" });
       showCoachBubble(latestAiTrendResult.coach_message || "趋势观察已生成。", "high", 5000);
     }
 
@@ -10698,6 +10753,7 @@
       if(res.ok){
         const msg = res.data?.message || "AI 教练连接成功。";
         if(status) status.textContent = "AI 状态：连接成功";
+        appendAiCoachOutputToCharacterChat({ type:"test_connection", title:"连接测试", message:msg }, { source:"test_connection" });
         showCoachBubble(msg, "high", 3500, { force:true });
       }else{
         if(status) status.textContent = `AI 状态：连接失败 · ${res.error || "请检查配置"}`;
