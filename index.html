@@ -3710,6 +3710,144 @@
     }
 
 
+    /* --- Patch v95: deterministic centering for AI role chat modal --- */
+    #aiCoachPanelModal{
+      box-sizing:border-box;
+      justify-content:center !important;
+    }
+
+    #aiCoachPanelModal > .ai-coach-panel-card{
+      box-sizing:border-box !important;
+      width:min(520px,100%) !important;
+      max-width:100% !important;
+      margin-inline:auto !important;
+    }
+
+    .ai-coach-panel-card.chat-mode .ai-coach-chat-box{
+      box-sizing:border-box !important;
+      width:100% !important;
+      max-width:100% !important;
+      margin-inline:auto !important;
+    }
+
+    .ai-coach-panel-card.chat-mode .ai-coach-chat-box .character-chat-log{
+      box-sizing:border-box !important;
+      width:100% !important;
+      max-width:100% !important;
+      margin-inline:auto !important;
+    }
+
+    .ai-coach-panel-actions{
+      box-sizing:border-box !important;
+      width:100% !important;
+      max-width:100% !important;
+      margin-inline:auto !important;
+    }
+
+    #closeAiCoachPanelBtn{
+      box-sizing:border-box !important;
+      width:100% !important;
+      max-width:100% !important;
+      margin-inline:auto !important;
+    }
+
+    .character-chat-log.character-chat-empty{
+      display:grid !important;
+      place-items:center !important;
+      text-align:center !important;
+    }
+
+    .character-chat-empty-message{
+      box-sizing:border-box;
+      width:100%;
+      max-width:100%;
+      min-height:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      color:var(--text);
+      background:transparent;
+      border:0;
+      box-shadow:none;
+      padding:0 14px;
+      line-height:1.7;
+      word-break:break-word;
+    }
+
+    .character-chat-composer{
+      box-sizing:border-box !important;
+      width:100% !important;
+      max-width:100% !important;
+      margin-inline:auto !important;
+      --character-chat-control-size:54px;
+      --character-chat-control-gap:10px;
+      --character-chat-composer-padding:10px;
+      --character-chat-inner-radius:calc(var(--character-chat-control-size) / 2);
+      --character-chat-outer-radius:calc(var(--character-chat-inner-radius) + var(--character-chat-composer-padding));
+      padding:var(--character-chat-composer-padding) !important;
+      border-radius:var(--character-chat-outer-radius) !important;
+      overflow:hidden !important;
+      background-clip:padding-box;
+    }
+
+    .character-chat-input-row{
+      box-sizing:border-box !important;
+      width:100% !important;
+      max-width:100% !important;
+      grid-template-columns:minmax(0,1fr) var(--character-chat-control-size) !important;
+      gap:var(--character-chat-control-gap) !important;
+      align-items:center !important;
+    }
+
+    #characterChatInput,
+    .character-chat-send-btn{
+      box-sizing:border-box !important;
+      border-radius:var(--character-chat-inner-radius) !important;
+      min-height:var(--character-chat-control-size) !important;
+      height:var(--character-chat-control-size) !important;
+      background-clip:padding-box;
+    }
+
+    #characterChatInput{
+      padding-block:calc((var(--character-chat-control-size) - 1.45em) / 2) !important;
+      padding-inline:18px !important;
+      line-height:1.45 !important;
+      overflow:hidden !important;
+      text-align:left;
+    }
+
+    .character-chat-send-btn{
+      width:var(--character-chat-control-size) !important;
+      min-width:var(--character-chat-control-size) !important;
+      max-width:var(--character-chat-control-size) !important;
+      flex:0 0 var(--character-chat-control-size) !important;
+    }
+
+    @media (max-width:480px){
+      #aiCoachPanelModal{
+        padding-inline:12px !important;
+        justify-content:center !important;
+      }
+
+      #aiCoachPanelModal > .ai-coach-panel-card{
+        width:100% !important;
+        max-width:100% !important;
+        margin-inline:auto !important;
+      }
+
+      .character-chat-composer{
+        --character-chat-control-size:52px;
+        --character-chat-control-gap:8px;
+        --character-chat-composer-padding:8px;
+      }
+
+      #characterChatInput{
+        padding-inline:16px !important;
+      }
+    }
+
+
 </style>
 </head>
 <body>
@@ -5646,10 +5784,12 @@
       if(!log) return;
       const active = getActiveCharacterCard();
       const history = getCharacterChatHistory();
+      log.classList.toggle("character-chat-empty", !active);
       if(!active){
-        log.innerHTML = `<div class="softbox">选择一个角色卡后开始聊天。</div>`;
+        log.innerHTML = `<div class="character-chat-empty-message">选择一个角色卡后开始聊天。</div>`;
         return;
       }
+      log.classList.remove("character-chat-empty");
       if(!history.length){
         const first = active.first_mes || `你好，我是${active.name}。`;
         log.innerHTML = `<div class="character-chat-msg assistant">${escapeHtml(first)}</div>`;
