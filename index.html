@@ -2165,7 +2165,7 @@
       align-items:center;
       justify-content:space-between;
       gap:12px;
-      margin-bottom:12px;
+      margin-bottom:0;
     }
 
     .collapsible-card-head{
@@ -3526,7 +3526,27 @@
       }
     }
 
-  </style>
+  
+    /* --- Patch v91: keep role chat header title-only without scrollbars --- */
+    .ai-coach-panel-card.chat-mode #aiCoachPanelContent{
+      flex:0 0 auto;
+      max-height:none !important;
+      overflow:visible !important;
+      scrollbar-width:none;
+      -ms-overflow-style:none;
+    }
+
+    .ai-coach-panel-card.chat-mode #aiCoachPanelContent::-webkit-scrollbar{
+      display:none;
+      width:0;
+      height:0;
+    }
+
+    .ai-coach-panel-card.chat-mode #aiCoachPanelContent > div{
+      margin-bottom:0 !important;
+    }
+
+</style>
 </head>
 <body>
   <div id="pageBgLayer" aria-hidden="true"></div>
@@ -3659,14 +3679,6 @@
           <button class="btn-outline full" id="aiDailyAdjustBtn" type="button">让 AI 调整今天训练</button>
           <div id="aiDailyAdjustResult" class="softbox" style="display:none;"></div>
         </div>
-      </div>
-
-      <div class="card">
-        <h2>睡眠与恢复建议</h2>
-        <div class="softbox">推荐目标：平均睡眠尽量拉到 <b>7.5小时以上</b>。</div>
-        <div class="softbox">推荐入睡：尽量稳定在 <b>01:00–01:30</b>，再慢慢提前。</div>
-        <div class="softbox">前一晚睡少于 6 小时：当天别做高强度主力训练，改轻量泵感、核心或恢复。</div>
-        <div class="softbox">保存本周记录时，会把当前计划里已打勾的训练动作一并写进周反馈摘要。</div>
       </div>
 
       <div class="card">
@@ -3902,9 +3914,9 @@
       <div class="card">
         <div class="ai-settings-head">
           <h2>AI 教练设置</h2>
-          <button class="btn-outline ai-settings-collapse-btn" id="aiSettingsCollapseBtn" type="button" aria-expanded="true" aria-controls="aiSettingsBody">收起</button>
+          <button class="btn-outline ai-settings-collapse-btn" id="aiSettingsCollapseBtn" type="button" aria-expanded="false" aria-controls="aiSettingsBody">展开</button>
         </div>
-        <div id="aiSettingsBody" class="ai-settings-body">
+        <div id="aiSettingsBody" class="ai-settings-body collapsed">
           <div class="softbox">开启后，AI 会在你完成训练动作、保存周记录或生成下周计划时，像教练一样给出反馈。桌宠会用短气泡提醒，不会打断当前操作。</div>
           <div class="tool-row" style="margin-top:12px;">
             <button class="btn-outline" id="aiEnabledBtn" type="button">AI 教练：关闭</button>
@@ -4092,7 +4104,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.05.12-86-weekly-day-pill-center";
+    const APP_VERSION = "v2026.05.12-91-chat-title-no-scrollbar";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const TEMP_DAILY_PLAN_OVERRIDES_KEY = "gain-temp-daily-plan-overrides";
     const DAILY_LOGS_KEY = "gain-daily-logs";
@@ -5212,12 +5224,14 @@
       localStorage.setItem(AI_PET_STATE_KEY, JSON.stringify({ ...getAiPetState(), ...(petState || {}) }));
     }
 
+    let aiSettingsCollapsed = true;
+
     function isAiSettingsCollapsed(){
-      return localStorage.getItem(AI_SETTINGS_COLLAPSED_KEY) === "1";
+      return aiSettingsCollapsed;
     }
 
     function setAiSettingsCollapsed(collapsed){
-      localStorage.setItem(AI_SETTINGS_COLLAPSED_KEY, collapsed ? "1" : "0");
+      aiSettingsCollapsed = !!collapsed;
       updateAiSettingsCollapseUi();
     }
 
@@ -10634,7 +10648,6 @@
         panelCard.classList.toggle("history-mode", !!showHistory);
         panelCard.classList.toggle("chat-mode", !showHistory);
       }
-      const last = getAiLastFeedback();
       const history = getAiFeedbackHistory();
       const activeCharacterCard = getActiveCharacterCard();
       const chatBox = $("aiCoachChatBox");
@@ -10655,10 +10668,6 @@
       }else{
         content.innerHTML = `
           <div style="font-size:22px;font-weight:800;margin-bottom:10px;">AI 教练${activeCharacterCard ? ` · ${escapeHtml(activeCharacterCard.name)}` : ""}</div>
-          <div class="softbox">
-            <b>最近反馈：</b><br>
-            ${escapeHtml(last?.message || "还没有反馈。完成一个动作后，这里会显示最近一次教练提醒。")}
-          </div>
         `;
         if(chatBox){
           chatBox.style.display = "flex";
