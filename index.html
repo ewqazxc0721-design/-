@@ -3546,6 +3546,170 @@
       margin-bottom:0 !important;
     }
 
+
+    /* --- Patch v93: iOS role-chat send icon optical centering --- */
+    .character-chat-send-btn{
+      display:grid !important;
+      place-items:center !important;
+      align-items:center !important;
+      justify-content:center !important;
+      padding:0 !important;
+      line-height:0 !important;
+      text-align:center !important;
+      font-size:0 !important;
+      letter-spacing:0 !important;
+      overflow:hidden;
+    }
+
+    .character-chat-send-btn .character-chat-send-icon{
+      width:25px;
+      height:25px;
+      display:block;
+      margin:0;
+      flex:0 0 auto;
+      color:currentColor;
+      pointer-events:none;
+      transform:translate(.5px,-.25px);
+      transform-origin:center center;
+    }
+
+    @supports (-webkit-touch-callout: none){
+      .character-chat-send-btn .character-chat-send-icon{
+        width:24px;
+        height:24px;
+        transform:translate(.75px,-.5px);
+      }
+    }
+
+    /* --- Patch v94: radius audit + concentric role-chat corners --- */
+    :root{
+      --lg-card-outer-radius:28px;
+      --lg-card-inner-radius:20px;
+      --lg-card-inset-radius:16px;
+      --lg-modal-radius:30px;
+      --lg-modal-padding:22px;
+      --lg-modal-mobile-radius:26px;
+      --lg-modal-mobile-padding:18px;
+    }
+
+    .card{
+      border-radius:var(--lg-card-outer-radius) !important;
+      background-clip:padding-box;
+    }
+
+    .softbox,
+    .greenbox,
+    .guide-result,
+    .calendar-detail-card,
+    .history-card,
+    .character-card-item,
+    .calendar-cell{
+      border-radius:var(--lg-card-inner-radius) !important;
+      background-clip:padding-box;
+    }
+
+    .guide-diagram,
+    .mini,
+    .calendar-day-tag{
+      border-radius:var(--lg-card-inset-radius) !important;
+      background-clip:padding-box;
+    }
+
+    #aiCoachPanelModal > .ai-coach-panel-card,
+    #historyRecordModal > div,
+    #planGuideModal > div,
+    #timerDoneModal > div{
+      border-radius:var(--lg-modal-radius) !important;
+      padding:var(--lg-modal-padding) !important;
+      background-clip:padding-box;
+    }
+
+    #aiCoachPanelModal > .ai-coach-panel-card{
+      overflow:hidden !important;
+    }
+
+    #historyRecordModal > div,
+    #planGuideModal > div{
+      overflow:auto;
+      -webkit-overflow-scrolling:touch;
+    }
+
+    .character-chat-log{
+      border-radius:var(--lg-card-inner-radius) !important;
+      padding:12px !important;
+      background-clip:padding-box;
+    }
+
+    .character-chat-msg{
+      border-radius:18px !important;
+      background-clip:padding-box;
+    }
+
+    .character-chat-composer{
+      --character-chat-control-size:54px;
+      --character-chat-control-gap:10px;
+      --character-chat-composer-padding:10px;
+      --character-chat-inner-radius:calc(var(--character-chat-control-size) / 2);
+      --character-chat-outer-radius:calc(var(--character-chat-inner-radius) + var(--character-chat-composer-padding));
+      padding:var(--character-chat-composer-padding) !important;
+      border-radius:var(--character-chat-outer-radius) !important;
+      overflow:hidden !important;
+      background-clip:padding-box;
+    }
+
+    .character-chat-input-row{
+      grid-template-columns:minmax(0,1fr) var(--character-chat-control-size) !important;
+      gap:var(--character-chat-control-gap) !important;
+      align-items:center !important;
+    }
+
+    #characterChatInput,
+    .character-chat-send-btn{
+      border-radius:var(--character-chat-inner-radius) !important;
+      min-height:var(--character-chat-control-size) !important;
+      background-clip:padding-box;
+    }
+
+    #characterChatInput{
+      padding:0 18px !important;
+      line-height:1.45 !important;
+    }
+
+    .character-chat-send-btn{
+      width:var(--character-chat-control-size) !important;
+      height:var(--character-chat-control-size) !important;
+      min-width:var(--character-chat-control-size) !important;
+      max-width:var(--character-chat-control-size) !important;
+      flex:0 0 var(--character-chat-control-size) !important;
+    }
+
+    @media (max-width:480px){
+      :root{
+        --lg-card-outer-radius:26px;
+        --lg-card-inner-radius:18px;
+        --lg-card-inset-radius:14px;
+      }
+
+      #aiCoachPanelModal > .ai-coach-panel-card,
+      #historyRecordModal > div,
+      #planGuideModal > div,
+      #timerDoneModal > div{
+        border-radius:var(--lg-modal-mobile-radius) !important;
+        padding:var(--lg-modal-mobile-padding) !important;
+      }
+
+      .character-chat-composer{
+        --character-chat-control-size:52px;
+        --character-chat-control-gap:8px;
+        --character-chat-composer-padding:8px;
+      }
+
+      #characterChatInput{
+        padding:0 16px !important;
+      }
+    }
+
+
 </style>
 </head>
 <body>
@@ -4063,7 +4227,12 @@
       <div id="aiCoachChatComposer" class="character-chat-composer">
         <div class="character-chat-input-row">
           <textarea id="characterChatInput" placeholder="输入要对当前角色说的话" rows="1"></textarea>
-          <button class="btn character-chat-send-btn" id="sendCharacterChatBtn" type="button" aria-label="发送角色聊天" title="发送">↵</button>
+          <button class="btn character-chat-send-btn" id="sendCharacterChatBtn" type="button" aria-label="发送角色聊天" title="发送">
+            <svg class="character-chat-send-icon" aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+              <path d="M19 5.5v5.75a4.25 4.25 0 0 1-4.25 4.25H6.75" fill="none" stroke="currentColor" stroke-width="2.45" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M10.35 11.15 6 15.5l4.35 4.35" fill="none" stroke="currentColor" stroke-width="2.45" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
         </div>
       </div>
     </div>
@@ -4104,7 +4273,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.05.12-93-trend-calendar-roles";
+    const APP_VERSION = "v2026.05.12-94-radius-audit";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const TEMP_DAILY_PLAN_OVERRIDES_KEY = "gain-temp-daily-plan-overrides";
     const DAILY_LOGS_KEY = "gain-daily-logs";
@@ -11441,6 +11610,199 @@
     $("cloudSyncBtn").onclick = () => syncToCloud(true);
     $("cloudRestoreBtn").onclick = restoreFromCloud;
     $("cloudAutoSyncBtn").onclick = toggleAutoSync;
+
+
+    /* --- Patch v92: centered liquid-glass controls + bottom dock liquid drag --- */
+    function getTabLiquidMaxScale(){
+      const tabsEl = document.querySelector(".tabs");
+      if(!tabsEl) return 1.18;
+      const value = parseFloat(getComputedStyle(tabsEl).getPropertyValue("--liquid-tab-max-scale"));
+      return Number.isFinite(value) ? Math.max(1, value) : 1.18;
+    }
+
+    function getTabLiquidDragScale(deltaX){
+      const maxScale = getTabLiquidMaxScale();
+      return Math.min(maxScale, 1 + Math.min(maxScale - 1, Math.abs(deltaX) / 260));
+    }
+
+    function setTabIndicatorTransform(indicator, left, options = {}){
+      if(!indicator) return;
+      const tabsEl = indicator.closest ? indicator.closest(".tabs") : document.querySelector(".tabs");
+      const direction = Number(options.direction || 0);
+      const requestedScale = Math.max(1, Number(options.scaleX || 1));
+      const scaleX = Math.min(requestedScale, getTabLiquidMaxScale());
+      if(tabsEl){
+        const metrics = getTabMetrics(tabDrag && tabDrag.active ? tabDrag.extraScale : 0);
+        const width = parseFloat(indicator.style.width) || indicator.offsetWidth || (metrics ? metrics.width : 0);
+        const edgeGap = metrics ? metrics.edgeGap : 0;
+        const containerWidth = metrics ? metrics.containerWidth : (tabsEl.clientWidth || tabsEl.offsetWidth || 0);
+        const extra = Math.max(0, width * (scaleX - 1));
+        let minLeft = edgeGap + extra / 2;
+        let maxLeft = Math.max(minLeft, containerWidth - width - edgeGap - extra / 2);
+        if(direction > 0){
+          minLeft = edgeGap;
+          maxLeft = Math.max(minLeft, containerWidth - width * scaleX - edgeGap);
+        }else if(direction < 0){
+          minLeft = edgeGap + extra;
+          maxLeft = Math.max(minLeft, containerWidth - width - edgeGap);
+        }
+        if(Number.isFinite(left)) left = Math.max(minLeft, Math.min(left, maxLeft));
+      }
+      indicator.style.transformOrigin = direction < 0 ? "right center" : direction > 0 ? "left center" : "center center";
+      indicator.style.transform = scaleX > 1.001 ? `translateX(${left}px) scaleX(${scaleX})` : `translateX(${left}px)`;
+    }
+
+    function updateTabIndicator(){
+      const tabsEl = document.querySelector(".tabs");
+      const indicator = tabsEl ? tabsEl.querySelector(".tab-indicator") : null;
+      const activeTab = tabsEl ? tabsEl.querySelector(".tab.active") : null;
+      if(!tabsEl || !indicator || !activeTab) return;
+
+      const styles = getComputedStyle(tabsEl);
+      const containerWidth = tabsEl.clientWidth;
+      const scale = parseFloat(styles.getPropertyValue("--indicator-scale")) || 1.13;
+      const edgeGap = parseFloat(styles.getPropertyValue("--indicator-edge-gap")) || 0;
+      const width = activeTab.offsetWidth * scale;
+      const center = activeTab.offsetLeft + activeTab.offsetWidth / 2;
+      let left = center - width / 2;
+      const minLeft = edgeGap;
+      const maxLeft = containerWidth - width - edgeGap;
+      left = Math.max(minLeft, Math.min(left, maxLeft));
+
+      indicator.style.width = width + "px";
+      setTabIndicatorTransform(indicator, left);
+    }
+
+    function previewIndicatorAtButton(button){
+      const extraScale = getDragExtraScale();
+      const state = getButtonSnapState(button, extraScale);
+      if(!state) return;
+      const { metrics, index, left } = state;
+      metrics.tabsEl.classList.add("pressing", "dragging");
+      metrics.indicator.classList.remove("dragging");
+      metrics.indicator.style.width = metrics.width + "px";
+      const previewDirection = left <= metrics.edgeGap + 1 ? 1 : left >= metrics.maxLeft - 1 ? -1 : index - metrics.buttons.indexOf(metrics.tabsEl.querySelector(".tab.active"));
+      setTabIndicatorTransform(metrics.indicator, left, {
+        scaleX: Math.min(getTabLiquidMaxScale(), 1.045),
+        direction: previewDirection
+      });
+      clearDragActiveTab();
+      button.classList.add("drag-active");
+    }
+
+    function startTabDrag(clientX, startLeftOverride = null){
+      tabDrag.extraScale = getDragExtraScale();
+      const metrics = getTabMetrics(tabDrag.extraScale);
+      if(!metrics) return;
+      const dragOverflow = parseFloat(getComputedStyle(metrics.tabsEl).getPropertyValue("--drag-overflow")) || 16;
+      tabDrag.active = true;
+      tabDrag.moved = false;
+      tabDrag.startX = clientX;
+      tabDrag.lastClientX = clientX;
+      tabDrag.startLeft = typeof startLeftOverride === "number" ? startLeftOverride : metrics.activeLeft;
+      tabDrag.minLeft = -dragOverflow;
+      tabDrag.maxLeft = metrics.containerWidth - metrics.width + dragOverflow;
+      tabDrag.lastLeft = tabDrag.startLeft;
+      metrics.tabsEl.classList.add("dragging", "pressing");
+      metrics.indicator.classList.add("dragging");
+      metrics.indicator.style.width = metrics.width + "px";
+      setTabIndicatorTransform(metrics.indicator, tabDrag.startLeft);
+      updateDraggedTabHighlight(tabDrag.startLeft);
+      document.body.style.userSelect = "none";
+      triggerBestEffortHaptic(8);
+    }
+
+    function moveTabDrag(clientX){
+      if(!tabDrag.active) return;
+      const deltaX = clientX - tabDrag.startX;
+      if(Math.abs(deltaX) > 4) tabDrag.moved = true;
+      const next = Math.max(tabDrag.minLeft, Math.min(tabDrag.startLeft + deltaX, tabDrag.maxLeft));
+      const metrics = getTabMetrics(tabDrag.extraScale);
+      if(metrics){
+        let direction = next - (tabDrag.lastLeft || tabDrag.startLeft) || deltaX;
+        if(next <= metrics.edgeGap + 1 && direction < 0) direction = 1;
+        if(next >= metrics.maxLeft - 1 && direction > 0) direction = -1;
+        setTabIndicatorTransform(metrics.indicator, next, {
+          scaleX: getTabLiquidDragScale(deltaX),
+          direction
+        });
+        updateDraggedTabHighlight(next);
+      }
+      tabDrag.lastLeft = next;
+      tabDrag.lastClientX = clientX;
+    }
+
+    function endTabDrag(){
+      if(!tabDrag.active) return;
+      const metrics = getTabMetrics(tabDrag.extraScale);
+      if(metrics){
+        metrics.tabsEl.classList.remove("dragging", "pressing");
+        metrics.indicator.classList.remove("dragging");
+      }
+      clearDragActiveTab();
+      document.body.style.userSelect = "";
+
+      const moved = tabDrag.moved;
+      tabDrag.active = false;
+      tabDrag.moved = false;
+      tabDrag.lastClientX = 0;
+      tabDrag.lastLeft = 0;
+
+      if(moved){
+        snapToNearestTab();
+        triggerBestEffortHaptic(10);
+      }else{
+        updateTabIndicator();
+      }
+    }
+
+    function attachLiquidGlassControls(){
+      if(document.documentElement.dataset.liquidGlassBound === "1") return;
+      document.documentElement.dataset.liquidGlassBound = "1";
+      const selector = ".btn,.btn-outline,.btn-danger,.mini-btn,.check-btn,.day-tab,.tab,.timer-adjust-btn,.character-chat-send-btn,.ai-coach-avatar";
+      let activeControl = null;
+      let activePointerId = null;
+
+      const setPressPoint = (target, event) => {
+        const rect = target.getBoundingClientRect();
+        if(!rect.width || !rect.height) return;
+        const x = Math.max(0, Math.min(100, ((event.clientX - rect.left) / rect.width) * 100));
+        const y = Math.max(0, Math.min(100, ((event.clientY - rect.top) / rect.height) * 100));
+        target.style.setProperty("--press-x", `${x}%`);
+        target.style.setProperty("--press-y", `${y}%`);
+      };
+
+      const releaseControl = () => {
+        if(activeControl){
+          activeControl.classList.remove("glass-pressing");
+          activeControl = null;
+          activePointerId = null;
+        }
+      };
+
+      document.addEventListener("pointerdown", (event) => {
+        const target = event.target instanceof Element ? event.target.closest(selector) : null;
+        if(!target || target.disabled) return;
+        activeControl = target;
+        activePointerId = event.pointerId;
+        setPressPoint(target, event);
+        target.classList.add("glass-pressing");
+        if(target.setPointerCapture){
+          try{ target.setPointerCapture(event.pointerId); }catch(err){}
+        }
+      }, { passive:true });
+
+      document.addEventListener("pointermove", (event) => {
+        if(!activeControl || (activePointerId !== null && event.pointerId !== activePointerId)) return;
+        setPressPoint(activeControl, event);
+      }, { passive:true });
+
+      document.addEventListener("pointerup", releaseControl, { passive:true });
+      document.addEventListener("pointercancel", releaseControl, { passive:true });
+      document.addEventListener("lostpointercapture", releaseControl, { passive:true });
+      window.addEventListener("blur", releaseControl);
+    }
+
 
     bindAiSettingsControls();
     bindCharacterCardControls();
