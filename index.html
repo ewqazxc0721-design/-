@@ -2261,17 +2261,70 @@
 
     .ai-coach-chat-box .character-chat-log{
       flex:1 1 auto;
-      min-height:140px;
+      min-height:0;
       max-height:min(34dvh, 320px);
+    }
+
+    .character-chat-composer{
+      flex:0 0 auto;
+      position:sticky;
+      bottom:0;
+      z-index:30;
+      display:grid;
+      grid-template-rows:auto auto;
+      gap:10px;
+      margin-top:10px;
+      padding:10px 0 0;
+      min-width:0;
+      isolation:isolate;
+      background:linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.94) 42%);
     }
 
     #characterChatInput{
       flex:0 0 auto;
+      position:relative;
+      z-index:40;
       width:100%;
       box-sizing:border-box;
-      min-height:76px;
-      max-height:120px;
-      margin-top:10px;
+      min-height:60px;
+      max-height:96px;
+      margin-top:0;
+      display:block;
+      resize:none;
+      border-radius:999px;
+      padding:17px 18px;
+      background:rgba(255,255,255,.34);
+      border:1px solid rgba(255,255,255,.56);
+      box-shadow:
+        0 16px 36px rgba(15,23,42,.13),
+        0 5px 14px rgba(15,23,42,.06),
+        inset 0 1px 0 rgba(255,255,255,.78),
+        inset 0 -1px 0 rgba(15,23,42,.06);
+      backdrop-filter:blur(28px) saturate(190%) brightness(1.06);
+      -webkit-backdrop-filter:blur(28px) saturate(190%) brightness(1.06);
+    }
+
+    .character-chat-actions{
+      position:relative;
+      z-index:10;
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      margin-top:0 !important;
+      padding:10px;
+      min-width:0;
+      border-radius:18px;
+      background:rgba(248,250,252,.78);
+      border:1px solid rgba(148,163,184,.18);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.70),
+        0 8px 20px rgba(15,23,42,.06);
+    }
+
+    .character-chat-actions .btn,
+    .character-chat-actions .btn-outline{
+      width:100%;
+      min-width:0;
     }
 
     .ai-coach-panel-card > .btns,
@@ -2294,12 +2347,19 @@
       }
 
       .ai-coach-chat-box .character-chat-log{
-        min-height:120px;
+        min-height:0;
         max-height:30dvh;
       }
 
       #characterChatInput{
-        min-height:72px;
+        min-height:56px;
+        max-height:88px;
+        padding:16px 17px;
+      }
+
+      .character-chat-composer{
+        gap:9px;
+        padding-top:9px;
       }
     }
 
@@ -3295,6 +3355,40 @@
       }
     }
 
+    /* --- Patch v23: iOS weekly day dock centered pill and label alignment --- */
+    @supports (-webkit-touch-callout: none){
+      @media (max-width: 480px){
+        #dayTabs .day-tab{
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          line-height: 1 !important;
+        }
+
+        #dayTabs .day-tab-content{
+          width: 100% !important;
+          height: 100% !important;
+          padding: 0 !important;
+          gap: 0 !important;
+          display: flex !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          justify-content: center !important;
+          text-align: center !important;
+          line-height: 1 !important;
+        }
+
+        #dayTabs .day-tab-label{
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          text-align: center !important;
+          line-height: 1 !important;
+          letter-spacing: 0 !important;
+        }
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -3811,10 +3905,12 @@
         <div class="ai-coach-chat-title">角色聊天</div>
         <div class="help">聊天会读取当前角色卡、本周计划、打卡进度和历史训练记录。</div>
         <div class="character-chat-log" id="characterChatLog"></div>
+        <div class="character-chat-composer">
         <textarea id="characterChatInput" placeholder="输入要对当前角色说的话"></textarea>
-        <div class="tool-row" style="margin-top:10px;">
+          <div class="tool-row character-chat-actions">
           <button class="btn" id="sendCharacterChatBtn" type="button">发送</button>
           <button class="btn-outline" id="clearCharacterChatBtn" type="button">清空聊天</button>
+          </div>
         </div>
       </div>
       <div class="btns">
@@ -3861,7 +3957,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.05.11-79-collapsed-tools";
+    const APP_VERSION = "v2026.05.11-83-ai-feedback-to-chat";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const TEMP_DAILY_PLAN_OVERRIDES_KEY = "gain-temp-daily-plan-overrides";
     const DAILY_LOGS_KEY = "gain-daily-logs";
@@ -4496,6 +4592,67 @@
       if(options.sync) queueAutoSync("角色聊天记录更新");
     }
 
+    function buildAiCoachChatMirrorText(feedback = {}){
+      const title = cleanAiDisplayText(feedback.title || "AI 教练");
+      const seen = new Set();
+      const lines = title ? [`【${title}】`] : [];
+      const addLine = (value, label = "") => {
+        const text = cleanAiDisplayText(normalizePlanItemText(value || ""));
+        if(!text || seen.has(`${label}:${text}`)) return;
+        seen.add(`${label}:${text}`);
+        lines.push(label ? `${label}：${text}` : text);
+      };
+      const addList = (value, label) => {
+        const list = Array.isArray(value) ? value : [];
+        const text = list.map((item) => cleanAiDisplayText(normalizePlanItemText(item))).filter(Boolean).join("；");
+        if(text) addLine(text, label);
+      };
+
+      addLine(feedback.message || feedback.coach_message || feedback.summary || feedback.reason || "");
+      addLine(feedback.praise, "鼓励");
+      addLine(feedback.warning, "提醒");
+      addLine(feedback.recovery, "恢复");
+      addList(feedback.progress, "进展");
+      addList(feedback.problems, "问题");
+      addList(feedback.next_week_advice, "下周建议");
+      addList(feedback.observations, "观察");
+      addList(feedback.risks, "风险");
+      addList(feedback.suggestions, "建议");
+      addList(feedback.changes, "变化");
+      addList(feedback.warnings, "提醒");
+      addList(feedback.adjustedItems, "今日调整");
+
+      return lines.join("\n").trim();
+    }
+
+    function appendAiCoachOutputToCharacterChat(feedback = {}, meta = {}, options = {}){
+      if(options.syncToCharacterChat === false) return null;
+      const activeCharacterCard = getActiveCharacterCard();
+      if(!activeCharacterCard) return null;
+      const content = buildAiCoachChatMirrorText(feedback);
+      if(!content) return null;
+
+      const history = getCharacterChatHistory();
+      const type = feedback?.type || "coach_feedback";
+      const latest = history[history.length - 1];
+      if(latest && latest.source === "ai_coach" && latest.aiFeedbackType === type && latest.content === content){
+        return latest;
+      }
+
+      const entry = {
+        role:"assistant",
+        content,
+        source:"ai_coach",
+        aiFeedbackType:type,
+        title: cleanAiDisplayText(feedback?.title || "AI 教练"),
+        characterCardId: activeCharacterCard.id,
+        meta: meta || {},
+        at:new Date().toISOString()
+      };
+      setCharacterChatHistory([...history, entry], { sync:true });
+      return entry;
+    }
+
     function setCharacterCards(cards, options = {}){
       const normalized = normalizeCharacterCardList(cards);
       localStorage.setItem(CHARACTER_CARDS_KEY, JSON.stringify(normalized));
@@ -4896,6 +5053,7 @@
       const list = getAiFeedbackHistory();
       list.unshift(item);
       localStorage.setItem(AI_FEEDBACK_HISTORY_KEY, JSON.stringify(list.slice(0, 50)));
+      appendAiCoachOutputToCharacterChat({ ...feedback, title:item.title, message:item.message, type:item.type }, item.meta);
       queueAutoSync("AI 反馈更新");
       return item;
     }
@@ -6903,6 +7061,39 @@
       });
     }
 
+    function getCenteredDayIndicatorBox(input = {}){
+      const center = Number(input.center);
+      const visibleLeft = Number(input.visibleLeft);
+      const visibleRight = Number(input.visibleRight);
+      const desiredWidth = Math.max(1, Number(input.desiredWidth) || 1);
+      const minWidth = Math.min(desiredWidth, Math.max(1, Number(input.minWidth) || 1));
+
+      if(!Number.isFinite(center) || !Number.isFinite(visibleLeft) || !Number.isFinite(visibleRight) || visibleRight <= visibleLeft){
+        const width = minWidth;
+        const left = Number.isFinite(visibleLeft) ? visibleLeft : 0;
+        return { left, width, center:left + width / 2 };
+      }
+
+      const availableWidth = Math.max(1, visibleRight - visibleLeft);
+      const maxCenteredWidth = Math.min(
+        desiredWidth,
+        availableWidth,
+        Math.max(0, (center - visibleLeft) * 2),
+        Math.max(0, (visibleRight - center) * 2)
+      );
+
+      if(maxCenteredWidth >= minWidth){
+        const width = maxCenteredWidth;
+        const left = center - width / 2;
+        return { left, width, center };
+      }
+
+      const width = Math.min(desiredWidth, Math.max(minWidth, Math.min(availableWidth, desiredWidth)));
+      const maxLeft = visibleRight - width;
+      const left = Math.max(visibleLeft, Math.min(center - width / 2, maxLeft));
+      return { left, width, center:left + width / 2 };
+    }
+
     function setDayIndicatorTransform(indicator, left, options = {}){
       if(!indicator) return;
       if(!isIosDayDockMode()){
@@ -6965,20 +7156,54 @@
       const fallbackWidth = getDayTabFallbackWidth(tabsEl, buttons);
       const buttonBoxes = buttons.map((btn, index) => getDayButtonBox(tabsEl, btn, index, fallbackWidth));
       const activeIndex = Math.max(0, buttons.indexOf(activeTab));
-      const activeBox = buttonBoxes[activeIndex] || buttonBoxes[0];
       const contentRight = buttonBoxes.reduce((max, box) => Math.max(max, box.left + box.width), 0) + edgeGap;
       const contentWidth = Math.max(tabsEl.scrollWidth || 0, contentRight, tabsEl.clientWidth || 0);
-      const width = Math.max(isIosDayDockMode() ? 68 : 1, activeBox.width * scale);
-      const maxLeft = Math.max(edgeGap, contentWidth - width - edgeGap);
-      const activeCenter = activeBox.center;
-      const activeLeft = Math.max(edgeGap, Math.min(activeCenter - width / 2, maxLeft));
+      const minIndicatorWidth = isIosDayDockMode() ? 68 : 1;
+      const visibleLeft = isIosDayDockMode() ? (tabsEl.scrollLeft || 0) + edgeGap : edgeGap;
+      const visibleRight = isIosDayDockMode()
+        ? (tabsEl.scrollLeft || 0) + (tabsEl.clientWidth || tabsEl.offsetWidth || contentWidth) - edgeGap
+        : contentWidth - edgeGap;
+      const buildIndicatorBox = (box) => {
+        const desiredWidth = Math.max(minIndicatorWidth, box.width * scale);
+        if(isIosDayDockMode()){
+          return getCenteredDayIndicatorBox({
+            center: box.center,
+            desiredWidth,
+            minWidth: minIndicatorWidth,
+            visibleLeft,
+            visibleRight
+          });
+        }
+        const maxLeft = Math.max(edgeGap, contentWidth - desiredWidth - edgeGap);
+        const left = Math.max(edgeGap, Math.min(box.center - desiredWidth / 2, maxLeft));
+        return { left, width: desiredWidth, center: left + desiredWidth / 2 };
+      };
+      const indicatorBoxes = buttonBoxes.map(buildIndicatorBox);
+      const activeIndicatorBox = indicatorBoxes[activeIndex] || indicatorBoxes[0] || { left:edgeGap, width:minIndicatorWidth, center:edgeGap + minIndicatorWidth / 2 };
+      const width = activeIndicatorBox.width;
+      const maxLeft = Math.max(visibleLeft, visibleRight - width);
+      const activeLeft = activeIndicatorBox.left;
+      const snapLefts = indicatorBoxes.map((box) => box.left);
+      const snapWidths = indicatorBoxes.map((box) => box.width);
+      const snapCenters = buttonBoxes.map((box) => box.center);
 
-      const snapLefts = buttonBoxes.map((box) => {
-        const left = box.center - width / 2;
-        return Math.max(edgeGap, Math.min(left, maxLeft));
-      });
-
-      return { tabsEl, indicator, buttons, buttonBoxes, contentWidth, width, edgeGap, maxLeft, activeLeft, snapLefts };
+      return {
+        tabsEl,
+        indicator,
+        buttons,
+        buttonBoxes,
+        indicatorBoxes,
+        contentWidth,
+        width,
+        edgeGap,
+        visibleLeft,
+        visibleRight,
+        maxLeft,
+        activeLeft,
+        snapLefts,
+        snapWidths,
+        snapCenters
+      };
     }
 
     function getDayIndicatorLeft(indicator){
@@ -7035,7 +7260,13 @@
       if(!metrics || !button) return null;
       const index = metrics.buttons.indexOf(button);
       if(index < 0) return null;
-      return { metrics, index, left: metrics.snapLefts[index] };
+      return {
+        metrics,
+        index,
+        left: metrics.snapLefts[index],
+        width: metrics.snapWidths?.[index] || metrics.width,
+        center: metrics.snapCenters?.[index] || (metrics.snapLefts[index] + metrics.width / 2)
+      };
     }
 
     function previewDayIndicatorAtButton(button){
@@ -7049,9 +7280,9 @@
       metrics.tabsEl.classList.toggle("previewing", isiOS);
       metrics.indicator.classList.remove("dragging");
       metrics.indicator.style.opacity = "1";
-      metrics.indicator.style.width = metrics.width + "px";
+      metrics.indicator.style.width = state.width + "px";
       const previewScale = isiOS ? (parseFloat(getComputedStyle(metrics.tabsEl).getPropertyValue("--day-liquid-preview-scale")) || 1.035) : 1;
-      const previewDirection = left <= metrics.edgeGap + 1 ? 1 : left >= metrics.maxLeft - 1 ? -1 : index - activePlanDay;
+      const previewDirection = left <= metrics.visibleLeft + 1 ? 1 : left >= metrics.maxLeft - 1 ? -1 : index - activePlanDay;
       setDayIndicatorTransform(metrics.indicator, left, {
         scaleX: previewScale,
         direction: previewDirection
@@ -7097,8 +7328,9 @@
     function updateDayDraggedTabHighlight(indicatorLeft){
       const metrics = getDayDockMetrics(dayDockDrag.extraScale);
       if(!metrics) return;
+      const indicatorWidth = parseFloat(metrics.indicator.style.width) || metrics.width;
       const pillStart = indicatorLeft;
-      const pillEnd = indicatorLeft + metrics.width;
+      const pillEnd = indicatorLeft + indicatorWidth;
       let bestButton = metrics.buttons[0] || null;
       let bestOverlap = -1;
 
@@ -7172,7 +7404,7 @@
       const scrollDelta = metrics.tabsEl.scrollLeft - dayDockDrag.startScrollLeft;
       const next = Math.max(dayDockDrag.minLeft, Math.min(dayDockDrag.startLeft + deltaX + scrollDelta, dayDockDrag.maxLeft));
       let direction = next - dayDockDrag.lastLeft || deltaX;
-      if(next <= metrics.edgeGap + 1 && direction < 0) direction = 1;
+      if(next <= metrics.visibleLeft + 1 && direction < 0) direction = 1;
       if(next >= metrics.maxLeft - 1 && direction > 0) direction = -1;
       setDayIndicatorTransform(metrics.indicator, next, {
         scaleX: getDayLiquidDragScale(deltaX),
@@ -7228,10 +7460,12 @@
       const metrics = getDayDockMetrics(dayDockDrag.extraScale);
       if(!metrics) return;
       const currentLeft = getDayIndicatorLeft(metrics.indicator);
+      const currentWidth = parseFloat(metrics.indicator.style.width) || metrics.width;
+      const currentCenter = currentLeft + currentWidth / 2;
       let nearestIndex = 0;
       let nearestDistance = Infinity;
-      metrics.snapLefts.forEach((snapLeft, index) => {
-        const distance = Math.abs(currentLeft - snapLeft);
+      metrics.snapCenters.forEach((snapCenter, index) => {
+        const distance = Math.abs(currentCenter - snapCenter);
         if(distance < nearestDistance){
           nearestDistance = distance;
           nearestIndex = index;
@@ -7331,7 +7565,7 @@
       if(metrics && metrics.snapLefts[dayIndex] != null){
         const safeGap = Math.max(12, metrics.edgeGap);
         const indicatorLeft = metrics.snapLefts[dayIndex];
-        const indicatorRight = indicatorLeft + metrics.width;
+        const indicatorRight = indicatorLeft + (metrics.snapWidths?.[dayIndex] || metrics.width);
         const minScrollForIndicator = indicatorRight - tabs.clientWidth + safeGap;
         const maxScrollForIndicator = indicatorLeft - safeGap;
         targetScroll = Math.max(minScrollForIndicator, Math.min(targetScroll, maxScrollForIndicator));
@@ -10292,7 +10526,7 @@
           </div>
         `;
         if(chatBox){
-          chatBox.style.display = "block";
+          chatBox.style.display = "flex";
           renderCharacterChat();
         }
       }
