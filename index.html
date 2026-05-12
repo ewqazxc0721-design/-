@@ -4152,6 +4152,17 @@
         <label class="label">备注</label>
         <textarea id="notes" placeholder="例如：胸部酸胀明显，背部发力感一般"></textarea>
 
+        <div class="softbox" id="aiWeeklySummaryDraftCard">
+          <b>AI 周总结草稿</b>
+          <div class="help" style="margin-top:4px;">基于训练日历里的每日完成项目、自动捕捉记录、体重、睡眠和备注生成，不会覆盖上面的手写内容。</div>
+          <div id="aiWeeklySummaryDraftMeta" class="help" style="margin-top:8px;">等待训练日历数据。</div>
+          <div id="aiWeeklySummaryDraftContent" style="margin-top:8px;white-space:pre-wrap;">还没有生成草稿。</div>
+          <div class="btns" style="margin-top:10px;">
+            <button class="btn-outline" id="refreshAiWeeklyDraftBtn" type="button">刷新草稿</button>
+            <button class="btn-outline" id="copyAiWeeklyDraftBtn" type="button">复制草稿</button>
+          </div>
+        </div>
+
         <div class="btns">
           <button class="btn" id="saveBtn">保存本周（含打卡）</button>
           <button class="btn-outline" id="copyBtn">复制给教练</button>
@@ -5748,6 +5759,7 @@
         status: entry.status || "",
         notes: characterCardText(entry.notes || "", 260),
         planSummary: characterCardText(entry.planSummary || "", 900),
+        aiWeeklySummaryDraft: characterCardText(entry.aiWeeklySummaryDraft?.text || entry.aiWeeklySummaryDraft?.suggestedText || "", 700),
         aiCoachMessage: characterCardText(entry.aiWeeklyFeedback?.coach_message || entry.aiWeeklyFeedback?.summary || "", 400)
       }));
     }
@@ -6294,34 +6306,82 @@
       };
     }
 
+    function collectWeeklyDailyFacts(range){
+      const logs = getDailyLogs();
+      return range.dates.map((dateKey) => {
+        const log = logs[dateKey];
+        if(!log) return null;
+        const completedItems = Array.isArray(log.completedItems) ? log.completedItems.filter(Boolean) : [];
+        const records = (Array.isArray(log.aiCaptureRecords) ? log.aiCaptureRecords : [])
+          .filter((record) => !record.revoked)
+          .map((record) => summarizeTrainingCaptureRecord(record));
+        const pieces = [];
+        if(completedItems.length) pieces.push(`完成计划：${completedItems.join("、")}`);
+        if(records.length) pieces.push(`自动捕捉：${records.join("、")}`);
+        if(log.weight) pieces.push(`体重：${log.weight}`);
+        if(log.sleep) pieces.push(`睡眠：${log.sleep}`);
+        if(log.note) pieces.push(`备注：${String(log.note).slice(0, 120)}`);
+        if(!pieces.length) return null;
+        return {
+          date: dateKey,
+          completedItems,
+          records,
+          weight: log.weight || "",
+          sleep: log.sleep || "",
+          note: log.note || "",
+          text: pieces.join("；")
+        };
+      }).filter(Boolean);
+    }
+
+    function buildAiWeeklySummaryText(facts){
+      const dayCount = new Set(facts.map((fact) => fact.date)).size;
+      const completedItemCount = facts.reduce((sum, fact) => sum + fact.completedItems.length, 0);
+      const autoRecordCount = facts.reduce((sum, fact) => sum + fact.records.length, 0);
+      if(!facts.length){
+        return {
+          text:"AI 周总结草稿：本周还没有训练日历事实。完成训练、保存当天日志或让 AI 捕捉部分/额外训练后，这里会自动更新。",
+          dayCount:0,
+          completedItemCount:0,
+          autoRecordCount:0
+        };
+      }
+      const stats = [
+        `本周已有 ${dayCount} 天训练日历事实`,
+        completedItemCount ? `完成计划 ${completedItemCount} 项` : "",
+        autoRecordCount ? `自动捕捉 ${autoRecordCount} 条` : ""
+      ].filter(Boolean).join("，");
+      return {
+        text:`AI 周总结草稿：${stats}。${facts.map((fact) => `${fact.date} ${fact.text}`).join("；")}。`,
+        dayCount,
+        completedItemCount,
+        autoRecordCount
+      };
+    }
+
     function generateAiWeeklySummaryDraft(date = new Date()){
       const range = getCurrentWeekRange(date);
-      const logs = getDailyLogs();
-      const weekRecords = range.dates.flatMap((dateKey) => {
-        const log = logs[dateKey];
-        return (Array.isArray(log?.aiCaptureRecords) ? log.aiCaptureRecords : [])
-          .filter((record) => !record.revoked)
-          .map((record) => ({ ...record, date:dateKey }));
-      });
-      const dayCount = new Set(weekRecords.map((record) => record.date)).size;
-      const text = weekRecords.length
-        ? `AI 周总结：本周已有 ${dayCount} 天自动捕捉记录，${weekRecords.map((record) => `${record.date} ${summarizeTrainingCaptureRecord(record)}`).join("；")}。`
-        : "AI 周总结：本周还没有自动捕捉到训练事实。";
+      const dailyFacts = collectWeeklyDailyFacts(range);
+      const built = buildAiWeeklySummaryText(dailyFacts);
       const summaries = getAiWeeklySummaries();
       const current = summaries[range.start];
       const summary = {
         weekStart:range.start,
         weekEnd:range.end,
         source:"ai_weekly_summary",
-        text,
+        text:built.text,
+        dailyFacts,
+        factDayCount:built.dayCount,
+        completedItemCount:built.completedItemCount,
+        autoRecordCount:built.autoRecordCount,
         generatedAt:new Date().toISOString(),
         stale:false,
         userModified: !!current?.userModified,
         localUpdatedAt:new Date().toISOString()
       };
       if(current?.userModified){
-        summary.suggestedText = text;
-        summary.text = current.text || text;
+        summary.suggestedText = built.text;
+        summary.text = current.text || built.text;
         summary.stale = true;
       }
       summaries[range.start] = summary;
@@ -6331,7 +6391,9 @@
 
     function refreshAiWeeklySummaryDraftForDate(dateKey){
       const date = parseDateKey(dateKey);
-      return generateAiWeeklySummaryDraft(date || new Date());
+      const summary = generateAiWeeklySummaryDraft(date || new Date());
+      renderAiWeeklySummaryDraftCard(date || new Date());
+      return summary;
     }
 
     function findPlanItemMatchForCapture(intent){
@@ -7628,6 +7690,7 @@
         },
         planCheckSummary:getPlanCheckSummaryJson(checks, days),
         dailyLogs:Object.values(getDailyLogs()).sort((a,b) => String(a.date || "").localeCompare(String(b.date || ""))),
+        aiWeeklySummaryDraft: sourceEntry?.aiWeeklySummaryDraft || getCurrentAiWeeklySummaryDraft(),
         aiWeeklySummaries:getAiWeeklySummaries(),
         generatedAt:new Date().toISOString()
       };
@@ -10643,6 +10706,58 @@
       $("autoAvg").textContent = avg || "未填写";
       $("summaryPreview").textContent = buildCurrentSummary();
       localStorage.setItem(FORM_KEY, JSON.stringify(data));
+      renderAiWeeklySummaryDraftCard();
+    }
+
+    function getCurrentAiWeeklySummaryDraft(date = new Date(), options = {}){
+      const range = getCurrentWeekRange(date);
+      const summaries = getAiWeeklySummaries();
+      if(!options.force && summaries[range.start]) return summaries[range.start];
+      return generateAiWeeklySummaryDraft(date);
+    }
+
+    function getStoredAiWeeklySummaryDraft(date = new Date()){
+      const range = getCurrentWeekRange(date);
+      return getAiWeeklySummaries()[range.start] || null;
+    }
+
+    function getAiWeeklySummaryDraftDisplayText(summary){
+      if(!summary) return "还没有生成草稿。";
+      return summary.suggestedText || summary.text || "还没有生成草稿。";
+    }
+
+    function renderAiWeeklySummaryDraftCard(date = new Date()){
+      const content = $("aiWeeklySummaryDraftContent");
+      const meta = $("aiWeeklySummaryDraftMeta");
+      if(!content && !meta) return null;
+      const range = getCurrentWeekRange(date);
+      const summary = getStoredAiWeeklySummaryDraft(date);
+      const text = getAiWeeklySummaryDraftDisplayText(summary);
+      if(content) content.textContent = text;
+      if(meta){
+        const dayCount = Number(summary?.factDayCount || 0);
+        const completed = Number(summary?.completedItemCount || 0);
+        const captured = Number(summary?.autoRecordCount || 0);
+        const pieces = [`范围：${summary?.weekStart || range.start} 至 ${summary?.weekEnd || range.end}`];
+        if(dayCount) pieces.push(`${dayCount} 天事实`);
+        if(completed) pieces.push(`${completed} 项计划完成`);
+        if(captured) pieces.push(`${captured} 条 AI 捕捉`);
+        if(summary?.stale && summary?.suggestedText) pieces.push("已保留你的手动版本，当前显示最新建议");
+        if(!summary) pieces.push("完成训练或点击刷新后生成");
+        meta.textContent = pieces.filter(Boolean).join(" · ");
+      }
+      return summary;
+    }
+
+    function refreshCurrentAiWeeklySummaryDraft(){
+      const summary = generateAiWeeklySummaryDraft(new Date());
+      renderAiWeeklySummaryDraftCard(new Date());
+      return summary;
+    }
+
+    function copyCurrentAiWeeklySummaryDraft(){
+      const summary = renderAiWeeklySummaryDraftCard();
+      return copyText(getAiWeeklySummaryDraftDisplayText(summary), "已复制 AI 周总结草稿");
     }
 
     function formatDateKey(date){
@@ -10897,14 +11012,17 @@
         current.updatedAt = new Date().toLocaleString("zh-CN");
         nextLogs[selectedCalendarDate] = current;
         setDailyLogs(nextLogs, { syncToCloud: true });
+        refreshAiWeeklySummaryDraftForDate(selectedCalendarDate);
       };
 
       $("deleteCalendarDetailBtn").onclick = () => {
         const ok = confirm("确定删除这一天的训练日志吗？");
         if(!ok) return;
+        const deletedDate = selectedCalendarDate;
         const nextLogs = getDailyLogs();
-        delete nextLogs[selectedCalendarDate];
+        delete nextLogs[deletedDate];
         setDailyLogs(nextLogs, { syncToCloud: true });
+        refreshAiWeeklySummaryDraftForDate(deletedDate);
       };
     }
 
@@ -10940,6 +11058,7 @@
 
       selectedCalendarDate = dateKey;
       setDailyLogs(logs, { syncToCloud: true });
+      refreshAiWeeklySummaryDraftForDate(dateKey);
       if(!options.silent){
         switchTab("history");
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -10974,6 +11093,7 @@
       const totalPlanItems = countTotalPlanItems(days);
       const completionPercent = calcPlanPercent(checks, days);
       const planSummary = buildPlanSummary(checks, days);
+      const aiWeeklySummaryDraft = generateAiWeeklySummaryDraft();
 
       const entry = {
         id: Date.now(),
@@ -10984,6 +11104,7 @@
         totalPlanItems,
         completionPercent,
         planSummary,
+        aiWeeklySummaryDraft,
         planChecksSnapshot: checks,
         tempDailyPlanOverridesSnapshot: getTempDailyPlanOverrides()
       };
@@ -11004,6 +11125,7 @@
         `饮食情况：${entry.diet || "-"}`,
         `本周状态：${entry.status || "-"}`,
         `备注：${entry.notes || "-"}`,
+        `AI 周总结草稿：${entry.aiWeeklySummaryDraft?.text || "-"}`,
         "",
         entry.planSummary
       ].join("\n");
@@ -11076,6 +11198,7 @@
         `饮食情况：${entry.diet || "-"}`,
         `本周状态：${entry.status || "-"}`,
         `备注：${entry.notes || "-"}`,
+        `AI 周总结草稿：${entry.aiWeeklySummaryDraft?.text || "-"}`,
         "",
         entry.planSummary || "本周计划打卡：暂无打卡记录"
       ].join("\n");
@@ -12801,6 +12924,11 @@
     function bindAiFeatureButtons(){
       if($("aiWeeklyBtn")) $("aiWeeklyBtn").onclick = () => generateAiWeeklyAnalysis({ force:true }).catch((err) => alert("AI 反馈生成失败：" + (err.message || "未知错误")));
       if($("aiNextPlanBtn")) $("aiNextPlanBtn").onclick = () => generateAiNextWeekPlan().catch((err) => alert("AI 计划生成失败：" + (err.message || "未知错误")));
+      if($("refreshAiWeeklyDraftBtn")) $("refreshAiWeeklyDraftBtn").onclick = () => {
+        refreshCurrentAiWeeklySummaryDraft();
+        alert("AI 周总结草稿已刷新");
+      };
+      if($("copyAiWeeklyDraftBtn")) $("copyAiWeeklyDraftBtn").onclick = copyCurrentAiWeeklySummaryDraft;
       if($("regenerateAiPlanBtn")) $("regenerateAiPlanBtn").onclick = () => generateAiNextWeekPlan();
       if($("adoptAiPlanBtn")) $("adoptAiPlanBtn").onclick = adoptAiPlan;
       if($("copyAiPlanBtn")) $("copyAiPlanBtn").onclick = () => copyText(JSON.stringify(latestAiPlanResult || {}, null, 2), "已复制 AI 计划");
