@@ -2228,6 +2228,49 @@
       margin-bottom:6px;
     }
 
+    .training-capture-card-stack{
+      display:grid;
+      gap:10px;
+      margin:4px 0 12px;
+    }
+    .training-capture-card{
+      border:1px solid rgba(20,184,166,.22);
+      background:rgba(236,253,245,.86);
+      border-radius:16px;
+      padding:12px;
+      color:#0f172a;
+      box-shadow:0 10px 24px rgba(15,23,42,.08);
+    }
+    .training-capture-card.warn{
+      border-color:rgba(245,158,11,.28);
+      background:rgba(255,251,235,.9);
+    }
+    .training-capture-card.error{
+      border-color:rgba(239,68,68,.28);
+      background:rgba(254,242,242,.92);
+    }
+    .training-capture-card-title{
+      font-size:13px;
+      font-weight:900;
+      margin-bottom:4px;
+    }
+    .training-capture-card-message{
+      font-size:13px;
+      line-height:1.55;
+      color:#334155;
+    }
+    .training-capture-card-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+    .training-capture-card-actions button{
+      min-height:34px;
+      padding:7px 12px;
+      font-size:12px;
+    }
+
     .ai-coach-panel-modal{
       align-items:center;
       justify-content:center;
@@ -2266,10 +2309,12 @@
 
     .character-chat-composer{
       flex:0 0 auto;
-      position:relative;
+      position:sticky;
       bottom:auto;
       z-index:30;
-      display:block;
+      display:grid;
+      grid-template-rows:auto auto;
+      gap:10px;
       margin-top:12px;
       padding:10px;
       min-width:0;
@@ -2294,10 +2339,19 @@
       min-width:0;
     }
 
+    .character-chat-actions{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      padding:10px;
+      border-radius:18px;
+      background:rgba(241,245,249,.66);
+    }
+
     #characterChatInput{
       flex:0 0 auto;
       position:relative;
-      z-index:1;
+      z-index:40;
       width:100%;
       box-sizing:border-box;
       min-height:58px;
@@ -2305,7 +2359,7 @@
       margin:0;
       display:block;
       resize:none;
-      border-radius:30px;
+      border-radius:999px;
       padding:16px 18px;
       overflow:auto;
       background:rgba(255,255,255,.72);
@@ -4228,6 +4282,10 @@
             <button class="btn-outline" id="aiBubbleEnabledBtn" type="button">聊天气泡：关闭</button>
             <button class="btn-outline" id="aiQuietModeBtn" type="button">安静模式：关闭</button>
           </div>
+          <div class="tool-row" style="margin-top:10px;">
+            <button class="btn-outline" id="aiAutoTrainingCaptureBtn" type="button">训练自动记录：开启</button>
+            <button class="btn-outline" id="aiTrainingIntentTriggerBtn" type="button">训练意图触发：开启</button>
+          </div>
           <div class="grid2">
             <div>
               <label class="label">API 调用模式</label>
@@ -4357,7 +4415,7 @@
         <div class="ai-coach-chat-title">角色聊天</div>
         <div class="character-chat-log" id="characterChatLog"></div>
       </div>
-      <div class="btns ai-coach-panel-actions">
+      <div class="btns ai-coach-panel-actions character-chat-actions">
         <button id="aiPanelChatBtn" class="btn-outline" type="button">角色聊天</button>
         <button id="aiPanelHistoryBtn" class="btn-outline" type="button">查看反馈历史</button>
       </div>
@@ -4411,7 +4469,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.05.12-95-role-coach-linkage-tdd";
+    const APP_VERSION = "v2026.05.12-94-radius-audit";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const TEMP_DAILY_PLAN_OVERRIDES_KEY = "gain-temp-daily-plan-overrides";
     const DAILY_LOGS_KEY = "gain-daily-logs";
@@ -4440,6 +4498,10 @@
     const CHARACTER_CARDS_KEY = "gain-character-cards";
     const ACTIVE_CHARACTER_CARD_ID_KEY = "gain-active-character-card-id";
     const CHARACTER_CHAT_HISTORY_KEY = "gain-character-chat-history";
+    const TRAINING_CAPTURE_CARDS_KEY = "gain-training-capture-cards";
+    const AI_WEEKLY_SUMMARIES_KEY = "gain-ai-weekly-summaries";
+    const PLAN_CHECK_META_KEY = "gain-plan-check-meta";
+    const TRAINING_SESSION_KEY = "gain-training-session";
     const FORM_DRAFT_BACKUP_KEY = "gain-tracker-form-draft-backup";
     const LATE_NIGHT_SLEEP_REMINDER_KEY = "gain-late-night-sleep-reminder-date";
     const LATE_NIGHT_SLEEP_REMINDER_CHECK_MS = 60000;
@@ -4913,6 +4975,8 @@
         autoFeedbackOnDayComplete: true,
         autoWeeklyAnalysis: true,
         autoPlanGeneration: false,
+        autoTrainingCapture: true,
+        trainingIntentTrigger: true,
         coachTone: "direct_warm",
         feedbackLength: "short",
         quietMode: false,
@@ -4931,6 +4995,8 @@
       next.autoFeedbackOnCheck = next.autoFeedbackOnCheck !== false;
       next.autoFeedbackOnDayComplete = next.autoFeedbackOnDayComplete !== false;
       next.autoWeeklyAnalysis = next.autoWeeklyAnalysis !== false;
+      next.autoTrainingCapture = next.autoTrainingCapture !== false;
+      next.trainingIntentTrigger = next.trainingIntentTrigger !== false;
       next.syncApiKeyToCloud = next.syncApiKeyToCloud !== false;
       next.apiMode = next.apiMode === "proxy" ? "proxy" : "direct";
       next.apiBaseUrl = String(next.apiBaseUrl || defaults.apiBaseUrl).trim() || defaults.apiBaseUrl;
@@ -5239,6 +5305,17 @@
           weight: log.weight || "",
           sleep: log.sleep || "",
           note: characterCardText(log.note || "", 300),
+          aiCaptureRecords: (Array.isArray(log.aiCaptureRecords) ? log.aiCaptureRecords : [])
+            .filter((record) => !record.revoked)
+            .slice(-8)
+            .map((record) => ({
+              id: record.id || "",
+              recordType: record.recordType || "",
+              summary: summarizeTrainingCaptureRecord(record),
+              sourceType: record.sourceType || "",
+              capturedRoleName: record.capturedRoleName || ""
+            })),
+          aiDailySummary: characterCardText(log.aiDailySummary?.text || "", 360),
           isTemporaryPlan: !!log.isTemporaryPlan
         }));
     }
@@ -5714,7 +5791,9 @@
         })),
         planCheckSummary: getPlanCheckSummaryJson(checks, days),
         recentDailyLogs: getRecentDailyLogsBrief(14),
-        recentWeeklyRecords: getWeeklyRecordsForCharacterChat(5)
+        recentWeeklyRecords: getWeeklyRecordsForCharacterChat(5),
+        aiWeeklySummaries: getAiWeeklySummaries(),
+        activeTrainingSession: getTrainingSession()
       };
     }
 
@@ -5727,6 +5806,804 @@
         "训练上下文 JSON：",
         JSON.stringify(context, null, 2)
       ].join("\n");
+    }
+
+    const TRAINING_CAPTURE_ACTION_ALIASES = [
+      { canonical:"引体向上", aliases:["引体向上","引体","pull up","pull-up","pullup","pull ups","pull-ups"] },
+      { canonical:"俯卧撑", aliases:["俯卧撑","push up","push-up","pushups","push ups"] },
+      { canonical:"侧平举", aliases:["侧平举","侧平","lateral raise","side raise"] },
+      { canonical:"哑铃飞鸟", aliases:["哑铃飞鸟","dumbbell fly","db fly"] },
+      { canonical:"俯身反向飞鸟", aliases:["俯身反向飞鸟","反向飞鸟","reverse fly","rear delt fly"] },
+      { canonical:"哑铃肩推", aliases:["哑铃肩推","肩推","shoulder press"] },
+      { canonical:"哑铃地板卧推", aliases:["哑铃地板卧推","地板卧推","卧推","bench press","floor press"] },
+      { canonical:"哑铃杯式深蹲", aliases:["哑铃杯式深蹲","杯式深蹲","深蹲","squat","goblet squat"] },
+      { canonical:"哑铃罗马尼亚硬拉", aliases:["哑铃罗马尼亚硬拉","罗马尼亚硬拉","硬拉","rdl","deadlift"] },
+      { canonical:"单臂哑铃划船", aliases:["单臂哑铃划船","哑铃划船","划船","row","dumbbell row"] },
+      { canonical:"弹力绳面拉", aliases:["弹力绳面拉","面拉","face pull"] },
+      { canonical:"哑铃弯举", aliases:["哑铃弯举","弯举","curl"] },
+      { canonical:"锤式弯举", aliases:["锤式弯举","hammer curl"] },
+      { canonical:"平板支撑", aliases:["平板支撑","plank"] },
+      { canonical:"跑步", aliases:["跑步","跑了","慢跑","run","running"] },
+      { canonical:"快走", aliases:["快走","walk","walking"] },
+      { canonical:"腿部训练", aliases:["练腿","腿练","练完腿","腿部训练"] }
+    ];
+
+    function normalizeTrainingSearchText(text){
+      return String(text || "")
+        .toLowerCase()
+        .replace(/[-_]/g, " ")
+        .replace(/[，。！？、；：,.!?;:()[\]{}]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function getTrainingCaptureAliasEntries(){
+      const entries = [];
+      TRAINING_CAPTURE_ACTION_ALIASES.forEach((entry) => {
+        (entry.aliases || []).forEach((alias) => entries.push({ canonical:entry.canonical, alias }));
+      });
+      (EXERCISE_GUIDES || []).forEach((guide) => {
+        const canonical = guide.title.split("/")[0].trim();
+        (guide.keywords || []).forEach((alias) => entries.push({ canonical, alias }));
+      });
+      const seen = new Set();
+      return entries
+        .map((entry) => ({ ...entry, normalizedAlias:normalizeTrainingSearchText(entry.alias) }))
+        .filter((entry) => {
+          const key = `${entry.canonical}:${entry.normalizedAlias}`;
+          if(!entry.normalizedAlias || seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        })
+        .sort((a, b) => b.normalizedAlias.length - a.normalizedAlias.length);
+    }
+
+    function matchExerciseFromText(text, options = {}){
+      const raw = String(text || "");
+      const normalized = normalizeTrainingSearchText(raw);
+      if(!normalized) return null;
+      const hasSpecificFly = /哑铃飞鸟|反向飞鸟|俯身反向飞鸟|dumbbell fly|reverse fly|rear delt fly/i.test(raw);
+      if(/飞鸟/.test(raw) && !hasSpecificFly){
+        return { ambiguous:true, canonical:"飞鸟", candidates:["哑铃飞鸟","俯身反向飞鸟"] };
+      }
+      const entries = getTrainingCaptureAliasEntries();
+      const match = entries.find((entry) => {
+        if(/^[a-z ]+$/.test(entry.normalizedAlias)){
+          return normalized.includes(entry.normalizedAlias);
+        }
+        return raw.includes(entry.alias);
+      });
+      return match ? { canonical:match.canonical, alias:match.alias, ambiguous:false } : null;
+    }
+
+    function classifyCharacterTrainingIntent(text, options = {}){
+      const raw = String(text || "").trim();
+      const t = normalizeTrainingSearchText(raw);
+      if(!raw) return { action:"none", reason:"empty" };
+      if(/比如|举例|假设|如果我说|怎么记|会怎么记|功能|机制/.test(raw)){
+        return { action:"none", reason:"meta_discussion" };
+      }
+      if(/别记|不要记|不用记|不要记录|别记录/.test(raw)){
+        return { action:"no_record", reason:"user_declined_recording" };
+      }
+      const safety = /疼|痛|刺痛|头晕|胸闷|胸痛|呼吸不|麻木|扭伤|拉伤|膝盖|肩膀怪|不舒服|眩晕|恶心/.test(raw);
+      if(safety) return { action:"safety", reason:"safety_risk" };
+      const skip = /今天没练|没训练|跳过|休息一天|今天休息|没去健身房|没练完/.test(raw);
+      if(skip) return { action:"capture", recordType:"skipped_training", reason:"skipped_training" };
+      const metric = /体重\s*\d|睡了\s*\d|睡眠\s*\d|主观疲劳\s*\d|疲劳\s*\d\s*分/.test(raw);
+      if(metric) return { action:"capture", recordType:"body_metric", reason:"body_metric" };
+      const exercise = matchExerciseFromText(raw, options);
+      const trainingVerb = /做了|做完|完成|练了|练完|跑了|走了|打卡|组|每组|次数|reps?|kg|公斤|分钟|min/.test(t);
+      const trainingFeeling = /练完|训练后|练得|发力|没感觉|酸|泵感|重量|力竭|代偿|状态/.test(raw);
+      const genericTired = /今天.*累|好累|很累|疲惫/.test(raw) && !/练|训练|腿|胸|背|肩|跑|动作/.test(raw);
+      if(genericTired) return { action:"none", reason:"generic_fatigue" };
+      if(exercise && exercise.ambiguous) return { action:"follow_up", reason:"ambiguous_exercise", candidates:exercise.candidates };
+      if(exercise && (trainingVerb || trainingFeeling)) return { action:"capture", recordType:trainingFeeling && !trainingVerb ? "technical_feedback" : "training_fact", reason:"training_related" };
+      if(trainingFeeling) return { action:"follow_up", reason:"missing_exercise_or_quantity" };
+      return { action:"none", reason:"ordinary_chat" };
+    }
+
+    function shouldAttachTrainingContextToCharacterChat(userText){
+      const settings = getAiSettings();
+      if(!settings.trainingIntentTrigger) return false;
+      const intent = classifyCharacterTrainingIntent(userText);
+      return ["capture","follow_up","safety"].includes(intent.action);
+    }
+
+    function parseCaptureQuantity(text){
+      const raw = String(text || "");
+      const setsMatch = raw.match(/(\d+)\s*组/);
+      const eachRepsMatch = raw.match(/每组\s*(\d+)\s*(?:个|次|reps?)?/i);
+      const repsMatch = raw.match(/(\d+)\s*(?:个|次|下|reps?)/i);
+      const durationMatch = raw.match(/(\d+(?:\.\d+)?)\s*(分钟|min|秒|s)(?:\b|$)?/i);
+      const weightMatch = raw.match(/(\d+(?:\.\d+)?)\s*(?:kg|公斤|千克)/i);
+      const bestSetMatch = raw.match(/最高(?:一组)?[^\d]*(\d+)/);
+      const quantity = {};
+      if(setsMatch) quantity.sets = Number(setsMatch[1]);
+      if(eachRepsMatch) quantity.repsPerSet = Number(eachRepsMatch[1]);
+      if(repsMatch) quantity.reps = Number(repsMatch[1]);
+      if(durationMatch){
+        quantity.duration = Number(durationMatch[1]);
+        quantity.durationUnit = /秒|s/i.test(durationMatch[2]) ? "秒" : "分钟";
+      }
+      if(weightMatch) quantity.weightKg = Number(weightMatch[1]);
+      if(bestSetMatch) quantity.bestSetReps = Number(bestSetMatch[1]);
+      return quantity;
+    }
+
+    function resolveTrainingCaptureDate(text, now = new Date()){
+      const raw = String(text || "");
+      const base = now instanceof Date && Number.isFinite(now.getTime()) ? now : new Date();
+      if(/前天/.test(raw)) return formatDateKey(addDays(base, -2));
+      if(/昨天|昨晚/.test(raw)) return formatDateKey(addDays(base, -1));
+      const weekMatch = raw.match(/(上周)?周([一二三四五六日天])/);
+      if(weekMatch){
+        const weekday = { 一:1, 二:2, 三:3, 四:4, 五:5, 六:6, 日:7, 天:7 }[weekMatch[2]];
+        const range = getCurrentWeekRange(base);
+        const currentWeekDate = parseDateKey(range.dates[weekday - 1]);
+        return formatDateKey(addDays(currentWeekDate, weekMatch[1] ? -7 : 0));
+      }
+      return formatDateKey(base);
+    }
+
+    function inferRecordTypeFromText(text, intent = {}){
+      const raw = String(text || "");
+      if(intent.action === "safety") return "safety_feedback";
+      if(intent.recordType) return intent.recordType;
+      if(/没练|跳过|休息/.test(raw)) return "skipped_training";
+      if(/体重|睡了|睡眠|主观疲劳|疲劳\s*\d\s*分/.test(raw)) return "body_metric";
+      if(/没感觉|发力|酸|重量|代偿|状态|累/.test(raw) && !/做了|做完|完成/.test(raw)) return "technical_feedback";
+      return "training_fact";
+    }
+
+    function buildCaptureCurrentValue(text, recordType, exerciseMatch){
+      const raw = String(text || "");
+      const quantity = parseCaptureQuantity(raw);
+      const value = {
+        text: raw,
+        exercise: exerciseMatch?.canonical || "",
+        ...quantity
+      };
+      if(recordType === "body_metric"){
+        const weight = raw.match(/体重[^\d]*(\d+(?:\.\d+)?)/);
+        const sleep = raw.match(/睡(?:了|眠)?[^\d]*(\d+(?:\.\d+)?)\s*(小时|h|分钟|分)?/i);
+        const fatigue = raw.match(/疲劳[^\d]*(\d+)/);
+        if(weight) value.weightKg = Number(weight[1]);
+        if(sleep){
+          value.sleep = `${sleep[1]}${sleep[2] || "小时"}`;
+        }
+        if(fatigue) value.fatigueScore = Number(fatigue[1]);
+      }
+      if(recordType === "skipped_training"){
+        value.status = /休息/.test(raw) ? "rest" : "skipped";
+      }
+      return value;
+    }
+
+    function extractLocalTrainingCaptureIntent(text, options = {}){
+      const intent = classifyCharacterTrainingIntent(text, options);
+      if(intent.action === "none" || intent.action === "no_record") return { action:intent.action, reason:intent.reason };
+      if(intent.action === "follow_up"){
+        return {
+          action:"follow_up",
+          reason:intent.reason,
+          prompt: intent.candidates?.length
+            ? `你说的是 ${intent.candidates.join("，还是 ")}？`
+            : "这条训练信息还缺动作或数量，要不要补一句我再帮你记？"
+        };
+      }
+      const exerciseMatch = matchExerciseFromText(text, options);
+      if(exerciseMatch?.ambiguous){
+        return {
+          action:"follow_up",
+          reason:"ambiguous_exercise",
+          prompt:`你说的是 ${exerciseMatch.candidates.join("，还是 ")}？`
+        };
+      }
+      const date = resolveTrainingCaptureDate(text, options.now || new Date());
+      const recordType = inferRecordTypeFromText(text, intent);
+      const currentValue = buildCaptureCurrentValue(text, recordType, exerciseMatch);
+      const completedExplicit = /做完|完成|练完|打卡了|全做完/.test(String(text || ""));
+      const canWriteWithoutAi = !!(recordType !== "training_fact" || currentValue.exercise || currentValue.duration || currentValue.reps || currentValue.sets);
+      if(!canWriteWithoutAi){
+        return { action:"follow_up", reason:"low_confidence", prompt:"这条我不敢直接猜，补一下动作或数量我再记录。" };
+      }
+      return {
+        action:"write",
+        date,
+        sourceType: options.sourceType || "character_chat",
+        recordType,
+        currentValue,
+        originalValue:{ ...currentValue },
+        originalText:String(text || ""),
+        completedExplicit,
+        confidence: exerciseMatch?.canonical || recordType !== "training_fact" ? "medium" : "low"
+      };
+    }
+
+    function getTrainingCaptureCards(){
+      const list = safeJsonParse(localStorage.getItem(TRAINING_CAPTURE_CARDS_KEY) || "[]", []);
+      return Array.isArray(list) ? list.slice(0, 5) : [];
+    }
+
+    function setTrainingCaptureCards(cards){
+      const safe = Array.isArray(cards) ? cards.slice(0, 5) : [];
+      localStorage.setItem(TRAINING_CAPTURE_CARDS_KEY, JSON.stringify(safe));
+      renderTrainingCaptureCards();
+      return safe;
+    }
+
+    function clearTrainingCaptureCards(){
+      localStorage.removeItem(TRAINING_CAPTURE_CARDS_KEY);
+      renderTrainingCaptureCards();
+    }
+
+    function pushTrainingCaptureCard(card){
+      const item = {
+        id:`capture_card_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        createdAt:new Date().toISOString(),
+        kind:"success",
+        ...card
+      };
+      setTrainingCaptureCards([item, ...getTrainingCaptureCards()].slice(0, 5));
+      return item;
+    }
+
+    function renderTrainingCaptureCards(){
+      const stack = $("trainingCaptureCardStack");
+      if(!stack) return;
+      const cards = getTrainingCaptureCards();
+      if(!cards.length){
+        stack.innerHTML = "";
+        return;
+      }
+      stack.innerHTML = cards.map((card) => {
+        const kindClass = card.kind === "error" ? "error" : (card.kind === "warn" ? "warn" : "");
+        const actions = [];
+        if(card.recordId && card.canUndo !== false) actions.push(`<button class="btn-outline" type="button" data-capture-undo="${escapeHtml(card.recordId)}">撤回</button>`);
+        if(card.recordId && card.canModify !== false) actions.push(`<button class="btn-outline" type="button" data-capture-modify="${escapeHtml(card.recordId)}">修改</button>`);
+        if(card.canDismiss !== false) actions.push(`<button class="btn-outline" type="button" data-capture-dismiss="${escapeHtml(card.id)}">收起</button>`);
+        return `
+          <div class="training-capture-card ${kindClass}">
+            <div class="training-capture-card-title">${escapeHtml(card.title || "训练记录")}</div>
+            <div class="training-capture-card-message">${escapeHtml(card.message || "")}</div>
+            ${actions.length ? `<div class="training-capture-card-actions">${actions.join("")}</div>` : ""}
+          </div>
+        `;
+      }).join("");
+      stack.querySelectorAll("[data-capture-undo]").forEach((btn) => {
+        btn.onclick = () => undoTrainingCaptureRecord(btn.getAttribute("data-capture-undo") || "");
+      });
+      stack.querySelectorAll("[data-capture-modify]").forEach((btn) => {
+        btn.onclick = () => {
+          const id = btn.getAttribute("data-capture-modify") || "";
+          const next = prompt("输入修改后的记录内容，例如：引体向上 12 个");
+          if(next) modifyLatestTrainingCaptureRecord(id, next);
+        };
+      });
+      stack.querySelectorAll("[data-capture-dismiss]").forEach((btn) => {
+        const id = btn.getAttribute("data-capture-dismiss") || "";
+        btn.onclick = () => setTrainingCaptureCards(getTrainingCaptureCards().filter((card) => card.id !== id));
+      });
+    }
+
+    function getAiWeeklySummaries(){
+      const map = safeJsonParse(localStorage.getItem(AI_WEEKLY_SUMMARIES_KEY) || "{}", {});
+      return map && typeof map === "object" && !Array.isArray(map) ? map : {};
+    }
+
+    function setAiWeeklySummaries(map){
+      localStorage.setItem(AI_WEEKLY_SUMMARIES_KEY, JSON.stringify(map || {}));
+      queueAutoSync("AI 周总结更新");
+      return map || {};
+    }
+
+    function getPlanCheckMeta(){
+      const map = safeJsonParse(localStorage.getItem(PLAN_CHECK_META_KEY) || "{}", {});
+      return map && typeof map === "object" && !Array.isArray(map) ? map : {};
+    }
+
+    function setPlanCheckMeta(meta){
+      localStorage.setItem(PLAN_CHECK_META_KEY, JSON.stringify(meta || {}));
+    }
+
+    function getPlanDayIndexForDate(dateKey){
+      const date = parseDateKey(dateKey);
+      if(!date) return 0;
+      return (date.getDay() + 6) % 7;
+    }
+
+    function buildDailyLogShell(dateKey, previous = {}){
+      const dayIndex = getPlanDayIndexForDate(dateKey);
+      const day = getPlanDays()[dayIndex] || {};
+      const checks = getPlanChecks();
+      const items = normalizePlanItemsList(day.items || previous.allItems || []);
+      const completedItems = items.filter((_, itemIndex) => checks[`d${dayIndex}_i${itemIndex}`]);
+      return {
+        date: dateKey,
+        planDay: previous.planDay || day.day || "",
+        focus: previous.focus || day.focus || "",
+        allItems: previous.allItems || items,
+        baseItems: previous.baseItems || day.baseItems || [],
+        isTemporaryPlan: !!(previous.isTemporaryPlan || day.isTemporary),
+        aiAdjustMessage: previous.aiAdjustMessage || day.temporaryMessage || "",
+        completedItems,
+        completedCount: completedItems.length,
+        totalItems: Number(previous.totalItems || items.length || 0),
+        weight: previous.weight || "",
+        sleep: previous.sleep || "",
+        note: previous.note || "",
+        aiCaptureRecords: Array.isArray(previous.aiCaptureRecords) ? previous.aiCaptureRecords : [],
+        aiDailySummary: previous.aiDailySummary || null,
+        createdAt: previous.createdAt || new Date().toLocaleString("zh-CN"),
+        updatedAt: new Date().toLocaleString("zh-CN"),
+        updatedAtIso: new Date().toISOString()
+      };
+    }
+
+    function syncDailyLogCompletionFromPlan(log, dateKey){
+      const dayIndex = getPlanDayIndexForDate(dateKey);
+      const day = getPlanDays()[dayIndex] || {};
+      const checks = getPlanChecks();
+      const items = normalizePlanItemsList(log.allItems?.length ? log.allItems : day.items || []);
+      log.allItems = items;
+      log.totalItems = items.length;
+      log.completedItems = items.filter((_, itemIndex) => checks[`d${dayIndex}_i${itemIndex}`]);
+      log.completedCount = log.completedItems.length;
+      return log;
+    }
+
+    function summarizeTrainingCaptureRecord(record){
+      const value = record?.currentValue || {};
+      const exercise = value.exercise || "";
+      if(record?.recordType === "safety_feedback"){
+        return `${exercise ? `${exercise}：` : ""}${value.text || "安全反馈"}`;
+      }
+      if(record?.recordType === "technical_feedback"){
+        return `${exercise ? `${exercise}：` : ""}${value.text || "训练反馈"}`;
+      }
+      if(record?.recordType === "skipped_training"){
+        return value.status === "rest" ? "今日休息" : "今日未训练";
+      }
+      if(record?.recordType === "body_metric"){
+        const parts = [];
+        if(value.weightKg) parts.push(`体重 ${value.weightKg}kg`);
+        if(value.sleep) parts.push(`睡眠 ${value.sleep}`);
+        if(value.fatigueScore) parts.push(`主观疲劳 ${value.fatigueScore}分`);
+        return parts.join("，") || value.text || "身体指标";
+      }
+      const pieces = [];
+      if(exercise) pieces.push(exercise);
+      if(value.sets) pieces.push(`${value.sets}组`);
+      if(value.repsPerSet) pieces.push(`每组${value.repsPerSet}次`);
+      if(value.reps && !value.repsPerSet) pieces.push(`${value.reps}次`);
+      if(value.bestSetReps) pieces.push(`最高一组${value.bestSetReps}次`);
+      if(value.duration) pieces.push(`${value.duration}${value.durationUnit || "分钟"}`);
+      if(value.weightKg) pieces.push(`${value.weightKg}kg`);
+      return pieces.join(" ") || value.text || "训练事实";
+    }
+
+    function generateAiDailySummaryForLog(log){
+      const records = (Array.isArray(log?.aiCaptureRecords) ? log.aiCaptureRecords : []).filter((record) => !record.revoked);
+      const text = records.length
+        ? `AI 日总结：${records.map((record) => summarizeTrainingCaptureRecord(record)).join("；")}。`
+        : "AI 日总结：暂无有效自动捕捉记录。";
+      return {
+        source:"ai_daily_summary",
+        text,
+        generatedAt:new Date().toISOString(),
+        stale:false,
+        localUpdatedAt:new Date().toISOString()
+      };
+    }
+
+    function generateAiWeeklySummaryDraft(date = new Date()){
+      const range = getCurrentWeekRange(date);
+      const logs = getDailyLogs();
+      const weekRecords = range.dates.flatMap((dateKey) => {
+        const log = logs[dateKey];
+        return (Array.isArray(log?.aiCaptureRecords) ? log.aiCaptureRecords : [])
+          .filter((record) => !record.revoked)
+          .map((record) => ({ ...record, date:dateKey }));
+      });
+      const dayCount = new Set(weekRecords.map((record) => record.date)).size;
+      const text = weekRecords.length
+        ? `AI 周总结：本周已有 ${dayCount} 天自动捕捉记录，${weekRecords.map((record) => `${record.date} ${summarizeTrainingCaptureRecord(record)}`).join("；")}。`
+        : "AI 周总结：本周还没有自动捕捉到训练事实。";
+      const summaries = getAiWeeklySummaries();
+      const current = summaries[range.start];
+      const summary = {
+        weekStart:range.start,
+        weekEnd:range.end,
+        source:"ai_weekly_summary",
+        text,
+        generatedAt:new Date().toISOString(),
+        stale:false,
+        userModified: !!current?.userModified,
+        localUpdatedAt:new Date().toISOString()
+      };
+      if(current?.userModified){
+        summary.suggestedText = text;
+        summary.text = current.text || text;
+        summary.stale = true;
+      }
+      summaries[range.start] = summary;
+      setAiWeeklySummaries(summaries);
+      return summary;
+    }
+
+    function refreshAiWeeklySummaryDraftForDate(dateKey){
+      const date = parseDateKey(dateKey);
+      return generateAiWeeklySummaryDraft(date || new Date());
+    }
+
+    function findPlanItemMatchForCapture(intent){
+      const dateKey = intent.date || formatDateKey(new Date());
+      const dayIndex = getPlanDayIndexForDate(dateKey);
+      const day = getPlanDays()[dayIndex];
+      const exercise = String(intent.currentValue?.exercise || "").trim();
+      if(!day || !exercise) return null;
+      const matches = normalizePlanItemsList(day.items || []).map((item, itemIndex) => ({ item, itemIndex }))
+        .filter(({ item }) => item.includes(exercise) || exercise.includes(item.split(/\s|×|x/)[0]));
+      if(matches.length !== 1) return null;
+      return { dayIndex, itemIndex:matches[0].itemIndex, item:matches[0].item, key:`d${dayIndex}_i${matches[0].itemIndex}` };
+    }
+
+    function isPreciseQuantityMatch(intent, itemText){
+      const value = intent.currentValue || {};
+      const item = String(itemText || "");
+      if(value.sets && !item.includes(`${value.sets}组`)) return false;
+      if(value.repsPerSet && !item.includes(String(value.repsPerSet))) return false;
+      return !!(value.sets || value.repsPerSet);
+    }
+
+    function maybeAutoCompletePlanItemForCapture(intent, recordId){
+      if(intent.recordType !== "training_fact") return [];
+      const match = findPlanItemMatchForCapture(intent);
+      if(!match) return [];
+      if(!intent.completedExplicit && !isPreciseQuantityMatch(intent, match.item)) return [];
+      const checks = getPlanChecks();
+      if(checks[match.key]) return [];
+      checks[match.key] = true;
+      setPlanChecks(checks);
+      const meta = getPlanCheckMeta();
+      meta[match.key] = { source:"training_capture", recordId, updatedAt:new Date().toISOString() };
+      setPlanCheckMeta(meta);
+      return [match.key];
+    }
+
+    function makeTrainingCaptureRecordId(){
+      return `capture_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    }
+
+    function findDuplicateCaptureRecord(log, intent){
+      const records = Array.isArray(log?.aiCaptureRecords) ? log.aiCaptureRecords : [];
+      const signature = `${intent.recordType}:${intent.currentValue?.exercise || ""}:${intent.currentValue?.text || ""}:${intent.currentValue?.reps || ""}:${intent.currentValue?.duration || ""}`;
+      return records.find((record) => {
+        if(record.revoked) return false;
+        const recordSignature = `${record.recordType}:${record.currentValue?.exercise || ""}:${record.currentValue?.text || ""}:${record.currentValue?.reps || ""}:${record.currentValue?.duration || ""}`;
+        return recordSignature === signature;
+      }) || null;
+    }
+
+    function persistDailyLogsAfterTrainingCapture(logs, options = {}){
+      setDailyLogs(logs, { syncToCloud: options.syncToCloud });
+      renderCalendar();
+      renderCalendarDetail();
+      updateSummary();
+    }
+
+    function formatTrainingCaptureCardMessage(record){
+      return `已记录到 ${record.date}：${summarizeTrainingCaptureRecord(record)}`;
+    }
+
+    function writeTrainingCaptureIntent(intent, options = {}){
+      if(!intent || intent.action !== "write") return { status:"ignored", reason:"no_write_intent" };
+      const logs = getDailyLogs();
+      const dateKey = intent.date || formatDateKey(new Date());
+      const log = buildDailyLogShell(dateKey, logs[dateKey] || {});
+      const duplicate = findDuplicateCaptureRecord(log, intent);
+      if(duplicate){
+        pushTrainingCaptureCard({
+          kind:"warn",
+          title:"记录未重复新增",
+          message:`这条和刚才的 ${summarizeTrainingCaptureRecord(duplicate)} 很像，已保留原记录。`,
+          recordId:duplicate.id
+        });
+        return { status:"duplicate", recordId:duplicate.id, record:duplicate };
+      }
+
+      const card = getActiveCharacterCard();
+      const record = {
+        id: options.recordId || makeTrainingCaptureRecordId(),
+        date: dateKey,
+        capturedAt:new Date().toISOString(),
+        sourceType:intent.sourceType || "character_chat",
+        capturedRoleId: card?.id || "",
+        capturedRoleName: card?.name || "",
+        recordType:intent.recordType || "training_fact",
+        currentValue:intent.currentValue || {},
+        originalValue:intent.originalValue || intent.currentValue || {},
+        originalText:intent.originalText || intent.currentValue?.text || "",
+        confidence:intent.confidence || "medium",
+        userModified:false,
+        revoked:false,
+        autoCompletedPlanChecks:[],
+        localUpdatedAt:new Date().toISOString(),
+        cloudVersion:0
+      };
+      record.autoCompletedPlanChecks = maybeAutoCompletePlanItemForCapture(intent, record.id);
+      log.aiCaptureRecords = [...(Array.isArray(log.aiCaptureRecords) ? log.aiCaptureRecords : []), record];
+      syncDailyLogCompletionFromPlan(log, dateKey);
+      log.aiDailySummary = generateAiDailySummaryForLog(log);
+      log.updatedAt = new Date().toLocaleString("zh-CN");
+      log.updatedAtIso = new Date().toISOString();
+      logs[dateKey] = log;
+      persistDailyLogsAfterTrainingCapture(logs, { syncToCloud:true });
+      refreshAiWeeklySummaryDraftForDate(dateKey);
+      if(options.createCard !== false){
+        pushTrainingCaptureCard({
+          kind: record.recordType === "safety_feedback" ? "warn" : "success",
+          title: record.recordType === "safety_feedback" ? "已记录安全反馈" : "已记录",
+          message:formatTrainingCaptureCardMessage(record),
+          recordId:record.id
+        });
+      }
+      return { status:"recorded", recordId:record.id, record, date:dateKey };
+    }
+
+    function findTrainingCaptureRecord(recordId){
+      const logs = getDailyLogs();
+      for(const [dateKey, log] of Object.entries(logs)){
+        const records = Array.isArray(log?.aiCaptureRecords) ? log.aiCaptureRecords : [];
+        const index = records.findIndex((record) => record.id === recordId);
+        if(index >= 0) return { logs, dateKey, log, records, index, record:records[index] };
+      }
+      return null;
+    }
+
+    function undoTrainingCaptureRecord(recordId){
+      const found = findTrainingCaptureRecord(recordId);
+      if(!found) return { status:"not_found" };
+      const { logs, dateKey, log, records, index, record } = found;
+      records[index] = {
+        ...record,
+        revoked:true,
+        localUpdatedAt:new Date().toISOString()
+      };
+      const checks = getPlanChecks();
+      const meta = getPlanCheckMeta();
+      (record.autoCompletedPlanChecks || []).forEach((key) => {
+        if(meta[key]?.source === "training_capture" && meta[key]?.recordId === record.id){
+          delete checks[key];
+          delete meta[key];
+        }
+      });
+      setPlanChecks(checks);
+      setPlanCheckMeta(meta);
+      log.aiCaptureRecords = records;
+      syncDailyLogCompletionFromPlan(log, dateKey);
+      log.aiDailySummary = generateAiDailySummaryForLog(log);
+      log.updatedAt = new Date().toLocaleString("zh-CN");
+      log.updatedAtIso = new Date().toISOString();
+      logs[dateKey] = log;
+      persistDailyLogsAfterTrainingCapture(logs, { syncToCloud:true });
+      refreshAiWeeklySummaryDraftForDate(dateKey);
+      pushTrainingCaptureCard({
+        kind:"warn",
+        title:"已撤回",
+        message:`已撤回 ${dateKey} 的自动捕捉记录。`,
+        recordId:record.id,
+        canUndo:false
+      });
+      return { status:"undone", recordId:record.id };
+    }
+
+    function modifyTrainingCaptureRecord(recordId, patch = {}){
+      const found = findTrainingCaptureRecord(recordId);
+      if(!found) return { status:"not_found" };
+      const { logs, dateKey, log, records, index, record } = found;
+      const nextRecord = {
+        ...record,
+        currentValue:{ ...(record.currentValue || {}), ...(patch.currentValue || {}) },
+        userModified:true,
+        localUpdatedAt:new Date().toISOString()
+      };
+      records[index] = nextRecord;
+      log.aiCaptureRecords = records;
+      log.aiDailySummary = generateAiDailySummaryForLog(log);
+      log.updatedAt = new Date().toLocaleString("zh-CN");
+      log.updatedAtIso = new Date().toISOString();
+      logs[dateKey] = log;
+      persistDailyLogsAfterTrainingCapture(logs, { syncToCloud:true });
+      refreshAiWeeklySummaryDraftForDate(dateKey);
+      pushTrainingCaptureCard({
+        title:"已修改",
+        message:formatTrainingCaptureCardMessage(nextRecord),
+        recordId:nextRecord.id
+      });
+      return { status:"modified", recordId:nextRecord.id, record:nextRecord };
+    }
+
+    function modifyLatestTrainingCaptureRecord(recordId, text){
+      const intent = extractLocalTrainingCaptureIntent(text);
+      const patch = intent?.action === "write" ? { currentValue:intent.currentValue } : { currentValue:{ text:String(text || "") } };
+      return modifyTrainingCaptureRecord(recordId, patch);
+    }
+
+    function findLatestRelatedTrainingCaptureRecord(){
+      const records = Object.values(getDailyLogs()).flatMap((log) => Array.isArray(log.aiCaptureRecords) ? log.aiCaptureRecords : []);
+      return records
+        .filter((record) => !record.revoked)
+        .sort((a, b) => Date.parse(b.capturedAt || "") - Date.parse(a.capturedAt || ""))[0] || null;
+    }
+
+    function handleTrainingCaptureCorrection(text){
+      const raw = String(text || "");
+      const latest = findLatestRelatedTrainingCaptureRecord();
+      if(!latest) return null;
+      if(/另外|还有|再加|顺便/.test(raw)) return null;
+      const correction = raw.match(/(?:不是|不对|改成|是)\s*(\d+)\s*(?:个|次|下|reps?)?/i);
+      if(!correction && !/刚才那条|记错了|我说错了/.test(raw)) return null;
+      const patch = correction ? { currentValue:{ reps:Number(correction[1]) } } : { currentValue:{ text:raw } };
+      return modifyTrainingCaptureRecord(latest.id, patch);
+    }
+
+    function handleCharacterTrainingCapture(text, options = {}){
+      const settings = getAiSettings();
+      const classified = classifyCharacterTrainingIntent(text, options);
+      if(classified.action === "none") return { status:"ignored", reason:classified.reason };
+      if(classified.action === "no_record"){
+        const latest = findLatestRelatedTrainingCaptureRecord();
+        if(latest) return undoTrainingCaptureRecord(latest.id);
+        return { status:"declined", reason:"user_declined_recording" };
+      }
+      if(!settings.trainingIntentTrigger){
+        if(classified.action === "safety"){
+          pushTrainingCaptureCard({
+            kind:"warn",
+            title:"安全提醒",
+            message:"训练意图触发已关闭，所以不会读取训练上下文或写入记录；但如果有胸闷、头晕、疼痛或麻木，请先停止相关训练，必要时寻求专业帮助。",
+            canUndo:false,
+            canModify:false
+          });
+          return { status:"safety_minimum", reason:"trainingIntentTrigger" };
+        }
+        return { status:"disabled", reason:"trainingIntentTrigger" };
+      }
+      if(!settings.autoTrainingCapture){
+        return { status:"disabled", reason:"autoTrainingCapture" };
+      }
+      const corrected = handleTrainingCaptureCorrection(text);
+      if(corrected) return corrected;
+      const intent = extractLocalTrainingCaptureIntent(text, options);
+      if(intent.action === "follow_up"){
+        pushTrainingCaptureCard({
+          kind:"warn",
+          title:"需要确认",
+          message:intent.prompt || "这条训练信息还不够明确，我先不写入。"
+        });
+        return { status:"follow_up", reason:intent.reason, prompt:intent.prompt };
+      }
+      if(intent.action !== "write") return { status:"ignored", reason:intent.reason || "no_write_intent" };
+      return writeTrainingCaptureIntent(intent, options);
+    }
+
+    function getTrainingSession(){
+      const session = safeJsonParse(localStorage.getItem(TRAINING_SESSION_KEY) || "null", null);
+      return session && typeof session === "object" ? session : null;
+    }
+
+    function setTrainingSession(session){
+      if(session){
+        localStorage.setItem(TRAINING_SESSION_KEY, JSON.stringify(session));
+      }else{
+        localStorage.removeItem(TRAINING_SESSION_KEY);
+      }
+      queueAutoSync("训练会话状态更新");
+      renderTrainingCaptureCards();
+      return session;
+    }
+
+    function startTrainingSession(dayIndex = activePlanDay){
+      const existing = getTrainingSession();
+      if(existing && existing.status === "active"){
+        pushTrainingCaptureCard({
+          kind:"warn",
+          title:"训练会话未结束",
+          message:`你还有一个 ${existing.dayName || "训练日"} 会话草稿。可继续、结束保存或放弃。`,
+          canUndo:false,
+          canModify:false
+        });
+        openAiCoachPanel(false, { focusChat:true });
+        return existing;
+      }
+      const day = getPlanDays()[dayIndex];
+      if(!day) return null;
+      const card = getActiveCharacterCard();
+      const session = {
+        id:`session_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        status:"active",
+        dayIndex,
+        dayName:day.day || `第${dayIndex + 1}天`,
+        date:getDateForPlanDayInCurrentWeek(day.day, dayIndex),
+        focus:day.focus || "",
+        items:normalizePlanItemsList(day.items || []),
+        characterCardId:card?.id || "",
+        characterCardName:card?.name || "",
+        events:[],
+        startedAt:new Date().toISOString(),
+        updatedAt:new Date().toISOString()
+      };
+      setTrainingSession(session);
+      pushTrainingCaptureCard({
+        title:"训练会话已开始",
+        message:`${session.dayName} · ${session.characterCardName ? `陪练角色：${session.characterCardName}` : "未绑定角色"}。退出页面后会保留草稿。`,
+        canUndo:false,
+        canModify:false
+      });
+      openAiCoachPanel(false, { focusChat:true });
+      return session;
+    }
+
+    function finishTrainingSession(options = {}){
+      const session = getTrainingSession();
+      if(!session) return { status:"not_found" };
+      const save = options.save !== false;
+      const finished = {
+        ...session,
+        status: save ? "finished" : "discarded",
+        endedAt:new Date().toISOString(),
+        updatedAt:new Date().toISOString()
+      };
+      if(save){
+        const summaryIntent = {
+          action:"write",
+          date:session.date || formatDateKey(new Date()),
+          sourceType:"training_session",
+          recordType:"training_fact",
+          currentValue:{
+            text:`训练会话结束：${session.dayName || ""}`,
+            exercise:session.focus || "训练会话",
+            status:"session_finished",
+            completedItems:(getPlanDays()[session.dayIndex]?.items || []).filter((_, itemIndex) => getPlanChecks()[`d${session.dayIndex}_i${itemIndex}`])
+          },
+          originalValue:{ text:`训练会话结束：${session.dayName || ""}` },
+          originalText:`训练会话结束：${session.dayName || ""}`,
+          completedExplicit:false,
+          confidence:"medium"
+        };
+        writeTrainingCaptureIntent(summaryIntent, { createCard:false });
+      }
+      setTrainingSession(null);
+      pushTrainingCaptureCard({
+        kind: save ? "success" : "warn",
+        title: save ? "训练会话已保存" : "训练会话已放弃",
+        message: save ? "本次训练会话已沉淀到当天自动捕捉记录。" : "会话草稿已放弃，不写入训练事实。",
+        canUndo:false,
+        canModify:false
+      });
+      return { status:finished.status, session:finished };
+    }
+
+    function maybePromptTrainingSessionClose(dayIndex){
+      const session = getTrainingSession();
+      if(!session || session.status !== "active" || Number(session.dayIndex) !== Number(dayIndex)) return false;
+      const day = getPlanDays()[dayIndex];
+      if(!day) return false;
+      const checks = getPlanChecks();
+      const done = normalizePlanItemsList(day.items || []).every((_, itemIndex) => checks[`d${dayIndex}_i${itemIndex}`]);
+      if(!done) return false;
+      session.status = "closing";
+      session.updatedAt = new Date().toISOString();
+      setTrainingSession(session);
+      pushTrainingCaptureCard({
+        title:"今日项目已完成",
+        message:"训练会话进入收尾确认。你可以补充感受，也可以稍后结束并保存。",
+        canUndo:false,
+        canModify:false
+      });
+      return true;
     }
 
     function renderCharacterCards(){
@@ -5854,7 +6731,7 @@
       if(settings.apiMode === "proxy" && !settings.proxyUrl) throw new Error("请先在 AI 设置里填写代理 URL");
 
       const history = getCharacterChatHistory().slice(-12);
-      const trainingContext = buildCharacterTrainingContext();
+      const trainingContext = shouldAttachTrainingContextToCharacterChat(userText) ? buildCharacterTrainingContext() : null;
       const messages = [
         { role:"system", content:buildCharacterChatSystemPrompt(card, trainingContext) },
         ...history.map((item) => ({ role:item.role, content:String(item.content || "") })),
@@ -5919,6 +6796,7 @@
       }
       const history = getCharacterChatHistory();
       setCharacterChatHistory([...history, { role:"user", content:text, at:new Date().toISOString() }]);
+      handleCharacterTrainingCapture(text);
       if(input) input.value = "";
       if(btn) btn.disabled = true;
       try{
@@ -6078,6 +6956,8 @@
       setBtn("aiPetEnabledBtn", "桌宠反馈", settings.deskPetEnabled);
       setBtn("aiBubbleEnabledBtn", "聊天气泡", settings.bubbleEnabled);
       setBtn("aiQuietModeBtn", "安静模式", settings.quietMode);
+      setBtn("aiAutoTrainingCaptureBtn", "训练自动记录", settings.autoTrainingCapture);
+      setBtn("aiTrainingIntentTriggerBtn", "训练意图触发", settings.trainingIntentTrigger);
       const syncBtn = $("aiSyncKeyBtn");
       if(syncBtn){
         syncBtn.textContent = `同步key：${settings.syncApiKeyToCloud ? "开启" : "关闭"}`;
@@ -6570,6 +7450,7 @@
         },
         planCheckSummary:getPlanCheckSummaryJson(checks, days),
         dailyLogs:Object.values(getDailyLogs()).sort((a,b) => String(a.date || "").localeCompare(String(b.date || ""))),
+        aiWeeklySummaries:getAiWeeklySummaries(),
         generatedAt:new Date().toISOString()
       };
     }
@@ -6945,8 +7826,10 @@
       const history = Array.isArray(row.history_json) ? row.history_json : [];
       const embeddedDailyLogs = rawForm.__dailyLogs && typeof rawForm.__dailyLogs === "object" ? rawForm.__dailyLogs : {};
       const embeddedPlanChecks = rawForm.__planChecks && typeof rawForm.__planChecks === "object" ? rawForm.__planChecks : {};
+      const embeddedPlanCheckMeta = rawForm.__planCheckMeta && typeof rawForm.__planCheckMeta === "object" ? rawForm.__planCheckMeta : {};
       const embeddedPlanTemplate = rawForm.__planTemplate && typeof rawForm.__planTemplate === "object" ? rawForm.__planTemplate : DEFAULT_PLAN_TEMPLATE;
       const embeddedTempDailyPlanOverrides = rawForm.__tempDailyPlanOverrides && typeof rawForm.__tempDailyPlanOverrides === "object" ? rawForm.__tempDailyPlanOverrides : {};
+      const embeddedAiWeeklySummaries = rawForm.__aiWeeklySummaries && typeof rawForm.__aiWeeklySummaries === "object" ? rawForm.__aiWeeklySummaries : {};
       const embeddedAiSettings = rawForm.__aiSettings && typeof rawForm.__aiSettings === "object" ? rawForm.__aiSettings : null;
       const embeddedAiFeedbackHistory = Array.isArray(rawForm.__aiFeedbackHistory) ? rawForm.__aiFeedbackHistory : [];
       const embeddedAiLastFeedback = rawForm.__aiLastFeedback && typeof rawForm.__aiLastFeedback === "object" ? rawForm.__aiLastFeedback : null;
@@ -6955,6 +7838,7 @@
       const embeddedCharacterCards = Array.isArray(rawForm.__characterCards) ? rawForm.__characterCards : [];
       const embeddedActiveCharacterCardId = typeof rawForm.__activeCharacterCardId === "string" ? rawForm.__activeCharacterCardId : "";
       const embeddedCharacterChatHistory = Array.isArray(rawForm.__characterChatHistory) ? rawForm.__characterChatHistory : [];
+      const embeddedTrainingSession = rawForm.__trainingSession && typeof rawForm.__trainingSession === "object" ? rawForm.__trainingSession : null;
       return {
         id: row.id || row.uuid || row.row_id || null,
         user_id: row.user_id || "",
@@ -6962,8 +7846,10 @@
         history_json: history,
         daily_logs_json: row.daily_logs_json && typeof row.daily_logs_json === "object" ? row.daily_logs_json : embeddedDailyLogs,
         plan_checks_json: row.plan_checks_json && typeof row.plan_checks_json === "object" ? row.plan_checks_json : embeddedPlanChecks,
+        plan_check_meta_json: embeddedPlanCheckMeta,
         plan_template_json: row.plan_template_json && typeof row.plan_template_json === "object" ? row.plan_template_json : embeddedPlanTemplate,
         temp_daily_plan_overrides_json: embeddedTempDailyPlanOverrides,
+        ai_weekly_summaries_json: embeddedAiWeeklySummaries,
         ai_settings_json: embeddedAiSettings,
         ai_feedback_history_json: embeddedAiFeedbackHistory,
         ai_last_feedback_json: embeddedAiLastFeedback,
@@ -6972,6 +7858,7 @@
         character_cards_json: embeddedCharacterCards,
         active_character_card_id: embeddedActiveCharacterCardId,
         character_chat_history_json: embeddedCharacterChatHistory,
+        training_session_json: embeddedTrainingSession,
         updated_at: rawForm.__updatedAt || row.updated_at || row.modified_at || row.created_at || ""
       };
     }
@@ -7080,9 +7967,11 @@
           ...snapshot.form,
           __dailyLogs: snapshot.dailyLogs,
           __planChecks: snapshot.planChecks,
+          __planCheckMeta: snapshot.planCheckMeta,
           __planTemplate: snapshot.planTemplate,
           __tempDailyPlanOverrides: snapshot.tempDailyPlanOverrides,
           __pageBackground: getPageBackgroundData(),
+          __aiWeeklySummaries: snapshot.aiWeeklySummaries,
           __aiSettings: snapshot.aiSettings,
           __aiFeedbackHistory: snapshot.aiFeedbackHistory,
           __aiLastFeedback: snapshot.aiLastFeedback,
@@ -7092,6 +7981,7 @@
           __characterCards: snapshot.characterCards,
           __activeCharacterCardId: snapshot.activeCharacterCardId,
           __characterChatHistory: snapshot.characterChatHistory,
+          __trainingSession: snapshot.trainingSession,
           __lastCloudSyncAt: uploadUpdatedAt,
           __updatedAt: uploadUpdatedAt
         };
@@ -7205,8 +8095,10 @@
             dailyLogs: cloud.daily_logs_json || {},
             lastCloudSyncAt: cloud.updated_at || new Date().toISOString(),
             planChecks: cloud.plan_checks_json || {},
+            planCheckMeta: cloud.plan_check_meta_json || {},
             planTemplate: cloud.plan_template_json || DEFAULT_PLAN_TEMPLATE,
             tempDailyPlanOverrides: cloud.temp_daily_plan_overrides_json || {},
+            aiWeeklySummaries: cloud.ai_weekly_summaries_json || {},
             aiSettings: cloud.ai_settings_json || undefined,
             aiFeedbackHistory: cloud.ai_feedback_history_json || [],
             aiLastFeedback: cloud.ai_last_feedback_json || null,
@@ -7215,6 +8107,7 @@
             characterCards: cloud.character_cards_json || [],
             activeCharacterCardId: cloud.active_character_card_id || "",
             characterChatHistory: cloud.character_chat_history_json || [],
+            trainingSession: cloud.training_session_json || null,
             updatedAt: cloud.updated_at || new Date().toISOString()
           });
           setCloudStatus(`云端状态：已自动恢复较新的云端版本（${getCloudUserLabel(user)}）`);
@@ -7273,8 +8166,10 @@
         dailyLogs: getDailyLogs(),
         lastCloudSyncAt: getLastCloudSyncAt(),
         planChecks: getPlanChecks(),
+        planCheckMeta: getPlanCheckMeta(),
         planTemplate: getPlanTemplate(),
         tempDailyPlanOverrides: getTempDailyPlanOverrides(),
+        aiWeeklySummaries: getAiWeeklySummaries(),
         aiSettings: getAiSettingsForBackup(),
         aiFeedbackHistory: getAiFeedbackHistory(),
         aiLastFeedback: getAiLastFeedback(),
@@ -7284,6 +8179,7 @@
         characterCards: getCharacterCards(),
         activeCharacterCardId: getActiveCharacterCardId(),
         characterChatHistory: getCharacterChatHistory(),
+        trainingSession: getTrainingSession(),
         updatedAt: getLocalUpdatedAt()
       };
     }
@@ -7294,10 +8190,12 @@
       const pageBackground = String((payload && payload.pageBackground) || safeForm.__pageBackground || "").trim();
       const embeddedDailyLogs = safeForm.__dailyLogs;
       const embeddedPlanChecks = safeForm.__planChecks;
+      const embeddedPlanCheckMeta = safeForm.__planCheckMeta;
       const embeddedPlanTemplate = safeForm.__planTemplate;
       const embeddedTempDailyPlanOverrides = safeForm.__tempDailyPlanOverrides;
       const embeddedLastCloudSyncAt = safeForm.__lastCloudSyncAt;
       const embeddedUpdatedAt = safeForm.__updatedAt;
+      const embeddedAiWeeklySummaries = safeForm.__aiWeeklySummaries;
       const embeddedAiSettings = safeForm.__aiSettings;
       const embeddedAiFeedbackHistory = safeForm.__aiFeedbackHistory;
       const embeddedAiLastFeedback = safeForm.__aiLastFeedback;
@@ -7307,13 +8205,16 @@
       const embeddedCharacterCards = safeForm.__characterCards;
       const embeddedActiveCharacterCardId = safeForm.__activeCharacterCardId;
       const embeddedCharacterChatHistory = safeForm.__characterChatHistory;
+      const embeddedTrainingSession = safeForm.__trainingSession;
       delete safeForm.__pageBackground;
       delete safeForm.__dailyLogs;
       delete safeForm.__planChecks;
+      delete safeForm.__planCheckMeta;
       delete safeForm.__planTemplate;
       delete safeForm.__tempDailyPlanOverrides;
       delete safeForm.__lastCloudSyncAt;
       delete safeForm.__updatedAt;
+      delete safeForm.__aiWeeklySummaries;
       delete safeForm.__aiSettings;
       delete safeForm.__aiFeedbackHistory;
       delete safeForm.__aiLastFeedback;
@@ -7323,13 +8224,16 @@
       delete safeForm.__characterCards;
       delete safeForm.__activeCharacterCardId;
       delete safeForm.__characterChatHistory;
+      delete safeForm.__trainingSession;
 
       const safeHistory = payload && Array.isArray(payload.history) ? payload.history : [];
       const safeDailyLogs = payload && payload.dailyLogs ? payload.dailyLogs : (embeddedDailyLogs && typeof embeddedDailyLogs === "object" ? embeddedDailyLogs : {});
       const safePlanChecks = payload && payload.planChecks ? payload.planChecks : (embeddedPlanChecks && typeof embeddedPlanChecks === "object" ? embeddedPlanChecks : {});
+      const safePlanCheckMeta = payload && payload.planCheckMeta ? payload.planCheckMeta : (embeddedPlanCheckMeta && typeof embeddedPlanCheckMeta === "object" ? embeddedPlanCheckMeta : {});
       const planTemplateSource = payload && payload.planTemplate ? payload.planTemplate : (embeddedPlanTemplate && typeof embeddedPlanTemplate === "object" ? embeddedPlanTemplate : getPlanTemplate());
       const safePlanTemplate = normalizePlanTemplate(planTemplateSource);
       const safeTempDailyPlanOverrides = normalizeTempDailyPlanOverrides(payload && payload.tempDailyPlanOverrides ? payload.tempDailyPlanOverrides : (embeddedTempDailyPlanOverrides && typeof embeddedTempDailyPlanOverrides === "object" ? embeddedTempDailyPlanOverrides : {}));
+      const safeAiWeeklySummaries = payload && payload.aiWeeklySummaries ? payload.aiWeeklySummaries : (embeddedAiWeeklySummaries && typeof embeddedAiWeeklySummaries === "object" ? embeddedAiWeeklySummaries : {});
       const safeAiSettings = payload && payload.aiSettings ? payload.aiSettings : (embeddedAiSettings || null);
       const safeAiFeedbackHistory = payload && Array.isArray(payload.aiFeedbackHistory) ? payload.aiFeedbackHistory : (Array.isArray(embeddedAiFeedbackHistory) ? embeddedAiFeedbackHistory : []);
       const safeAiLastFeedback = payload && payload.aiLastFeedback ? payload.aiLastFeedback : (embeddedAiLastFeedback || null);
@@ -7339,6 +8243,7 @@
       const safeCharacterCards = normalizeCharacterCardList(payload && Array.isArray(payload.characterCards) ? payload.characterCards : (Array.isArray(embeddedCharacterCards) ? embeddedCharacterCards : []));
       const safeActiveCharacterCardId = String((payload && payload.activeCharacterCardId) || embeddedActiveCharacterCardId || "");
       const safeCharacterChatHistory = Array.isArray(payload && payload.characterChatHistory) ? payload.characterChatHistory : (Array.isArray(embeddedCharacterChatHistory) ? embeddedCharacterChatHistory : []);
+      const safeTrainingSession = payload && payload.trainingSession ? payload.trainingSession : (embeddedTrainingSession || null);
       const updatedAt = (payload && payload.updatedAt) || embeddedUpdatedAt || new Date().toISOString();
 
       suppressAutoSync = true;
@@ -7347,8 +8252,10 @@
         localStorage.setItem(HISTORY_KEY, JSON.stringify(safeHistory));
         localStorage.setItem(DAILY_LOGS_KEY, JSON.stringify(safeDailyLogs));
         localStorage.setItem(PLAN_CHECKS_KEY, JSON.stringify(safePlanChecks));
+        localStorage.setItem(PLAN_CHECK_META_KEY, JSON.stringify(safePlanCheckMeta));
         localStorage.setItem(PLAN_TEMPLATE_KEY, JSON.stringify(safePlanTemplate));
         localStorage.setItem(TEMP_DAILY_PLAN_OVERRIDES_KEY, JSON.stringify(safeTempDailyPlanOverrides));
+        localStorage.setItem(AI_WEEKLY_SUMMARIES_KEY, JSON.stringify(safeAiWeeklySummaries));
         if(safeAiSettings) localStorage.setItem(AI_SETTINGS_KEY, JSON.stringify(normalizeAiSettings(safeAiSettings)));
         localStorage.setItem(AI_FEEDBACK_HISTORY_KEY, JSON.stringify(safeAiFeedbackHistory));
         if(safeAiLastFeedback) localStorage.setItem(AI_LAST_FEEDBACK_KEY, JSON.stringify(safeAiLastFeedback));
@@ -7362,6 +8269,7 @@
           localStorage.removeItem(ACTIVE_CHARACTER_CARD_ID_KEY);
         }
         localStorage.setItem(CHARACTER_CHAT_HISTORY_KEY, JSON.stringify(safeCharacterChatHistory.slice(-40)));
+        if(safeTrainingSession) localStorage.setItem(TRAINING_SESSION_KEY, JSON.stringify(safeTrainingSession)); else localStorage.removeItem(TRAINING_SESSION_KEY);
         setLastCloudSyncAt((payload && payload.lastCloudSyncAt) || embeddedLastCloudSyncAt || updatedAt);
         applyPageBackground(pageBackground);
         markLocalStateChanged("从云端恢复到本机", updatedAt);
@@ -7462,8 +8370,10 @@
           dailyLogs: data.daily_logs_json || {},
           lastCloudSyncAt: data.updated_at || new Date().toISOString(),
           planChecks: data.plan_checks_json || {},
+          planCheckMeta: data.plan_check_meta_json || {},
           planTemplate: data.plan_template_json || DEFAULT_PLAN_TEMPLATE,
           tempDailyPlanOverrides: data.temp_daily_plan_overrides_json || {},
+          aiWeeklySummaries: data.ai_weekly_summaries_json || {},
           aiSettings: data.ai_settings_json || undefined,
           aiFeedbackHistory: data.ai_feedback_history_json || [],
           aiLastFeedback: data.ai_last_feedback_json || null,
@@ -7472,6 +8382,7 @@
           characterCards: data.character_cards_json || [],
           activeCharacterCardId: data.active_character_card_id || "",
           characterChatHistory: data.character_chat_history_json || [],
+          trainingSession: data.training_session_json || null,
           updatedAt: data.updated_at || new Date().toISOString()
         });
         setCloudStatus(`云端状态：已从云端恢复（${getCloudUserLabel(user)}）`);
@@ -7525,6 +8436,7 @@
       clearTempDailyPlanOverrides();
       if(clearChecks){
         localStorage.removeItem(PLAN_CHECKS_KEY);
+        localStorage.removeItem(PLAN_CHECK_META_KEY);
         localStorage.removeItem(AI_MILESTONE_KEY);
       }
       queueAutoSync(clearChecks ? "训练模板更新并重置打卡" : "训练模板更新");
@@ -8984,6 +9896,8 @@
       try{
         const payload = {
           current: buildCoachJsonPayload(),
+          calendarDailyLogs: Object.values(getDailyLogs()).sort((a, b) => String(a.date || "").localeCompare(String(b.date || ""))),
+          aiWeeklySummaryDraft: generateAiWeeklySummaryDraft(),
           recentHistory: getHistory().slice(0, 3),
           planTemplate: getPlanTemplate(),
           planCheckSummary: getPlanCheckSummaryJson()
@@ -9099,9 +10013,14 @@
 
     function clearPlanChecksForDay(dayIndex){
       const checks = getPlanChecks();
+      const meta = getPlanCheckMeta();
       Object.keys(checks).forEach((key) => {
-        if(key.startsWith(`d${dayIndex}_i`)) delete checks[key];
+        if(key.startsWith(`d${dayIndex}_i`)){
+          delete checks[key];
+          delete meta[key];
+        }
       });
+      setPlanCheckMeta(meta);
       setPlanChecks(checks);
     }
 
@@ -9223,11 +10142,20 @@
       const beforeDone = !!checks[key];
       checks[key] = !checks[key];
       const afterDone = !!checks[key];
+      const meta = getPlanCheckMeta();
+      if(afterDone){
+        meta[key] = { source:"manual", updatedAt:new Date().toISOString() };
+      }else{
+        delete meta[key];
+      }
+      setPlanCheckMeta(meta);
       setPlanChecks(checks);
       renderPlan();
       updateSummary();
       if(!beforeDone && afterDone){
         handleAiExerciseCompleted(key).catch((err) => console.error("AI 动作反馈失败", err));
+        const parsed = parsePlanCheckKey(key);
+        if(parsed) maybePromptTrainingSessionClose(parsed.dayIndex);
       }
     }
 
@@ -9235,17 +10163,23 @@
       const days = getPlanDays();
       const checks = getPlanChecks();
       if(!days[dayIndex]) return;
+      const meta = getPlanCheckMeta();
       days[dayIndex].items.forEach((_, itemIndex) => {
-        checks[`d${dayIndex}_i${itemIndex}`] = true;
+        const key = `d${dayIndex}_i${itemIndex}`;
+        checks[key] = true;
+        meta[key] = { source:"manual", updatedAt:new Date().toISOString() };
       });
+      setPlanCheckMeta(meta);
       setPlanChecks(checks);
       renderPlan();
       updateSummary();
+      maybePromptTrainingSessionClose(dayIndex);
       handleAiDayComplete(dayIndex, { source:"complete_day_button" }).catch((err) => console.error("AI 完成反馈失败", err));
     }
 
     function resetPlanChecks(){
       localStorage.removeItem(PLAN_CHECKS_KEY);
+      localStorage.removeItem(PLAN_CHECK_META_KEY);
       queueAutoSync("清空训练打卡");
       renderPlan();
       updateSummary();
@@ -9306,6 +10240,7 @@
             <div style="margin-top:12px">${itemsHtml}</div>
             <div class="greenbox"><b>蛋白粉安排：</b>${escapeHtml(d.protein || "暂无")}</div>
             <div class="plan-actions">
+              <button class="btn" data-start-training-session="${dayIndex}">开始训练</button>
               <button class="btn-outline" data-day-complete="${dayIndex}">一键完成今天</button>
               <button class="btn-outline" data-record-daily-log="${dayIndex}">记录到本周对应日期</button>
               ${restoreTempButton}
@@ -9350,6 +10285,10 @@
         btn.onclick = () => completeDay(Number(btn.getAttribute("data-day-complete")));
       });
 
+      container.querySelectorAll("[data-start-training-session]").forEach((btn) => {
+        btn.onclick = () => startTrainingSession(Number(btn.getAttribute("data-start-training-session")));
+      });
+
       container.querySelectorAll("[data-record-daily-log]").forEach((btn) => {
         btn.onclick = () => recordPlanDayToToday(Number(btn.getAttribute("data-record-daily-log")));
       });
@@ -9359,9 +10298,14 @@
           const dayIndex = Number(btn.getAttribute("data-clear-temp-plan"));
           clearTempDailyPlanOverride(dayIndex, { sync:true });
           const checks = getPlanChecks();
+          const meta = getPlanCheckMeta();
           Object.keys(checks).forEach((key) => {
-            if(key.startsWith(`d${dayIndex}_i`)) delete checks[key];
+            if(key.startsWith(`d${dayIndex}_i`)){
+              delete checks[key];
+              delete meta[key];
+            }
           });
+          setPlanCheckMeta(meta);
           setPlanChecks(checks);
           renderPlan();
           updateSummary();
@@ -9689,6 +10633,10 @@
       const completedItems = Array.isArray(log.completedItems) ? log.completedItems : [];
       const allItems = Array.isArray(log.allItems) ? log.allItems : [];
       const displayItems = completedItems.length ? completedItems : allItems;
+      const aiCaptureRecords = (Array.isArray(log.aiCaptureRecords) ? log.aiCaptureRecords : []);
+      const activeAiCaptureRecords = aiCaptureRecords.filter((record) => !record.revoked);
+      const revokedAiCaptureRecords = aiCaptureRecords.filter((record) => record.revoked);
+      const aiDailySummary = log.aiDailySummary || generateAiDailySummaryForLog(log);
 
       box.innerHTML = `
         <div style="font-weight:800;font-size:18px;">${escapeHtml(selectedCalendarDate)} · ${escapeHtml(log.planDay || "")}</div>
@@ -9701,6 +10649,20 @@
 
         <div class="label">当天完成动作</div>
         <ul class="calendar-items">${displayItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("") || "<li>暂无记录</li>"}</ul>
+
+        <div class="label">自动捕捉记录</div>
+        <ul class="calendar-items">
+          ${activeAiCaptureRecords.map((record) => `
+            <li>
+              ${escapeHtml(summarizeTrainingCaptureRecord(record))}
+              <div class="help">自动捕捉${record.capturedRoleName ? ` · 来源角色：${escapeHtml(record.capturedRoleName)}` : ""}${record.userModified ? " · 用户已修改" : ""}</div>
+            </li>
+          `).join("") || "<li>暂无自动捕捉记录</li>"}
+        </ul>
+        ${revokedAiCaptureRecords.length ? `<div class="help">已撤回 ${revokedAiCaptureRecords.length} 条自动捕捉记录，不进入 AI 总结。</div>` : ""}
+
+        <div class="label">AI 日总结</div>
+        <div class="softbox">${escapeHtml(aiDailySummary.text || "AI 日总结：暂无有效自动捕捉记录。")}</div>
 
         <div class="grid2" style="margin-top:12px;">
           <div>
@@ -9767,6 +10729,8 @@
         weight: logs[dateKey]?.weight || "",
         sleep: logs[dateKey]?.sleep || "",
         note: logs[dateKey]?.note || "",
+        aiCaptureRecords: Array.isArray(logs[dateKey]?.aiCaptureRecords) ? logs[dateKey].aiCaptureRecords : [],
+        aiDailySummary: logs[dateKey]?.aiDailySummary || null,
         createdAt: logs[dateKey]?.createdAt || new Date().toLocaleString("zh-CN"),
         updatedAt: new Date().toLocaleString("zh-CN"),
         updatedAtIso: new Date().toISOString()
@@ -10633,8 +11597,10 @@
         dailyLogs: getDailyLogs(),
         lastCloudSyncAt: getLastCloudSyncAt(),
         planChecks: getPlanChecks(),
+        planCheckMeta: getPlanCheckMeta(),
         planTemplate: getPlanTemplate(),
         tempDailyPlanOverrides: getTempDailyPlanOverrides(),
+        aiWeeklySummaries: getAiWeeklySummaries(),
         pageBackground: getPageBackgroundData(),
         aiSettings: getAiSettingsForBackup(),
         aiFeedbackHistory: getAiFeedbackHistory(),
@@ -10644,7 +11610,8 @@
         aiMilestones: getAiMilestones(),
         characterCards: getCharacterCards(),
         activeCharacterCardId: getActiveCharacterCardId(),
-        characterChatHistory: getCharacterChatHistory()
+        characterChatHistory: getCharacterChatHistory(),
+        trainingSession: getTrainingSession()
       };
       const ok = confirm("导出的备份可能包含 AI API Key，请不要发送给他人。继续导出吗？");
       if(!ok) return;
@@ -10675,11 +11642,23 @@
             if(nextForm.__tempDailyPlanOverrides && typeof nextForm.__tempDailyPlanOverrides === "object" && !payload.tempDailyPlanOverrides){
               payload.tempDailyPlanOverrides = nextForm.__tempDailyPlanOverrides;
             }
+            if(nextForm.__planCheckMeta && typeof nextForm.__planCheckMeta === "object" && !payload.planCheckMeta){
+              payload.planCheckMeta = nextForm.__planCheckMeta;
+            }
+            if(nextForm.__aiWeeklySummaries && typeof nextForm.__aiWeeklySummaries === "object" && !payload.aiWeeklySummaries){
+              payload.aiWeeklySummaries = nextForm.__aiWeeklySummaries;
+            }
+            if(nextForm.__trainingSession && typeof nextForm.__trainingSession === "object" && !payload.trainingSession){
+              payload.trainingSession = nextForm.__trainingSession;
+            }
             delete nextForm.__pageBackground;
             delete nextForm.__tempDailyPlanOverrides;
+            delete nextForm.__planCheckMeta;
+            delete nextForm.__aiWeeklySummaries;
             delete nextForm.__characterCards;
             delete nextForm.__activeCharacterCardId;
             delete nextForm.__characterChatHistory;
+            delete nextForm.__trainingSession;
             localStorage.setItem(FORM_KEY, JSON.stringify(nextForm));
           }
           if(Array.isArray(payload.history)){
@@ -10697,10 +11676,16 @@
           if(payload.planChecks){
             localStorage.setItem(PLAN_CHECKS_KEY, JSON.stringify(payload.planChecks));
           }
+          if(payload.planCheckMeta){
+            localStorage.setItem(PLAN_CHECK_META_KEY, JSON.stringify(payload.planCheckMeta));
+          }
           if(payload.tempDailyPlanOverrides){
             localStorage.setItem(TEMP_DAILY_PLAN_OVERRIDES_KEY, JSON.stringify(normalizeTempDailyPlanOverrides(payload.tempDailyPlanOverrides)));
           }else{
             localStorage.removeItem(TEMP_DAILY_PLAN_OVERRIDES_KEY);
+          }
+          if(payload.aiWeeklySummaries){
+            localStorage.setItem(AI_WEEKLY_SUMMARIES_KEY, JSON.stringify(payload.aiWeeklySummaries));
           }
           if(payload.aiSettings){
             localStorage.setItem(AI_SETTINGS_KEY, JSON.stringify(normalizeAiSettings(payload.aiSettings)));
@@ -10735,6 +11720,11 @@
           if(Array.isArray(payload.characterChatHistory)){
             localStorage.setItem(CHARACTER_CHAT_HISTORY_KEY, JSON.stringify(payload.characterChatHistory.slice(-40)));
           }
+          if(payload.trainingSession){
+            localStorage.setItem(TRAINING_SESSION_KEY, JSON.stringify(payload.trainingSession));
+          }else{
+            localStorage.removeItem(TRAINING_SESSION_KEY);
+          }
           applyPageBackground(payload.pageBackground || "");
 
           setForm(JSON.parse(localStorage.getItem(FORM_KEY) || JSON.stringify(defaultForm)));
@@ -10762,6 +11752,7 @@
       localStorage.removeItem(FORM_KEY);
       localStorage.removeItem(HISTORY_KEY);
       localStorage.removeItem(PLAN_CHECKS_KEY);
+      localStorage.removeItem(PLAN_CHECK_META_KEY);
       localStorage.removeItem(PLAN_TEMPLATE_KEY);
       localStorage.removeItem(TEMP_DAILY_PLAN_OVERRIDES_KEY);
       localStorage.removeItem(ACTIVE_PLAN_DAY_KEY);
@@ -10778,12 +11769,15 @@
       localStorage.removeItem(AI_SETTINGS_KEY);
       localStorage.removeItem(AI_LAST_FEEDBACK_KEY);
       localStorage.removeItem(AI_FEEDBACK_HISTORY_KEY);
+      localStorage.removeItem(AI_WEEKLY_SUMMARIES_KEY);
       localStorage.removeItem(AI_PET_STATE_KEY);
       localStorage.removeItem(AI_PET_ICON_KEY);
       localStorage.removeItem(AI_MILESTONE_KEY);
       localStorage.removeItem(CHARACTER_CARDS_KEY);
       localStorage.removeItem(ACTIVE_CHARACTER_CARD_ID_KEY);
       localStorage.removeItem(CHARACTER_CHAT_HISTORY_KEY);
+      localStorage.removeItem(TRAINING_CAPTURE_CARDS_KEY);
+      localStorage.removeItem(TRAINING_SESSION_KEY);
       localStorage.removeItem(FORM_DRAFT_BACKUP_KEY);
 
       activePlanDay = 0;
@@ -11472,7 +12466,9 @@
       }else{
         content.innerHTML = `
           <div style="font-size:22px;font-weight:800;margin-bottom:10px;">AI 教练${activeCharacterCard ? ` · ${escapeHtml(activeCharacterCard.name)}` : ""}</div>
+          <div id="trainingCaptureCardStack" class="training-capture-card-stack"></div>
         `;
+        renderTrainingCaptureCards();
         if(chatBox){
           chatBox.style.display = "flex";
           renderCharacterChat();
@@ -11520,6 +12516,8 @@
       if($("aiPetEnabledBtn")) $("aiPetEnabledBtn").onclick = () => toggle("deskPetEnabled");
       if($("aiBubbleEnabledBtn")) $("aiBubbleEnabledBtn").onclick = () => toggle("bubbleEnabled");
       if($("aiQuietModeBtn")) $("aiQuietModeBtn").onclick = () => toggle("quietMode");
+      if($("aiAutoTrainingCaptureBtn")) $("aiAutoTrainingCaptureBtn").onclick = () => toggle("autoTrainingCapture");
+      if($("aiTrainingIntentTriggerBtn")) $("aiTrainingIntentTriggerBtn").onclick = () => toggle("trainingIntentTrigger");
       if($("aiSettingsCollapseBtn")) $("aiSettingsCollapseBtn").onclick = () => setAiSettingsCollapsed(!isAiSettingsCollapsed());
       if($("aiSyncKeyBtn")) $("aiSyncKeyBtn").onclick = () => toggle("syncApiKeyToCloud");
       if($("aiSaveSettingsBtn")) $("aiSaveSettingsBtn").onclick = () => saveAiSettings(collectAiSettingsFromUi(), { bubble:true });
@@ -11942,1312 +12940,6 @@
       document.addEventListener("lostpointercapture", releaseControl, { passive:true });
       window.addEventListener("blur", releaseControl);
     }
-
-
-
-    /* --- Patch v95: role card × AI coach training-linkage MVP (TDD vertical slices) --- */
-    const TRAINING_LINKAGE_SESSION_KEY = "gain-training-linkage-session";
-    const TRAINING_LINKAGE_LAST_CARD_KEY = "gain-training-linkage-last-card";
-    const TRAINING_LINKAGE_WEEKLY_SUMMARY_KEY = "gain-training-linkage-weekly-summary";
-    const TRAINING_LINKAGE_TEST_REPORT_KEY = "gain-training-linkage-test-report";
-
-    function installTrainingLinkageStyles(){
-      if(document.getElementById("trainingLinkageStyles")) return;
-      const style = document.createElement("style");
-      style.id = "trainingLinkageStyles";
-      style.textContent = `
-        .training-linkage-card{display:none;margin:0 0 12px;padding:12px 14px;border-radius:18px;background:rgba(239,246,255,.96);border:1px solid rgba(59,130,246,.18);box-shadow:0 10px 24px rgba(59,130,246,.08);font-size:13px;line-height:1.55;}
-        .training-linkage-card.show{display:block;}
-        .training-linkage-card.warn{background:rgba(255,247,237,.96);border-color:rgba(251,146,60,.24);}
-        .training-linkage-card.danger{background:rgba(254,242,242,.96);border-color:rgba(239,68,68,.22);}
-        .training-linkage-card.success{background:rgba(236,253,245,.96);border-color:rgba(16,185,129,.18);}
-        .training-linkage-title{font-weight:800;margin-bottom:4px;}
-        .training-linkage-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
-        .training-linkage-actions .mini-btn{padding:7px 10px;}
-        .training-linkage-section{margin-top:14px;padding:12px 14px;border-radius:18px;background:rgba(248,250,252,.92);border:1px solid rgba(148,163,184,.16);}
-        .training-linkage-record{margin-top:8px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.82);border:1px solid rgba(148,163,184,.14);font-size:13px;line-height:1.55;}
-        .training-linkage-record.revoked{opacity:.58;text-decoration:line-through;}
-        .training-session-ribbon{margin:12px 0 0;padding:12px 14px;border-radius:18px;background:rgba(236,253,245,.96);border:1px solid rgba(16,185,129,.18);font-size:13px;line-height:1.55;}
-        .training-self-test-pass{color:#047857;font-weight:800;}
-        .training-self-test-fail{color:#b91c1c;font-weight:800;}
-      `;
-      document.head.appendChild(style);
-    }
-
-    function normalizeTrainingLinkageSettings(settings){
-      const next = settings && typeof settings === "object" ? settings : {};
-      next.autoTrainingCapture = next.autoTrainingCapture !== false;
-      next.trainingIntentTrigger = next.trainingIntentTrigger !== false;
-      next.trainingCaptureAiExtraction = next.trainingCaptureAiExtraction !== false;
-      return next;
-    }
-
-    const __trainingLinkageBaseGetAiSettings = getAiSettings;
-    getAiSettings = function(){
-      return normalizeTrainingLinkageSettings(__trainingLinkageBaseGetAiSettings());
-    };
-
-    const __trainingLinkageBaseGetAiSettingsForBackup = getAiSettingsForBackup;
-    getAiSettingsForBackup = function(){
-      return normalizeTrainingLinkageSettings(__trainingLinkageBaseGetAiSettingsForBackup());
-    };
-
-    const __trainingLinkageBaseCollectAiSettingsFromUi = collectAiSettingsFromUi;
-    collectAiSettingsFromUi = function(){
-      const settings = normalizeTrainingLinkageSettings(__trainingLinkageBaseCollectAiSettingsFromUi());
-      const autoBtn = $("trainingAutoCaptureBtn");
-      const intentBtn = $("trainingIntentTriggerBtn");
-      const aiExtractBtn = $("trainingAiExtractBtn");
-      if(autoBtn && autoBtn.dataset.value){
-        settings.autoTrainingCapture = autoBtn.dataset.value === "1";
-      }
-      if(intentBtn && intentBtn.dataset.value){
-        settings.trainingIntentTrigger = intentBtn.dataset.value === "1";
-      }
-      if(aiExtractBtn && aiExtractBtn.dataset.value){
-        settings.trainingCaptureAiExtraction = aiExtractBtn.dataset.value === "1";
-      }
-      return settings;
-    };
-
-    function ensureTrainingLinkageUi(){
-      installTrainingLinkageStyles();
-
-      const chatBox = $("aiCoachChatBox");
-      if(chatBox && !$("trainingLinkageCard")){
-        const card = document.createElement("div");
-        card.id = "trainingLinkageCard";
-        card.className = "training-linkage-card";
-        chatBox.insertBefore(card, chatBox.firstChild.nextSibling || chatBox.firstChild);
-      }
-
-      const settingsBody = $("aiSettingsBody");
-      if(settingsBody && !$("trainingLinkageSettingsBlock")){
-        const block = document.createElement("div");
-        block.id = "trainingLinkageSettingsBlock";
-        block.innerHTML = `
-          <div class="softbox" style="margin-top:12px;">
-            <b>角色卡 × AI 教练联动</b><br>
-            普通聊天默认不教练化；只有明确训练意图、训练反馈、跳过训练或风险内容才读取训练上下文并写入训练事实。
-          </div>
-          <div class="tool-row" style="margin-top:10px;">
-            <button class="btn-outline" id="trainingAutoCaptureBtn" type="button">自动记录：开启</button>
-            <button class="btn-outline" id="trainingIntentTriggerBtn" type="button">训练触发：开启</button>
-          </div>
-          <button class="btn-outline full" id="trainingAiExtractBtn" type="button">AI 意图提取：开启</button>
-        `;
-        const status = $("aiSettingsStatus");
-        settingsBody.insertBefore(block, status || settingsBody.firstChild);
-        ["trainingAutoCaptureBtn","trainingIntentTriggerBtn","trainingAiExtractBtn"].forEach((id) => {
-          const btn = $(id);
-          if(btn){
-            btn.onclick = () => {
-              const settings = getAiSettings();
-              const field = id === "trainingAutoCaptureBtn"
-                ? "autoTrainingCapture"
-                : id === "trainingIntentTriggerBtn"
-                  ? "trainingIntentTrigger"
-                  : "trainingCaptureAiExtraction";
-              settings[field] = !settings[field];
-              saveAiSettings(settings);
-              updateAiSettingsUi();
-            };
-          }
-        });
-      }
-
-      const toolsSection = $("tools");
-      if(toolsSection && !$("trainingLinkageSelfTestCard")){
-        const div = document.createElement("div");
-        div.className = "card";
-        div.id = "trainingLinkageSelfTestCard";
-        div.innerHTML = `
-          <h2>联动行为自测</h2>
-          <div class="softbox">验证训练意图识别、写入器、撤回回滚、日/周总结和导入导出字段。测试会临时备份本地数据，结束后自动恢复。</div>
-          <button class="btn-outline full" id="trainingLinkageSelfTestBtn" type="button">运行联动自测</button>
-          <div id="trainingLinkageSelfTestResult" class="softbox" style="display:none;"></div>
-        `;
-        const version = $("appVersionText");
-        toolsSection.insertBefore(div, version || null);
-        $("trainingLinkageSelfTestBtn").onclick = () => {
-          const result = TrainingLinkage.runBehaviorTests();
-          renderTrainingLinkageSelfTestResult(result);
-        };
-      }
-
-      refreshTrainingLinkageSettingsUi();
-    }
-
-    function refreshTrainingLinkageSettingsUi(){
-      const settings = getAiSettings();
-      const setBtn = (id, label, value) => {
-        const btn = $(id);
-        if(!btn) return;
-        btn.dataset.value = value ? "1" : "0";
-        btn.textContent = `${label}：${value ? "开启" : "关闭"}`;
-        btn.className = value ? "btn" : "btn-outline";
-      };
-      setBtn("trainingAutoCaptureBtn", "自动记录", settings.autoTrainingCapture !== false);
-      setBtn("trainingIntentTriggerBtn", "训练触发", settings.trainingIntentTrigger !== false);
-      setBtn("trainingAiExtractBtn", "AI 意图提取", settings.trainingCaptureAiExtraction !== false);
-    }
-
-    const __trainingLinkageBaseUpdateAiSettingsUi = updateAiSettingsUi;
-    updateAiSettingsUi = function(){
-      ensureTrainingLinkageUi();
-      __trainingLinkageBaseUpdateAiSettingsUi();
-      refreshTrainingLinkageSettingsUi();
-      const status = $("aiSettingsStatus");
-      if(status){
-        const settings = getAiSettings();
-        status.textContent += ` · 自动记录${settings.autoTrainingCapture !== false ? "开" : "关"} · 训练触发${settings.trainingIntentTrigger !== false ? "开" : "关"}`;
-      }
-    };
-
-    const TrainingLinkage = (() => {
-      const actionAliases = [
-        { canonical:"引体向上", aliases:["引体向上","引体","pull up","pull-up","pullup","chin up","chin-up"] },
-        { canonical:"俯卧撑", aliases:["俯卧撑","push up","push-up","pushup"] },
-        { canonical:"跑步", aliases:["跑步","跑了","跑","running","run"] },
-        { canonical:"卧推", aliases:["卧推","bench press","bench"] },
-        { canonical:"深蹲", aliases:["深蹲","squat"] },
-        { canonical:"硬拉", aliases:["硬拉","deadlift"] },
-        { canonical:"侧平举", aliases:["侧平举","lateral raise","side raise"] },
-        { canonical:"飞鸟", aliases:["飞鸟","fly","flye"] },
-        { canonical:"划船", aliases:["划船","row"] },
-        { canonical:"弯举", aliases:["弯举","curl"] },
-        { canonical:"卷腹", aliases:["卷腹","crunch"] },
-        { canonical:"平板支撑", aliases:["平板支撑","plank"] }
-      ];
-      const safetyWords = /(胸闷|头晕|眩晕|晕|心悸|恶心|刺痛|剧痛|疼|痛|麻|麻木|呼吸困难|喘不上|膝盖痛|肩膀痛|腰痛)/;
-      const trainingWords = /(训练|健身|练|组|个|次|重量|卧推|深蹲|硬拉|引体|俯卧撑|侧平举|飞鸟|跑步|pull|push|bench|squat|deadlift|reps?|sets?)/i;
-      const genericLifestyleWords = /(火锅|电影|工作|上班|学习|游戏|聊天|心情|猜我|刷剧)/;
-      const correctionWords = /(不是|改成|其实|应该是|刚才说错|记错)/;
-      const appendWords = /(另外|还|再加|补充|顺便)/;
-      const explicitCompletionWords = /(做完|练完|完成|打卡|结束|搞定|全部做了|done|finished|completed)/i;
-
-      const nowIso = () => new Date().toISOString();
-      const id = (prefix = "cap") => `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-      const clean = (value) => String(value || "").trim();
-      const todayKey = () => formatDateKey(new Date());
-
-      function normalizeText(text){
-        return String(text || "")
-          .toLowerCase()
-          .replace(/[，。！？、；：]/g, " ")
-          .replace(/\s+/g, " ")
-          .trim();
-      }
-
-      function findAction(text){
-        const source = normalizeText(text);
-        const hits = [];
-        actionAliases.forEach((entry) => {
-          entry.aliases.forEach((alias) => {
-            const a = normalizeText(alias);
-            if(a && source.includes(a)){
-              hits.push({ canonical:entry.canonical, alias, length:a.length });
-            }
-          });
-        });
-        hits.sort((a, b) => b.length - a.length);
-        return hits[0] || null;
-      }
-
-      function normalizeActionName(text){
-        const hit = findAction(text);
-        return hit ? hit.canonical : clean(text);
-      }
-
-      function normalizeForMatch(text){
-        const source = normalizeText(text);
-        let next = source;
-        actionAliases.forEach((entry) => {
-          entry.aliases.forEach((alias) => {
-            const a = normalizeText(alias);
-            if(a) next = next.split(a).join(normalizeText(entry.canonical));
-          });
-        });
-        return next.replace(/\s+/g, "");
-      }
-
-      function findMatchingPlanItem(action, dateKey = todayKey()){
-        const days = getPlanDays();
-        const todayIndex = getTodayPlanDayIndex(days);
-        const candidates = [];
-        days.forEach((day, dayIndex) => {
-          const isToday = getDateForPlanDayInCurrentWeek(day.day, dayIndex) === dateKey;
-          (day.items || []).forEach((item, itemIndex) => {
-            const itemNorm = normalizeForMatch(item);
-            const actionNorm = normalizeForMatch(action);
-            if(actionNorm && itemNorm.includes(actionNorm)){
-              candidates.push({ dayIndex, itemIndex, key:`d${dayIndex}_i${itemIndex}`, item, day, isToday, score:isToday ? 2 : 1 });
-            }
-          });
-        });
-        candidates.sort((a, b) => b.score - a.score);
-        return candidates[0] || null;
-      }
-
-      function extractQuantities(text){
-        const source = normalizeText(text);
-        const numbers = [...source.matchAll(/(\d+(?:\.\d+)?)/g)].map((m) => Number(m[1])).filter(Number.isFinite);
-        const sets = (source.match(/(\d+)\s*组/) || [])[1] || (source.match(/(\d+)\s*sets?/) || [])[1] || "";
-        const reps = (source.match(/每组\s*(\d+)/) || [])[1]
-          || (source.match(/(\d+)\s*(个|次|reps?)/) || [])[1]
-          || "";
-        const minutes = (source.match(/(\d+)\s*(分钟|min|minutes?)/) || [])[1] || "";
-        const weight = (source.match(/(\d+(?:\.\d+)?)\s*(kg|公斤|千克)/) || [])[1] || "";
-        return {
-          numbers,
-          sets: sets ? Number(sets) : null,
-          reps: reps ? Number(reps) : null,
-          minutes: minutes ? Number(minutes) : null,
-          weightKg: weight ? Number(weight) : null
-        };
-      }
-
-      function buildValueText(intent){
-        const q = intent.quantities || {};
-        const parts = [];
-        if(q.sets) parts.push(`${q.sets}组`);
-        if(q.reps) parts.push(q.sets ? `每组${q.reps}次` : `${q.reps}次`);
-        if(q.minutes) parts.push(`${q.minutes}分钟`);
-        if(q.weightKg) parts.push(`${q.weightKg}kg`);
-        if(!parts.length && q.numbers && q.numbers.length) parts.push(`${q.numbers[0]}`);
-        return [intent.action, parts.join(" ")].filter(Boolean).join(" · ");
-      }
-
-      function getRoleMeta(){
-        const card = getActiveCharacterCard();
-        return card ? { id: card.id || "", name: card.name || "当前角色" } : { id:"", name:"未选择角色" };
-      }
-
-      function classify(text, options = {}){
-        const raw = String(text || "").trim();
-        const source = normalizeText(raw);
-        if(!raw) return { type:"none", confidence:0 };
-        const action = findAction(raw);
-        const quantities = extractQuantities(raw);
-        const hasTrainingWord = trainingWords.test(raw) || !!action;
-        const hasSafety = safetyWords.test(raw);
-        const isCorrection = correctionWords.test(raw);
-        const isAppend = appendWords.test(raw);
-        const explicitCompletion = explicitCompletionWords.test(raw);
-        const mentionedTrainingFatigue = /(酸|累|疲劳|无力|恢复|状态不好)/.test(raw) && /(练完|训练|健身|练腿|练胸|练背|练肩|练手|练完腿|练完胸|练完背)/.test(raw);
-        const genericFatigue = /(今天|最近)?.{0,3}(好累|很累|累啊|疲惫|心情一般)/.test(raw) && !mentionedTrainingFatigue && !hasTrainingWord;
-
-        if(genericLifestyleWords.test(raw) && !hasTrainingWord && !hasSafety){
-          return { type:"none", confidence:0.05, reason:"普通生活聊天" };
-        }
-        if(genericFatigue){
-          return { type:"none", confidence:0.1, reason:"泛疲劳，不写训练记录" };
-        }
-        if(isCorrection){
-          return { type:"correction", confidence:0.82, originalText:raw, quantities, action: action?.canonical || "", append:isAppend };
-        }
-        if(/(今天|今晚|上午|下午)?.{0,4}(没练|没去健身房|跳过|休息一天|不练了|决定不练|暂停训练)/.test(raw)){
-          const rest = /(休息|不练了|决定不练)/.test(raw);
-          return { type: rest ? "rest" : "skipped", recordType: rest ? "rest" : "skipped", confidence:0.92, originalText:raw, action:"未训练", quantities };
-        }
-        if(hasSafety && (hasTrainingWord || /(肩膀|膝盖|腰|胸|腿|手腕|手肘|背)/.test(raw))){
-          return { type:"safety", recordType:"safety", confidence:0.9, originalText:raw, action:action?.canonical || "训练风险", quantities, explicitCompletion:false };
-        }
-        if(/(肩膀|膝盖|腰|手腕|手肘).{0,6}(怪怪|不舒服|不对劲|卡|紧)/.test(raw)){
-          return { type:"ask", recordType:"technical_feedback", confidence:0.62, originalText:raw, action:action?.canonical || "", question:"你这个不舒服是训练时出现的吗？要不要记到今天的训练反馈里？" };
-        }
-        if(mentionedTrainingFatigue){
-          return { type:"feedback", recordType:"recovery_feedback", confidence:0.86, originalText:raw, action:action?.canonical || "训练疲劳", quantities };
-        }
-        if(/(练得还行|比上次强|重量有点轻|状态还行|感觉一般)/.test(raw) && hasTrainingWord){
-          return { type:"ask", recordType:"training_feedback", confidence:0.65, originalText:raw, action:action?.canonical || "", question:"我能帮你记，但还缺一点信息：是哪一个动作、重量/次数，还是整体训练感受？" };
-        }
-        if(action && action.canonical === "飞鸟" && !/(哑铃|绳索|夹胸|反向|胸|肩后束)/.test(raw)){
-          return { type:"ask", recordType:"training_fact", confidence:0.58, originalText:raw, action:"飞鸟", question:"你说的“飞鸟”是哑铃飞鸟、绳索夹胸，还是反向飞鸟？确认后我再记录，避免记错动作。" };
-        }
-        if(action && (quantities.numbers.length || explicitCompletion || /(做了|练了|跑了|完成了|打卡了)/.test(raw))){
-          return {
-            type:"fact",
-            recordType:"training_fact",
-            confidence:0.88,
-            originalText:raw,
-            action:action.canonical,
-            quantities,
-            explicitCompletion
-          };
-        }
-        if(hasTrainingWord && hasSafety){
-          return { type:"safety", recordType:"safety", confidence:0.78, originalText:raw, action:action?.canonical || "训练风险", quantities };
-        }
-        if(hasTrainingWord && settingsAllowsAiExtraction(options.settings)){
-          return { type:"needs_ai", confidence:0.45, originalText:raw, action:action?.canonical || "", quantities };
-        }
-        return { type:"none", confidence:0.12, reason:"没有明确训练事实" };
-      }
-
-      function settingsAllowsAiExtraction(settings){
-        return !settings || settings.trainingCaptureAiExtraction !== false;
-      }
-
-      function ensureLog(dateKey, logs){
-        const days = getPlanDays();
-        const todayIndex = getTodayPlanDayIndex(days);
-        const day = days[todayIndex] || days[activePlanDay] || { day:"", focus:"", items:[] };
-        const existing = logs[dateKey] || {};
-        return {
-          date: dateKey,
-          planDay: existing.planDay || day.day || "",
-          focus: existing.focus || day.focus || "",
-          allItems: Array.isArray(existing.allItems) ? existing.allItems : (day.items || []),
-          baseItems: Array.isArray(existing.baseItems) ? existing.baseItems : (day.baseItems || []),
-          isTemporaryPlan: !!(existing.isTemporaryPlan || day.isTemporary),
-          aiAdjustMessage: existing.aiAdjustMessage || day.temporaryMessage || "",
-          completedItems: Array.isArray(existing.completedItems) ? existing.completedItems : [],
-          completedCount: Number(existing.completedCount || 0),
-          totalItems: Number(existing.totalItems || (day.items || []).length),
-          weight: existing.weight || "",
-          sleep: existing.sleep || "",
-          note: existing.note || "",
-          aiCaptureRecords: Array.isArray(existing.aiCaptureRecords) ? existing.aiCaptureRecords : [],
-          aiDailySummary: existing.aiDailySummary || "",
-          aiDailySummaryUpdatedAt: existing.aiDailySummaryUpdatedAt || "",
-          createdAt: existing.createdAt || new Date().toLocaleString("zh-CN"),
-          updatedAt: existing.updatedAt || new Date().toLocaleString("zh-CN"),
-          updatedAtIso: existing.updatedAtIso || nowIso()
-        };
-      }
-
-      function summarizeDaily(records){
-        const active = (records || []).filter((r) => !r.revoked);
-        if(!active.length) return "";
-        const facts = active.filter((r) => r.recordType === "training_fact").map((r) => r.currentText || r.originalText);
-        const feedback = active.filter((r) => /feedback|safety|recovery/.test(r.recordType)).map((r) => r.currentText || r.originalText);
-        const skipped = active.filter((r) => /skipped|rest/.test(r.recordType)).map((r) => r.currentText || r.originalText);
-        const lines = [];
-        if(facts.length) lines.push(`训练事实：${facts.slice(-4).join("；")}`);
-        if(feedback.length) lines.push(`反馈/风险：${feedback.slice(-3).join("；")}`);
-        if(skipped.length) lines.push(`未训练/休息：${skipped.slice(-2).join("；")}`);
-        return lines.join("\n");
-      }
-
-      function updateWeeklySummary(logs = getDailyLogs()){
-        const rows = Object.values(logs || {})
-          .sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")))
-          .filter((log) => Array.isArray(log.aiCaptureRecords) && log.aiCaptureRecords.some((r) => !r.revoked));
-        const lines = rows.slice(-7).map((log) => {
-          const summary = log.aiDailySummary || summarizeDaily(log.aiCaptureRecords);
-          return `${log.date}：${summary || "有训练捕捉记录"}`;
-        });
-        const payload = {
-          generatedAt: nowIso(),
-          source: "dailyLogs.aiCaptureRecords",
-          text: lines.length ? `AI 周总结草稿\n${lines.join("\n")}` : "AI 周总结草稿：暂无 AI 捕捉记录。",
-          days: rows.map((log) => log.date)
-        };
-        localStorage.setItem(TRAINING_LINKAGE_WEEKLY_SUMMARY_KEY, JSON.stringify(payload));
-        return payload;
-      }
-
-      function applyPlanCompletionForIntent(intent, record, log){
-        if(intent.recordType !== "training_fact" && intent.type !== "fact") return [];
-        const match = findMatchingPlanItem(intent.action, log.date || todayKey());
-        if(!match) return [];
-        const shouldComplete = !!intent.explicitCompletion || !!(intent.quantities && (intent.quantities.reps || intent.quantities.sets || intent.quantities.minutes));
-        if(!shouldComplete) return [];
-        const checks = getPlanChecks();
-        const wasManualDone = !!checks[match.key];
-        if(!wasManualDone){
-          checks[match.key] = true;
-          setPlanChecks(checks);
-          record.autoCompletedCheckKeys.push(match.key);
-        }
-        record.linkedPlanItems.push({
-          key: match.key,
-          dayIndex: match.dayIndex,
-          itemIndex: match.itemIndex,
-          item: match.item,
-          autoCompleted: !wasManualDone
-        });
-        return [match.key];
-      }
-
-      function refreshLogPlanCompletion(log){
-        const days = getPlanDays();
-        const checks = getPlanChecks();
-        const dayIndex = days.findIndex((day, index) => getDateForPlanDayInCurrentWeek(day.day, index) === log.date);
-        const day = dayIndex >= 0 ? days[dayIndex] : null;
-        if(day){
-          const completedItems = (day.items || []).filter((_, itemIndex) => checks[`d${dayIndex}_i${itemIndex}`]);
-          log.completedItems = completedItems;
-          log.completedCount = completedItems.length;
-          log.totalItems = (day.items || []).length;
-          log.allItems = day.items || [];
-          log.planDay = log.planDay || day.day || "";
-          log.focus = log.focus || day.focus || "";
-        }
-        return log;
-      }
-
-      function applyIntent(intent, options = {}){
-        const dateKey = intent.date || options.date || todayKey();
-        const logs = getDailyLogs();
-        const log = ensureLog(dateKey, logs);
-        const role = options.role || getRoleMeta();
-        const valueText = buildValueText(intent) || intent.originalText || "";
-        const record = {
-          id: id("cap"),
-          date: dateKey,
-          createdAt: new Date().toLocaleString("zh-CN"),
-          createdAtIso: nowIso(),
-          sourceType: options.sourceType || "character_chat",
-          source: "ai_capture",
-          captureRoleId: role.id || "",
-          captureRoleName: role.name || "",
-          recordType: intent.recordType || intent.type || "training_fact",
-          action: intent.action || "",
-          originalText: intent.originalText || "",
-          currentText: valueText,
-          originalValue: intent.quantities || {},
-          currentValue: intent.quantities || {},
-          confidence: intent.confidence || 0,
-          userModified: false,
-          revoked: false,
-          localVersion: Date.now(),
-          cloudVersion: 0,
-          autoCompletedCheckKeys: [],
-          linkedPlanItems: [],
-          needsFollowup: false
-        };
-        applyPlanCompletionForIntent(intent, record, log);
-        log.aiCaptureRecords.push(record);
-        log.aiDailySummary = summarizeDaily(log.aiCaptureRecords);
-        log.aiDailySummaryUpdatedAt = nowIso();
-        log.updatedAt = new Date().toLocaleString("zh-CN");
-        log.updatedAtIso = nowIso();
-        refreshLogPlanCompletion(log);
-        logs[dateKey] = log;
-        setDailyLogs(logs, { syncToCloud: true });
-        updateWeeklySummary(logs);
-
-        const card = {
-          id: record.id,
-          date: dateKey,
-          kind: record.recordType === "safety" ? "danger" : "success",
-          title: record.recordType === "safety" ? "已记录安全反馈" : "已记录训练事实",
-          message: `已记录到 ${dateKey}：${record.currentText || record.originalText}`,
-          recordId: record.id,
-          actions: ["undo","edit"]
-        };
-        setLastCard(card);
-        return { status:"recorded", record, card, log };
-      }
-
-      function setLastCard(card){
-        localStorage.setItem(TRAINING_LINKAGE_LAST_CARD_KEY, JSON.stringify(card || {}));
-      }
-
-      function getLastCard(){
-        return safeJsonParse(localStorage.getItem(TRAINING_LINKAGE_LAST_CARD_KEY) || "{}", {});
-      }
-
-      function findRecord(recordId){
-        const logs = getDailyLogs();
-        for(const [dateKey, log] of Object.entries(logs)){
-          const records = Array.isArray(log.aiCaptureRecords) ? log.aiCaptureRecords : [];
-          const record = records.find((item) => item.id === recordId);
-          if(record) return { logs, dateKey, log, record };
-        }
-        return null;
-      }
-
-      function getLatestActiveRecord(){
-        const logs = getDailyLogs();
-        const records = [];
-        Object.values(logs).forEach((log) => {
-          (log.aiCaptureRecords || []).forEach((record) => {
-            if(!record.revoked) records.push({ log, record });
-          });
-        });
-        records.sort((a, b) => String(b.record.createdAtIso || "").localeCompare(String(a.record.createdAtIso || "")));
-        return records[0] || null;
-      }
-
-      function revokeRecord(recordId){
-        const found = findRecord(recordId);
-        if(!found) return { status:"missing" };
-        found.record.revoked = true;
-        found.record.revokedAtIso = nowIso();
-        found.record.localVersion = Date.now();
-        const checks = getPlanChecks();
-        (found.record.autoCompletedCheckKeys || []).forEach((key) => {
-          if(checks[key]) checks[key] = false;
-        });
-        setPlanChecks(checks);
-        found.log.aiDailySummary = summarizeDaily(found.log.aiCaptureRecords);
-        found.log.aiDailySummaryUpdatedAt = nowIso();
-        found.log.updatedAt = new Date().toLocaleString("zh-CN");
-        found.log.updatedAtIso = nowIso();
-        refreshLogPlanCompletion(found.log);
-        found.logs[found.dateKey] = found.log;
-        setDailyLogs(found.logs, { syncToCloud: true });
-        updateWeeklySummary(found.logs);
-        const card = {
-          id: recordId,
-          date: found.dateKey,
-          kind:"warn",
-          title:"已撤回记录",
-          message:`已撤回 ${found.dateKey} 的 AI 捕捉记录；只回滚这条记录自动完成的打卡。`,
-          actions:[]
-        };
-        setLastCard(card);
-        return { status:"revoked", card, record:found.record };
-      }
-
-      function editRecord(recordId, nextText){
-        const found = findRecord(recordId);
-        if(!found) return { status:"missing" };
-        const value = clean(nextText);
-        if(!value) return { status:"empty" };
-        found.record.currentText = value;
-        found.record.userModified = true;
-        found.record.localVersion = Date.now();
-        found.record.modifiedAtIso = nowIso();
-        found.log.aiDailySummary = summarizeDaily(found.log.aiCaptureRecords);
-        found.log.aiDailySummaryUpdatedAt = nowIso();
-        found.log.updatedAt = new Date().toLocaleString("zh-CN");
-        found.log.updatedAtIso = nowIso();
-        found.logs[found.dateKey] = found.log;
-        setDailyLogs(found.logs, { syncToCloud: true });
-        updateWeeklySummary(found.logs);
-        const card = {
-          id: recordId,
-          date: found.dateKey,
-          kind:"success",
-          title:"已修改记录",
-          message:`已修改为：${value}`,
-          recordId,
-          actions:["undo","edit"]
-        };
-        setLastCard(card);
-        return { status:"edited", card, record:found.record };
-      }
-
-      function handleCorrection(intent){
-        const latest = getLatestActiveRecord();
-        if(!latest){
-          return { status:"ask", question:"我没找到最近可修改的训练记录。你想新增一条，还是先说一下具体动作和数量？" };
-        }
-        const q = intent.quantities || {};
-        const numbers = q.numbers || [];
-        const oldText = latest.record.currentText || latest.record.originalText || "";
-        let nextText = intent.originalText;
-        if(numbers.length){
-          const n = numbers[numbers.length - 1];
-          nextText = oldText.replace(/\d+(?:\.\d+)?(?!.*\d)/, String(n));
-          if(nextText === oldText) nextText = `${oldText} → ${n}`;
-          latest.record.currentValue = { ...(latest.record.currentValue || {}), correctedNumber:n };
-        }
-        return editRecord(latest.record.id, nextText);
-      }
-
-      async function maybeExtractWithAi(text, settings){
-        if(!settings || settings.trainingCaptureAiExtraction === false) return null;
-        const ready = settings.apiMode === "proxy" ? !!settings.proxyUrl : !!settings.apiKey;
-        if(!settings.enabled || !ready) return null;
-        try{
-          const res = await callAiCoach("training_record_intent", {
-            text,
-            context: buildCharacterTrainingContext(),
-            instruction: "只返回 JSON：{type,recordType,action,quantities,confidence,needsFollowup,question,safetyRisk,explicitCompletion}"
-          }, { timeoutMs:14000, force:true });
-          const data = res && res.data ? res.data : null;
-          if(!data || typeof data !== "object") return null;
-          if(data.needsFollowup || data.question){
-            return { type:"ask", recordType:data.recordType || "training_feedback", confidence:data.confidence || 0.55, originalText:text, action:data.action || "", question:data.question || "这条训练信息还缺关键字段，要记到哪一天/哪个动作？" };
-          }
-          if(data.type || data.recordType || data.action){
-            return {
-              type: data.safetyRisk ? "safety" : (data.type || "fact"),
-              recordType: data.recordType || (data.safetyRisk ? "safety" : "training_fact"),
-              confidence: Number(data.confidence || 0.7),
-              originalText:text,
-              action:data.action || "",
-              quantities:data.quantities || {},
-              explicitCompletion: !!data.explicitCompletion
-            };
-          }
-        }catch(err){
-          console.warn("AI 训练意图提取失败，已回退本地规则", err);
-        }
-        return null;
-      }
-
-      async function captureFromText(text, options = {}){
-        const settings = normalizeTrainingLinkageSettings(options.settings || getAiSettings());
-        const raw = clean(text);
-        const baseIntent = classify(raw, { settings });
-        const safetyOnly = baseIntent.type === "safety";
-        if(settings.trainingIntentTrigger === false && !safetyOnly && !isActiveTrainingSession()){
-          return { status:"ignored", reason:"training_intent_trigger_disabled" };
-        }
-        if(settings.autoTrainingCapture === false && !safetyOnly){
-          return { status:"ignored", reason:"auto_capture_disabled" };
-        }
-        let intent = baseIntent;
-        if(baseIntent.type === "needs_ai"){
-          intent = await maybeExtractWithAi(raw, settings) || { type:"ask", recordType:"training_feedback", originalText:raw, question:"这句话像训练内容，但我没法稳定提取。请补充动作、数量或感受，我再记录。" };
-        }
-        if(intent.type === "none"){
-          return { status:"ignored", reason:intent.reason || "no_training_intent" };
-        }
-        if(intent.type === "ask"){
-          const card = { kind:"warn", title:"需要补充信息", message:intent.question || "这条训练信息还缺关键字段。", actions:[] };
-          setLastCard(card);
-          return { status:"ask", question:card.message, card, intent };
-        }
-        if(intent.type === "correction" && !intent.append){
-          const result = handleCorrection(intent);
-          if(result.card) setLastCard(result.card);
-          return result;
-        }
-        if(intent.type === "safety"){
-          const result = applyIntent({ ...intent, recordType:"safety" }, options);
-          result.card.kind = "danger";
-          result.card.title = "已记录安全反馈";
-          result.card.message = `已记录风险反馈：${intent.originalText}。明显疼痛、胸闷、头晕或麻木时先停止训练，必要时线下就医。`;
-          setLastCard(result.card);
-          return result;
-        }
-        if(intent.type === "skipped" || intent.type === "rest"){
-          return applyIntent({ ...intent, recordType:intent.type === "rest" ? "rest" : "skipped", action:intent.action || "未训练" }, options);
-        }
-        if(intent.type === "feedback"){
-          return applyIntent({ ...intent, recordType:intent.recordType || "training_feedback" }, options);
-        }
-        return applyIntent(intent, options);
-      }
-
-      function getSession(){
-        return safeJsonParse(localStorage.getItem(TRAINING_LINKAGE_SESSION_KEY) || "null", null);
-      }
-
-      function setSession(session){
-        if(session) localStorage.setItem(TRAINING_LINKAGE_SESSION_KEY, JSON.stringify(session));
-        else localStorage.removeItem(TRAINING_LINKAGE_SESSION_KEY);
-      }
-
-      function isActiveTrainingSession(){
-        const session = getSession();
-        return !!session && ["active","closing"].includes(session.status);
-      }
-
-      function startSession(dayIndex = activePlanDay){
-        const days = getPlanDays();
-        const day = days[dayIndex];
-        if(!day) return null;
-        const role = getRoleMeta();
-        const session = {
-          id: id("session"),
-          status:"active",
-          dayIndex,
-          dayName: day.day || "",
-          focus: day.focus || "",
-          startedAtIso: nowIso(),
-          role,
-          completedAtIso:"",
-          summary:"",
-          exitState:"active"
-        };
-        setSession(session);
-        showCaptureCard({ kind:"success", title:"训练会话已开始", message:`${role.name}会作为陪练外壳；训练判断仍由 AI 教练规则负责。`, actions:["end_session"] });
-        renderTrainingSessionRibbon();
-        return session;
-      }
-
-      function endSession(mode = "save"){
-        const session = getSession();
-        if(!session) return null;
-        session.status = mode === "discard" ? "discarded" : "ended";
-        session.completedAtIso = nowIso();
-        session.exitState = mode;
-        session.summary = mode === "discard" ? "已放弃未结束训练会话。" : "已结束并保存训练会话。";
-        setSession(session.status === "discarded" ? null : session);
-        if(mode !== "discard"){
-          localStorage.setItem(TRAINING_LINKAGE_SESSION_KEY, JSON.stringify(session));
-        }
-        showCaptureCard({ kind:"success", title: mode === "discard" ? "已放弃训练会话" : "训练会话已结束", message:session.summary, actions:[] });
-        renderTrainingSessionRibbon();
-        return session;
-      }
-
-      function checkSessionCompletion(){
-        const session = getSession();
-        if(!session || session.status !== "active") return null;
-        const day = getPlanDays()[session.dayIndex];
-        if(!day) return null;
-        const checks = getPlanChecks();
-        const allDone = (day.items || []).length > 0 && (day.items || []).every((_, itemIndex) => checks[`d${session.dayIndex}_i${itemIndex}`]);
-        if(allDone){
-          session.status = "closing";
-          session.completedAtIso = nowIso();
-          setSession(session);
-          showCaptureCard({ kind:"success", title:"今日项目已完成", message:"今日项目都已完成。你可以补充训练感受，也可以直接结束并保存。", actions:["end_session","continue_session"] });
-          renderTrainingSessionRibbon();
-        }
-        return session;
-      }
-
-      function exportExtra(){
-        return {
-          trainingLinkageVersion: 1,
-          trainingSession: getSession(),
-          trainingLastCard: getLastCard(),
-          trainingWeeklySummary: safeJsonParse(localStorage.getItem(TRAINING_LINKAGE_WEEKLY_SUMMARY_KEY) || "null", null),
-          trainingTestReport: safeJsonParse(localStorage.getItem(TRAINING_LINKAGE_TEST_REPORT_KEY) || "null", null)
-        };
-      }
-
-      function importExtra(payload){
-        if(!payload || typeof payload !== "object") return;
-        if(payload.trainingSession) localStorage.setItem(TRAINING_LINKAGE_SESSION_KEY, JSON.stringify(payload.trainingSession));
-        if(payload.trainingLastCard) localStorage.setItem(TRAINING_LINKAGE_LAST_CARD_KEY, JSON.stringify(payload.trainingLastCard));
-        if(payload.trainingWeeklySummary) localStorage.setItem(TRAINING_LINKAGE_WEEKLY_SUMMARY_KEY, JSON.stringify(payload.trainingWeeklySummary));
-      }
-
-      function runBehaviorTests(){
-        const keys = [DAILY_LOGS_KEY, PLAN_CHECKS_KEY, TRAINING_LINKAGE_LAST_CARD_KEY, TRAINING_LINKAGE_WEEKLY_SUMMARY_KEY, TRAINING_LINKAGE_SESSION_KEY, AI_SETTINGS_KEY];
-        const backup = {};
-        keys.forEach((key) => { backup[key] = localStorage.getItem(key); });
-        const results = [];
-        const assert = (name, pass, details = "") => results.push({ name, pass:!!pass, details });
-        try{
-          localStorage.setItem(DAILY_LOGS_KEY, "{}");
-          localStorage.setItem(PLAN_CHECKS_KEY, "{}");
-          const settings = getAiSettings();
-          settings.autoTrainingCapture = true;
-          settings.trainingIntentTrigger = true;
-          settings.trainingCaptureAiExtraction = true;
-          localStorage.setItem(AI_SETTINGS_KEY, JSON.stringify(settings));
-
-          const first = classify("今天做了 15 个引体向上", { settings });
-          assert("明确训练事实会被识别", first.type === "fact" && first.action === "引体向上", JSON.stringify(first));
-          applyIntent(first, { sourceType:"test", role:{ id:"test", name:"测试角色" } });
-          const logs1 = getDailyLogs();
-          const today = todayKey();
-          assert("写入器写入每日训练日历", !!logs1[today]?.aiCaptureRecords?.length, JSON.stringify(logs1[today] || {}));
-          assert("用户备注不被覆盖", (logs1[today]?.note || "") === "", "note should stay empty");
-
-          const fatigue = classify("今天好累啊", { settings });
-          assert("泛疲劳不写训练记录", fatigue.type === "none", JSON.stringify(fatigue));
-
-          const safety = applyIntent(classify("深蹲的时候膝盖痛", { settings }), { sourceType:"test" });
-          assert("安全反馈不会自动完成", safety.record.recordType === "safety" && !safety.record.autoCompletedCheckKeys.length, JSON.stringify(safety.record));
-
-          const revoke = revokeRecord(safety.record.id);
-          assert("撤回 AI 捕捉记录能标记 revoked", revoke.status === "revoked" && revoke.record.revoked === true, JSON.stringify(revoke.record));
-
-          const weekly = updateWeeklySummary(getDailyLogs());
-          assert("周总结基于每日事实生成草稿", /AI 周总结草稿/.test(weekly.text), weekly.text);
-
-          const extra = exportExtra();
-          assert("导出包含联动附加字段", extra.trainingLinkageVersion === 1 && "trainingWeeklySummary" in extra, JSON.stringify(extra));
-        }catch(err){
-          assert("自测运行未抛错", false, err.message || String(err));
-        }finally{
-          keys.forEach((key) => {
-            if(backup[key] === null || backup[key] === undefined) localStorage.removeItem(key);
-            else localStorage.setItem(key, backup[key]);
-          });
-          renderHistory();
-          renderPlan();
-        }
-        const report = { at: nowIso(), passed: results.filter((r) => r.pass).length, failed: results.filter((r) => !r.pass).length, results };
-        localStorage.setItem(TRAINING_LINKAGE_TEST_REPORT_KEY, JSON.stringify(report));
-        return report;
-      }
-
-      return {
-        classify,
-        captureFromText,
-        applyIntent,
-        revokeRecord,
-        editRecord,
-        getLastCard,
-        showLastCard: () => showCaptureCard(getLastCard()),
-        startSession,
-        endSession,
-        getSession,
-        isActiveTrainingSession,
-        checkSessionCompletion,
-        renderTrainingSessionRibbon,
-        updateWeeklySummary,
-        exportExtra,
-        importExtra,
-        runBehaviorTests,
-        normalizeActionName,
-        findMatchingPlanItem
-      };
-    })();
-
-    window.TrainingLinkage = TrainingLinkage;
-
-    function showCaptureCard(card){
-      ensureTrainingLinkageUi();
-      const box = $("trainingLinkageCard");
-      if(!box) return;
-      if(!card || !card.message){
-        box.className = "training-linkage-card";
-        box.innerHTML = "";
-        return;
-      }
-      const kind = card.kind || "success";
-      box.className = `training-linkage-card show ${kind}`;
-      const actions = Array.isArray(card.actions) ? card.actions : [];
-      const buttons = actions.map((action) => {
-        if(action === "undo") return `<button class="mini-btn" data-training-card-action="undo" data-record-id="${escapeHtml(card.recordId || card.id || "")}">撤回</button>`;
-        if(action === "edit") return `<button class="mini-btn" data-training-card-action="edit" data-record-id="${escapeHtml(card.recordId || card.id || "")}">修改</button>`;
-        if(action === "end_session") return `<button class="mini-btn" data-training-card-action="end-session">结束并保存</button>`;
-        if(action === "continue_session") return `<button class="mini-btn" data-training-card-action="continue-session">继续训练</button>`;
-        return "";
-      }).join("");
-      box.innerHTML = `
-        <div class="training-linkage-title">${escapeHtml(card.title || "训练记录")}</div>
-        <div>${escapeHtml(card.message || "")}</div>
-        ${buttons ? `<div class="training-linkage-actions">${buttons}</div>` : ""}
-      `;
-      box.querySelectorAll("[data-training-card-action]").forEach((btn) => {
-        btn.onclick = () => handleTrainingCardAction(btn.getAttribute("data-training-card-action"), btn.getAttribute("data-record-id"));
-      });
-    }
-
-    function handleTrainingCardAction(action, recordId){
-      if(action === "undo"){
-        const result = TrainingLinkage.revokeRecord(recordId);
-        showCaptureCard(result.card);
-        renderPlan();
-        renderHistory();
-        return;
-      }
-      if(action === "edit"){
-        const foundText = (() => {
-          const found = recordId ? TrainingLinkage.editRecord(recordId, "__probe__") : null;
-          if(found && found.status === "edited"){
-            // revert probe immediately by asking user below. This branch is avoided by using find via prompt fallback.
-          }
-          return "";
-        })();
-        const next = prompt("修改这条 AI 捕捉记录：", "");
-        if(next === null) return;
-        const result = TrainingLinkage.editRecord(recordId, next);
-        showCaptureCard(result.card || { kind:"warn", title:"修改失败", message:"没有找到这条记录。", actions:[] });
-        renderPlan();
-        renderHistory();
-        return;
-      }
-      if(action === "end-session"){
-        TrainingLinkage.endSession("save");
-        return;
-      }
-      if(action === "continue-session"){
-        const session = TrainingLinkage.getSession();
-        if(session){
-          session.status = "active";
-          localStorage.setItem(TRAINING_LINKAGE_SESSION_KEY, JSON.stringify(session));
-          showCaptureCard({ kind:"success", title:"继续训练", message:"训练会话已恢复为进行中。", actions:["end_session"] });
-          TrainingLinkage.renderTrainingSessionRibbon();
-        }
-      }
-    }
-
-    async function processTrainingLinkageFromCharacterChat(text){
-      const settings = getAiSettings();
-      const result = await TrainingLinkage.captureFromText(text, {
-        settings,
-        sourceType: TrainingLinkage.isActiveTrainingSession() ? "training_session" : "character_chat",
-        role: (() => {
-          const card = getActiveCharacterCard();
-          return card ? { id:card.id, name:card.name } : { id:"", name:"未选择角色" };
-        })()
-      });
-      if(result.card) showCaptureCard(result.card);
-      if(result.status === "ask"){
-        return result.question || result.card?.message || "这条训练信息还缺关键字段，要不要补充一下？";
-      }
-      if(result.record && result.record.recordType === "safety"){
-        return "先停一下。明显疼痛、胸闷、头晕、麻木这类信号不要硬扛。我已经把这条记成安全反馈，今天训练先降强度或停止，必要时线下就医。";
-      }
-      if(result.status === "recorded"){
-        return "";
-      }
-      return "";
-    }
-
-    function shouldUseTrainingContextForMessage(userText){
-      const settings = getAiSettings();
-      if(TrainingLinkage.isActiveTrainingSession()) return true;
-      if(settings.trainingIntentTrigger === false) return false;
-      const intent = TrainingLinkage.classify(userText, { settings });
-      return !["none"].includes(intent.type);
-    }
-
-    const __trainingLinkageBaseCallCharacterChat = callCharacterChat;
-    callCharacterChat = async function(userText){
-      const settings = getAiSettings();
-      const card = getActiveCharacterCard();
-      if(!card) throw new Error("请先选择角色卡");
-      if(settings.apiMode === "direct" && !settings.apiKey) throw new Error("请先在 AI 设置里填写 API Key");
-      if(settings.apiMode === "proxy" && !settings.proxyUrl) throw new Error("请先在 AI 设置里填写代理 URL");
-      const history = getCharacterChatHistory().slice(-12);
-      const attachTrainingContext = shouldUseTrainingContextForMessage(userText);
-      const trainingContext = attachTrainingContext ? buildCharacterTrainingContext() : null;
-      const safeSystemPrompt = [
-        buildCharacterChatSystemPrompt(card, trainingContext),
-        "联动规则：角色卡只决定怎么说；训练安全、记录权限、计划完成判断以系统规则为准。系统记录卡片、撤回、保存失败等页面级状态不要角色化。",
-        attachTrainingContext ? "当前消息触发了训练上下文，可以用角色口吻表达训练判断。" : "当前消息未触发训练上下文，请按普通角色聊天回复，不要强行带入训练计划。"
-      ].join("\n");
-      const messages = [
-        { role:"system", content:safeSystemPrompt },
-        ...history.map((item) => ({ role:item.role, content:String(item.content || "") })),
-        { role:"user", content:userText }
-      ];
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 25000);
-      try{
-        let res;
-        if(settings.apiMode === "proxy"){
-          res = await fetch(settings.proxyUrl, {
-            method:"POST",
-            headers:{ "Content-Type":"application/json" },
-            signal: controller.signal,
-            body: JSON.stringify({
-              task:"character_chat",
-              payload:{ message:userText, history, characterCard:characterCardPromptPayload(card), trainingContext },
-              settings:{
-                model:settings.model,
-                temperature:settings.temperature,
-                maxTokens:settings.maxTokens,
-                characterCardPrompt: characterCardPromptBlock(card),
-                trainingContextPrompt: trainingContext ? buildCharacterTrainingContextPrompt(trainingContext) : ""
-              }
-            })
-          });
-        }else{
-          res = await fetch(`${settings.apiBaseUrl.replace(/\/$/, "")}/chat/completions`, {
-            method:"POST",
-            headers:{ "Content-Type":"application/json", "Authorization":`Bearer ${settings.apiKey}` },
-            signal: controller.signal,
-            body: JSON.stringify({
-              model: settings.model || "deepseek-v4-flash",
-              temperature: settings.temperature ?? 0.7,
-              max_tokens: Math.max(300, settings.maxTokens ?? 700),
-              messages
-            })
-          });
-        }
-        if(!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
-        const content = normalizeChatReplyText(json);
-        if(!content) throw new Error("AI 没有返回可显示内容");
-        return content;
-      }finally{
-        clearTimeout(timeout);
-      }
-    };
-
-    const __trainingLinkageBaseSendCharacterChat = sendCharacterChat;
-    sendCharacterChat = async function(){
-      const input = $("characterChatInput");
-      const btn = $("sendCharacterChatBtn");
-      const text = String(input?.value || "").trim();
-      if(!text) return;
-      const card = getActiveCharacterCard();
-      if(!card){
-        alert("请先选择一个角色卡");
-        return;
-      }
-      const history = getCharacterChatHistory();
-      setCharacterChatHistory([...history, { role:"user", content:text, at:new Date().toISOString() }]);
-      if(input) input.value = "";
-      if(btn) btn.disabled = true;
-      try{
-        const linkageReply = await processTrainingLinkageFromCharacterChat(text);
-        const settings = getAiSettings();
-        const ready = settings.apiMode === "proxy" ? !!settings.proxyUrl : !!settings.apiKey;
-        if(linkageReply && (!settings.enabled || !ready)){
-          setCharacterChatHistory([...getCharacterChatHistory(), { role:"assistant", content:linkageReply, at:new Date().toISOString() }], { sync:true });
-          return;
-        }
-        const reply = await callCharacterChat(text);
-        setCharacterChatHistory([...getCharacterChatHistory(), { role:"assistant", content:reply || linkageReply || "（没有返回内容）", at:new Date().toISOString() }], { sync:true });
-      }catch(err){
-        console.error(err);
-        const lastCard = TrainingLinkage.getLastCard();
-        if(lastCard && lastCard.message && /已记录/.test(lastCard.message)){
-          setCharacterChatHistory([...getCharacterChatHistory(), { role:"assistant", content:"训练事实已经在本机记录；角色回复发送失败，请检查 AI 配置。", at:new Date().toISOString() }], { sync:true });
-        }else{
-          setCharacterChatHistory([...getCharacterChatHistory(), { role:"assistant", content:`发送失败：${err.message || "请检查 AI 配置"}`, at:new Date().toISOString() }], { sync:true });
-        }
-      }finally{
-        if(btn) btn.disabled = false;
-      }
-    };
-
-    function renderTrainingSessionRibbon(){
-      const container = $("planContainer");
-      if(!container) return;
-      const old = $("trainingSessionRibbon");
-      if(old) old.remove();
-      const session = TrainingLinkage.getSession();
-      if(!session || !["active","closing"].includes(session.status)) return;
-      const div = document.createElement("div");
-      div.id = "trainingSessionRibbon";
-      div.className = "training-session-ribbon";
-      div.innerHTML = `
-        <div><b>训练会话：</b>${escapeHtml(session.dayName || "今日训练")} · 角色：${escapeHtml(session.role?.name || "当前角色")} · ${session.status === "closing" ? "待收尾" : "进行中"}</div>
-        <div class="training-linkage-actions">
-          <button class="mini-btn" data-training-session-action="continue">继续训练</button>
-          <button class="mini-btn" data-training-session-action="end">结束并保存</button>
-          <button class="mini-btn" data-training-session-action="discard">放弃</button>
-        </div>
-      `;
-      container.parentNode.insertBefore(div, container);
-      div.querySelectorAll("[data-training-session-action]").forEach((btn) => {
-        btn.onclick = () => {
-          const action = btn.getAttribute("data-training-session-action");
-          if(action === "end") TrainingLinkage.endSession("save");
-          else if(action === "discard") TrainingLinkage.endSession("discard");
-          else showCaptureCard({ kind:"success", title:"继续训练", message:"训练会话继续进行，当前角色保持为进入时的陪练外壳。", actions:["end_session"] });
-          renderTrainingSessionRibbon();
-        };
-      });
-    }
-    TrainingLinkage.renderTrainingSessionRibbon = renderTrainingSessionRibbon;
-
-    const __trainingLinkageBaseRenderPlan = renderPlan;
-    renderPlan = function(){
-      __trainingLinkageBaseRenderPlan();
-      document.querySelectorAll(".day-panel").forEach((panel, dayIndex) => {
-        const actions = panel.querySelector(".plan-actions");
-        if(actions && !actions.querySelector("[data-start-training-session]")){
-          const btn = document.createElement("button");
-          btn.className = "btn";
-          btn.type = "button";
-          btn.setAttribute("data-start-training-session", String(dayIndex));
-          btn.textContent = "开始训练";
-          btn.onclick = () => {
-            TrainingLinkage.startSession(dayIndex);
-            openAiCoachPanel(false, { focusChat:true });
-          };
-          actions.insertBefore(btn, actions.firstChild);
-        }
-      });
-      renderTrainingSessionRibbon();
-    };
-
-    const __trainingLinkageBaseTogglePlanCheck = togglePlanCheck;
-    togglePlanCheck = function(key){
-      __trainingLinkageBaseTogglePlanCheck(key);
-      TrainingLinkage.checkSessionCompletion();
-      const logs = getDailyLogs();
-      const today = formatDateKey(new Date());
-      if(logs[today]){
-        logs[today].aiDailySummary = logs[today].aiDailySummary || "";
-        TrainingLinkage.updateWeeklySummary(logs);
-      }
-    };
-
-    const __trainingLinkageBaseRecordPlanDayToToday = recordPlanDayToToday;
-    recordPlanDayToToday = function(dayIndex, options = {}){
-      const existingDate = getDateForPlanDayInCurrentWeek((getPlanDays()[dayIndex] || {}).day || "", dayIndex);
-      const before = getDailyLogs()[existingDate] || {};
-      const dateKey = __trainingLinkageBaseRecordPlanDayToToday(dayIndex, { ...options, silent:true });
-      if(dateKey){
-        const logs = getDailyLogs();
-        const next = logs[dateKey] || {};
-        next.aiCaptureRecords = Array.isArray(before.aiCaptureRecords) ? before.aiCaptureRecords : (Array.isArray(next.aiCaptureRecords) ? next.aiCaptureRecords : []);
-        next.aiDailySummary = before.aiDailySummary || next.aiDailySummary || "";
-        next.aiDailySummaryUpdatedAt = before.aiDailySummaryUpdatedAt || next.aiDailySummaryUpdatedAt || "";
-        logs[dateKey] = next;
-        setDailyLogs(logs, { syncToCloud:true });
-      }
-      if(!options.silent){
-        switchTab("history");
-        window.scrollTo({ top:0, behavior:"smooth" });
-        alert(`已保存到本周对应日期：${dateKey}`);
-      }
-      return dateKey;
-    };
-
-    function renderTrainingCaptureRecordsHtml(log){
-      const records = Array.isArray(log?.aiCaptureRecords) ? log.aiCaptureRecords : [];
-      const active = records.filter((r) => !r.revoked);
-      const revoked = records.filter((r) => r.revoked);
-      const render = (record) => `
-        <div class="training-linkage-record ${record.revoked ? "revoked" : ""}">
-          <div><b>${escapeHtml(record.recordType || "training_fact")}</b> · ${escapeHtml(record.captureRoleName || "系统")}</div>
-          <div>${escapeHtml(record.currentText || record.originalText || "")}</div>
-          <div class="help">来源：${escapeHtml(record.sourceType || "")} · ${escapeHtml(record.createdAt || "")}${record.userModified ? " · 已由用户修改" : ""}${record.revoked ? " · 已撤回" : ""}</div>
-          ${record.revoked ? "" : `<div class="training-linkage-actions"><button class="mini-btn" data-calendar-edit-capture="${escapeHtml(record.id)}">修改</button><button class="mini-btn" data-calendar-revoke-capture="${escapeHtml(record.id)}">撤回</button></div>`}
-        </div>
-      `;
-      return `
-        <div class="training-linkage-section">
-          <div class="training-linkage-title">AI 捕捉记录</div>
-          ${active.length ? active.map(render).join("") : `<div class="help">暂无有效 AI 捕捉记录。</div>`}
-          ${revoked.length ? `<div class="label">已撤回</div>${revoked.map(render).join("")}` : ""}
-        </div>
-        <div class="training-linkage-section">
-          <div class="training-linkage-title">AI 日总结</div>
-          <div>${escapeHtml(log?.aiDailySummary || "暂无 AI 日总结。")}</div>
-          <div class="training-linkage-actions"><button class="mini-btn" id="refreshAiDailySummaryBtn" type="button">刷新日总结</button></div>
-        </div>
-      `;
-    }
-
-    const __trainingLinkageBaseRenderCalendarDetail = renderCalendarDetail;
-    renderCalendarDetail = function(){
-      __trainingLinkageBaseRenderCalendarDetail();
-      const box = $("calendarDetail");
-      if(!box) return;
-      const logs = getDailyLogs();
-      const log = logs[selectedCalendarDate];
-      if(!log) return;
-      const wrap = document.createElement("div");
-      wrap.innerHTML = renderTrainingCaptureRecordsHtml(log);
-      box.appendChild(wrap);
-      box.querySelectorAll("[data-calendar-revoke-capture]").forEach((btn) => {
-        btn.onclick = () => {
-          const result = TrainingLinkage.revokeRecord(btn.getAttribute("data-calendar-revoke-capture"));
-          showCaptureCard(result.card);
-          renderPlan();
-          renderCalendarDetail();
-        };
-      });
-      box.querySelectorAll("[data-calendar-edit-capture]").forEach((btn) => {
-        btn.onclick = () => {
-          const next = prompt("修改 AI 捕捉记录：", "");
-          if(next === null) return;
-          const result = TrainingLinkage.editRecord(btn.getAttribute("data-calendar-edit-capture"), next);
-          showCaptureCard(result.card);
-          renderCalendarDetail();
-        };
-      });
-      const refresh = $("refreshAiDailySummaryBtn");
-      if(refresh){
-        refresh.onclick = () => {
-          const nextLogs = getDailyLogs();
-          const current = nextLogs[selectedCalendarDate];
-          if(current){
-            current.aiDailySummary = (current.aiCaptureRecords || []).filter((r) => !r.revoked).map((r) => r.currentText || r.originalText).join("；") || "";
-            current.aiDailySummaryUpdatedAt = new Date().toISOString();
-            nextLogs[selectedCalendarDate] = current;
-            setDailyLogs(nextLogs, { syncToCloud:true });
-          }
-        };
-      }
-    };
-
-    const __trainingLinkageBaseRenderHistory = renderHistory;
-    renderHistory = function(){
-      __trainingLinkageBaseRenderHistory();
-      const list = $("historyList");
-      const summary = safeJsonParse(localStorage.getItem(TRAINING_LINKAGE_WEEKLY_SUMMARY_KEY) || "null", null);
-      if(list && summary && summary.text && !$("trainingWeeklySummaryDraft")){
-        const div = document.createElement("div");
-        div.id = "trainingWeeklySummaryDraft";
-        div.className = "history-card";
-        div.innerHTML = `
-          <div class="history-top"><div><div style="font-weight:700">AI 周总结草稿</div><div class="history-meta">基于每日训练日历事实 · ${escapeHtml(summary.generatedAt || "")}</div></div><div class="badge">AI</div></div>
-          <div class="softbox" style="margin-top:10px;"><pre>${escapeHtml(summary.text || "")}</pre></div>
-          <button class="btn-outline full" id="copyTrainingWeeklySummaryBtn" type="button">复制周总结草稿</button>
-        `;
-        list.parentNode.insertBefore(div, list);
-        const btn = $("copyTrainingWeeklySummaryBtn");
-        if(btn) btn.onclick = () => copyText(summary.text || "", "已复制 AI 周总结草稿");
-      }
-    };
-
-    const __trainingLinkageBaseGetLocalSnapshot = getLocalSnapshot;
-    getLocalSnapshot = function(){
-      return { ...__trainingLinkageBaseGetLocalSnapshot(), ...TrainingLinkage.exportExtra() };
-    };
-
-    const __trainingLinkageBaseApplyLocalSnapshot = applyLocalSnapshot;
-    applyLocalSnapshot = function(payload){
-      __trainingLinkageBaseApplyLocalSnapshot(payload);
-      TrainingLinkage.importExtra(payload);
-      renderTrainingSessionRibbon();
-    };
-
-    exportData = function(){
-      const payload = {
-        form: JSON.parse(localStorage.getItem(FORM_KEY) || "{}"),
-        history: getHistory(),
-        dailyLogs: getDailyLogs(),
-        lastCloudSyncAt: getLastCloudSyncAt(),
-        planChecks: getPlanChecks(),
-        planTemplate: getPlanTemplate(),
-        tempDailyPlanOverrides: getTempDailyPlanOverrides(),
-        pageBackground: getPageBackgroundData(),
-        aiSettings: getAiSettingsForBackup(),
-        aiFeedbackHistory: getAiFeedbackHistory(),
-        aiLastFeedback: getAiLastFeedback(),
-        aiPetState: getAiPetState(),
-        aiPetIcon: getAiPetIconData(),
-        aiMilestones: getAiMilestones(),
-        characterCards: getCharacterCards(),
-        activeCharacterCardId: getActiveCharacterCardId(),
-        characterChatHistory: getCharacterChatHistory(),
-        ...TrainingLinkage.exportExtra()
-      };
-      const ok = confirm("导出的备份可能包含 AI API Key 和训练捕捉记录，请不要发送给他人。继续导出吗？");
-      if(!ok) return;
-      const date = new Date().toISOString().slice(0, 10);
-      downloadJson(`增肌记录备份_${date}.json`, payload);
-    };
-
-    const __trainingLinkageBaseImportData = importData;
-    importData = function(file){
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try{
-          const payload = JSON.parse(e.target.result);
-          TrainingLinkage.importExtra(payload);
-          if(payload.dailyLogs){
-            Object.values(payload.dailyLogs || {}).forEach((log) => {
-              log.aiCaptureRecords = Array.isArray(log.aiCaptureRecords) ? log.aiCaptureRecords : [];
-              log.aiDailySummary = log.aiDailySummary || "";
-            });
-          }
-          const blob = new Blob([JSON.stringify(payload)], { type:"application/json" });
-          const patchedFile = new File([blob], file.name || "import.json", { type:"application/json" });
-          __trainingLinkageBaseImportData(patchedFile);
-        }catch(err){
-          alert("导入失败，文件格式不对");
-        }
-      };
-      reader.readAsText(file);
-    };
-
-    const __trainingLinkageBaseResetAll = resetAll;
-    resetAll = function(){
-      __trainingLinkageBaseResetAll();
-      localStorage.removeItem(TRAINING_LINKAGE_SESSION_KEY);
-      localStorage.removeItem(TRAINING_LINKAGE_LAST_CARD_KEY);
-      localStorage.removeItem(TRAINING_LINKAGE_WEEKLY_SUMMARY_KEY);
-      localStorage.removeItem(TRAINING_LINKAGE_TEST_REPORT_KEY);
-    };
-
-    function renderTrainingLinkageSelfTestResult(report){
-      const box = $("trainingLinkageSelfTestResult");
-      if(!box) return;
-      box.style.display = "block";
-      const rows = (report.results || []).map((item) => `<li><span class="${item.pass ? "training-self-test-pass" : "training-self-test-fail"}">${item.pass ? "PASS" : "FAIL"}</span> ${escapeHtml(item.name)}${item.details ? `<div class="help">${escapeHtml(item.details).slice(0, 400)}</div>` : ""}</li>`).join("");
-      box.innerHTML = `<div><b>通过 ${report.passed} / 失败 ${report.failed}</b> · ${escapeHtml(report.at || "")}</div><ul class="calendar-items">${rows}</ul>`;
-    }
-
-    ensureTrainingLinkageUi();
-    showCaptureCard(TrainingLinkage.getLastCard());
 
 
     bindAiSettingsControls();
