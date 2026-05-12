@@ -3984,6 +3984,60 @@
     }
 
 
+
+    /* --- Patch: AutoSleep CSV import for weekly sleep fields --- */
+    .sleep-csv-import-card{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:10px;
+      align-items:center;
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:18px;
+      background:rgba(241,245,249,.94);
+      border:1px solid rgba(148,163,184,.18);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.30);
+    }
+
+    .sleep-csv-import-title{
+      font-size:14px;
+      font-weight:800;
+      color:var(--text);
+      line-height:1.35;
+    }
+
+    .sleep-csv-import-desc{
+      margin-top:4px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.5;
+    }
+
+    .sleep-csv-import-card .mini-btn{
+      min-width:118px;
+      min-height:40px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+    }
+
+    #autoSleepCsvStatus{
+      grid-column:1 / -1;
+      margin-top:0;
+      padding-left:0;
+    }
+
+    @media (max-width:480px){
+      .sleep-csv-import-card{
+        grid-template-columns:1fr;
+      }
+      .sleep-csv-import-card .mini-btn{
+        width:100%;
+        min-height:44px;
+      }
+    }
+
 </style>
 </head>
 <body>
@@ -4170,7 +4224,7 @@
 
         <div class="softbox">
           <b>用一句话填写</b>
-          <div class="help" style="margin-top:4px;">把本周体重、睡眠、引体、饮食和状态直接写成一句话，AI 会尽量帮你填入空字段。</div>
+          <div class="help" style="margin-top:4px;">把本周体重、睡眠、引体、饮食和状态直接写成一句话，AI 会先分析上下文，再填入对应字段。</div>
           <textarea id="aiNaturalLogInput" placeholder="例如：这周体重55.1、54.6、55.9，平均睡眠7小时，引体最高6个，总量19，饮食一般，周五周六没器材。" style="margin-top:10px;"></textarea>
           <button class="btn-outline full" id="aiParseLogBtn" type="button">AI 解析并填入</button>
           <div class="help" id="aiNaturalLogStatus"></div>
@@ -4181,13 +4235,13 @@
 
         <label class="label">7天空腹体重（kg）</label>
         <div class="grid7">
-          <input id="weight1" placeholder="第1天" inputmode="decimal" />
-          <input id="weight2" placeholder="第2天" inputmode="decimal" />
-          <input id="weight3" placeholder="第3天" inputmode="decimal" />
-          <input id="weight4" placeholder="第4天" inputmode="decimal" />
-          <input id="weight5" placeholder="第5天" inputmode="decimal" />
-          <input id="weight6" placeholder="第6天" inputmode="decimal" />
-          <input id="weight7" placeholder="第7天" inputmode="decimal" />
+          <input id="weight1" placeholder="周一" inputmode="decimal" />
+          <input id="weight2" placeholder="周二" inputmode="decimal" />
+          <input id="weight3" placeholder="周三" inputmode="decimal" />
+          <input id="weight4" placeholder="周四" inputmode="decimal" />
+          <input id="weight5" placeholder="周五" inputmode="decimal" />
+          <input id="weight6" placeholder="周六" inputmode="decimal" />
+          <input id="weight7" placeholder="周日" inputmode="decimal" />
         </div>
 
         <div class="softbox">自动计算周平均体重：<b id="autoAvg">未填写</b></div>
@@ -4201,6 +4255,16 @@
             <label class="label">最晚入睡</label>
             <input id="latestSleep" placeholder="例如：1:20" />
           </div>
+        </div>
+
+        <div class="sleep-csv-import-card">
+          <div>
+            <div class="sleep-csv-import-title">导入睡眠 CSV</div>
+            <div class="sleep-csv-import-desc">支持 AutoSleep 导出的 CSV；自动读取本周实际睡眠时长和最晚就寝时间，不调用 AI。</div>
+          </div>
+          <button class="mini-btn" id="autoSleepCsvImportBtn" type="button">导入 CSV</button>
+          <input type="file" id="autoSleepCsvFile" accept=".csv,text/csv" style="display:none" />
+          <div class="help" id="autoSleepCsvStatus"></div>
         </div>
 
         <div class="grid2">
@@ -4283,7 +4347,7 @@
     <section id="history" class="section">
       <div class="card">
         <h2>AI 趋势观察</h2>
-        <div class="softbox">提取训练日历中近三个月数据，结合饮食备注、体重、睡眠和训练完成记录生成趋势分析。</div>
+        <div class="softbox">提取训练日历和已保存周记录中的近三个月数据，结合饮食备注、体重、睡眠和训练完成记录生成趋势分析。</div>
         <button class="btn-outline full" id="aiTrendBtn" type="button">分析最近记录</button>
         <div id="aiTrendResult" class="softbox" style="display:none;"></div>
       </div>
@@ -4562,7 +4626,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.05.12-94-radius-audit";
+    const APP_VERSION = "v2026.05.12-95-no-false-plank";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const TEMP_DAILY_PLAN_OVERRIDES_KEY = "gain-temp-daily-plan-overrides";
     const DAILY_LOGS_KEY = "gain-daily-logs";
@@ -5517,6 +5581,113 @@
         .map(({ _trendTime, ...log }) => log);
     }
 
+    function parseTrendDateLoose(value){
+      if(value instanceof Date && Number.isFinite(value.getTime())){
+        return new Date(value.getFullYear(), value.getMonth(), value.getDate());
+      }
+      const text = String(value ?? "").trim();
+      if(!text) return null;
+
+      const compact = text.match(/(20\d{2})(\d{2})(\d{2})/);
+      if(compact){
+        const d = parseTrendDateKey(`${compact[1]}-${compact[2]}-${compact[3]}`);
+        if(d) return d;
+      }
+
+      const normalized = text
+        .replace(/[年/.]/g, "-")
+        .replace(/[月]/g, "-")
+        .replace(/[日号]/g, "")
+        .replace(/[T\s].*$/, "")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+      const iso = normalized.match(/(20\d{2})-(\d{1,2})-(\d{1,2})/);
+      if(iso){
+        const d = parseTrendDateKey(`${iso[1]}-${String(iso[2]).padStart(2, "0")}-${String(iso[3]).padStart(2, "0")}`);
+        if(d) return d;
+      }
+
+      const parsedMs = Date.parse(text);
+      if(Number.isFinite(parsedMs)){
+        const d = new Date(parsedMs);
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      }
+      return null;
+    }
+
+    function parseTrendWeekRangeFromLabel(label){
+      const text = String(label || "").trim();
+      if(!text) return null;
+      const compactMatches = [...text.matchAll(/(20\d{2})(\d{2})(\d{2})/g)];
+      if(compactMatches.length){
+        const dates = compactMatches
+          .map((m) => parseTrendDateKey(`${m[1]}-${m[2]}-${m[3]}`))
+          .filter(Boolean);
+        if(dates.length){
+          return {
+            startDate: dates[0],
+            endDate: dates[dates.length - 1]
+          };
+        }
+      }
+      const dateMatches = [...text.matchAll(/(20\d{2})[年\-/.](\d{1,2})[月\-/.](\d{1,2})/g)];
+      if(dateMatches.length){
+        const dates = dateMatches
+          .map((m) => parseTrendDateKey(`${m[1]}-${String(m[2]).padStart(2, "0")}-${String(m[3]).padStart(2, "0")}`))
+          .filter(Boolean);
+        if(dates.length){
+          return {
+            startDate: dates[0],
+            endDate: dates[dates.length - 1]
+          };
+        }
+      }
+      return null;
+    }
+
+    function getTrendHistoryEntryRange(entry = {}){
+      const range = parseTrendWeekRangeFromLabel(entry.weekLabel);
+      if(range) return range;
+      const savedDate = parseTrendDateLoose(entry.createdAt) || parseTrendDateLoose(entry.updatedAt) || parseTrendDateLoose(entry.id);
+      if(savedDate) return { startDate:savedDate, endDate:savedDate };
+      return null;
+    }
+
+    function getRecentWeeklyHistoryForTrend(months = 3, now = new Date(), history = getHistory()){
+      const safeMonths = Math.max(1, Number(months) || 3);
+      const end = now instanceof Date && Number.isFinite(now.getTime())
+        ? new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        : new Date();
+      const start = shiftTrendMonths(end, -safeMonths);
+      return (Array.isArray(history) ? history : [])
+        .map((entry) => {
+          const safeEntry = entry && typeof entry === "object" ? entry : {};
+          const range = getTrendHistoryEntryRange(safeEntry);
+          if(!range) return null;
+          const endTime = range.endDate.getTime();
+          const startTime = range.startDate.getTime();
+          const overlapsWindow = endTime >= start.getTime() && startTime <= end.getTime();
+          if(!overlapsWindow) return null;
+          return {
+            ...safeEntry,
+            trendStartDate: formatTrendDateKey(range.startDate),
+            trendEndDate: formatTrendDateKey(range.endDate),
+            _trendTime: endTime
+          };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a._trendTime - b._trendTime)
+        .map(({ _trendTime, ...entry }) => entry);
+    }
+
+    function parseTrendPercent(value){
+      const num = parseTrendNumber(value);
+      if(num == null) return null;
+      if(num >= 0 && num <= 1) return Math.round(num * 100);
+      if(num >= 0 && num <= 100) return Math.round(num);
+      return null;
+    }
+
     function summarizeTrendFocusCounts(records){
       const counts = {};
       records.forEach((log) => {
@@ -5557,6 +5728,7 @@
         : new Date();
       const start = shiftTrendMonths(end, -3);
       const records = Array.isArray(calendarLogs) ? calendarLogs : [];
+      const recentWeeklyHistory = getRecentWeeklyHistoryForTrend(3, end, Array.isArray(history) ? history : []);
 
       const calendarRecords = records.map((log) => {
         const completedItems = Array.isArray(log.completedItems) ? log.completedItems : [];
@@ -5583,41 +5755,83 @@
         };
       });
 
-      const weeklySnapshots = (Array.isArray(history) ? history : []).slice(0, 12).map((entry) => ({
-        weekLabel: entry.weekLabel || "",
-        avgWeight: entry.avgWeight || "",
-        averageSleep: entry.avgSleep || "",
-        latestSleep: entry.latestSleep || "",
-        trainingDays: entry.trainingDays || "",
-        diet: entry.diet || "",
-        status: entry.status || "",
-        notes: entry.notes || "",
-        completionPercent: entry.completionPercent || "",
-        completedCount: entry.completedCount ?? "",
-        totalPlanItems: entry.totalPlanItems ?? ""
-      }));
+      const weeklySnapshots = recentWeeklyHistory.map((entry) => {
+        const completedCount = Number.isFinite(Number(entry.completedCount)) ? Number(entry.completedCount) : null;
+        const totalPlanItems = Number.isFinite(Number(entry.totalPlanItems)) ? Number(entry.totalPlanItems) : null;
+        const completionPercent = parseTrendPercent(entry.completionPercent);
+        const trainingDaysNum = parseTrendNumber(entry.trainingDays);
+        const avgWeightKg = parseTrendWeightKg(entry.avgWeight);
+        const avgSleepHours = parseTrendSleepHours(entry.avgSleep || entry.averageSleep);
+        return {
+          id: entry.id || "",
+          weekLabel: entry.weekLabel || "",
+          startDate: entry.trendStartDate || "",
+          endDate: entry.trendEndDate || "",
+          savedAt: entry.createdAt || "",
+          avgWeight: entry.avgWeight || "",
+          avgWeightKg,
+          averageSleep: entry.avgSleep || entry.averageSleep || "",
+          averageSleepHours: avgSleepHours,
+          latestSleep: entry.latestSleep || "",
+          trainingDays: entry.trainingDays || "",
+          trainingDaysNum: trainingDaysNum != null ? trainingDaysNum : null,
+          diet: entry.diet || "",
+          status: entry.status || "",
+          notes: entry.notes || "",
+          pullupBest: entry.pullupBest || "",
+          pullupTotal: entry.pullupTotal || "",
+          pushupBest: entry.pushupBest || "",
+          completionPercent: entry.completionPercent || "",
+          completionRatePercent: completionPercent,
+          completedCount: completedCount ?? "",
+          totalPlanItems: totalPlanItems ?? "",
+          planSummary: String(entry.planSummary || "").slice(0, 900),
+          aiWeeklySummary: String(entry.aiWeeklySummaryDraft?.text || entry.aiWeeklySummary?.text || entry.aiWeeklySummary || "").slice(0, 500)
+        };
+      });
 
       const weightSamples = calendarRecords
         .filter((log) => log.weightKg != null)
         .map((log) => ({ date:log.date, valueKg:log.weightKg, source:"calendar" }));
-      if(!weightSamples.length){
-        weeklySnapshots.forEach((entry, index) => {
-          const avgWeight = parseTrendWeightKg(entry.avgWeight);
-          if(avgWeight != null) weightSamples.push({ date:entry.weekLabel || `历史周记录${index + 1}`, valueKg:avgWeight, source:"weekly" });
-        });
-      }
+      weeklySnapshots.forEach((entry, index) => {
+        if(entry.avgWeightKg != null){
+          weightSamples.push({
+            date: entry.endDate || entry.weekLabel || `历史周记录${index + 1}`,
+            valueKg: entry.avgWeightKg,
+            source:"weekly"
+          });
+        }
+      });
+      weightSamples.sort((a, b) => {
+        const da = parseTrendDateLoose(a.date)?.getTime() || 0;
+        const db = parseTrendDateLoose(b.date)?.getTime() || 0;
+        return da - db;
+      });
+
       const sleepSamples = calendarRecords
         .filter((log) => log.sleepHours != null)
         .map((log) => ({ date:log.date, hours:log.sleepHours, source:"calendar" }));
-      if(!sleepSamples.length){
-        weeklySnapshots.forEach((entry, index) => {
-          const avgSleep = parseTrendSleepHours(entry.averageSleep);
-          if(avgSleep != null) sleepSamples.push({ date:entry.weekLabel || `历史周记录${index + 1}`, hours:avgSleep, source:"weekly" });
-        });
-      }
+      weeklySnapshots.forEach((entry, index) => {
+        if(entry.averageSleepHours != null){
+          sleepSamples.push({
+            date: entry.endDate || entry.weekLabel || `历史周记录${index + 1}`,
+            hours: entry.averageSleepHours,
+            source:"weekly"
+          });
+        }
+      });
+      sleepSamples.sort((a, b) => {
+        const da = parseTrendDateLoose(a.date)?.getTime() || 0;
+        const db = parseTrendDateLoose(b.date)?.getTime() || 0;
+        return da - db;
+      });
 
-      const completedItems = calendarRecords.reduce((sum, log) => sum + (Number(log.completedCount) || 0), 0);
-      const totalItems = calendarRecords.reduce((sum, log) => sum + (Number(log.totalItems) || 0), 0);
+      const calendarCompletedItems = calendarRecords.reduce((sum, log) => sum + (Number(log.completedCount) || 0), 0);
+      const calendarTotalItems = calendarRecords.reduce((sum, log) => sum + (Number(log.totalItems) || 0), 0);
+      const weeklyCompletedItems = weeklySnapshots.reduce((sum, entry) => sum + (Number(entry.completedCount) || 0), 0);
+      const weeklyTotalItems = weeklySnapshots.reduce((sum, entry) => sum + (Number(entry.totalPlanItems) || 0), 0);
+      const weeklyTrainingDays = weeklySnapshots.reduce((sum, entry) => sum + (Number(entry.trainingDaysNum) || 0), 0);
+      const weeklyCompletionRates = weeklySnapshots.map((entry) => entry.completionRatePercent).filter((value) => Number.isFinite(value));
       const firstWeight = weightSamples[0] || null;
       const lastWeight = weightSamples[weightSamples.length - 1] || null;
       const weightValues = weightSamples.map((item) => item.valueKg);
@@ -5631,14 +5845,18 @@
           startDate:formatTrendDateKey(start),
           endDate:formatTrendDateKey(end),
           calendarLogDays:calendarRecords.length,
-          source:"calendar_daily_logs"
+          weeklyRecordCount:weeklySnapshots.length,
+          source:"calendar_daily_logs_and_saved_weekly_records"
         },
         calendarRecords,
         weeklySnapshots,
+        recentWeeklyRecords: weeklySnapshots,
         planCheckSummary,
         weight:{
-          source:weightSamples[0]?.source || "none",
+          source: weightSamples.length ? "calendar+weekly" : "none",
           sampleCount:weightSamples.length,
+          calendarSampleCount:weightSamples.filter((item) => item.source === "calendar").length,
+          weeklySampleCount:weightSamples.filter((item) => item.source === "weekly").length,
           first:firstWeight,
           last:lastWeight,
           averageKg:averageTrendNumbers(weightValues, 2),
@@ -5647,8 +5865,10 @@
           changeKg:firstWeight && lastWeight ? roundTrendNumber(lastWeight.valueKg - firstWeight.valueKg, 2) : null
         },
         sleep:{
-          source:sleepSamples[0]?.source || "none",
+          source: sleepSamples.length ? "calendar+weekly" : "none",
           sampleCount:sleepSamples.length,
+          calendarSampleCount:sleepSamples.filter((item) => item.source === "calendar").length,
+          weeklySampleCount:sleepSamples.filter((item) => item.source === "weekly").length,
           averageHours:averageTrendNumbers(sleepValues, 2),
           minHours:sleepValues.length ? Math.min(...sleepValues) : null,
           maxHours:sleepValues.length ? Math.max(...sleepValues) : null,
@@ -5656,9 +5876,16 @@
         },
         training:{
           sessions:calendarRecords.length,
-          completedItems,
-          totalItems,
-          completionRatePercent:totalItems ? Math.round(completedItems / totalItems * 100) : null,
+          weeklyRecords:weeklySnapshots.length,
+          calendarCompletedItems,
+          calendarTotalItems,
+          weeklyCompletedItems,
+          weeklyTotalItems,
+          completedItems:calendarCompletedItems + weeklyCompletedItems,
+          totalItems:calendarTotalItems + weeklyTotalItems,
+          completionRatePercent:(calendarTotalItems + weeklyTotalItems) ? Math.round((calendarCompletedItems + weeklyCompletedItems) / (calendarTotalItems + weeklyTotalItems) * 100) : null,
+          weeklyAverageCompletionRatePercent:averageTrendNumbers(weeklyCompletionRates, 1),
+          weeklyTrainingDays,
           focusCounts:summarizeTrendFocusCounts(calendarRecords),
           temporaryPlanDays:calendarRecords.filter((log) => log.isTemporaryPlan).length
         },
@@ -5671,6 +5898,7 @@
         dataQuality:{
           missing:[
             !calendarRecords.length ? "近三个月日历训练日志" : "",
+            !weeklySnapshots.length ? "近三个月已保存周记录" : "",
             !weightSamples.length ? "体重记录" : "",
             !sleepSamples.length ? "睡眠记录" : "",
             !dietSignals.length ? "饮食/备注记录" : ""
@@ -5682,7 +5910,7 @@
     function buildLocalTrendAnalysis(payload = {}){
       const context = payload.trendContext || buildTrendAnalysisContext({
         calendarLogs: payload.calendarDailyLogs || payload.dailyLogs || [],
-        history: payload.recentHistory || [],
+        history: payload.recentWeeklyRecords || payload.recentHistory || [],
         currentForm: payload.currentForm || {},
         planCheckSummary: payload.planCheckSummary || {}
       });
@@ -5696,16 +5924,20 @@
       const diet = context.diet || {};
       const roleName = String(payload.activeCharacterCard?.name || "").trim();
 
-      if(training.sessions){
-        const rateText = training.completionRatePercent != null ? `，动作完成率约 ${training.completionRatePercent}%` : "";
-        observations.push(`${windowText} 的日历里有 ${training.sessions} 天训练日志，完成 ${training.completedItems || 0}/${training.totalItems || 0} 个动作${rateText}。`);
+      if(training.sessions || training.weeklyRecords){
+        const rateText = training.completionRatePercent != null ? `，合并完成率约 ${training.completionRatePercent}%` : "";
+        observations.push(`${windowText} 共读取日历 ${training.sessions || 0} 天、已保存周记录 ${training.weeklyRecords || 0} 条，合并统计完成 ${training.completedItems || 0}/${training.totalItems || 0} 个动作${rateText}。`);
+        if(training.weeklyRecords){
+          const weeklyRateText = training.weeklyAverageCompletionRatePercent != null ? `，周记录平均完成率约 ${training.weeklyAverageCompletionRatePercent}%` : "";
+          observations.push(`近三个月周记录覆盖 ${training.weeklyRecords} 周，记录训练天数合计 ${training.weeklyTrainingDays || 0} 天${weeklyRateText}。`);
+        }
         if(Array.isArray(training.focusCounts) && training.focusCounts.length){
-          observations.push(`训练重点最多的是 ${training.focusCounts.map((item) => `${item.name} ${item.count}天`).join("、")}。`);
+          observations.push(`日历训练重点最多的是 ${training.focusCounts.map((item) => `${item.name} ${item.count}天`).join("、")}。`);
         }
       }else{
-        observations.push(`${windowText} 日历里还没有训练日志，当前无法判断训练连续性。`);
-        risks.push("没有日历训练记录时，AI 只能泛化建议，无法判断训练量是否真的执行。");
-        suggestions.push("先把每次训练保存到日历，再补当天体重、睡眠和备注。");
+        observations.push(`${windowText} 日历和已保存周记录里都没有训练数据，当前无法判断训练连续性。`);
+        risks.push("没有日历训练记录和保存周记录时，AI 只能泛化建议，无法判断训练量是否真的执行。");
+        suggestions.push("先把每次训练保存到日历，并定期保存周记录，再补体重、睡眠和备注。");
       }
 
       if(weight.sampleCount){
@@ -5932,6 +6164,11 @@
       { canonical:"哑铃弯举", aliases:["哑铃弯举","弯举","curl"] },
       { canonical:"锤式弯举", aliases:["锤式弯举","hammer curl"] },
       { canonical:"平板支撑", aliases:["平板支撑","plank"] },
+      { canonical:"侧桥", aliases:["侧桥","侧平板","侧向平板支撑","side plank","side plank hold"] },
+      { canonical:"死虫", aliases:["死虫","dead bug","deadbug"] },
+      { canonical:"卷腹", aliases:["卷腹","crunch","crunches"] },
+      { canonical:"反向卷腹", aliases:["反向卷腹","仰卧举腿","reverse crunch","leg raise"] },
+      { canonical:"俄罗斯转体", aliases:["俄罗斯转体","russian twist"] },
       { canonical:"跑步", aliases:["跑步","跑了","慢跑","run","running"] },
       { canonical:"快走", aliases:["快走","walk","walking"] },
       { canonical:"腿部训练", aliases:["练腿","腿练","练完腿","腿部训练"] }
@@ -5967,6 +6204,43 @@
         .sort((a, b) => b.normalizedAlias.length - a.normalizedAlias.length);
     }
 
+    function getMatchedTrainingExercisesFromText(text, options = {}){
+      const raw = String(text || "");
+      const normalized = normalizeTrainingSearchText(raw);
+      if(!normalized) return [];
+      const entries = getTrainingCaptureAliasEntries();
+      const matches = [];
+      entries.forEach((entry) => {
+        const isEnglishAlias = /^[a-z ]+$/.test(entry.normalizedAlias);
+        const source = isEnglishAlias ? normalized : raw;
+        const needle = isEnglishAlias ? entry.normalizedAlias : entry.alias;
+        const index = source.indexOf(needle);
+        if(index < 0) return;
+        const end = index + String(needle || "").length;
+        const duplicateAliasMatch = matches.some((match) => (
+          match.index === index &&
+          match.end === end &&
+          match.normalizedAlias === entry.normalizedAlias
+        ));
+        const nestedInLongerMatch = matches.some((match) => (
+          index >= match.index &&
+          end <= match.end &&
+          String(match.alias || "").length > String(entry.alias || "").length
+        ));
+        if(duplicateAliasMatch || nestedInLongerMatch) return;
+        if(matches.some((match) => match.canonical === entry.canonical)) return;
+        matches.push({
+          canonical: entry.canonical,
+          alias: entry.alias,
+          normalizedAlias: entry.normalizedAlias,
+          index,
+          end,
+          ambiguous:false
+        });
+      });
+      return matches.sort((a, b) => a.index - b.index || b.alias.length - a.alias.length);
+    }
+
     function matchExerciseFromText(text, options = {}){
       const raw = String(text || "");
       const normalized = normalizeTrainingSearchText(raw);
@@ -5975,13 +6249,7 @@
       if(/飞鸟/.test(raw) && !hasSpecificFly){
         return { ambiguous:true, canonical:"飞鸟", candidates:["哑铃飞鸟","俯身反向飞鸟"] };
       }
-      const entries = getTrainingCaptureAliasEntries();
-      const match = entries.find((entry) => {
-        if(/^[a-z ]+$/.test(entry.normalizedAlias)){
-          return normalized.includes(entry.normalizedAlias);
-        }
-        return raw.includes(entry.alias);
-      });
+      const match = getMatchedTrainingExercisesFromText(raw, options)[0];
       return match ? { canonical:match.canonical, alias:match.alias, ambiguous:false } : null;
     }
 
@@ -6343,6 +6611,7 @@
           prompt:`你说的是 ${exerciseMatch.candidates.join("，还是 ")}？`
         };
       }
+      const exerciseMatches = getMatchedTrainingExercisesFromText(text, options);
       const activeSession = getActiveTrainingSessionForCapture(options);
       const date = activeSession && !hasExplicitTrainingCaptureDate(text)
         ? activeSession.date
@@ -6353,6 +6622,10 @@
         { date, recordType }
       );
       const completedExplicit = /做完|完成|练完|打卡了|全做完/.test(String(text || ""));
+      if(recordType === "training_fact" && completedExplicit && exerciseMatches.length > 1){
+        currentValue.completedExercises = exerciseMatches.map((match) => match.canonical);
+        currentValue.exercise = currentValue.completedExercises.join("、");
+      }
       if(shouldAskForTrainingQuantity(recordType, currentValue, text)){
         setPendingTrainingCaptureContext({
           date,
@@ -6577,9 +6850,89 @@
       return log;
     }
 
+    function splitTrainingExerciseNames(text){
+      return String(text || "")
+        .split(/[、，,和与\/／；;]+/)
+        .map((name) => name.trim())
+        .filter((name) => name && name.length >= 2);
+    }
+
+    function hasExplicitPlankMention(text){
+      const raw = String(text || "");
+      if(/平板支撑/.test(raw)) return true;
+      if(!/\bplank\b/i.test(raw)) return false;
+      return !/\bside\s+plank\b/i.test(raw);
+    }
+
+    function hasCoreGuideSiblingMention(text){
+      return /侧桥|侧平板|侧向平板支撑|死虫|卷腹|俄罗斯转体|side\s+plank|dead\s*bug|crunch|russian\s+twist/i.test(String(text || ""));
+    }
+
+    function sanitizeTrainingExerciseNamesForRecord(record, names){
+      const raw = [record?.originalText, record?.currentValue?.text].filter(Boolean).join(" ");
+      if(!raw) return names;
+      if(!names.includes("平板支撑")) return names;
+      if(hasExplicitPlankMention(raw)) return names;
+      if(!hasCoreGuideSiblingMention(raw)) return names;
+      return names.filter((name) => name !== "平板支撑");
+    }
+
+    function getTrainingCaptureDisplayExercise(record){
+      const value = record?.currentValue || {};
+      const names = [];
+      if(Array.isArray(value.completedExercises)){
+        value.completedExercises.forEach((name) => names.push(String(name || "").trim()));
+      }
+      splitTrainingExerciseNames(value.exercise).forEach((name) => names.push(name));
+      const safeNames = sanitizeTrainingExerciseNamesForRecord(record, Array.from(new Set(names.filter(Boolean))));
+      return safeNames.join("、") || String(value.exercise || "");
+    }
+
+    function repairFalseGuideAliasTrainingRecords(){
+      const logs = getDailyLogs();
+      let changed = false;
+      Object.entries(logs).forEach(([dateKey, log]) => {
+        const records = Array.isArray(log?.aiCaptureRecords) ? log.aiCaptureRecords : [];
+        if(!records.length) return;
+        const nextRecords = records.map((record) => {
+          if(record?.recordType !== "training_fact") return record;
+          const value = record.currentValue || {};
+          const names = [];
+          if(Array.isArray(value.completedExercises)){
+            value.completedExercises.forEach((name) => names.push(String(name || "").trim()));
+          }
+          splitTrainingExerciseNames(value.exercise).forEach((name) => names.push(name));
+          const uniqueNames = Array.from(new Set(names.filter(Boolean)));
+          const safeNames = sanitizeTrainingExerciseNamesForRecord(record, uniqueNames);
+          if(safeNames.length === uniqueNames.length) return record;
+          changed = true;
+          return {
+            ...record,
+            currentValue:{
+              ...value,
+              exercise:safeNames.join("、"),
+              completedExercises:Array.isArray(value.completedExercises) ? safeNames : value.completedExercises
+            },
+            localUpdatedAt:new Date().toISOString()
+          };
+        });
+        if(nextRecords !== records){
+          log.aiCaptureRecords = nextRecords;
+          log.aiDailySummary = generateAiDailySummaryForLog(log);
+          log.updatedAt = new Date().toLocaleString("zh-CN");
+          log.updatedAtIso = new Date().toISOString();
+          logs[dateKey] = log;
+        }
+      });
+      if(changed){
+        setDailyLogs(logs, { syncToCloud:false });
+      }
+      return changed;
+    }
+
     function summarizeTrainingCaptureRecord(record){
       const value = record?.currentValue || {};
-      const exercise = value.exercise || "";
+      const exercise = getTrainingCaptureDisplayExercise(record);
       if(record?.recordType === "safety_feedback"){
         return `${exercise ? `${exercise}：` : ""}${value.text || "安全反馈"}`;
       }
@@ -6713,16 +7066,62 @@
       return summary;
     }
 
-    function findPlanItemMatchForCapture(intent){
+    function getPlanItemExerciseName(itemText){
+      const text = String(itemText || "").trim();
+      if(!text) return "";
+      const doseIndex = text.search(/\s*\d/);
+      return (doseIndex >= 0 ? text.slice(0, doseIndex) : text).trim();
+    }
+
+    function getPlanItemExerciseAliases(itemText){
+      const name = getPlanItemExerciseName(itemText);
+      if(!name) return [];
+      const aliases = [name];
+      if(/[\/／]/.test(name)){
+        name.split(/[\/／]/).map((part) => part.trim()).filter(Boolean).forEach((part) => aliases.push(part));
+      }
+      return Array.from(new Set(aliases.filter((alias) => alias.length >= 2)));
+    }
+
+    function getTrainingCaptureExerciseNames(intent){
+      const value = intent.currentValue || {};
+      const names = [];
+      if(Array.isArray(value.completedExercises)){
+        value.completedExercises.forEach((name) => names.push(String(name || "").trim()));
+      }
+      if(value.exercise){
+        String(value.exercise).split(/[、，,和与\/／]+/).forEach((name) => names.push(name.trim()));
+      }
+      getMatchedTrainingExercisesFromText([intent.originalText, value.text].filter(Boolean).join(" ")).forEach((match) => {
+        names.push(match.canonical);
+        names.push(match.alias);
+      });
+      return Array.from(new Set(names.filter((name) => name && name.length >= 2)));
+    }
+
+    function doesCaptureMentionPlanItem(intent, itemText){
+      const raw = [intent.originalText, intent.currentValue?.text].filter(Boolean).join(" ");
+      const itemAliases = getPlanItemExerciseAliases(itemText);
+      if(itemAliases.some((alias) => raw.includes(alias))) return true;
+      const names = getTrainingCaptureExerciseNames(intent);
+      return names.some((name) => {
+        return itemText.includes(name) || itemAliases.some((alias) => name.includes(alias) || alias.includes(name));
+      });
+    }
+
+    function findPlanItemMatchesForCapture(intent){
       const dateKey = intent.date || formatDateKey(new Date());
       const dayIndex = getPlanDayIndexForDate(dateKey);
       const day = getPlanDays()[dayIndex];
-      const exercise = String(intent.currentValue?.exercise || "").trim();
-      if(!day || !exercise) return null;
-      const matches = normalizePlanItemsList(day.items || []).map((item, itemIndex) => ({ item, itemIndex }))
-        .filter(({ item }) => item.includes(exercise) || exercise.includes(item.split(/\s|×|x/)[0]));
-      if(matches.length !== 1) return null;
-      return { dayIndex, itemIndex:matches[0].itemIndex, item:matches[0].item, key:`d${dayIndex}_i${matches[0].itemIndex}` };
+      if(!day) return [];
+      return normalizePlanItemsList(day.items || [])
+        .map((item, itemIndex) => ({ dayIndex, itemIndex, item, key:`d${dayIndex}_i${itemIndex}` }))
+        .filter((match) => doesCaptureMentionPlanItem(intent, match.item));
+    }
+
+    function findPlanItemMatchForCapture(intent){
+      const matches = findPlanItemMatchesForCapture(intent);
+      return matches.length === 1 ? matches[0] : null;
     }
 
     function isPreciseQuantityMatch(intent, itemText){
@@ -6798,20 +7197,25 @@
 
     function maybeAutoCompletePlanItemForCapture(intent, recordId){
       if(intent.recordType !== "training_fact") return [];
-      const match = findPlanItemMatchForCapture(intent);
-      if(!match) return [];
+      const matches = findPlanItemMatchesForCapture(intent);
+      if(!matches.length) return [];
       const value = intent.currentValue || {};
-      const plannedDose = parsePlanItemTrainingDose(match.item);
-      if(plannedDose.plannedSets && value.sets && value.sets < plannedDose.plannedSets) return [];
-      if(!intent.completedExplicit && !isPreciseQuantityMatch(intent, match.item)) return [];
       const checks = getPlanChecks();
-      if(checks[match.key]) return [];
-      checks[match.key] = true;
-      setPlanChecks(checks);
       const meta = getPlanCheckMeta();
-      meta[match.key] = { source:"training_capture", recordId, updatedAt:new Date().toISOString() };
+      const completedKeys = [];
+      matches.forEach((match) => {
+        const plannedDose = parsePlanItemTrainingDose(match.item);
+        if(matches.length === 1 && plannedDose.plannedSets && value.sets && value.sets < plannedDose.plannedSets) return;
+        if(!intent.completedExplicit && !isPreciseQuantityMatch(intent, match.item)) return;
+        if(checks[match.key]) return;
+        checks[match.key] = true;
+        meta[match.key] = { source:"training_capture", recordId, updatedAt:new Date().toISOString() };
+        completedKeys.push(match.key);
+      });
+      if(!completedKeys.length) return [];
+      setPlanChecks(checks);
       setPlanCheckMeta(meta);
-      return [match.key];
+      return completedKeys;
     }
 
     function makeTrainingCaptureRecordId(){
@@ -6946,6 +7350,7 @@
       };
       record.autoCompletedPlanChecks = intent.allowAutoComplete === false ? [] : maybeAutoCompletePlanItemForCapture(intent, record.id);
       log.aiCaptureRecords = [...(Array.isArray(log.aiCaptureRecords) ? log.aiCaptureRecords : []), record];
+      if(record.autoCompletedPlanChecks.length) renderPlan();
       syncDailyLogCompletionFromPlan(log, dateKey);
       log.aiDailySummary = generateAiDailySummaryForLog(log);
       log.updatedAt = new Date().toLocaleString("zh-CN");
@@ -7710,11 +8115,17 @@
           "字段必须严格归类：pullupBest=引体向上单组最高次数；pullupTotal=本周/当天/本次引体向上总次数、总量、累计、合计。",
           "遇到类似‘做了19个引体向上，最高一组6个’时，必须返回 pullupTotal:'19'，pullupBest:'6'；绝不能把总量数字填入最高一组。",
           "‘最高一组/单组最高/最多一组’附近的数字才填 pullupBest；‘总量/总共/合计/累计/一共/做了X个引体向上’附近的数字填 pullupTotal。",
-          "只填用户明确提供的字段；不确定就留空，不要猜。"
+          "weight1 到 weight7 分别代表周一到周日；看到‘周四体重56kg’必须填 weight4:'56'，不能填到 weight1 或第一个空格。",
+          "如果一句话后半句用‘然后/当天/那天/晚上/还’承接前一个周几，要继承前一个周几。例如‘周四体重56kg，然后晚上吃火锅’的饮食应写成‘周四晚上吃火锅’。",
+          "diet=饮食执行情况，只填吃饭、蛋白、主食、碳水、热量、加餐、胃口等饮食相关内容；不要把体重、睡眠、休息日整句复制进来。",
+          "status=本周状态，只填疲劳、精神、恢复、酸痛、发力感、训练表现、身体状态、睡眠好坏等状态内容。",
+          "notes=备注，只填器材限制、出差、加班、没练/跳过、休息日、特殊安排、补充说明等其他备注。",
+          "如果用户明确写了‘饮食/本周状态/备注’标签，要按标签后面的内容分别填入对应字段，不能混到同一栏。",
+          "先理解整句上下文再决定字段，只填用户明确提供的字段；不确定就留空，不要猜。"
         ].join("\n"),
         trend_analysis: [
-          "必须优先基于 payload.trendContext 与 payload.calendarDailyLogs：这是日历中近三个月的真实训练、体重、睡眠和备注数据。",
-          "必须分别总结饮食、体重、睡眠、训练记录；至少引用 2 个具体数字、日期范围或完成率。",
+          "必须优先基于 payload.trendContext、payload.calendarDailyLogs 与 payload.recentWeeklyRecords：这是训练日历和已保存周记录中近三个月的真实训练、体重、睡眠和备注数据。",
+          "必须分别总结饮食、体重、睡眠、训练记录；训练记录要同时参考日历记录和已保存周记录；至少引用 2 个具体数字、日期范围或完成率。",
           "不要用“记录越完整趋势越准”“需要补齐记录”这类模板空话替代分析；数据不足时要明确指出是哪类数据不足。",
           "如果 payload.activeCharacterCard 存在，observations/risks/suggestions/coach_message 的中文表达必须带入角色卡的性格和说话方式，但不要写“角色卡”三个字给用户看。",
           "只给趋势观察和建议，不要展示推理过程或接口字段。"
@@ -8330,7 +8741,208 @@
       return result;
     }
 
-    function normalizeNaturalLanguageLogPatch(aiPatch, text){
+    const WEEKDAY_WEIGHT_LABELS = ["周一","周二","周三","周四","周五","周六","周日"];
+
+    function chineseDayNumberToIndex(value){
+      const raw = String(value || "").trim();
+      const map = { "一":0, "二":1, "三":2, "四":3, "五":4, "六":5, "七":6, "日":6, "天":6, "1":0, "2":1, "3":2, "4":3, "5":4, "6":5, "7":6 };
+      return Object.prototype.hasOwnProperty.call(map, raw) ? map[raw] : -1;
+    }
+
+    function extractWeekdayIndexFromText(text){
+      const source = String(text || "");
+      const weekday = source.match(/(?:周|星期|礼拜)\s*([一二三四五六日天])/);
+      if(weekday) return chineseDayNumberToIndex(weekday[1]);
+      const numberedDay = source.match(/第\s*([一二三四五六七1234567])\s*天/);
+      if(numberedDay) return chineseDayNumberToIndex(numberedDay[1]);
+      return -1;
+    }
+
+    function removeContinuationPrefix(text){
+      return String(text || "").trim().replace(/^(?:然后|接着|之后|后来|当天|那天|这天)\s*/, "");
+    }
+
+    function prefixClauseWithWeekdayContext(clause, weekdayIndex){
+      const text = String(clause || "").trim();
+      if(!text || weekdayIndex < 0 || extractWeekdayIndexFromText(text) >= 0) return text;
+      const cleaned = removeContinuationPrefix(text);
+      if(/^(?:早上|上午|中午|下午|晚上|夜里|睡前|还|又|也|并且|同时|吃|喝)/.test(cleaned)){
+        return `${WEEKDAY_WEIGHT_LABELS[weekdayIndex]}${cleaned}`;
+      }
+      return text;
+    }
+
+    function splitNaturalFeedbackClausesWithContext(text){
+      const prepared = String(text || "")
+        .replace(/\r\n/g, "\n")
+        .replace(/(然后|接着|之后|后来)(?=(?:早上|上午|中午|下午|晚上|夜里|睡前|还|又|也|吃|喝))/g, "，$1");
+      const rawClauses = prepared
+        .split(/[\n。；;，,]+/)
+        .map((item) => item.trim())
+        .filter(Boolean);
+      let lastWeekdayIndex = -1;
+      return rawClauses.map((rawClause) => {
+        const explicitIndex = extractWeekdayIndexFromText(rawClause);
+        const clause = explicitIndex >= 0
+          ? rawClause
+          : prefixClauseWithWeekdayContext(rawClause, lastWeekdayIndex);
+        const nextIndex = extractWeekdayIndexFromText(clause);
+        if(nextIndex >= 0) lastWeekdayIndex = nextIndex;
+        return clause;
+      }).filter(Boolean);
+    }
+
+    function normalizeBodyWeightValue(value){
+      const match = String(value || "").match(/(\d+(?:\.\d+)?)/);
+      if(!match) return "";
+      const numeric = Number(match[1]);
+      if(!Number.isFinite(numeric) || numeric < 35 || numeric > 120) return "";
+      return match[1];
+    }
+
+    function pickBodyWeightFromClause(clause){
+      const source = String(clause || "");
+      const patterns = [
+        /(?:空腹)?体重\s*(?:是|为|到|有|约|大概|差不多|=|：|:)?\s*(\d+(?:\.\d+)?)\s*(?:kg|公斤|斤)?/i,
+        /(\d+(?:\.\d+)?)\s*(?:kg|公斤)\s*(?:左右)?(?:的)?(?:空腹)?体重?/i
+      ];
+      for(const pattern of patterns){
+        const match = source.match(pattern);
+        const value = normalizeBodyWeightValue(match?.[1]);
+        if(value) return value;
+      }
+      return "";
+    }
+
+    function extractBodyWeightFieldsFromNaturalText(text){
+      const source = String(text || "");
+      const patch = {};
+      const clauses = splitNaturalFeedbackClausesWithContext(source);
+      clauses.forEach((clause) => {
+        const weekdayIndex = extractWeekdayIndexFromText(clause);
+        if(weekdayIndex < 0) return;
+        if(!/(?:体重|空腹|kg|公斤)/i.test(clause)) return;
+        const value = pickBodyWeightFromClause(clause);
+        if(value) patch[`weight${weekdayIndex + 1}`] = value;
+      });
+
+      if(Object.keys(patch).length) return patch;
+
+      const listMatch = source.match(/(?:本周|这周|7天|七天|空腹)?体重[^\d]{0,12}((?:\d+(?:\.\d+)?\s*(?:kg|公斤)?\s*[、,，/ ]*){2,7})/i);
+      if(listMatch){
+        const values = (listMatch[1].match(/\d+(?:\.\d+)?/g) || [])
+          .map(normalizeBodyWeightValue)
+          .filter(Boolean)
+          .slice(0, 7);
+        values.forEach((value, index) => {
+          patch[`weight${index + 1}`] = value;
+        });
+      }
+      return patch;
+    }
+
+    function shouldSkipWeeklyFeedbackClause(clause){
+      const text = trimWeeklyFeedbackValue(clause);
+      if(!text) return true;
+      if(/(?:体重|空腹|kg|公斤)/i.test(text) && !/(?:吃|喝|饮食|餐|饭|火锅|烧烤|外卖|加餐|胃口|睡|累|疲劳|休息|没练|器材)/.test(text)){
+        return true;
+      }
+      return false;
+    }
+
+    function shouldPreferParsedWeeklyField(currentValue, parsedValue, key){
+      const current = trimWeeklyFeedbackValue(currentValue);
+      const parsed = trimWeeklyFeedbackValue(parsedValue);
+      if(!current || !parsed) return false;
+      if(/^(?:然后|接着|之后|后来|当天|那天|这天|早上|上午|中午|下午|晚上|夜里|睡前|还|又|也)/.test(current) && /(?:周|星期|礼拜)[一二三四五六日天]/.test(parsed)){
+        return true;
+      }
+      if(/(?:体重|空腹|kg|公斤)/i.test(current) && !/(?:体重|空腹|kg|公斤)/i.test(parsed)){
+        return true;
+      }
+      if(key === "notes" && /(?:睡不好|没睡好|睡眠差|睡得不好|疲劳|累|酸痛)/.test(current) && !/(?:睡不好|没睡好|睡眠差|睡得不好|疲劳|累|酸痛)/.test(parsed)){
+        return true;
+      }
+      return false;
+    }
+
+    function trimWeeklyFeedbackValue(value){
+      return String(value || "")
+        .replace(/^[\s:：=,，;；。\-—、]+/, "")
+        .replace(/^(?:是|为|的话|方面|情况)\s*/i, "")
+        .replace(/[\s,，;；。]+$/g, "")
+        .trim();
+    }
+
+    function appendWeeklyFeedbackValue(target, key, value){
+      const cleaned = trimWeeklyFeedbackValue(value);
+      if(!cleaned) return;
+      const current = target[key] ? String(target[key]).split("；").map((item) => item.trim()).filter(Boolean) : [];
+      const duplicated = current.some((item) => item === cleaned || item.includes(cleaned) || cleaned.includes(item));
+      if(!duplicated) current.push(cleaned);
+      target[key] = current.join("；");
+    }
+
+    function weeklyFeedbackLabelToKey(label){
+      const raw = String(label || "");
+      if(/饮食|吃饭|餐食|摄入|蛋白|碳水|热量/.test(raw)) return "diet";
+      if(/本周状态|训练状态|身体状态|恢复状态|状态|疲劳|恢复/.test(raw)) return "status";
+      if(/备注|补充|说明|其他|特殊情况|注意事项/.test(raw)) return "notes";
+      return "";
+    }
+
+    function normalizeWeeklyFeedbackLabeledText(text){
+      const source = String(text || "")
+        .replace(/\r\n/g, "\n")
+        .replace(/[\t ]+/g, " ");
+      const result = {};
+      const labelPattern = /(饮食执行情况|饮食情况|饮食执行|餐食情况|饮食|吃饭|本周状态|训练状态|身体状态|恢复状态|状态|备注|补充说明|补充|说明|其他|特殊情况|注意事项)\s*([:：=]|是|为)?/g;
+      const matches = [];
+      let match;
+      while((match = labelPattern.exec(source))){
+        const key = weeklyFeedbackLabelToKey(match[1]);
+        if(!key) continue;
+        matches.push({ key, label:match[1], index:match.index, end:labelPattern.lastIndex, strongConnector:!!match[2] });
+      }
+      matches.forEach((item, index) => {
+        const next = matches[index + 1];
+        const rawSegment = source.slice(item.end, next ? next.index : source.length);
+        const segment = item.strongConnector ? rawSegment : rawSegment.split(/[，,。；;\n]/)[0];
+        appendWeeklyFeedbackValue(result, item.key, segment);
+      });
+      return result;
+    }
+
+    function classifyWeeklyFeedbackClause(clause){
+      const text = trimWeeklyFeedbackValue(clause);
+      if(!text) return "";
+      if(/^(?:例如|比如|假设|如果|怎么|如何|为什么)/.test(text)) return "";
+      if(shouldSkipWeeklyFeedbackClause(text)) return "";
+      const dietPattern = /饮食|吃饭|餐食|蛋白|蛋白粉|主食|碳水|热量|加餐|早餐|午餐|午饭|晚餐|晚饭|宵夜|三顿|牛奶|香蕉|鸡蛋|鸡胸|牛肉|肉|米饭|面|外卖|火锅|烧烤|零食|奶茶|吃|饭|胃口|饿|撑|食欲/;
+      const statusPattern = /本周状态|训练状态|身体状态|恢复状态|状态|恢复|疲劳|累|酸|疼|痛|精神|乏力|没力|发力|睡眠不足|睡不好|没睡好|睡眠差|睡得不好|头晕|胸闷|不舒服|状态不好|状态一般|状态不错|状态还行|表现/;
+      const notesPattern = /备注|补充|说明|其他|特殊情况|注意事项|器材|无器械|没器材|弹力绳|哑铃|出差|旅行|加班|请假|不在家|健身房|没练|跳过|休息|安排|计划/;
+      if(/^(?:饮食|吃饭|餐食)/.test(text) || dietPattern.test(text)) return "diet";
+      if(/^(?:本周状态|训练状态|身体状态|恢复状态|状态)/.test(text) || statusPattern.test(text)) return "status";
+      if(/^(?:备注|补充|说明|其他)/.test(text) || notesPattern.test(text)) return "notes";
+      return "";
+    }
+
+    function extractWeeklyFeedbackTextFieldsFromNaturalText(text){
+      const source = String(text || "").trim();
+      const result = normalizeWeeklyFeedbackLabeledText(source);
+      const clauses = splitNaturalFeedbackClausesWithContext(source);
+      clauses.forEach((clause) => {
+        if(shouldSkipWeeklyFeedbackClause(clause)) return;
+        const key = classifyWeeklyFeedbackClause(clause);
+        if(!key) return;
+        let cleaned = removeContinuationPrefix(clause)
+          .replace(/^(饮食执行情况|饮食情况|饮食执行|餐食情况|饮食|吃饭|本周状态|训练状态|身体状态|恢复状态|状态|备注|补充说明|补充|说明|其他|特殊情况|注意事项)\s*(?:[:：=]|是|为)?\s*/g, "");
+        appendWeeklyFeedbackValue(result, key, cleaned);
+      });
+      return result;
+    }
+
+    function normalizeNaturalLanguageLogPatch(aiPatch, text, options = {}){
       const patch = {};
       Object.entries(aiPatch || {}).forEach(([key, value]) => {
         if(!formKeys.includes(key)) return;
@@ -8338,16 +8950,34 @@
         if(nextValue) patch[key] = nextValue;
       });
 
-      const local = parseNaturalLogFallback(text).formPatch || {};
+      const local = parseNaturalLogFallback(text, { includeTextFields:!options.aiSucceeded }).formPatch || {};
       Object.entries(local).forEach(([key, value]) => {
         if(!formKeys.includes(key)) return;
         const nextValue = String(value ?? "").trim();
         if(nextValue && !patch[key]) patch[key] = nextValue;
       });
 
+      const bodyWeightFields = extractBodyWeightFieldsFromNaturalText(text);
+      const explicitWeightValues = new Set(Object.values(bodyWeightFields).map((value) => String(value)));
+      Object.keys(patch).forEach((key) => {
+        if(!/^weight[1-7]$/.test(key)) return;
+        const currentValue = String(patch[key] || "");
+        if(bodyWeightFields[key] && bodyWeightFields[key] !== currentValue) return;
+        if(!bodyWeightFields[key] && explicitWeightValues.has(currentValue)) delete patch[key];
+      });
+      Object.assign(patch, bodyWeightFields);
+
       const pullupMetrics = extractPullupMetricsFromNaturalText(text);
       if(pullupMetrics.pullupBest) patch.pullupBest = pullupMetrics.pullupBest;
       if(pullupMetrics.pullupTotal) patch.pullupTotal = pullupMetrics.pullupTotal;
+
+      const weeklyTextFields = extractWeeklyFeedbackTextFieldsFromNaturalText(text);
+      ["diet","status","notes"].forEach((key) => {
+        if(!weeklyTextFields[key]) return;
+        if(!patch[key] || shouldPreferParsedWeeklyField(patch[key], weeklyTextFields[key], key)){
+          patch[key] = weeklyTextFields[key];
+        }
+      });
 
       const bestNum = Number(normalizeTrainingCountValue(patch.pullupBest, { min:1, max:999 }) || 0);
       const totalNum = Number(normalizeTrainingCountValue(patch.pullupTotal, { min:1, max:999 }) || 0);
@@ -8359,21 +8989,232 @@
       return patch;
     }
 
-    function parseNaturalLogFallback(text){
+    function parseNaturalLogFallback(text, options = {}){
       const t = String(text || "");
       const patch = {};
-      const nums = t.match(/\d+(?:\.\d+)?/g) || [];
-      const weightNums = nums.filter((n) => {
-        const v = Number(n);
-        return v >= 35 && v <= 120;
-      }).slice(0, 7);
-      weightNums.forEach((v, i) => patch[`weight${i + 1}`] = v);
+      const bodyWeightFields = extractBodyWeightFieldsFromNaturalText(t);
+      Object.assign(patch, bodyWeightFields);
+      if(!Object.keys(bodyWeightFields).length && /(?:体重|空腹|kg|公斤)/i.test(t)){
+        const nums = t.match(/\d+(?:\.\d+)?/g) || [];
+        const weightNums = nums.filter((n) => {
+          const v = Number(n);
+          return v >= 35 && v <= 120;
+        }).slice(0, 7);
+        weightNums.forEach((v, i) => patch[`weight${i + 1}`] = v);
+      }
       Object.assign(patch, extractPullupMetricsFromNaturalText(t));
+      if(options.includeTextFields !== false){
+        Object.assign(patch, extractWeeklyFeedbackTextFieldsFromNaturalText(t));
+      }
       const sleep = t.match(/(?:平均睡眠|睡眠)[^\d]*(\d+(?:\.\d+)?\s*(?:小时|h)?)/i);
       if(sleep) patch.avgSleep = sleep[1];
-      if(/饮食一般/.test(t)) patch.diet = "一般";
-      if(/没器材|无器械/.test(t)) patch.notes = [patch.notes, "有无器械训练日"].filter(Boolean).join("；");
-      return { type:"natural_language_log", formPatch:patch, confidence:"local", missingFields:[], message:"已按字段含义填入能识别的信息；总量和最高一组已分开校验。" };
+      return { type:"natural_language_log", formPatch:patch, confidence:"local", missingFields:[], message:"已按字段含义填入能识别的信息；饮食、状态、备注已按栏目分开校验。" };
+    }
+
+
+    function parseCsvRows(text){
+      const rows = [];
+      const source = String(text || "").replace(/^\ufeff/, "");
+      let row = [];
+      let cell = "";
+      let inQuotes = false;
+      for(let i = 0; i < source.length; i += 1){
+        const ch = source[i];
+        const next = source[i + 1];
+        if(ch === '"'){
+          if(inQuotes && next === '"'){
+            cell += '"';
+            i += 1;
+          }else{
+            inQuotes = !inQuotes;
+          }
+          continue;
+        }
+        if(ch === "," && !inQuotes){
+          row.push(cell);
+          cell = "";
+          continue;
+        }
+        if((ch === "\n" || ch === "\r") && !inQuotes){
+          if(ch === "\r" && next === "\n") i += 1;
+          row.push(cell);
+          const hasContent = row.some((value) => String(value || "").trim() !== "");
+          if(hasContent) rows.push(row);
+          row = [];
+          cell = "";
+          continue;
+        }
+        cell += ch;
+      }
+      if(cell || row.length){
+        row.push(cell);
+        const hasContent = row.some((value) => String(value || "").trim() !== "");
+        if(hasContent) rows.push(row);
+      }
+      return rows;
+    }
+
+    function findCsvColumn(headers, name, options = {}){
+      const matches = [];
+      headers.forEach((header, index) => {
+        if(String(header || "").trim() === name) matches.push(index);
+      });
+      if(!matches.length) return -1;
+      if(options.after){
+        const afterIndex = headers.findIndex((header) => String(header || "").trim() === options.after);
+        const afterMatch = matches.find((index) => index > afterIndex);
+        if(afterIndex >= 0 && afterMatch != null) return afterMatch;
+      }
+      if(options.before){
+        const beforeIndex = headers.findIndex((header) => String(header || "").trim() === options.before);
+        const beforeMatch = [...matches].reverse().find((index) => index < beforeIndex);
+        if(beforeIndex >= 0 && beforeMatch != null) return beforeMatch;
+      }
+      return options.last ? matches[matches.length - 1] : matches[0];
+    }
+
+    function parseAutoSleepDateKey(value){
+      const text = String(value || "").trim();
+      if(!text) return "";
+      const iso = text.match(/(20\d{2})[-/年](\d{1,2})[-/月](\d{1,2})/);
+      if(iso){
+        return `${iso[1]}-${String(iso[2]).padStart(2, "0")}-${String(iso[3]).padStart(2, "0")}`;
+      }
+      const parsed = new Date(text);
+      if(Number.isFinite(parsed.getTime())) return formatDateKey(parsed);
+      return "";
+    }
+
+    function parseDurationToMinutes(value){
+      const text = String(value || "").trim();
+      if(!text) return null;
+      const hms = text.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+      if(hms){
+        return Number(hms[1]) * 60 + Number(hms[2]) + (Number(hms[3] || 0) >= 30 ? 1 : 0);
+      }
+      const cn = text.match(/(\d+(?:\.\d+)?)\s*(?:小时|h)(?:\s*(\d+)\s*(?:分钟|分|m))?/i);
+      if(cn){
+        return Math.round(Number(cn[1]) * 60 + Number(cn[2] || 0));
+      }
+      const min = text.match(/(\d+)\s*(?:分钟|分|m)/i);
+      if(min) return Number(min[1]);
+      const num = Number(text);
+      if(Number.isFinite(num) && num > 0) return Math.round(num * 60);
+      return null;
+    }
+
+    function formatSleepMinutes(minutes){
+      const total = Math.max(0, Math.round(Number(minutes) || 0));
+      const h = Math.floor(total / 60);
+      const m = total % 60;
+      if(!h) return `${m}分钟`;
+      return m ? `${h}小时${m}分` : `${h}小时`;
+    }
+
+    function parseAutoSleepClock(value){
+      const text = String(value || "").trim();
+      const match = text.match(/(?:^|\s)(\d{1,2}):(\d{2})(?::\d{2})?$/) || text.match(/T(\d{1,2}):(\d{2})(?::\d{2})?/);
+      if(!match) return null;
+      const hour = Number(match[1]);
+      const minute = Number(match[2]);
+      if(!Number.isFinite(hour) || !Number.isFinite(minute) || hour > 23 || minute > 59) return null;
+      return { hour, minute, display:`${hour}:${String(minute).padStart(2, "0")}`, sortMinutes:(hour < 12 ? hour + 24 : hour) * 60 + minute };
+    }
+
+    function getWeekRangeForSleepCsv(){
+      const labelRange = parseTrendWeekRangeFromLabel($("weekLabel")?.value || "");
+      if(labelRange?.startDate && labelRange?.endDate){
+        return {
+          start: formatDateKey(labelRange.startDate),
+          end: formatDateKey(labelRange.endDate),
+          source:"weekLabel"
+        };
+      }
+      const range = getCurrentWeekRange();
+      return { start:range.start, end:range.end, source:"currentWeek" };
+    }
+
+    function parseAutoSleepCsvSummary(csvText, options = {}){
+      const rows = parseCsvRows(csvText);
+      if(rows.length < 2) throw new Error("CSV 没有可读取的数据行");
+      const headers = rows[0].map((header) => String(header || "").trim());
+      const endDateCol = findCsvColumn(headers, "结束日期");
+      const wakeCol = findCsvColumn(headers, "起床时间");
+      const isoCol = findCsvColumn(headers, "ISO8601");
+      const bedCol = findCsvColumn(headers, "就寝时间");
+      const sleepCol = findCsvColumn(headers, "睡眠时间", { after:"时间段", before:"7日平均睡眠时间" });
+      const sleepFallbackCol = findCsvColumn(headers, "睡眠时间", { last:true });
+      if((sleepCol < 0 && sleepFallbackCol < 0) || bedCol < 0) throw new Error("没有找到 AutoSleep 的睡眠时间或就寝时间列");
+
+      const range = options.range || getWeekRangeForSleepCsv();
+      const records = rows.slice(1).map((row) => {
+        const dateKey = parseAutoSleepDateKey(row[endDateCol]) || parseAutoSleepDateKey(row[wakeCol]) || parseAutoSleepDateKey(row[isoCol]);
+        const sleepMinutes = parseDurationToMinutes(row[sleepCol >= 0 ? sleepCol : sleepFallbackCol]);
+        const bedtime = parseAutoSleepClock(row[bedCol]);
+        return {
+          dateKey,
+          sleepMinutes,
+          bedtime,
+          rawSleep: row[sleepCol >= 0 ? sleepCol : sleepFallbackCol] || "",
+          rawBedtime: row[bedCol] || ""
+        };
+      }).filter((record) => record.dateKey && record.dateKey >= range.start && record.dateKey <= range.end && record.sleepMinutes != null);
+
+      if(!records.length){
+        return { range, records:[], avgSleep:"", latestSleep:"", averageMinutes:null, latestBedtime:null };
+      }
+      const averageMinutes = Math.round(records.reduce((sum, item) => sum + item.sleepMinutes, 0) / records.length);
+      const latestBedtime = records
+        .map((record) => record.bedtime)
+        .filter(Boolean)
+        .sort((a, b) => b.sortMinutes - a.sortMinutes)[0] || null;
+      return {
+        range,
+        records,
+        averageMinutes,
+        avgSleep: formatSleepMinutes(averageMinutes),
+        latestBedtime,
+        latestSleep: latestBedtime?.display || ""
+      };
+    }
+
+    function applyAutoSleepCsvSummary(summary){
+      const statusEl = $("autoSleepCsvStatus");
+      if(!summary || !summary.records?.length){
+        if(statusEl){
+          const range = summary?.range || getWeekRangeForSleepCsv();
+          statusEl.textContent = `没有在 ${range.start} 至 ${range.end} 找到睡眠记录，未改动本周反馈。`;
+        }
+        return false;
+      }
+      if($("avgSleep")) $("avgSleep").value = summary.avgSleep;
+      if($("latestSleep")) $("latestSleep").value = summary.latestSleep;
+      updateSummary();
+      queueAutoSync("导入睡眠 CSV");
+      if(statusEl){
+        const days = summary.records.length;
+        const sleepValues = summary.records.map((record) => `${record.dateKey} ${formatSleepMinutes(record.sleepMinutes)}`).join("；");
+        statusEl.textContent = `已导入 ${summary.range.start} 至 ${summary.range.end} 的 ${days} 条睡眠记录：平均睡眠 ${summary.avgSleep}，最晚入睡 ${summary.latestSleep}。${sleepValues}`;
+      }
+      return true;
+    }
+
+    function importAutoSleepCsv(file){
+      const statusEl = $("autoSleepCsvStatus");
+      if(statusEl) statusEl.textContent = "正在读取 CSV……";
+      const reader = new FileReader();
+      reader.onload = () => {
+        try{
+          const summary = parseAutoSleepCsvSummary(reader.result || "");
+          applyAutoSleepCsvSummary(summary);
+        }catch(err){
+          if(statusEl) statusEl.textContent = `导入失败：${err.message || "CSV 格式不支持"}`;
+        }
+      };
+      reader.onerror = () => {
+        if(statusEl) statusEl.textContent = "导入失败：文件读取失败";
+      };
+      reader.readAsText(file, "utf-8");
     }
 
     function renderAiObject(data){
@@ -10901,7 +11742,7 @@
       if(status) status.textContent = "AI 正在解析...";
       const res = await callAiCoach("natural_language_log", { text, existingForm:getForm() }, { timeoutMs:22000, force:true });
       const data = res.data || parseNaturalLogFallback(text);
-      data.formPatch = normalizeNaturalLanguageLogPatch(data.formPatch || {}, text);
+      data.formPatch = normalizeNaturalLanguageLogPatch(data.formPatch || {}, text, { aiSucceeded:res.ok });
       applyFormPatchWithoutOverwriting(data.formPatch || {});
       if(status) status.textContent = data.message || "已填入能识别的信息；总量和最高一组已自动校验。";
       appendAiCoachOutputToCharacterChat({
@@ -11006,7 +11847,7 @@
       const now = new Date();
       const calendarDailyLogs = getRecentCalendarLogsForTrend(3, now, getDailyLogs());
       const currentForm = getForm();
-      const recentHistory = getHistory().slice(0, 12);
+      const recentHistory = getRecentWeeklyHistoryForTrend(3, now, getHistory());
       const planCheckSummary = getPlanCheckSummaryJson();
       const trendContext = buildTrendAnalysisContext({
         now,
@@ -11016,10 +11857,11 @@
         planCheckSummary
       });
       const payload = {
-        analysisWindow:"calendar_last_3_months",
+        analysisWindow:"calendar_and_weekly_records_last_3_months",
         trendContext,
         calendarDailyLogs,
         recentHistory,
+        recentWeeklyRecords: recentHistory,
         planCheckSummary,
         currentForm
       };
@@ -13608,6 +14450,12 @@
         }
       };
       if($("aiParseLogBtn")) $("aiParseLogBtn").onclick = () => parseNaturalLogWithAi().catch((err) => alert("AI 解析失败：" + (err.message || "未知错误")));
+      if($("autoSleepCsvImportBtn")) $("autoSleepCsvImportBtn").onclick = () => $("autoSleepCsvFile")?.click();
+      if($("autoSleepCsvFile")) $("autoSleepCsvFile").onchange = (event) => {
+        const file = event.target.files && event.target.files[0];
+        if(file) importAutoSleepCsv(file);
+        event.target.value = "";
+      };
       if($("aiDailyAdjustBtn")) $("aiDailyAdjustBtn").onclick = () => generateDailyAdjust().catch((err) => alert("AI 调整失败：" + (err.message || "未知错误")));
       if($("aiTrendBtn")) $("aiTrendBtn").onclick = () => generateTrendAnalysis().catch((err) => alert("趋势分析失败：" + (err.message || "未知错误")));
       if($("restoreDraftBackupBtn")) $("restoreDraftBackupBtn").onclick = restoreDraftBackup;
@@ -13961,6 +14809,7 @@
     attachDayDockInteractions();
     repairIosDayDockLayout({ immediate:true });
     setForm(JSON.parse(localStorage.getItem(FORM_KEY) || JSON.stringify(defaultForm)));
+    repairFalseGuideAliasTrainingRecords();
     renderHistory();
     initPortableTools();
     switchTab("plan", false);
