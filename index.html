@@ -6354,6 +6354,60 @@
       return !!(value.sets || value.repsPerSet);
     }
 
+    function isExtraTrainingCaptureText(text){
+      return /额外|另外|还有|多做|多加|加练|再加|顺便|超过计划|比计划多/.test(String(text || ""));
+    }
+
+    function isTrainingSessionPlanItemCompletion(intent, match){
+      if(!intent || intent.recordType !== "training_fact") return false;
+      if(intent.sourceType !== "training_session" && !intent.trainingSessionId) return false;
+      if(!match || isExtraTrainingCaptureText(intent.originalText || intent.currentValue?.text)) return false;
+      const value = intent.currentValue || {};
+      const plannedDose = parsePlanItemTrainingDose(match.item);
+      if(plannedDose.plannedSets && value.sets && value.sets !== plannedDose.plannedSets) return false;
+      if(plannedDose.plannedRepsPerSet && value.repsPerSet && value.repsPerSet !== plannedDose.plannedRepsPerSet) return false;
+      return !!(intent.completedExplicit || isPreciseQuantityMatch(intent, match.item));
+    }
+
+    function checkTrainingSessionPlanItem(intent, match, options = {}){
+      const dateKey = intent.date || formatDateKey(new Date());
+      const logs = getDailyLogs();
+      const checks = getPlanChecks();
+      const alreadyChecked = !!checks[match.key];
+      checks[match.key] = true;
+      setPlanChecks(checks);
+
+      const meta = getPlanCheckMeta();
+      if(!alreadyChecked || !meta[match.key]){
+        meta[match.key] = {
+          source:"training_session",
+          trainingSessionId:intent.trainingSessionId || "",
+          updatedAt:new Date().toISOString()
+        };
+        setPlanCheckMeta(meta);
+      }
+
+      const log = buildDailyLogShell(dateKey, logs[dateKey] || {});
+      syncDailyLogCompletionFromPlan(log, dateKey);
+      log.aiDailySummary = generateAiDailySummaryForLog(log);
+      log.updatedAt = new Date().toLocaleString("zh-CN");
+      log.updatedAtIso = new Date().toISOString();
+      logs[dateKey] = log;
+      persistDailyLogsAfterTrainingCapture(logs, { syncToCloud:true });
+      refreshAiWeeklySummaryDraftForDate(dateKey);
+      renderPlan();
+      if(options.createCard !== false){
+        pushTrainingCaptureCard({
+          title:"已完成计划项",
+          message:`已在 ${dateKey} 勾选：${match.item}`,
+          canUndo:false,
+          canModify:false
+        });
+      }
+      maybePromptTrainingSessionClose(match.dayIndex);
+      return { status:"checked", date:dateKey, planCheckKey:match.key, item:match.item, alreadyChecked };
+    }
+
     function maybeAutoCompletePlanItemForCapture(intent, recordId){
       if(intent.recordType !== "training_fact") return [];
       const match = findPlanItemMatchForCapture(intent);
@@ -6587,6 +6641,10 @@
         return { status:"follow_up", reason:intent.reason, prompt:intent.prompt };
       }
       if(intent.action !== "write") return { status:"ignored", reason:intent.reason || "no_write_intent" };
+      const matchedPlanItem = findPlanItemMatchForCapture(intent);
+      if(isTrainingSessionPlanItemCompletion(intent, matchedPlanItem)){
+        return checkTrainingSessionPlanItem(intent, matchedPlanItem, options);
+      }
       return writeTrainingCaptureIntent(intent, options);
     }
 
