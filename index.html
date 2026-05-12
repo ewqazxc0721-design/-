@@ -5910,24 +5910,70 @@
       return ["capture","follow_up","safety"].includes(intent.action);
     }
 
+    function parseChineseTrainingNumber(value){
+      const raw = String(value || "").trim();
+      if(!raw) return null;
+      if(/^\d+(?:\.\d+)?$/.test(raw)) return Number(raw);
+      const digits = { 零:0, 一:1, 二:2, 两:2, 三:3, 四:4, 五:5, 六:6, 七:7, 八:8, 九:9 };
+      if(Object.prototype.hasOwnProperty.call(digits, raw)) return digits[raw];
+      if(raw === "十") return 10;
+      const tenIndex = raw.indexOf("十");
+      if(tenIndex >= 0){
+        const highText = raw.slice(0, tenIndex);
+        const lowText = raw.slice(tenIndex + 1);
+        const high = highText ? digits[highText] : 1;
+        const low = lowText ? digits[lowText] : 0;
+        if(Number.isFinite(high) && Number.isFinite(low)) return high * 10 + low;
+      }
+      return null;
+    }
+
+    function formatPlannedRepsText(prefix, repsText, unit){
+      const cleanPrefix = String(prefix || "").replace(/\s+/g, "");
+      const cleanReps = String(repsText || "").replace(/\s+/g, "");
+      const cleanUnit = String(unit || "次").trim() || "次";
+      return cleanReps ? `${cleanPrefix}${cleanReps}${cleanUnit}` : "";
+    }
+
+    function parsePlanItemTrainingDose(itemText){
+      const text = String(itemText || "");
+      const dose = {};
+      const plannedSets = text.match(/(\d+)\s*组/);
+      const repsMatch = text.match(/(每侧|每边|每组)?\s*(\d+(?:\s*[–—-]\s*\d+)?)\s*(次|个|下|reps?)/i);
+      const durationMatch = text.match(/(\d+(?:\.\d+)?(?:\s*[–—-]\s*\d+)?)\s*(分钟|min|秒|s)/i);
+      if(plannedSets) dose.plannedSets = Number(plannedSets[1]);
+      if(repsMatch){
+        dose.plannedRepsText = formatPlannedRepsText(repsMatch[1] || "", repsMatch[2], repsMatch[3]);
+        if(/^\d+$/.test(String(repsMatch[2] || "").trim())) dose.plannedRepsPerSet = Number(repsMatch[2]);
+      }
+      if(durationMatch){
+        dose.plannedDurationText = `${String(durationMatch[1]).replace(/\s+/g, "")}${durationMatch[2]}`;
+      }
+      return dose;
+    }
+
     function parseCaptureQuantity(text){
       const raw = String(text || "");
-      const setsMatch = raw.match(/(\d+)\s*组/);
-      const eachRepsMatch = raw.match(/每组\s*(\d+)\s*(?:个|次|reps?)?/i);
-      const repsMatch = raw.match(/(\d+)\s*(?:个|次|下|reps?)/i);
+      const numberToken = "(\\d+(?:\\.\\d+)?|[一二两三四五六七八九十]+)";
+      const setsMatch = raw.match(new RegExp(`${numberToken}\\s*组`));
+      const eachRepsMatch = raw.match(new RegExp(`每组\\s*${numberToken}\\s*(?:个|次|reps?)?`, "i"));
+      const repsMatch = raw.match(new RegExp(`${numberToken}\\s*(?:个|次|下|reps?)`, "i"));
       const durationMatch = raw.match(/(\d+(?:\.\d+)?)\s*(分钟|min|秒|s)(?:\b|$)?/i);
       const weightMatch = raw.match(/(\d+(?:\.\d+)?)\s*(?:kg|公斤|千克)/i);
-      const bestSetMatch = raw.match(/最高(?:一组)?[^\d]*(\d+)/);
+      const bestSetMatch = raw.match(new RegExp(`最高(?:一组)?[^\\d一二两三四五六七八九十]*${numberToken}`));
       const quantity = {};
-      if(setsMatch) quantity.sets = Number(setsMatch[1]);
-      if(eachRepsMatch) quantity.repsPerSet = Number(eachRepsMatch[1]);
-      if(repsMatch) quantity.reps = Number(repsMatch[1]);
+      if(setsMatch) quantity.sets = parseChineseTrainingNumber(setsMatch[1]);
+      if(eachRepsMatch) quantity.repsPerSet = parseChineseTrainingNumber(eachRepsMatch[1]);
+      if(repsMatch) quantity.reps = parseChineseTrainingNumber(repsMatch[1]);
       if(durationMatch){
         quantity.duration = Number(durationMatch[1]);
         quantity.durationUnit = /秒|s/i.test(durationMatch[2]) ? "秒" : "分钟";
       }
       if(weightMatch) quantity.weightKg = Number(weightMatch[1]);
-      if(bestSetMatch) quantity.bestSetReps = Number(bestSetMatch[1]);
+      if(bestSetMatch) quantity.bestSetReps = parseChineseTrainingNumber(bestSetMatch[1]);
+      Object.keys(quantity).forEach((key) => {
+        if(quantity[key] == null || Number.isNaN(quantity[key])) delete quantity[key];
+      });
       return quantity;
     }
 
@@ -5989,6 +6035,25 @@
       return value;
     }
 
+    function enrichCaptureValueWithMatchedPlan(currentValue, intentShell = {}){
+      const match = findPlanItemMatchForCapture({
+        date:intentShell.date,
+        recordType:intentShell.recordType,
+        currentValue
+      });
+      if(!match) return currentValue;
+      const dose = parsePlanItemTrainingDose(match.item);
+      return {
+        ...currentValue,
+        matchedPlanItem: match.item,
+        matchedPlanKey: match.key,
+        plannedSets: currentValue.plannedSets || dose.plannedSets,
+        plannedRepsPerSet: currentValue.plannedRepsPerSet || dose.plannedRepsPerSet,
+        plannedRepsText: currentValue.plannedRepsText || dose.plannedRepsText,
+        plannedDurationText: currentValue.plannedDurationText || dose.plannedDurationText
+      };
+    }
+
     function extractLocalTrainingCaptureIntent(text, options = {}){
       const intent = classifyCharacterTrainingIntent(text, options);
       if(intent.action === "none" || intent.action === "no_record") return { action:intent.action, reason:intent.reason };
@@ -6014,7 +6079,10 @@
         ? activeSession.date
         : resolveTrainingCaptureDate(text, options.now || new Date());
       const recordType = inferRecordTypeFromText(text, intent);
-      const currentValue = buildCaptureCurrentValue(text, recordType, exerciseMatch);
+      const currentValue = enrichCaptureValueWithMatchedPlan(
+        buildCaptureCurrentValue(text, recordType, exerciseMatch),
+        { date, recordType }
+      );
       const completedExplicit = /做完|完成|练完|打卡了|全做完/.test(String(text || ""));
       const canWriteWithoutAi = !!(recordType !== "training_fact" || currentValue.exercise || currentValue.duration || currentValue.reps || currentValue.sets);
       if(!canWriteWithoutAi){
@@ -6204,6 +6272,8 @@
       if(value.sets) pieces.push(`${value.sets}组`);
       if(value.repsPerSet) pieces.push(`每组${value.repsPerSet}次`);
       if(value.reps && !value.repsPerSet) pieces.push(`${value.reps}次`);
+      if(value.plannedRepsText && !value.repsPerSet && !value.reps) pieces.push(value.plannedRepsText);
+      if(value.plannedDurationText && !value.duration) pieces.push(value.plannedDurationText);
       if(value.bestSetReps) pieces.push(`最高一组${value.bestSetReps}次`);
       if(value.duration) pieces.push(`${value.duration}${value.durationUnit || "分钟"}`);
       if(value.weightKg) pieces.push(`${value.weightKg}kg`);
@@ -6288,6 +6358,9 @@
       if(intent.recordType !== "training_fact") return [];
       const match = findPlanItemMatchForCapture(intent);
       if(!match) return [];
+      const value = intent.currentValue || {};
+      const plannedDose = parsePlanItemTrainingDose(match.item);
+      if(plannedDose.plannedSets && value.sets && value.sets < plannedDose.plannedSets) return [];
       if(!intent.completedExplicit && !isPreciseQuantityMatch(intent, match.item)) return [];
       const checks = getPlanChecks();
       if(checks[match.key]) return [];
