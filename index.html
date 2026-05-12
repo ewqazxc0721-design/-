@@ -7294,7 +7294,13 @@
         ].join("\n"),
         weekly_analysis: "面向用户的字段保留角色口吻，但不要把推理过程、任务说明或 JSON 要求写进内容。",
         next_week_plan: "plan.days 必须是可执行的新计划；changes 说明具体改了什么，不要只返回“保留当前计划”。",
-        natural_language_log: "只返回能填入表单的 formPatch 和一句自然提示，不要展示解析过程。",
+        natural_language_log: [
+          "只返回能填入表单的 formPatch 和一句自然提示，不要展示解析过程。",
+          "字段必须严格归类：pullupBest=引体向上单组最高次数；pullupTotal=本周/当天/本次引体向上总次数、总量、累计、合计。",
+          "遇到类似‘做了19个引体向上，最高一组6个’时，必须返回 pullupTotal:'19'，pullupBest:'6'；绝不能把总量数字填入最高一组。",
+          "‘最高一组/单组最高/最多一组’附近的数字才填 pullupBest；‘总量/总共/合计/累计/一共/做了X个引体向上’附近的数字填 pullupTotal。",
+          "只填用户明确提供的字段；不确定就留空，不要猜。"
+        ].join("\n"),
         trend_analysis: [
           "必须优先基于 payload.trendContext 与 payload.calendarDailyLogs：这是日历中近三个月的真实训练、体重、睡眠和备注数据。",
           "必须分别总结饮食、体重、睡眠、训练记录；至少引用 2 个具体数字、日期范围或完成率。",
@@ -7696,6 +7702,125 @@
       };
     }
 
+    function normalizeTrainingCountValue(value, options = {}){
+      const raw = String(value ?? "").match(/(\d+(?:\.\d+)?)/);
+      if(!raw) return "";
+      const n = Number(raw[1]);
+      const min = Number.isFinite(options.min) ? options.min : 0;
+      const max = Number.isFinite(options.max) ? options.max : 999;
+      if(!Number.isFinite(n) || n < min || n > max) return "";
+      return String(Math.round(n));
+    }
+
+    function pickFirstCount(text, patterns, options = {}){
+      const source = String(text || "");
+      for(const pattern of patterns){
+        const match = source.match(pattern);
+        if(match){
+          const value = normalizeTrainingCountValue(match[1], options);
+          if(value) return value;
+        }
+      }
+      return "";
+    }
+
+    function extractPullupMetricsFromNaturalText(text){
+      const source = String(text || "").replace(/，/g, ",").replace(/。/g, ";").replace(/；/g, ";");
+      const clauses = source.split(/[,;\n]+/).map((item) => item.trim()).filter(Boolean);
+      const pullupWord = /引体(?:向上)?|pull[-\s]?ups?/i;
+      const otherExerciseWord = /俯卧撑|深蹲|卧推|肩推|侧平举|弯举|卷腹|平板|臂屈伸|划船|硬拉|飞鸟|推举|深蹲|跑步|跳绳/;
+      const bestWord = /最高一组|单组最高|一组最高|一组最多|最多一组|最好一组|单组|最高|最多/;
+      const totalWord = /总量|总共|合计|总计|累计|一共|总数|总次数|共/;
+      const result = {};
+      let lastExercise = "";
+
+      clauses.forEach((clause) => {
+        const hasPullup = pullupWord.test(clause);
+        const hasOtherExercise = otherExerciseWord.test(clause);
+        const isPullupContext = hasPullup || (lastExercise === "pullup" && !hasOtherExercise);
+        if(!isPullupContext){
+          if(hasOtherExercise) lastExercise = "other";
+          return;
+        }
+
+        const best = pickFirstCount(clause, [
+          /(?:最高一组|单组最高|一组最高|一组最多|最多一组|最好一组|单组|最高|最多)\s*(?:是|为|到|有|做了|做)?\s*(\d+(?:\.\d+)?)/,
+          /(\d+(?:\.\d+)?)\s*(?:个|次)?\s*(?:最高一组|单组最高|一组最高|一组最多|最多一组|最好一组|单组)/
+        ], { min:1, max:80 });
+        if(best) result.pullupBest = best;
+
+        const explicitTotal = pickFirstCount(clause, [
+          /(?:总量|总共|合计|总计|累计|一共|总数|总次数|共)\s*(?:是|为|到|有|做了|完成)?\s*(\d+(?:\.\d+)?)/,
+          /(?:引体(?:向上)?|pull[-\s]?ups?)[^\d]{0,16}(?:总量|总共|合计|总计|累计|一共|总数|总次数|共)[^\d]{0,8}(\d+(?:\.\d+)?)/i
+        ], { min:1, max:999 });
+        if(explicitTotal){
+          result.pullupTotal = explicitTotal;
+        }else if(!bestWord.test(clause)){
+          const implicitTotal = pickFirstCount(clause, [
+            /(?:做了|完成了|做|完成|练了)\s*(\d+(?:\.\d+)?)\s*(?:个|次)?\s*(?:引体(?:向上)?|pull[-\s]?ups?)/i,
+            /(\d+(?:\.\d+)?)\s*(?:个|次)?\s*(?:引体(?:向上)?|pull[-\s]?ups?)/i,
+            /(?:引体(?:向上)?|pull[-\s]?ups?)\s*(?:做了|完成了|做|完成|练了)?\s*(\d+(?:\.\d+)?)\s*(?:个|次)?/i
+          ], { min:1, max:999 });
+          if(implicitTotal) result.pullupTotal = implicitTotal;
+        }
+
+        if(hasPullup) lastExercise = "pullup";
+      });
+
+      if(!result.pullupBest){
+        const crossClauseBest = pickFirstCount(source, [
+          /(?:引体(?:向上)?|pull[-\s]?ups?)[^。；;\n]{0,48}(?:最高一组|单组最高|一组最高|一组最多|最多一组|最好一组|单组|最高|最多)\s*(?:是|为|到|有|做了|做)?\s*(\d+(?:\.\d+)?)/i
+        ], { min:1, max:80 });
+        if(crossClauseBest) result.pullupBest = crossClauseBest;
+      }
+      if(!result.pullupTotal){
+        const crossClauseTotal = pickFirstCount(source, [
+          /(?:做了|完成了|做|完成|练了)\s*(\d+(?:\.\d+)?)\s*(?:个|次)?\s*(?:引体(?:向上)?|pull[-\s]?ups?)/i,
+          /(?:引体(?:向上)?|pull[-\s]?ups?)[^。；;\n]{0,48}(?:总量|总共|合计|总计|累计|一共|总数|总次数|共)\s*(?:是|为|到|有|做了|完成)?\s*(\d+(?:\.\d+)?)/i,
+          /(?:总量|总共|合计|总计|累计|一共|总数|总次数|共)\s*(?:是|为|到|有|做了|完成)?\s*(\d+(?:\.\d+)?)[^。；;\n]{0,48}(?:引体(?:向上)?|pull[-\s]?ups?)/i
+        ], { min:1, max:999 });
+        if(crossClauseTotal) result.pullupTotal = crossClauseTotal;
+      }
+
+      const bestNum = Number(result.pullupBest || 0);
+      const totalNum = Number(result.pullupTotal || 0);
+      if(bestNum && totalNum && bestNum > totalNum){
+        const oldBest = result.pullupBest;
+        result.pullupBest = result.pullupTotal;
+        result.pullupTotal = oldBest;
+      }
+      return result;
+    }
+
+    function normalizeNaturalLanguageLogPatch(aiPatch, text){
+      const patch = {};
+      Object.entries(aiPatch || {}).forEach(([key, value]) => {
+        if(!formKeys.includes(key)) return;
+        const nextValue = String(value ?? "").trim();
+        if(nextValue) patch[key] = nextValue;
+      });
+
+      const local = parseNaturalLogFallback(text).formPatch || {};
+      Object.entries(local).forEach(([key, value]) => {
+        if(!formKeys.includes(key)) return;
+        const nextValue = String(value ?? "").trim();
+        if(nextValue && !patch[key]) patch[key] = nextValue;
+      });
+
+      const pullupMetrics = extractPullupMetricsFromNaturalText(text);
+      if(pullupMetrics.pullupBest) patch.pullupBest = pullupMetrics.pullupBest;
+      if(pullupMetrics.pullupTotal) patch.pullupTotal = pullupMetrics.pullupTotal;
+
+      const bestNum = Number(normalizeTrainingCountValue(patch.pullupBest, { min:1, max:999 }) || 0);
+      const totalNum = Number(normalizeTrainingCountValue(patch.pullupTotal, { min:1, max:999 }) || 0);
+      if(bestNum && totalNum && bestNum > totalNum){
+        const oldBest = patch.pullupBest;
+        patch.pullupBest = patch.pullupTotal;
+        patch.pullupTotal = oldBest;
+      }
+      return patch;
+    }
+
     function parseNaturalLogFallback(text){
       const t = String(text || "");
       const patch = {};
@@ -7705,15 +7830,12 @@
         return v >= 35 && v <= 120;
       }).slice(0, 7);
       weightNums.forEach((v, i) => patch[`weight${i + 1}`] = v);
-      const pullBest = t.match(/引体(?:最高|最多|一组)?[^\d]*(\d+)/);
-      if(pullBest) patch.pullupBest = pullBest[1];
-      const pullTotal = t.match(/(?:总量|总共|合计)[^\d]*(\d+)/);
-      if(pullTotal) patch.pullupTotal = pullTotal[1];
+      Object.assign(patch, extractPullupMetricsFromNaturalText(t));
       const sleep = t.match(/(?:平均睡眠|睡眠)[^\d]*(\d+(?:\.\d+)?\s*(?:小时|h)?)/i);
       if(sleep) patch.avgSleep = sleep[1];
       if(/饮食一般/.test(t)) patch.diet = "一般";
       if(/没器材|无器械/.test(t)) patch.notes = [patch.notes, "有无器械训练日"].filter(Boolean).join("；");
-      return { type:"natural_language_log", formPatch:patch, confidence:"low", missingFields:[], message:"已用本地规则填入能识别的信息，缺少字段可以手动补。" };
+      return { type:"natural_language_log", formPatch:patch, confidence:"local", missingFields:[], message:"已按字段含义填入能识别的信息；总量和最高一组已分开校验。" };
     }
 
     function renderAiObject(data){
@@ -10241,8 +10363,9 @@
       if(status) status.textContent = "AI 正在解析...";
       const res = await callAiCoach("natural_language_log", { text, existingForm:getForm() }, { timeoutMs:22000, force:true });
       const data = res.data || parseNaturalLogFallback(text);
+      data.formPatch = normalizeNaturalLanguageLogPatch(data.formPatch || {}, text);
       applyFormPatchWithoutOverwriting(data.formPatch || {});
-      if(status) status.textContent = data.message || "已填入能识别的信息。";
+      if(status) status.textContent = data.message || "已填入能识别的信息；总量和最高一组已自动校验。";
       appendAiCoachOutputToCharacterChat({
         ...data,
         type:"natural_language_log",
