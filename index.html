@@ -5946,6 +5946,15 @@
       return formatDateKey(base);
     }
 
+    function hasExplicitTrainingCaptureDate(text){
+      return /今天|刚刚|昨天|昨晚|前天|上周|周[一二三四五六日天]/.test(String(text || ""));
+    }
+
+    function getActiveTrainingSessionForCapture(options = {}){
+      const session = options.trainingSession || getTrainingSession();
+      return isOpenTrainingSession(session) ? session : null;
+    }
+
     function inferRecordTypeFromText(text, intent = {}){
       const raw = String(text || "");
       if(intent.action === "safety") return "safety_feedback";
@@ -6000,7 +6009,10 @@
           prompt:`你说的是 ${exerciseMatch.candidates.join("，还是 ")}？`
         };
       }
-      const date = resolveTrainingCaptureDate(text, options.now || new Date());
+      const activeSession = getActiveTrainingSessionForCapture(options);
+      const date = activeSession && !hasExplicitTrainingCaptureDate(text)
+        ? activeSession.date
+        : resolveTrainingCaptureDate(text, options.now || new Date());
       const recordType = inferRecordTypeFromText(text, intent);
       const currentValue = buildCaptureCurrentValue(text, recordType, exerciseMatch);
       const completedExplicit = /做完|完成|练完|打卡了|全做完/.test(String(text || ""));
@@ -6011,7 +6023,8 @@
       return {
         action:"write",
         date,
-        sourceType: options.sourceType || "character_chat",
+        sourceType: options.sourceType || (activeSession ? "training_session" : "character_chat"),
+        trainingSessionId: activeSession?.id || "",
         recordType,
         currentValue,
         originalValue:{ ...currentValue },
@@ -6062,6 +6075,11 @@
         const actions = [];
         if(card.recordId && card.canUndo !== false) actions.push(`<button class="btn-outline" type="button" data-capture-undo="${escapeHtml(card.recordId)}">撤回</button>`);
         if(card.recordId && card.canModify !== false) actions.push(`<button class="btn-outline" type="button" data-capture-modify="${escapeHtml(card.recordId)}">修改</button>`);
+        if(card.trainingSessionActions){
+          actions.push(`<button class="btn" type="button" data-training-session-continue="1">继续训练</button>`);
+          actions.push(`<button class="btn-outline" type="button" data-training-session-finish="1">结束并保存</button>`);
+          actions.push(`<button class="btn-danger" type="button" data-training-session-discard="1">放弃训练</button>`);
+        }
         if(card.canDismiss !== false) actions.push(`<button class="btn-outline" type="button" data-capture-dismiss="${escapeHtml(card.id)}">收起</button>`);
         return `
           <div class="training-capture-card ${kindClass}">
@@ -6084,6 +6102,15 @@
       stack.querySelectorAll("[data-capture-dismiss]").forEach((btn) => {
         const id = btn.getAttribute("data-capture-dismiss") || "";
         btn.onclick = () => setTrainingCaptureCards(getTrainingCaptureCards().filter((card) => card.id !== id));
+      });
+      stack.querySelectorAll("[data-training-session-continue]").forEach((btn) => {
+        btn.onclick = () => continueTrainingSession();
+      });
+      stack.querySelectorAll("[data-training-session-finish]").forEach((btn) => {
+        btn.onclick = () => finishTrainingSession({ save:true });
+      });
+      stack.querySelectorAll("[data-training-session-discard]").forEach((btn) => {
+        btn.onclick = () => finishTrainingSession({ save:false });
       });
     }
 
@@ -6319,6 +6346,7 @@
         date: dateKey,
         capturedAt:new Date().toISOString(),
         sourceType:intent.sourceType || "character_chat",
+        trainingSessionId:intent.trainingSessionId || "",
         capturedRoleId: card?.id || "",
         capturedRoleName: card?.name || "",
         recordType:intent.recordType || "training_fact",
@@ -6505,13 +6533,28 @@
       return session;
     }
 
+    function isOpenTrainingSession(session){
+      return !!session && ["active","closing"].includes(session.status);
+    }
+
+    function continueTrainingSession(){
+      const session = getTrainingSession();
+      if(!isOpenTrainingSession(session)) return { status:"not_found" };
+      activePlanDay = Number.isInteger(Number(session.dayIndex)) ? Number(session.dayIndex) : activePlanDay;
+      localStorage.setItem(ACTIVE_PLAN_DAY_KEY, String(activePlanDay));
+      openAiCoachPanel(false, { focusChat:true });
+      renderPlan();
+      return { status:"continued", session };
+    }
+
     function startTrainingSession(dayIndex = activePlanDay){
       const existing = getTrainingSession();
-      if(existing && existing.status === "active"){
+      if(isOpenTrainingSession(existing)){
         pushTrainingCaptureCard({
           kind:"warn",
           title:"训练会话未结束",
           message:`你还有一个 ${existing.dayName || "训练日"} 会话草稿。可继续、结束保存或放弃。`,
+          trainingSessionActions:true,
           canUndo:false,
           canModify:false
         });
@@ -6539,16 +6582,18 @@
       pushTrainingCaptureCard({
         title:"训练会话已开始",
         message:`${session.dayName} · ${session.characterCardName ? `陪练角色：${session.characterCardName}` : "未绑定角色"}。退出页面后会保留草稿。`,
+        trainingSessionActions:true,
         canUndo:false,
         canModify:false
       });
+      renderPlan();
       openAiCoachPanel(false, { focusChat:true });
       return session;
     }
 
     function finishTrainingSession(options = {}){
       const session = getTrainingSession();
-      if(!session) return { status:"not_found" };
+      if(!isOpenTrainingSession(session)) return { status:"not_found" };
       const save = options.save !== false;
       const finished = {
         ...session,
@@ -6583,6 +6628,7 @@
         canUndo:false,
         canModify:false
       });
+      renderPlan();
       return { status:finished.status, session:finished };
     }
 
@@ -6600,6 +6646,7 @@
       pushTrainingCaptureCard({
         title:"今日项目已完成",
         message:"训练会话进入收尾确认。你可以补充感受，也可以稍后结束并保存。",
+        trainingSessionActions:true,
         canUndo:false,
         canModify:false
       });
@@ -10211,6 +10258,9 @@
       `;
 
       container.innerHTML = days.map((d, dayIndex) => {
+        const openSession = getTrainingSession();
+        const sessionOnThisDay = isOpenTrainingSession(openSession) && Number(openSession.dayIndex) === dayIndex;
+        const sessionOnAnotherDay = isOpenTrainingSession(openSession) && Number(openSession.dayIndex) !== dayIndex;
         const itemsHtml = d.items.map((item, itemIndex) => {
           const key = `d${dayIndex}_i${itemIndex}`;
           const done = !!checks[key];
@@ -10231,6 +10281,15 @@
         const restoreTempButton = d.isTemporary
           ? `<button class="btn-outline" data-clear-temp-plan="${dayIndex}">恢复原计划</button>`
           : "";
+        const trainingSessionButtons = sessionOnThisDay
+          ? `
+              <button class="btn" data-continue-training-session="${dayIndex}">继续训练</button>
+              <button class="btn-outline" data-finish-training-session="${dayIndex}">结束并保存</button>
+              <button class="btn-danger" data-discard-training-session="${dayIndex}">放弃训练</button>
+            `
+          : sessionOnAnotherDay
+            ? `<button class="btn-outline" data-continue-training-session="${dayIndex}">继续未结束训练</button>`
+            : `<button class="btn" data-start-training-session="${dayIndex}">开始训练</button>`;
 
         return `
           <div class="day-panel ${dayIndex === activePlanDay ? "active" : ""}">
@@ -10240,7 +10299,7 @@
             <div style="margin-top:12px">${itemsHtml}</div>
             <div class="greenbox"><b>蛋白粉安排：</b>${escapeHtml(d.protein || "暂无")}</div>
             <div class="plan-actions">
-              <button class="btn" data-start-training-session="${dayIndex}">开始训练</button>
+              ${trainingSessionButtons}
               <button class="btn-outline" data-day-complete="${dayIndex}">一键完成今天</button>
               <button class="btn-outline" data-record-daily-log="${dayIndex}">记录到本周对应日期</button>
               ${restoreTempButton}
@@ -10287,6 +10346,18 @@
 
       container.querySelectorAll("[data-start-training-session]").forEach((btn) => {
         btn.onclick = () => startTrainingSession(Number(btn.getAttribute("data-start-training-session")));
+      });
+
+      container.querySelectorAll("[data-continue-training-session]").forEach((btn) => {
+        btn.onclick = () => continueTrainingSession();
+      });
+
+      container.querySelectorAll("[data-finish-training-session]").forEach((btn) => {
+        btn.onclick = () => finishTrainingSession({ save:true });
+      });
+
+      container.querySelectorAll("[data-discard-training-session]").forEach((btn) => {
+        btn.onclick = () => finishTrainingSession({ save:false });
       });
 
       container.querySelectorAll("[data-record-daily-log]").forEach((btn) => {
