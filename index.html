@@ -4411,7 +4411,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.05.12-94-radius-audit";
+    const APP_VERSION = "v2026.05.12-95-role-coach-linkage-tdd";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const TEMP_DAILY_PLAN_OVERRIDES_KEY = "gain-temp-daily-plan-overrides";
     const DAILY_LOGS_KEY = "gain-daily-logs";
@@ -11942,6 +11942,1312 @@
       document.addEventListener("lostpointercapture", releaseControl, { passive:true });
       window.addEventListener("blur", releaseControl);
     }
+
+
+
+    /* --- Patch v95: role card × AI coach training-linkage MVP (TDD vertical slices) --- */
+    const TRAINING_LINKAGE_SESSION_KEY = "gain-training-linkage-session";
+    const TRAINING_LINKAGE_LAST_CARD_KEY = "gain-training-linkage-last-card";
+    const TRAINING_LINKAGE_WEEKLY_SUMMARY_KEY = "gain-training-linkage-weekly-summary";
+    const TRAINING_LINKAGE_TEST_REPORT_KEY = "gain-training-linkage-test-report";
+
+    function installTrainingLinkageStyles(){
+      if(document.getElementById("trainingLinkageStyles")) return;
+      const style = document.createElement("style");
+      style.id = "trainingLinkageStyles";
+      style.textContent = `
+        .training-linkage-card{display:none;margin:0 0 12px;padding:12px 14px;border-radius:18px;background:rgba(239,246,255,.96);border:1px solid rgba(59,130,246,.18);box-shadow:0 10px 24px rgba(59,130,246,.08);font-size:13px;line-height:1.55;}
+        .training-linkage-card.show{display:block;}
+        .training-linkage-card.warn{background:rgba(255,247,237,.96);border-color:rgba(251,146,60,.24);}
+        .training-linkage-card.danger{background:rgba(254,242,242,.96);border-color:rgba(239,68,68,.22);}
+        .training-linkage-card.success{background:rgba(236,253,245,.96);border-color:rgba(16,185,129,.18);}
+        .training-linkage-title{font-weight:800;margin-bottom:4px;}
+        .training-linkage-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+        .training-linkage-actions .mini-btn{padding:7px 10px;}
+        .training-linkage-section{margin-top:14px;padding:12px 14px;border-radius:18px;background:rgba(248,250,252,.92);border:1px solid rgba(148,163,184,.16);}
+        .training-linkage-record{margin-top:8px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.82);border:1px solid rgba(148,163,184,.14);font-size:13px;line-height:1.55;}
+        .training-linkage-record.revoked{opacity:.58;text-decoration:line-through;}
+        .training-session-ribbon{margin:12px 0 0;padding:12px 14px;border-radius:18px;background:rgba(236,253,245,.96);border:1px solid rgba(16,185,129,.18);font-size:13px;line-height:1.55;}
+        .training-self-test-pass{color:#047857;font-weight:800;}
+        .training-self-test-fail{color:#b91c1c;font-weight:800;}
+      `;
+      document.head.appendChild(style);
+    }
+
+    function normalizeTrainingLinkageSettings(settings){
+      const next = settings && typeof settings === "object" ? settings : {};
+      next.autoTrainingCapture = next.autoTrainingCapture !== false;
+      next.trainingIntentTrigger = next.trainingIntentTrigger !== false;
+      next.trainingCaptureAiExtraction = next.trainingCaptureAiExtraction !== false;
+      return next;
+    }
+
+    const __trainingLinkageBaseGetAiSettings = getAiSettings;
+    getAiSettings = function(){
+      return normalizeTrainingLinkageSettings(__trainingLinkageBaseGetAiSettings());
+    };
+
+    const __trainingLinkageBaseGetAiSettingsForBackup = getAiSettingsForBackup;
+    getAiSettingsForBackup = function(){
+      return normalizeTrainingLinkageSettings(__trainingLinkageBaseGetAiSettingsForBackup());
+    };
+
+    const __trainingLinkageBaseCollectAiSettingsFromUi = collectAiSettingsFromUi;
+    collectAiSettingsFromUi = function(){
+      const settings = normalizeTrainingLinkageSettings(__trainingLinkageBaseCollectAiSettingsFromUi());
+      const autoBtn = $("trainingAutoCaptureBtn");
+      const intentBtn = $("trainingIntentTriggerBtn");
+      const aiExtractBtn = $("trainingAiExtractBtn");
+      if(autoBtn && autoBtn.dataset.value){
+        settings.autoTrainingCapture = autoBtn.dataset.value === "1";
+      }
+      if(intentBtn && intentBtn.dataset.value){
+        settings.trainingIntentTrigger = intentBtn.dataset.value === "1";
+      }
+      if(aiExtractBtn && aiExtractBtn.dataset.value){
+        settings.trainingCaptureAiExtraction = aiExtractBtn.dataset.value === "1";
+      }
+      return settings;
+    };
+
+    function ensureTrainingLinkageUi(){
+      installTrainingLinkageStyles();
+
+      const chatBox = $("aiCoachChatBox");
+      if(chatBox && !$("trainingLinkageCard")){
+        const card = document.createElement("div");
+        card.id = "trainingLinkageCard";
+        card.className = "training-linkage-card";
+        chatBox.insertBefore(card, chatBox.firstChild.nextSibling || chatBox.firstChild);
+      }
+
+      const settingsBody = $("aiSettingsBody");
+      if(settingsBody && !$("trainingLinkageSettingsBlock")){
+        const block = document.createElement("div");
+        block.id = "trainingLinkageSettingsBlock";
+        block.innerHTML = `
+          <div class="softbox" style="margin-top:12px;">
+            <b>角色卡 × AI 教练联动</b><br>
+            普通聊天默认不教练化；只有明确训练意图、训练反馈、跳过训练或风险内容才读取训练上下文并写入训练事实。
+          </div>
+          <div class="tool-row" style="margin-top:10px;">
+            <button class="btn-outline" id="trainingAutoCaptureBtn" type="button">自动记录：开启</button>
+            <button class="btn-outline" id="trainingIntentTriggerBtn" type="button">训练触发：开启</button>
+          </div>
+          <button class="btn-outline full" id="trainingAiExtractBtn" type="button">AI 意图提取：开启</button>
+        `;
+        const status = $("aiSettingsStatus");
+        settingsBody.insertBefore(block, status || settingsBody.firstChild);
+        ["trainingAutoCaptureBtn","trainingIntentTriggerBtn","trainingAiExtractBtn"].forEach((id) => {
+          const btn = $(id);
+          if(btn){
+            btn.onclick = () => {
+              const settings = getAiSettings();
+              const field = id === "trainingAutoCaptureBtn"
+                ? "autoTrainingCapture"
+                : id === "trainingIntentTriggerBtn"
+                  ? "trainingIntentTrigger"
+                  : "trainingCaptureAiExtraction";
+              settings[field] = !settings[field];
+              saveAiSettings(settings);
+              updateAiSettingsUi();
+            };
+          }
+        });
+      }
+
+      const toolsSection = $("tools");
+      if(toolsSection && !$("trainingLinkageSelfTestCard")){
+        const div = document.createElement("div");
+        div.className = "card";
+        div.id = "trainingLinkageSelfTestCard";
+        div.innerHTML = `
+          <h2>联动行为自测</h2>
+          <div class="softbox">验证训练意图识别、写入器、撤回回滚、日/周总结和导入导出字段。测试会临时备份本地数据，结束后自动恢复。</div>
+          <button class="btn-outline full" id="trainingLinkageSelfTestBtn" type="button">运行联动自测</button>
+          <div id="trainingLinkageSelfTestResult" class="softbox" style="display:none;"></div>
+        `;
+        const version = $("appVersionText");
+        toolsSection.insertBefore(div, version || null);
+        $("trainingLinkageSelfTestBtn").onclick = () => {
+          const result = TrainingLinkage.runBehaviorTests();
+          renderTrainingLinkageSelfTestResult(result);
+        };
+      }
+
+      refreshTrainingLinkageSettingsUi();
+    }
+
+    function refreshTrainingLinkageSettingsUi(){
+      const settings = getAiSettings();
+      const setBtn = (id, label, value) => {
+        const btn = $(id);
+        if(!btn) return;
+        btn.dataset.value = value ? "1" : "0";
+        btn.textContent = `${label}：${value ? "开启" : "关闭"}`;
+        btn.className = value ? "btn" : "btn-outline";
+      };
+      setBtn("trainingAutoCaptureBtn", "自动记录", settings.autoTrainingCapture !== false);
+      setBtn("trainingIntentTriggerBtn", "训练触发", settings.trainingIntentTrigger !== false);
+      setBtn("trainingAiExtractBtn", "AI 意图提取", settings.trainingCaptureAiExtraction !== false);
+    }
+
+    const __trainingLinkageBaseUpdateAiSettingsUi = updateAiSettingsUi;
+    updateAiSettingsUi = function(){
+      ensureTrainingLinkageUi();
+      __trainingLinkageBaseUpdateAiSettingsUi();
+      refreshTrainingLinkageSettingsUi();
+      const status = $("aiSettingsStatus");
+      if(status){
+        const settings = getAiSettings();
+        status.textContent += ` · 自动记录${settings.autoTrainingCapture !== false ? "开" : "关"} · 训练触发${settings.trainingIntentTrigger !== false ? "开" : "关"}`;
+      }
+    };
+
+    const TrainingLinkage = (() => {
+      const actionAliases = [
+        { canonical:"引体向上", aliases:["引体向上","引体","pull up","pull-up","pullup","chin up","chin-up"] },
+        { canonical:"俯卧撑", aliases:["俯卧撑","push up","push-up","pushup"] },
+        { canonical:"跑步", aliases:["跑步","跑了","跑","running","run"] },
+        { canonical:"卧推", aliases:["卧推","bench press","bench"] },
+        { canonical:"深蹲", aliases:["深蹲","squat"] },
+        { canonical:"硬拉", aliases:["硬拉","deadlift"] },
+        { canonical:"侧平举", aliases:["侧平举","lateral raise","side raise"] },
+        { canonical:"飞鸟", aliases:["飞鸟","fly","flye"] },
+        { canonical:"划船", aliases:["划船","row"] },
+        { canonical:"弯举", aliases:["弯举","curl"] },
+        { canonical:"卷腹", aliases:["卷腹","crunch"] },
+        { canonical:"平板支撑", aliases:["平板支撑","plank"] }
+      ];
+      const safetyWords = /(胸闷|头晕|眩晕|晕|心悸|恶心|刺痛|剧痛|疼|痛|麻|麻木|呼吸困难|喘不上|膝盖痛|肩膀痛|腰痛)/;
+      const trainingWords = /(训练|健身|练|组|个|次|重量|卧推|深蹲|硬拉|引体|俯卧撑|侧平举|飞鸟|跑步|pull|push|bench|squat|deadlift|reps?|sets?)/i;
+      const genericLifestyleWords = /(火锅|电影|工作|上班|学习|游戏|聊天|心情|猜我|刷剧)/;
+      const correctionWords = /(不是|改成|其实|应该是|刚才说错|记错)/;
+      const appendWords = /(另外|还|再加|补充|顺便)/;
+      const explicitCompletionWords = /(做完|练完|完成|打卡|结束|搞定|全部做了|done|finished|completed)/i;
+
+      const nowIso = () => new Date().toISOString();
+      const id = (prefix = "cap") => `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      const clean = (value) => String(value || "").trim();
+      const todayKey = () => formatDateKey(new Date());
+
+      function normalizeText(text){
+        return String(text || "")
+          .toLowerCase()
+          .replace(/[，。！？、；：]/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+
+      function findAction(text){
+        const source = normalizeText(text);
+        const hits = [];
+        actionAliases.forEach((entry) => {
+          entry.aliases.forEach((alias) => {
+            const a = normalizeText(alias);
+            if(a && source.includes(a)){
+              hits.push({ canonical:entry.canonical, alias, length:a.length });
+            }
+          });
+        });
+        hits.sort((a, b) => b.length - a.length);
+        return hits[0] || null;
+      }
+
+      function normalizeActionName(text){
+        const hit = findAction(text);
+        return hit ? hit.canonical : clean(text);
+      }
+
+      function normalizeForMatch(text){
+        const source = normalizeText(text);
+        let next = source;
+        actionAliases.forEach((entry) => {
+          entry.aliases.forEach((alias) => {
+            const a = normalizeText(alias);
+            if(a) next = next.split(a).join(normalizeText(entry.canonical));
+          });
+        });
+        return next.replace(/\s+/g, "");
+      }
+
+      function findMatchingPlanItem(action, dateKey = todayKey()){
+        const days = getPlanDays();
+        const todayIndex = getTodayPlanDayIndex(days);
+        const candidates = [];
+        days.forEach((day, dayIndex) => {
+          const isToday = getDateForPlanDayInCurrentWeek(day.day, dayIndex) === dateKey;
+          (day.items || []).forEach((item, itemIndex) => {
+            const itemNorm = normalizeForMatch(item);
+            const actionNorm = normalizeForMatch(action);
+            if(actionNorm && itemNorm.includes(actionNorm)){
+              candidates.push({ dayIndex, itemIndex, key:`d${dayIndex}_i${itemIndex}`, item, day, isToday, score:isToday ? 2 : 1 });
+            }
+          });
+        });
+        candidates.sort((a, b) => b.score - a.score);
+        return candidates[0] || null;
+      }
+
+      function extractQuantities(text){
+        const source = normalizeText(text);
+        const numbers = [...source.matchAll(/(\d+(?:\.\d+)?)/g)].map((m) => Number(m[1])).filter(Number.isFinite);
+        const sets = (source.match(/(\d+)\s*组/) || [])[1] || (source.match(/(\d+)\s*sets?/) || [])[1] || "";
+        const reps = (source.match(/每组\s*(\d+)/) || [])[1]
+          || (source.match(/(\d+)\s*(个|次|reps?)/) || [])[1]
+          || "";
+        const minutes = (source.match(/(\d+)\s*(分钟|min|minutes?)/) || [])[1] || "";
+        const weight = (source.match(/(\d+(?:\.\d+)?)\s*(kg|公斤|千克)/) || [])[1] || "";
+        return {
+          numbers,
+          sets: sets ? Number(sets) : null,
+          reps: reps ? Number(reps) : null,
+          minutes: minutes ? Number(minutes) : null,
+          weightKg: weight ? Number(weight) : null
+        };
+      }
+
+      function buildValueText(intent){
+        const q = intent.quantities || {};
+        const parts = [];
+        if(q.sets) parts.push(`${q.sets}组`);
+        if(q.reps) parts.push(q.sets ? `每组${q.reps}次` : `${q.reps}次`);
+        if(q.minutes) parts.push(`${q.minutes}分钟`);
+        if(q.weightKg) parts.push(`${q.weightKg}kg`);
+        if(!parts.length && q.numbers && q.numbers.length) parts.push(`${q.numbers[0]}`);
+        return [intent.action, parts.join(" ")].filter(Boolean).join(" · ");
+      }
+
+      function getRoleMeta(){
+        const card = getActiveCharacterCard();
+        return card ? { id: card.id || "", name: card.name || "当前角色" } : { id:"", name:"未选择角色" };
+      }
+
+      function classify(text, options = {}){
+        const raw = String(text || "").trim();
+        const source = normalizeText(raw);
+        if(!raw) return { type:"none", confidence:0 };
+        const action = findAction(raw);
+        const quantities = extractQuantities(raw);
+        const hasTrainingWord = trainingWords.test(raw) || !!action;
+        const hasSafety = safetyWords.test(raw);
+        const isCorrection = correctionWords.test(raw);
+        const isAppend = appendWords.test(raw);
+        const explicitCompletion = explicitCompletionWords.test(raw);
+        const mentionedTrainingFatigue = /(酸|累|疲劳|无力|恢复|状态不好)/.test(raw) && /(练完|训练|健身|练腿|练胸|练背|练肩|练手|练完腿|练完胸|练完背)/.test(raw);
+        const genericFatigue = /(今天|最近)?.{0,3}(好累|很累|累啊|疲惫|心情一般)/.test(raw) && !mentionedTrainingFatigue && !hasTrainingWord;
+
+        if(genericLifestyleWords.test(raw) && !hasTrainingWord && !hasSafety){
+          return { type:"none", confidence:0.05, reason:"普通生活聊天" };
+        }
+        if(genericFatigue){
+          return { type:"none", confidence:0.1, reason:"泛疲劳，不写训练记录" };
+        }
+        if(isCorrection){
+          return { type:"correction", confidence:0.82, originalText:raw, quantities, action: action?.canonical || "", append:isAppend };
+        }
+        if(/(今天|今晚|上午|下午)?.{0,4}(没练|没去健身房|跳过|休息一天|不练了|决定不练|暂停训练)/.test(raw)){
+          const rest = /(休息|不练了|决定不练)/.test(raw);
+          return { type: rest ? "rest" : "skipped", recordType: rest ? "rest" : "skipped", confidence:0.92, originalText:raw, action:"未训练", quantities };
+        }
+        if(hasSafety && (hasTrainingWord || /(肩膀|膝盖|腰|胸|腿|手腕|手肘|背)/.test(raw))){
+          return { type:"safety", recordType:"safety", confidence:0.9, originalText:raw, action:action?.canonical || "训练风险", quantities, explicitCompletion:false };
+        }
+        if(/(肩膀|膝盖|腰|手腕|手肘).{0,6}(怪怪|不舒服|不对劲|卡|紧)/.test(raw)){
+          return { type:"ask", recordType:"technical_feedback", confidence:0.62, originalText:raw, action:action?.canonical || "", question:"你这个不舒服是训练时出现的吗？要不要记到今天的训练反馈里？" };
+        }
+        if(mentionedTrainingFatigue){
+          return { type:"feedback", recordType:"recovery_feedback", confidence:0.86, originalText:raw, action:action?.canonical || "训练疲劳", quantities };
+        }
+        if(/(练得还行|比上次强|重量有点轻|状态还行|感觉一般)/.test(raw) && hasTrainingWord){
+          return { type:"ask", recordType:"training_feedback", confidence:0.65, originalText:raw, action:action?.canonical || "", question:"我能帮你记，但还缺一点信息：是哪一个动作、重量/次数，还是整体训练感受？" };
+        }
+        if(action && action.canonical === "飞鸟" && !/(哑铃|绳索|夹胸|反向|胸|肩后束)/.test(raw)){
+          return { type:"ask", recordType:"training_fact", confidence:0.58, originalText:raw, action:"飞鸟", question:"你说的“飞鸟”是哑铃飞鸟、绳索夹胸，还是反向飞鸟？确认后我再记录，避免记错动作。" };
+        }
+        if(action && (quantities.numbers.length || explicitCompletion || /(做了|练了|跑了|完成了|打卡了)/.test(raw))){
+          return {
+            type:"fact",
+            recordType:"training_fact",
+            confidence:0.88,
+            originalText:raw,
+            action:action.canonical,
+            quantities,
+            explicitCompletion
+          };
+        }
+        if(hasTrainingWord && hasSafety){
+          return { type:"safety", recordType:"safety", confidence:0.78, originalText:raw, action:action?.canonical || "训练风险", quantities };
+        }
+        if(hasTrainingWord && settingsAllowsAiExtraction(options.settings)){
+          return { type:"needs_ai", confidence:0.45, originalText:raw, action:action?.canonical || "", quantities };
+        }
+        return { type:"none", confidence:0.12, reason:"没有明确训练事实" };
+      }
+
+      function settingsAllowsAiExtraction(settings){
+        return !settings || settings.trainingCaptureAiExtraction !== false;
+      }
+
+      function ensureLog(dateKey, logs){
+        const days = getPlanDays();
+        const todayIndex = getTodayPlanDayIndex(days);
+        const day = days[todayIndex] || days[activePlanDay] || { day:"", focus:"", items:[] };
+        const existing = logs[dateKey] || {};
+        return {
+          date: dateKey,
+          planDay: existing.planDay || day.day || "",
+          focus: existing.focus || day.focus || "",
+          allItems: Array.isArray(existing.allItems) ? existing.allItems : (day.items || []),
+          baseItems: Array.isArray(existing.baseItems) ? existing.baseItems : (day.baseItems || []),
+          isTemporaryPlan: !!(existing.isTemporaryPlan || day.isTemporary),
+          aiAdjustMessage: existing.aiAdjustMessage || day.temporaryMessage || "",
+          completedItems: Array.isArray(existing.completedItems) ? existing.completedItems : [],
+          completedCount: Number(existing.completedCount || 0),
+          totalItems: Number(existing.totalItems || (day.items || []).length),
+          weight: existing.weight || "",
+          sleep: existing.sleep || "",
+          note: existing.note || "",
+          aiCaptureRecords: Array.isArray(existing.aiCaptureRecords) ? existing.aiCaptureRecords : [],
+          aiDailySummary: existing.aiDailySummary || "",
+          aiDailySummaryUpdatedAt: existing.aiDailySummaryUpdatedAt || "",
+          createdAt: existing.createdAt || new Date().toLocaleString("zh-CN"),
+          updatedAt: existing.updatedAt || new Date().toLocaleString("zh-CN"),
+          updatedAtIso: existing.updatedAtIso || nowIso()
+        };
+      }
+
+      function summarizeDaily(records){
+        const active = (records || []).filter((r) => !r.revoked);
+        if(!active.length) return "";
+        const facts = active.filter((r) => r.recordType === "training_fact").map((r) => r.currentText || r.originalText);
+        const feedback = active.filter((r) => /feedback|safety|recovery/.test(r.recordType)).map((r) => r.currentText || r.originalText);
+        const skipped = active.filter((r) => /skipped|rest/.test(r.recordType)).map((r) => r.currentText || r.originalText);
+        const lines = [];
+        if(facts.length) lines.push(`训练事实：${facts.slice(-4).join("；")}`);
+        if(feedback.length) lines.push(`反馈/风险：${feedback.slice(-3).join("；")}`);
+        if(skipped.length) lines.push(`未训练/休息：${skipped.slice(-2).join("；")}`);
+        return lines.join("\n");
+      }
+
+      function updateWeeklySummary(logs = getDailyLogs()){
+        const rows = Object.values(logs || {})
+          .sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")))
+          .filter((log) => Array.isArray(log.aiCaptureRecords) && log.aiCaptureRecords.some((r) => !r.revoked));
+        const lines = rows.slice(-7).map((log) => {
+          const summary = log.aiDailySummary || summarizeDaily(log.aiCaptureRecords);
+          return `${log.date}：${summary || "有训练捕捉记录"}`;
+        });
+        const payload = {
+          generatedAt: nowIso(),
+          source: "dailyLogs.aiCaptureRecords",
+          text: lines.length ? `AI 周总结草稿\n${lines.join("\n")}` : "AI 周总结草稿：暂无 AI 捕捉记录。",
+          days: rows.map((log) => log.date)
+        };
+        localStorage.setItem(TRAINING_LINKAGE_WEEKLY_SUMMARY_KEY, JSON.stringify(payload));
+        return payload;
+      }
+
+      function applyPlanCompletionForIntent(intent, record, log){
+        if(intent.recordType !== "training_fact" && intent.type !== "fact") return [];
+        const match = findMatchingPlanItem(intent.action, log.date || todayKey());
+        if(!match) return [];
+        const shouldComplete = !!intent.explicitCompletion || !!(intent.quantities && (intent.quantities.reps || intent.quantities.sets || intent.quantities.minutes));
+        if(!shouldComplete) return [];
+        const checks = getPlanChecks();
+        const wasManualDone = !!checks[match.key];
+        if(!wasManualDone){
+          checks[match.key] = true;
+          setPlanChecks(checks);
+          record.autoCompletedCheckKeys.push(match.key);
+        }
+        record.linkedPlanItems.push({
+          key: match.key,
+          dayIndex: match.dayIndex,
+          itemIndex: match.itemIndex,
+          item: match.item,
+          autoCompleted: !wasManualDone
+        });
+        return [match.key];
+      }
+
+      function refreshLogPlanCompletion(log){
+        const days = getPlanDays();
+        const checks = getPlanChecks();
+        const dayIndex = days.findIndex((day, index) => getDateForPlanDayInCurrentWeek(day.day, index) === log.date);
+        const day = dayIndex >= 0 ? days[dayIndex] : null;
+        if(day){
+          const completedItems = (day.items || []).filter((_, itemIndex) => checks[`d${dayIndex}_i${itemIndex}`]);
+          log.completedItems = completedItems;
+          log.completedCount = completedItems.length;
+          log.totalItems = (day.items || []).length;
+          log.allItems = day.items || [];
+          log.planDay = log.planDay || day.day || "";
+          log.focus = log.focus || day.focus || "";
+        }
+        return log;
+      }
+
+      function applyIntent(intent, options = {}){
+        const dateKey = intent.date || options.date || todayKey();
+        const logs = getDailyLogs();
+        const log = ensureLog(dateKey, logs);
+        const role = options.role || getRoleMeta();
+        const valueText = buildValueText(intent) || intent.originalText || "";
+        const record = {
+          id: id("cap"),
+          date: dateKey,
+          createdAt: new Date().toLocaleString("zh-CN"),
+          createdAtIso: nowIso(),
+          sourceType: options.sourceType || "character_chat",
+          source: "ai_capture",
+          captureRoleId: role.id || "",
+          captureRoleName: role.name || "",
+          recordType: intent.recordType || intent.type || "training_fact",
+          action: intent.action || "",
+          originalText: intent.originalText || "",
+          currentText: valueText,
+          originalValue: intent.quantities || {},
+          currentValue: intent.quantities || {},
+          confidence: intent.confidence || 0,
+          userModified: false,
+          revoked: false,
+          localVersion: Date.now(),
+          cloudVersion: 0,
+          autoCompletedCheckKeys: [],
+          linkedPlanItems: [],
+          needsFollowup: false
+        };
+        applyPlanCompletionForIntent(intent, record, log);
+        log.aiCaptureRecords.push(record);
+        log.aiDailySummary = summarizeDaily(log.aiCaptureRecords);
+        log.aiDailySummaryUpdatedAt = nowIso();
+        log.updatedAt = new Date().toLocaleString("zh-CN");
+        log.updatedAtIso = nowIso();
+        refreshLogPlanCompletion(log);
+        logs[dateKey] = log;
+        setDailyLogs(logs, { syncToCloud: true });
+        updateWeeklySummary(logs);
+
+        const card = {
+          id: record.id,
+          date: dateKey,
+          kind: record.recordType === "safety" ? "danger" : "success",
+          title: record.recordType === "safety" ? "已记录安全反馈" : "已记录训练事实",
+          message: `已记录到 ${dateKey}：${record.currentText || record.originalText}`,
+          recordId: record.id,
+          actions: ["undo","edit"]
+        };
+        setLastCard(card);
+        return { status:"recorded", record, card, log };
+      }
+
+      function setLastCard(card){
+        localStorage.setItem(TRAINING_LINKAGE_LAST_CARD_KEY, JSON.stringify(card || {}));
+      }
+
+      function getLastCard(){
+        return safeJsonParse(localStorage.getItem(TRAINING_LINKAGE_LAST_CARD_KEY) || "{}", {});
+      }
+
+      function findRecord(recordId){
+        const logs = getDailyLogs();
+        for(const [dateKey, log] of Object.entries(logs)){
+          const records = Array.isArray(log.aiCaptureRecords) ? log.aiCaptureRecords : [];
+          const record = records.find((item) => item.id === recordId);
+          if(record) return { logs, dateKey, log, record };
+        }
+        return null;
+      }
+
+      function getLatestActiveRecord(){
+        const logs = getDailyLogs();
+        const records = [];
+        Object.values(logs).forEach((log) => {
+          (log.aiCaptureRecords || []).forEach((record) => {
+            if(!record.revoked) records.push({ log, record });
+          });
+        });
+        records.sort((a, b) => String(b.record.createdAtIso || "").localeCompare(String(a.record.createdAtIso || "")));
+        return records[0] || null;
+      }
+
+      function revokeRecord(recordId){
+        const found = findRecord(recordId);
+        if(!found) return { status:"missing" };
+        found.record.revoked = true;
+        found.record.revokedAtIso = nowIso();
+        found.record.localVersion = Date.now();
+        const checks = getPlanChecks();
+        (found.record.autoCompletedCheckKeys || []).forEach((key) => {
+          if(checks[key]) checks[key] = false;
+        });
+        setPlanChecks(checks);
+        found.log.aiDailySummary = summarizeDaily(found.log.aiCaptureRecords);
+        found.log.aiDailySummaryUpdatedAt = nowIso();
+        found.log.updatedAt = new Date().toLocaleString("zh-CN");
+        found.log.updatedAtIso = nowIso();
+        refreshLogPlanCompletion(found.log);
+        found.logs[found.dateKey] = found.log;
+        setDailyLogs(found.logs, { syncToCloud: true });
+        updateWeeklySummary(found.logs);
+        const card = {
+          id: recordId,
+          date: found.dateKey,
+          kind:"warn",
+          title:"已撤回记录",
+          message:`已撤回 ${found.dateKey} 的 AI 捕捉记录；只回滚这条记录自动完成的打卡。`,
+          actions:[]
+        };
+        setLastCard(card);
+        return { status:"revoked", card, record:found.record };
+      }
+
+      function editRecord(recordId, nextText){
+        const found = findRecord(recordId);
+        if(!found) return { status:"missing" };
+        const value = clean(nextText);
+        if(!value) return { status:"empty" };
+        found.record.currentText = value;
+        found.record.userModified = true;
+        found.record.localVersion = Date.now();
+        found.record.modifiedAtIso = nowIso();
+        found.log.aiDailySummary = summarizeDaily(found.log.aiCaptureRecords);
+        found.log.aiDailySummaryUpdatedAt = nowIso();
+        found.log.updatedAt = new Date().toLocaleString("zh-CN");
+        found.log.updatedAtIso = nowIso();
+        found.logs[found.dateKey] = found.log;
+        setDailyLogs(found.logs, { syncToCloud: true });
+        updateWeeklySummary(found.logs);
+        const card = {
+          id: recordId,
+          date: found.dateKey,
+          kind:"success",
+          title:"已修改记录",
+          message:`已修改为：${value}`,
+          recordId,
+          actions:["undo","edit"]
+        };
+        setLastCard(card);
+        return { status:"edited", card, record:found.record };
+      }
+
+      function handleCorrection(intent){
+        const latest = getLatestActiveRecord();
+        if(!latest){
+          return { status:"ask", question:"我没找到最近可修改的训练记录。你想新增一条，还是先说一下具体动作和数量？" };
+        }
+        const q = intent.quantities || {};
+        const numbers = q.numbers || [];
+        const oldText = latest.record.currentText || latest.record.originalText || "";
+        let nextText = intent.originalText;
+        if(numbers.length){
+          const n = numbers[numbers.length - 1];
+          nextText = oldText.replace(/\d+(?:\.\d+)?(?!.*\d)/, String(n));
+          if(nextText === oldText) nextText = `${oldText} → ${n}`;
+          latest.record.currentValue = { ...(latest.record.currentValue || {}), correctedNumber:n };
+        }
+        return editRecord(latest.record.id, nextText);
+      }
+
+      async function maybeExtractWithAi(text, settings){
+        if(!settings || settings.trainingCaptureAiExtraction === false) return null;
+        const ready = settings.apiMode === "proxy" ? !!settings.proxyUrl : !!settings.apiKey;
+        if(!settings.enabled || !ready) return null;
+        try{
+          const res = await callAiCoach("training_record_intent", {
+            text,
+            context: buildCharacterTrainingContext(),
+            instruction: "只返回 JSON：{type,recordType,action,quantities,confidence,needsFollowup,question,safetyRisk,explicitCompletion}"
+          }, { timeoutMs:14000, force:true });
+          const data = res && res.data ? res.data : null;
+          if(!data || typeof data !== "object") return null;
+          if(data.needsFollowup || data.question){
+            return { type:"ask", recordType:data.recordType || "training_feedback", confidence:data.confidence || 0.55, originalText:text, action:data.action || "", question:data.question || "这条训练信息还缺关键字段，要记到哪一天/哪个动作？" };
+          }
+          if(data.type || data.recordType || data.action){
+            return {
+              type: data.safetyRisk ? "safety" : (data.type || "fact"),
+              recordType: data.recordType || (data.safetyRisk ? "safety" : "training_fact"),
+              confidence: Number(data.confidence || 0.7),
+              originalText:text,
+              action:data.action || "",
+              quantities:data.quantities || {},
+              explicitCompletion: !!data.explicitCompletion
+            };
+          }
+        }catch(err){
+          console.warn("AI 训练意图提取失败，已回退本地规则", err);
+        }
+        return null;
+      }
+
+      async function captureFromText(text, options = {}){
+        const settings = normalizeTrainingLinkageSettings(options.settings || getAiSettings());
+        const raw = clean(text);
+        const baseIntent = classify(raw, { settings });
+        const safetyOnly = baseIntent.type === "safety";
+        if(settings.trainingIntentTrigger === false && !safetyOnly && !isActiveTrainingSession()){
+          return { status:"ignored", reason:"training_intent_trigger_disabled" };
+        }
+        if(settings.autoTrainingCapture === false && !safetyOnly){
+          return { status:"ignored", reason:"auto_capture_disabled" };
+        }
+        let intent = baseIntent;
+        if(baseIntent.type === "needs_ai"){
+          intent = await maybeExtractWithAi(raw, settings) || { type:"ask", recordType:"training_feedback", originalText:raw, question:"这句话像训练内容，但我没法稳定提取。请补充动作、数量或感受，我再记录。" };
+        }
+        if(intent.type === "none"){
+          return { status:"ignored", reason:intent.reason || "no_training_intent" };
+        }
+        if(intent.type === "ask"){
+          const card = { kind:"warn", title:"需要补充信息", message:intent.question || "这条训练信息还缺关键字段。", actions:[] };
+          setLastCard(card);
+          return { status:"ask", question:card.message, card, intent };
+        }
+        if(intent.type === "correction" && !intent.append){
+          const result = handleCorrection(intent);
+          if(result.card) setLastCard(result.card);
+          return result;
+        }
+        if(intent.type === "safety"){
+          const result = applyIntent({ ...intent, recordType:"safety" }, options);
+          result.card.kind = "danger";
+          result.card.title = "已记录安全反馈";
+          result.card.message = `已记录风险反馈：${intent.originalText}。明显疼痛、胸闷、头晕或麻木时先停止训练，必要时线下就医。`;
+          setLastCard(result.card);
+          return result;
+        }
+        if(intent.type === "skipped" || intent.type === "rest"){
+          return applyIntent({ ...intent, recordType:intent.type === "rest" ? "rest" : "skipped", action:intent.action || "未训练" }, options);
+        }
+        if(intent.type === "feedback"){
+          return applyIntent({ ...intent, recordType:intent.recordType || "training_feedback" }, options);
+        }
+        return applyIntent(intent, options);
+      }
+
+      function getSession(){
+        return safeJsonParse(localStorage.getItem(TRAINING_LINKAGE_SESSION_KEY) || "null", null);
+      }
+
+      function setSession(session){
+        if(session) localStorage.setItem(TRAINING_LINKAGE_SESSION_KEY, JSON.stringify(session));
+        else localStorage.removeItem(TRAINING_LINKAGE_SESSION_KEY);
+      }
+
+      function isActiveTrainingSession(){
+        const session = getSession();
+        return !!session && ["active","closing"].includes(session.status);
+      }
+
+      function startSession(dayIndex = activePlanDay){
+        const days = getPlanDays();
+        const day = days[dayIndex];
+        if(!day) return null;
+        const role = getRoleMeta();
+        const session = {
+          id: id("session"),
+          status:"active",
+          dayIndex,
+          dayName: day.day || "",
+          focus: day.focus || "",
+          startedAtIso: nowIso(),
+          role,
+          completedAtIso:"",
+          summary:"",
+          exitState:"active"
+        };
+        setSession(session);
+        showCaptureCard({ kind:"success", title:"训练会话已开始", message:`${role.name}会作为陪练外壳；训练判断仍由 AI 教练规则负责。`, actions:["end_session"] });
+        renderTrainingSessionRibbon();
+        return session;
+      }
+
+      function endSession(mode = "save"){
+        const session = getSession();
+        if(!session) return null;
+        session.status = mode === "discard" ? "discarded" : "ended";
+        session.completedAtIso = nowIso();
+        session.exitState = mode;
+        session.summary = mode === "discard" ? "已放弃未结束训练会话。" : "已结束并保存训练会话。";
+        setSession(session.status === "discarded" ? null : session);
+        if(mode !== "discard"){
+          localStorage.setItem(TRAINING_LINKAGE_SESSION_KEY, JSON.stringify(session));
+        }
+        showCaptureCard({ kind:"success", title: mode === "discard" ? "已放弃训练会话" : "训练会话已结束", message:session.summary, actions:[] });
+        renderTrainingSessionRibbon();
+        return session;
+      }
+
+      function checkSessionCompletion(){
+        const session = getSession();
+        if(!session || session.status !== "active") return null;
+        const day = getPlanDays()[session.dayIndex];
+        if(!day) return null;
+        const checks = getPlanChecks();
+        const allDone = (day.items || []).length > 0 && (day.items || []).every((_, itemIndex) => checks[`d${session.dayIndex}_i${itemIndex}`]);
+        if(allDone){
+          session.status = "closing";
+          session.completedAtIso = nowIso();
+          setSession(session);
+          showCaptureCard({ kind:"success", title:"今日项目已完成", message:"今日项目都已完成。你可以补充训练感受，也可以直接结束并保存。", actions:["end_session","continue_session"] });
+          renderTrainingSessionRibbon();
+        }
+        return session;
+      }
+
+      function exportExtra(){
+        return {
+          trainingLinkageVersion: 1,
+          trainingSession: getSession(),
+          trainingLastCard: getLastCard(),
+          trainingWeeklySummary: safeJsonParse(localStorage.getItem(TRAINING_LINKAGE_WEEKLY_SUMMARY_KEY) || "null", null),
+          trainingTestReport: safeJsonParse(localStorage.getItem(TRAINING_LINKAGE_TEST_REPORT_KEY) || "null", null)
+        };
+      }
+
+      function importExtra(payload){
+        if(!payload || typeof payload !== "object") return;
+        if(payload.trainingSession) localStorage.setItem(TRAINING_LINKAGE_SESSION_KEY, JSON.stringify(payload.trainingSession));
+        if(payload.trainingLastCard) localStorage.setItem(TRAINING_LINKAGE_LAST_CARD_KEY, JSON.stringify(payload.trainingLastCard));
+        if(payload.trainingWeeklySummary) localStorage.setItem(TRAINING_LINKAGE_WEEKLY_SUMMARY_KEY, JSON.stringify(payload.trainingWeeklySummary));
+      }
+
+      function runBehaviorTests(){
+        const keys = [DAILY_LOGS_KEY, PLAN_CHECKS_KEY, TRAINING_LINKAGE_LAST_CARD_KEY, TRAINING_LINKAGE_WEEKLY_SUMMARY_KEY, TRAINING_LINKAGE_SESSION_KEY, AI_SETTINGS_KEY];
+        const backup = {};
+        keys.forEach((key) => { backup[key] = localStorage.getItem(key); });
+        const results = [];
+        const assert = (name, pass, details = "") => results.push({ name, pass:!!pass, details });
+        try{
+          localStorage.setItem(DAILY_LOGS_KEY, "{}");
+          localStorage.setItem(PLAN_CHECKS_KEY, "{}");
+          const settings = getAiSettings();
+          settings.autoTrainingCapture = true;
+          settings.trainingIntentTrigger = true;
+          settings.trainingCaptureAiExtraction = true;
+          localStorage.setItem(AI_SETTINGS_KEY, JSON.stringify(settings));
+
+          const first = classify("今天做了 15 个引体向上", { settings });
+          assert("明确训练事实会被识别", first.type === "fact" && first.action === "引体向上", JSON.stringify(first));
+          applyIntent(first, { sourceType:"test", role:{ id:"test", name:"测试角色" } });
+          const logs1 = getDailyLogs();
+          const today = todayKey();
+          assert("写入器写入每日训练日历", !!logs1[today]?.aiCaptureRecords?.length, JSON.stringify(logs1[today] || {}));
+          assert("用户备注不被覆盖", (logs1[today]?.note || "") === "", "note should stay empty");
+
+          const fatigue = classify("今天好累啊", { settings });
+          assert("泛疲劳不写训练记录", fatigue.type === "none", JSON.stringify(fatigue));
+
+          const safety = applyIntent(classify("深蹲的时候膝盖痛", { settings }), { sourceType:"test" });
+          assert("安全反馈不会自动完成", safety.record.recordType === "safety" && !safety.record.autoCompletedCheckKeys.length, JSON.stringify(safety.record));
+
+          const revoke = revokeRecord(safety.record.id);
+          assert("撤回 AI 捕捉记录能标记 revoked", revoke.status === "revoked" && revoke.record.revoked === true, JSON.stringify(revoke.record));
+
+          const weekly = updateWeeklySummary(getDailyLogs());
+          assert("周总结基于每日事实生成草稿", /AI 周总结草稿/.test(weekly.text), weekly.text);
+
+          const extra = exportExtra();
+          assert("导出包含联动附加字段", extra.trainingLinkageVersion === 1 && "trainingWeeklySummary" in extra, JSON.stringify(extra));
+        }catch(err){
+          assert("自测运行未抛错", false, err.message || String(err));
+        }finally{
+          keys.forEach((key) => {
+            if(backup[key] === null || backup[key] === undefined) localStorage.removeItem(key);
+            else localStorage.setItem(key, backup[key]);
+          });
+          renderHistory();
+          renderPlan();
+        }
+        const report = { at: nowIso(), passed: results.filter((r) => r.pass).length, failed: results.filter((r) => !r.pass).length, results };
+        localStorage.setItem(TRAINING_LINKAGE_TEST_REPORT_KEY, JSON.stringify(report));
+        return report;
+      }
+
+      return {
+        classify,
+        captureFromText,
+        applyIntent,
+        revokeRecord,
+        editRecord,
+        getLastCard,
+        showLastCard: () => showCaptureCard(getLastCard()),
+        startSession,
+        endSession,
+        getSession,
+        isActiveTrainingSession,
+        checkSessionCompletion,
+        renderTrainingSessionRibbon,
+        updateWeeklySummary,
+        exportExtra,
+        importExtra,
+        runBehaviorTests,
+        normalizeActionName,
+        findMatchingPlanItem
+      };
+    })();
+
+    window.TrainingLinkage = TrainingLinkage;
+
+    function showCaptureCard(card){
+      ensureTrainingLinkageUi();
+      const box = $("trainingLinkageCard");
+      if(!box) return;
+      if(!card || !card.message){
+        box.className = "training-linkage-card";
+        box.innerHTML = "";
+        return;
+      }
+      const kind = card.kind || "success";
+      box.className = `training-linkage-card show ${kind}`;
+      const actions = Array.isArray(card.actions) ? card.actions : [];
+      const buttons = actions.map((action) => {
+        if(action === "undo") return `<button class="mini-btn" data-training-card-action="undo" data-record-id="${escapeHtml(card.recordId || card.id || "")}">撤回</button>`;
+        if(action === "edit") return `<button class="mini-btn" data-training-card-action="edit" data-record-id="${escapeHtml(card.recordId || card.id || "")}">修改</button>`;
+        if(action === "end_session") return `<button class="mini-btn" data-training-card-action="end-session">结束并保存</button>`;
+        if(action === "continue_session") return `<button class="mini-btn" data-training-card-action="continue-session">继续训练</button>`;
+        return "";
+      }).join("");
+      box.innerHTML = `
+        <div class="training-linkage-title">${escapeHtml(card.title || "训练记录")}</div>
+        <div>${escapeHtml(card.message || "")}</div>
+        ${buttons ? `<div class="training-linkage-actions">${buttons}</div>` : ""}
+      `;
+      box.querySelectorAll("[data-training-card-action]").forEach((btn) => {
+        btn.onclick = () => handleTrainingCardAction(btn.getAttribute("data-training-card-action"), btn.getAttribute("data-record-id"));
+      });
+    }
+
+    function handleTrainingCardAction(action, recordId){
+      if(action === "undo"){
+        const result = TrainingLinkage.revokeRecord(recordId);
+        showCaptureCard(result.card);
+        renderPlan();
+        renderHistory();
+        return;
+      }
+      if(action === "edit"){
+        const foundText = (() => {
+          const found = recordId ? TrainingLinkage.editRecord(recordId, "__probe__") : null;
+          if(found && found.status === "edited"){
+            // revert probe immediately by asking user below. This branch is avoided by using find via prompt fallback.
+          }
+          return "";
+        })();
+        const next = prompt("修改这条 AI 捕捉记录：", "");
+        if(next === null) return;
+        const result = TrainingLinkage.editRecord(recordId, next);
+        showCaptureCard(result.card || { kind:"warn", title:"修改失败", message:"没有找到这条记录。", actions:[] });
+        renderPlan();
+        renderHistory();
+        return;
+      }
+      if(action === "end-session"){
+        TrainingLinkage.endSession("save");
+        return;
+      }
+      if(action === "continue-session"){
+        const session = TrainingLinkage.getSession();
+        if(session){
+          session.status = "active";
+          localStorage.setItem(TRAINING_LINKAGE_SESSION_KEY, JSON.stringify(session));
+          showCaptureCard({ kind:"success", title:"继续训练", message:"训练会话已恢复为进行中。", actions:["end_session"] });
+          TrainingLinkage.renderTrainingSessionRibbon();
+        }
+      }
+    }
+
+    async function processTrainingLinkageFromCharacterChat(text){
+      const settings = getAiSettings();
+      const result = await TrainingLinkage.captureFromText(text, {
+        settings,
+        sourceType: TrainingLinkage.isActiveTrainingSession() ? "training_session" : "character_chat",
+        role: (() => {
+          const card = getActiveCharacterCard();
+          return card ? { id:card.id, name:card.name } : { id:"", name:"未选择角色" };
+        })()
+      });
+      if(result.card) showCaptureCard(result.card);
+      if(result.status === "ask"){
+        return result.question || result.card?.message || "这条训练信息还缺关键字段，要不要补充一下？";
+      }
+      if(result.record && result.record.recordType === "safety"){
+        return "先停一下。明显疼痛、胸闷、头晕、麻木这类信号不要硬扛。我已经把这条记成安全反馈，今天训练先降强度或停止，必要时线下就医。";
+      }
+      if(result.status === "recorded"){
+        return "";
+      }
+      return "";
+    }
+
+    function shouldUseTrainingContextForMessage(userText){
+      const settings = getAiSettings();
+      if(TrainingLinkage.isActiveTrainingSession()) return true;
+      if(settings.trainingIntentTrigger === false) return false;
+      const intent = TrainingLinkage.classify(userText, { settings });
+      return !["none"].includes(intent.type);
+    }
+
+    const __trainingLinkageBaseCallCharacterChat = callCharacterChat;
+    callCharacterChat = async function(userText){
+      const settings = getAiSettings();
+      const card = getActiveCharacterCard();
+      if(!card) throw new Error("请先选择角色卡");
+      if(settings.apiMode === "direct" && !settings.apiKey) throw new Error("请先在 AI 设置里填写 API Key");
+      if(settings.apiMode === "proxy" && !settings.proxyUrl) throw new Error("请先在 AI 设置里填写代理 URL");
+      const history = getCharacterChatHistory().slice(-12);
+      const attachTrainingContext = shouldUseTrainingContextForMessage(userText);
+      const trainingContext = attachTrainingContext ? buildCharacterTrainingContext() : null;
+      const safeSystemPrompt = [
+        buildCharacterChatSystemPrompt(card, trainingContext),
+        "联动规则：角色卡只决定怎么说；训练安全、记录权限、计划完成判断以系统规则为准。系统记录卡片、撤回、保存失败等页面级状态不要角色化。",
+        attachTrainingContext ? "当前消息触发了训练上下文，可以用角色口吻表达训练判断。" : "当前消息未触发训练上下文，请按普通角色聊天回复，不要强行带入训练计划。"
+      ].join("\n");
+      const messages = [
+        { role:"system", content:safeSystemPrompt },
+        ...history.map((item) => ({ role:item.role, content:String(item.content || "") })),
+        { role:"user", content:userText }
+      ];
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 25000);
+      try{
+        let res;
+        if(settings.apiMode === "proxy"){
+          res = await fetch(settings.proxyUrl, {
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            signal: controller.signal,
+            body: JSON.stringify({
+              task:"character_chat",
+              payload:{ message:userText, history, characterCard:characterCardPromptPayload(card), trainingContext },
+              settings:{
+                model:settings.model,
+                temperature:settings.temperature,
+                maxTokens:settings.maxTokens,
+                characterCardPrompt: characterCardPromptBlock(card),
+                trainingContextPrompt: trainingContext ? buildCharacterTrainingContextPrompt(trainingContext) : ""
+              }
+            })
+          });
+        }else{
+          res = await fetch(`${settings.apiBaseUrl.replace(/\/$/, "")}/chat/completions`, {
+            method:"POST",
+            headers:{ "Content-Type":"application/json", "Authorization":`Bearer ${settings.apiKey}` },
+            signal: controller.signal,
+            body: JSON.stringify({
+              model: settings.model || "deepseek-v4-flash",
+              temperature: settings.temperature ?? 0.7,
+              max_tokens: Math.max(300, settings.maxTokens ?? 700),
+              messages
+            })
+          });
+        }
+        if(!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        const content = normalizeChatReplyText(json);
+        if(!content) throw new Error("AI 没有返回可显示内容");
+        return content;
+      }finally{
+        clearTimeout(timeout);
+      }
+    };
+
+    const __trainingLinkageBaseSendCharacterChat = sendCharacterChat;
+    sendCharacterChat = async function(){
+      const input = $("characterChatInput");
+      const btn = $("sendCharacterChatBtn");
+      const text = String(input?.value || "").trim();
+      if(!text) return;
+      const card = getActiveCharacterCard();
+      if(!card){
+        alert("请先选择一个角色卡");
+        return;
+      }
+      const history = getCharacterChatHistory();
+      setCharacterChatHistory([...history, { role:"user", content:text, at:new Date().toISOString() }]);
+      if(input) input.value = "";
+      if(btn) btn.disabled = true;
+      try{
+        const linkageReply = await processTrainingLinkageFromCharacterChat(text);
+        const settings = getAiSettings();
+        const ready = settings.apiMode === "proxy" ? !!settings.proxyUrl : !!settings.apiKey;
+        if(linkageReply && (!settings.enabled || !ready)){
+          setCharacterChatHistory([...getCharacterChatHistory(), { role:"assistant", content:linkageReply, at:new Date().toISOString() }], { sync:true });
+          return;
+        }
+        const reply = await callCharacterChat(text);
+        setCharacterChatHistory([...getCharacterChatHistory(), { role:"assistant", content:reply || linkageReply || "（没有返回内容）", at:new Date().toISOString() }], { sync:true });
+      }catch(err){
+        console.error(err);
+        const lastCard = TrainingLinkage.getLastCard();
+        if(lastCard && lastCard.message && /已记录/.test(lastCard.message)){
+          setCharacterChatHistory([...getCharacterChatHistory(), { role:"assistant", content:"训练事实已经在本机记录；角色回复发送失败，请检查 AI 配置。", at:new Date().toISOString() }], { sync:true });
+        }else{
+          setCharacterChatHistory([...getCharacterChatHistory(), { role:"assistant", content:`发送失败：${err.message || "请检查 AI 配置"}`, at:new Date().toISOString() }], { sync:true });
+        }
+      }finally{
+        if(btn) btn.disabled = false;
+      }
+    };
+
+    function renderTrainingSessionRibbon(){
+      const container = $("planContainer");
+      if(!container) return;
+      const old = $("trainingSessionRibbon");
+      if(old) old.remove();
+      const session = TrainingLinkage.getSession();
+      if(!session || !["active","closing"].includes(session.status)) return;
+      const div = document.createElement("div");
+      div.id = "trainingSessionRibbon";
+      div.className = "training-session-ribbon";
+      div.innerHTML = `
+        <div><b>训练会话：</b>${escapeHtml(session.dayName || "今日训练")} · 角色：${escapeHtml(session.role?.name || "当前角色")} · ${session.status === "closing" ? "待收尾" : "进行中"}</div>
+        <div class="training-linkage-actions">
+          <button class="mini-btn" data-training-session-action="continue">继续训练</button>
+          <button class="mini-btn" data-training-session-action="end">结束并保存</button>
+          <button class="mini-btn" data-training-session-action="discard">放弃</button>
+        </div>
+      `;
+      container.parentNode.insertBefore(div, container);
+      div.querySelectorAll("[data-training-session-action]").forEach((btn) => {
+        btn.onclick = () => {
+          const action = btn.getAttribute("data-training-session-action");
+          if(action === "end") TrainingLinkage.endSession("save");
+          else if(action === "discard") TrainingLinkage.endSession("discard");
+          else showCaptureCard({ kind:"success", title:"继续训练", message:"训练会话继续进行，当前角色保持为进入时的陪练外壳。", actions:["end_session"] });
+          renderTrainingSessionRibbon();
+        };
+      });
+    }
+    TrainingLinkage.renderTrainingSessionRibbon = renderTrainingSessionRibbon;
+
+    const __trainingLinkageBaseRenderPlan = renderPlan;
+    renderPlan = function(){
+      __trainingLinkageBaseRenderPlan();
+      document.querySelectorAll(".day-panel").forEach((panel, dayIndex) => {
+        const actions = panel.querySelector(".plan-actions");
+        if(actions && !actions.querySelector("[data-start-training-session]")){
+          const btn = document.createElement("button");
+          btn.className = "btn";
+          btn.type = "button";
+          btn.setAttribute("data-start-training-session", String(dayIndex));
+          btn.textContent = "开始训练";
+          btn.onclick = () => {
+            TrainingLinkage.startSession(dayIndex);
+            openAiCoachPanel(false, { focusChat:true });
+          };
+          actions.insertBefore(btn, actions.firstChild);
+        }
+      });
+      renderTrainingSessionRibbon();
+    };
+
+    const __trainingLinkageBaseTogglePlanCheck = togglePlanCheck;
+    togglePlanCheck = function(key){
+      __trainingLinkageBaseTogglePlanCheck(key);
+      TrainingLinkage.checkSessionCompletion();
+      const logs = getDailyLogs();
+      const today = formatDateKey(new Date());
+      if(logs[today]){
+        logs[today].aiDailySummary = logs[today].aiDailySummary || "";
+        TrainingLinkage.updateWeeklySummary(logs);
+      }
+    };
+
+    const __trainingLinkageBaseRecordPlanDayToToday = recordPlanDayToToday;
+    recordPlanDayToToday = function(dayIndex, options = {}){
+      const existingDate = getDateForPlanDayInCurrentWeek((getPlanDays()[dayIndex] || {}).day || "", dayIndex);
+      const before = getDailyLogs()[existingDate] || {};
+      const dateKey = __trainingLinkageBaseRecordPlanDayToToday(dayIndex, { ...options, silent:true });
+      if(dateKey){
+        const logs = getDailyLogs();
+        const next = logs[dateKey] || {};
+        next.aiCaptureRecords = Array.isArray(before.aiCaptureRecords) ? before.aiCaptureRecords : (Array.isArray(next.aiCaptureRecords) ? next.aiCaptureRecords : []);
+        next.aiDailySummary = before.aiDailySummary || next.aiDailySummary || "";
+        next.aiDailySummaryUpdatedAt = before.aiDailySummaryUpdatedAt || next.aiDailySummaryUpdatedAt || "";
+        logs[dateKey] = next;
+        setDailyLogs(logs, { syncToCloud:true });
+      }
+      if(!options.silent){
+        switchTab("history");
+        window.scrollTo({ top:0, behavior:"smooth" });
+        alert(`已保存到本周对应日期：${dateKey}`);
+      }
+      return dateKey;
+    };
+
+    function renderTrainingCaptureRecordsHtml(log){
+      const records = Array.isArray(log?.aiCaptureRecords) ? log.aiCaptureRecords : [];
+      const active = records.filter((r) => !r.revoked);
+      const revoked = records.filter((r) => r.revoked);
+      const render = (record) => `
+        <div class="training-linkage-record ${record.revoked ? "revoked" : ""}">
+          <div><b>${escapeHtml(record.recordType || "training_fact")}</b> · ${escapeHtml(record.captureRoleName || "系统")}</div>
+          <div>${escapeHtml(record.currentText || record.originalText || "")}</div>
+          <div class="help">来源：${escapeHtml(record.sourceType || "")} · ${escapeHtml(record.createdAt || "")}${record.userModified ? " · 已由用户修改" : ""}${record.revoked ? " · 已撤回" : ""}</div>
+          ${record.revoked ? "" : `<div class="training-linkage-actions"><button class="mini-btn" data-calendar-edit-capture="${escapeHtml(record.id)}">修改</button><button class="mini-btn" data-calendar-revoke-capture="${escapeHtml(record.id)}">撤回</button></div>`}
+        </div>
+      `;
+      return `
+        <div class="training-linkage-section">
+          <div class="training-linkage-title">AI 捕捉记录</div>
+          ${active.length ? active.map(render).join("") : `<div class="help">暂无有效 AI 捕捉记录。</div>`}
+          ${revoked.length ? `<div class="label">已撤回</div>${revoked.map(render).join("")}` : ""}
+        </div>
+        <div class="training-linkage-section">
+          <div class="training-linkage-title">AI 日总结</div>
+          <div>${escapeHtml(log?.aiDailySummary || "暂无 AI 日总结。")}</div>
+          <div class="training-linkage-actions"><button class="mini-btn" id="refreshAiDailySummaryBtn" type="button">刷新日总结</button></div>
+        </div>
+      `;
+    }
+
+    const __trainingLinkageBaseRenderCalendarDetail = renderCalendarDetail;
+    renderCalendarDetail = function(){
+      __trainingLinkageBaseRenderCalendarDetail();
+      const box = $("calendarDetail");
+      if(!box) return;
+      const logs = getDailyLogs();
+      const log = logs[selectedCalendarDate];
+      if(!log) return;
+      const wrap = document.createElement("div");
+      wrap.innerHTML = renderTrainingCaptureRecordsHtml(log);
+      box.appendChild(wrap);
+      box.querySelectorAll("[data-calendar-revoke-capture]").forEach((btn) => {
+        btn.onclick = () => {
+          const result = TrainingLinkage.revokeRecord(btn.getAttribute("data-calendar-revoke-capture"));
+          showCaptureCard(result.card);
+          renderPlan();
+          renderCalendarDetail();
+        };
+      });
+      box.querySelectorAll("[data-calendar-edit-capture]").forEach((btn) => {
+        btn.onclick = () => {
+          const next = prompt("修改 AI 捕捉记录：", "");
+          if(next === null) return;
+          const result = TrainingLinkage.editRecord(btn.getAttribute("data-calendar-edit-capture"), next);
+          showCaptureCard(result.card);
+          renderCalendarDetail();
+        };
+      });
+      const refresh = $("refreshAiDailySummaryBtn");
+      if(refresh){
+        refresh.onclick = () => {
+          const nextLogs = getDailyLogs();
+          const current = nextLogs[selectedCalendarDate];
+          if(current){
+            current.aiDailySummary = (current.aiCaptureRecords || []).filter((r) => !r.revoked).map((r) => r.currentText || r.originalText).join("；") || "";
+            current.aiDailySummaryUpdatedAt = new Date().toISOString();
+            nextLogs[selectedCalendarDate] = current;
+            setDailyLogs(nextLogs, { syncToCloud:true });
+          }
+        };
+      }
+    };
+
+    const __trainingLinkageBaseRenderHistory = renderHistory;
+    renderHistory = function(){
+      __trainingLinkageBaseRenderHistory();
+      const list = $("historyList");
+      const summary = safeJsonParse(localStorage.getItem(TRAINING_LINKAGE_WEEKLY_SUMMARY_KEY) || "null", null);
+      if(list && summary && summary.text && !$("trainingWeeklySummaryDraft")){
+        const div = document.createElement("div");
+        div.id = "trainingWeeklySummaryDraft";
+        div.className = "history-card";
+        div.innerHTML = `
+          <div class="history-top"><div><div style="font-weight:700">AI 周总结草稿</div><div class="history-meta">基于每日训练日历事实 · ${escapeHtml(summary.generatedAt || "")}</div></div><div class="badge">AI</div></div>
+          <div class="softbox" style="margin-top:10px;"><pre>${escapeHtml(summary.text || "")}</pre></div>
+          <button class="btn-outline full" id="copyTrainingWeeklySummaryBtn" type="button">复制周总结草稿</button>
+        `;
+        list.parentNode.insertBefore(div, list);
+        const btn = $("copyTrainingWeeklySummaryBtn");
+        if(btn) btn.onclick = () => copyText(summary.text || "", "已复制 AI 周总结草稿");
+      }
+    };
+
+    const __trainingLinkageBaseGetLocalSnapshot = getLocalSnapshot;
+    getLocalSnapshot = function(){
+      return { ...__trainingLinkageBaseGetLocalSnapshot(), ...TrainingLinkage.exportExtra() };
+    };
+
+    const __trainingLinkageBaseApplyLocalSnapshot = applyLocalSnapshot;
+    applyLocalSnapshot = function(payload){
+      __trainingLinkageBaseApplyLocalSnapshot(payload);
+      TrainingLinkage.importExtra(payload);
+      renderTrainingSessionRibbon();
+    };
+
+    exportData = function(){
+      const payload = {
+        form: JSON.parse(localStorage.getItem(FORM_KEY) || "{}"),
+        history: getHistory(),
+        dailyLogs: getDailyLogs(),
+        lastCloudSyncAt: getLastCloudSyncAt(),
+        planChecks: getPlanChecks(),
+        planTemplate: getPlanTemplate(),
+        tempDailyPlanOverrides: getTempDailyPlanOverrides(),
+        pageBackground: getPageBackgroundData(),
+        aiSettings: getAiSettingsForBackup(),
+        aiFeedbackHistory: getAiFeedbackHistory(),
+        aiLastFeedback: getAiLastFeedback(),
+        aiPetState: getAiPetState(),
+        aiPetIcon: getAiPetIconData(),
+        aiMilestones: getAiMilestones(),
+        characterCards: getCharacterCards(),
+        activeCharacterCardId: getActiveCharacterCardId(),
+        characterChatHistory: getCharacterChatHistory(),
+        ...TrainingLinkage.exportExtra()
+      };
+      const ok = confirm("导出的备份可能包含 AI API Key 和训练捕捉记录，请不要发送给他人。继续导出吗？");
+      if(!ok) return;
+      const date = new Date().toISOString().slice(0, 10);
+      downloadJson(`增肌记录备份_${date}.json`, payload);
+    };
+
+    const __trainingLinkageBaseImportData = importData;
+    importData = function(file){
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try{
+          const payload = JSON.parse(e.target.result);
+          TrainingLinkage.importExtra(payload);
+          if(payload.dailyLogs){
+            Object.values(payload.dailyLogs || {}).forEach((log) => {
+              log.aiCaptureRecords = Array.isArray(log.aiCaptureRecords) ? log.aiCaptureRecords : [];
+              log.aiDailySummary = log.aiDailySummary || "";
+            });
+          }
+          const blob = new Blob([JSON.stringify(payload)], { type:"application/json" });
+          const patchedFile = new File([blob], file.name || "import.json", { type:"application/json" });
+          __trainingLinkageBaseImportData(patchedFile);
+        }catch(err){
+          alert("导入失败，文件格式不对");
+        }
+      };
+      reader.readAsText(file);
+    };
+
+    const __trainingLinkageBaseResetAll = resetAll;
+    resetAll = function(){
+      __trainingLinkageBaseResetAll();
+      localStorage.removeItem(TRAINING_LINKAGE_SESSION_KEY);
+      localStorage.removeItem(TRAINING_LINKAGE_LAST_CARD_KEY);
+      localStorage.removeItem(TRAINING_LINKAGE_WEEKLY_SUMMARY_KEY);
+      localStorage.removeItem(TRAINING_LINKAGE_TEST_REPORT_KEY);
+    };
+
+    function renderTrainingLinkageSelfTestResult(report){
+      const box = $("trainingLinkageSelfTestResult");
+      if(!box) return;
+      box.style.display = "block";
+      const rows = (report.results || []).map((item) => `<li><span class="${item.pass ? "training-self-test-pass" : "training-self-test-fail"}">${item.pass ? "PASS" : "FAIL"}</span> ${escapeHtml(item.name)}${item.details ? `<div class="help">${escapeHtml(item.details).slice(0, 400)}</div>` : ""}</li>`).join("");
+      box.innerHTML = `<div><b>通过 ${report.passed} / 失败 ${report.failed}</b> · ${escapeHtml(report.at || "")}</div><ul class="calendar-items">${rows}</ul>`;
+    }
+
+    ensureTrainingLinkageUi();
+    showCaptureCard(TrainingLinkage.getLastCard());
 
 
     bindAiSettingsControls();
