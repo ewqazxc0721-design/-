@@ -742,6 +742,27 @@
       margin-top:14px;
     }
 
+    .daily-adjust-actions{
+      grid-template-columns:repeat(3,minmax(0,1fr));
+    }
+
+    .daily-adjust-actions .btn,
+    .daily-adjust-actions .btn-outline,
+    .daily-adjust-actions .btn-danger{
+      min-width:0;
+      width:100%;
+      padding-left:10px;
+      padding-right:10px;
+      white-space:normal;
+      line-height:1.25;
+    }
+
+    @media (max-width:480px){
+      .daily-adjust-actions{
+        grid-template-columns:1fr;
+      }
+    }
+
     .btn,.btn-outline,.btn-danger{
       position:relative;
       overflow:hidden;
@@ -7677,7 +7698,10 @@
           "今日调整必须真的改变训练：adjustedItems 不能完整照抄原 items；至少减少、替换或重排 1 个动作。",
           "adjustedItems 只放最终执行动作文本数组，不要放对象、解释、原始计划或 Markdown。",
           "message 用角色语气直接说明今天怎么练；不要说“输出 JSON”“任务要求”“角色卡”。",
-          "如果器材不足，必须按可用器材替换动作；如果睡眠差、能量累、明显酸痛或只有 20 分钟，必须降低训练量。"
+          "如果器材不足，必须按可用器材替换动作；如果睡眠差、能量累、明显酸痛或只有 20 分钟，必须降低训练量。",
+          "必须严格遵守 payload.state.gear：gear=只有弹力绳时，adjustedItems 里禁止出现哑铃、杠铃、单杠、引体向上、离心引体、dumbbell、barbell、pull-up；所有划船、弯举、推举、下拉都要改为弹力绳版本。",
+          "gear=只有哑铃时，adjustedItems 里禁止出现弹力绳、弹力带、阻力带、单杠、引体向上、离心引体；下拉/引体类改为哑铃划船类。",
+          "gear=无器械时，adjustedItems 里禁止出现哑铃、弹力绳、弹力带、阻力带、杠铃、单杠、引体向上；只能保留徒手训练、拉伸、核心训练。"
         ].join("\n"),
         weekly_analysis: "面向用户的字段保留角色口吻，但不要把推理过程、任务说明或 JSON 要求写进内容。",
         next_week_plan: "plan.days 必须是可执行的新计划；changes 说明具体改了什么，不要只返回“保留当前计划”。",
@@ -7863,6 +7887,113 @@
       return text;
     }
 
+    function getGearForbiddenPattern(gear){
+      const normalizedGear = String(gear || "").trim();
+      if(normalizedGear === "只有弹力绳"){
+        return /哑铃|杠铃|壶铃|单杠|引体向上|离心引体|dumbbell|barbell|kettlebell|pull[\s-]*up|chin[\s-]*up|db/i;
+      }
+      if(normalizedGear === "只有哑铃"){
+        return /弹力绳|弹力带|阻力带|拉力绳|单杠|引体向上|离心引体|band|resistance[\s-]*band|pull[\s-]*up|chin[\s-]*up/i;
+      }
+      if(normalizedGear === "无器械"){
+        return /哑铃|弹力绳|弹力带|阻力带|拉力绳|杠铃|壶铃|单杠|器械|引体向上|离心引体|dumbbell|barbell|kettlebell|band|resistance[\s-]*band|pull[\s-]*up|chin[\s-]*up|db/i;
+      }
+      return null;
+    }
+
+    function hasUnavailableGearForState(item, state = {}){
+      const pattern = getGearForbiddenPattern(state.gear);
+      return !!(pattern && pattern.test(String(item || "")));
+    }
+
+    function fallbackItemForGear(item, state = {}){
+      const gear = String(state.gear || "").trim();
+      const text = String(item || "");
+      if(!gear || gear === "完整") return text;
+      if(gear === "只有弹力绳"){
+        if(/卧推|俯卧撑|胸推|胸/.test(text)) return "弹力绳胸推 3组 × 12–15次";
+        if(/飞鸟|夹胸/.test(text)) return "弹力绳夹胸 3组 × 12–15次";
+        if(/肩推|推举/.test(text)) return "弹力绳肩推 3组 × 10–12次";
+        if(/侧平举|前平举/.test(text)) return "弹力绳侧平举 3组 × 15次";
+        if(/划船|背|引体向上|离心引体|下拉/.test(text)) return "弹力绳划船 4组 × 15次";
+        if(/面拉|反向飞鸟|后肩/.test(text)) return "弹力绳面拉 3组 × 15–20次";
+        if(/弯举|二头|锤式/.test(text)) return "弹力绳弯举 3组 × 12–15次";
+        if(/臂屈伸|三头|下压/.test(text)) return "弹力绳下压 3组 × 12–15次";
+        if(/深蹲|腿/.test(text)) return "弹力绳深蹲 3组 × 15次";
+        if(/硬拉|罗马尼亚/.test(text)) return "弹力绳罗马尼亚硬拉 3组 × 12次";
+        if(/提踵|小腿/.test(text)) return "弹力绳提踵 3组 × 15–20次";
+      }
+      if(gear === "只有哑铃"){
+        if(/下拉|引体向上|离心引体|划船/.test(text)) return "单臂哑铃划船 4组 × 每侧12次";
+        if(/面拉|反向飞鸟|后肩/.test(text)) return "俯身反向飞鸟 3组 × 15次";
+        if(/弯举|二头|锤式/.test(text)) return "哑铃弯举 3组 × 12次";
+        if(/臂屈伸|三头|下压/.test(text)) return "过顶哑铃臂屈伸 3组 × 12–15次";
+        if(/胸推|卧推|胸/.test(text)) return "哑铃地板卧推 3组 × 12–15次";
+        if(/深蹲|腿/.test(text)) return "哑铃杯式深蹲 3组 × 12–15次";
+        if(/硬拉|罗马尼亚/.test(text)) return "哑铃罗马尼亚硬拉 3组 × 12次";
+      }
+      if(gear === "无器械"){
+        if(/卧推|胸推|胸|俯卧撑/.test(text)) return "俯卧撑 3组 × 8–15次（保留 2 次余力）";
+        if(/肩推|推举/.test(text)) return "下犬式俯卧撑 3组 × 6–10次";
+        if(/划船|背|下拉|引体向上|离心引体/.test(text)) return "俯身 Y-T-W 3组 × 10次";
+        if(/侧平举|前平举|飞鸟|面拉|后肩/.test(text)) return "徒手肩部小幅侧平举 2组 × 20次";
+        if(/弯举|臂屈伸|二头|三头|锤式/.test(text)) return "窄距俯卧撑 2组 × 8–12次";
+        if(/深蹲|腿/.test(text)) return "徒手深蹲 3组 × 15–20次";
+        if(/硬拉|罗马尼亚/.test(text)) return "臀桥 3组 × 15次";
+        if(/提踵|小腿/.test(text)) return "徒手提踵 3组 × 20次";
+      }
+      return text;
+    }
+
+    function getSafeGearFallbackItems(state = {}, originalItems = []){
+      const gear = String(state.gear || "").trim();
+      if(gear === "只有弹力绳"){
+        return [
+          "弹力绳划船 4组 × 15次",
+          "弹力绳高位下拉 3组 × 12–15次",
+          "弹力绳面拉 3组 × 15–20次",
+          "弹力绳弯举 3组 × 12–15次"
+        ];
+      }
+      if(gear === "只有哑铃"){
+        return [
+          "单臂哑铃划船 4组 × 每侧12次",
+          "俯身反向飞鸟 3组 × 15次",
+          "哑铃弯举 3组 × 12次",
+          "过顶哑铃臂屈伸 3组 × 12–15次"
+        ];
+      }
+      if(gear === "无器械"){
+        return [
+          "俯身 Y-T-W 3组 × 10次",
+          "俯卧背部挺身 3组 × 12–15次",
+          "俯卧撑 3组 × 8–15次（保留 2 次余力）",
+          "平板支撑 3组 × 45秒"
+        ];
+      }
+      return normalizePlanItemsList(originalItems).slice(0, 4);
+    }
+
+    function sanitizeDailyAdjustItemsForGear(items, state = {}, originalItems = []){
+      const sourceItems = normalizePlanItemsList(items || []);
+      const sanitized = [];
+      const addSafe = (candidate) => {
+        let next = reduceTrainingVolumeText(adaptItemForGear(candidate, state), state);
+        if(hasUnavailableGearForState(next, state)){
+          next = reduceTrainingVolumeText(fallbackItemForGear(candidate, state), state);
+        }
+        if(!next || hasUnavailableGearForState(next, state)) return;
+        if(!sanitized.some((item) => item.replace(/\s+/g, "") === next.replace(/\s+/g, ""))){
+          sanitized.push(next);
+        }
+      };
+      sourceItems.forEach(addSafe);
+      if(!sanitized.length){
+        getSafeGearFallbackItems(state, originalItems).forEach(addSafe);
+      }
+      return normalizePlanItemsList(sanitized);
+    }
+
     function adaptItemForGear(item, state = {}){
       const gear = String(state.gear || "");
       let text = String(item || "");
@@ -7872,13 +8003,13 @@
         if(/哑铃飞鸟/.test(text)) return "宽距俯卧撑 2组 × 10–15次";
         if(/哑铃肩推|肩推/.test(text)) return "下犬式俯卧撑 3组 × 6–10次";
         if(/侧平举|前平举/.test(text)) return "徒手肩部小幅侧平举 2组 × 20次";
-        if(/单臂哑铃划船|俯身双哑铃划船|弹力绳划船/.test(text)) return "俯身 Y-T-W 3组 × 10次";
+        if(/单臂哑铃划船|俯身双哑铃划船|哑铃划船|弹力绳划船|划船/.test(text)) return "俯身 Y-T-W 3组 × 10次";
         if(/弹力绳高位下拉|弹力绳下拉|引体向上|离心引体/.test(text)) return "俯卧背部挺身 3组 × 12–15次";
         if(/弯举|臂屈伸/.test(text)) return "窄距俯卧撑 2组 × 8–12次";
         if(/杯式深蹲|罗马尼亚硬拉/.test(text)) return "徒手深蹲 3组 × 15–20次";
       }
       if(gear === "只有哑铃"){
-        if(/弹力绳高位下拉|弹力绳下拉/.test(text)) return "单臂哑铃划船 4组 × 每侧12次";
+        if(/弹力绳高位下拉|弹力绳下拉|高位下拉|引体向上|离心引体/.test(text)) return "单臂哑铃划船 4组 × 每侧12次";
         if(/弹力绳划船/.test(text)) return "俯身双哑铃划船 3组 × 12–15次";
         if(/弹力绳面拉/.test(text)) return "俯身反向飞鸟 3组 × 15次";
         if(/引体向上|离心引体/.test(text)) return "单臂哑铃划船 4组 × 每侧12次";
@@ -7886,13 +8017,15 @@
       if(gear === "只有弹力绳"){
         if(/哑铃地板卧推|哑铃卧推/.test(text)) return "弹力绳胸推 4组 × 12–15次";
         if(/哑铃飞鸟/.test(text)) return "弹力绳夹胸 3组 × 12–15次";
-        if(/哑铃肩推/.test(text)) return "弹力绳肩推 3组 × 10–12次";
+        if(/哑铃肩推|肩推/.test(text)) return "弹力绳肩推 3组 × 10–12次";
         if(/侧平举|前平举/.test(text)) return "弹力绳侧平举 3组 × 15次";
-        if(/单臂哑铃划船|俯身双哑铃划船/.test(text)) return "弹力绳划船 4组 × 15次";
-        if(/弯举/.test(text)) return "弹力绳弯举 3组 × 12–15次";
+        if(/引体向上|离心引体|高位下拉|下拉/.test(text)) return "弹力绳高位下拉 3组 × 12–15次";
+        if(/单臂哑铃划船|俯身双哑铃划船|哑铃划船|划船/.test(text)) return "弹力绳划船 4组 × 15次";
+        if(/俯身反向飞鸟|反向飞鸟|面拉/.test(text)) return "弹力绳面拉 3组 × 15–20次";
+        if(/弯举|锤式/.test(text)) return "弹力绳弯举 3组 × 12–15次";
         if(/臂屈伸/.test(text)) return "弹力绳下压 3组 × 12–15次";
         if(/杯式深蹲/.test(text)) return "弹力绳深蹲 3组 × 15次";
-        if(/罗马尼亚硬拉/.test(text)) return "弹力绳罗马尼亚硬拉 3组 × 12次";
+        if(/罗马尼亚硬拉|硬拉/.test(text)) return "弹力绳罗马尼亚硬拉 3组 × 12次";
       }
       return text;
     }
@@ -7905,9 +8038,7 @@
         : needsReduction
           ? Math.max(3, Math.ceil(original.length * 0.65))
           : Math.max(3, Math.min(original.length, Math.ceil(original.length * 0.8)));
-      let adjusted = original
-        .map((item) => reduceTrainingVolumeText(adaptItemForGear(item, state), state))
-        .filter(Boolean);
+      let adjusted = sanitizeDailyAdjustItemsForGear(original, state, original);
       adjusted = normalizePlanItemsList(adjusted).slice(0, Math.max(1, targetCount));
       if(planItemsSignature(adjusted) === planItemsSignature(original)){
         adjusted = normalizePlanItemsList([
@@ -7938,16 +8069,23 @@
       next.title = String(next.title || "今日训练调整");
       next.message = cleanAiDisplayText(next.message || next.coach_message || fallback.message || "");
       next.mode = String(next.mode || fallback.mode || "adjusted");
-      next.adjustedItems = normalizePlanItemsList(next.adjustedItems || next.items || next.planItems);
+      const rawAdjustedItems = normalizePlanItemsList(next.adjustedItems || next.items || next.planItems);
+      next.adjustedItems = sanitizeDailyAdjustItemsForGear(rawAdjustedItems, payload.state || {}, day.items);
       next.warnings = Array.isArray(next.warnings) ? next.warnings.map((item) => cleanAiDisplayText(normalizePlanItemText(item))).filter(Boolean) : [];
       next.recovery = cleanAiDisplayText(next.recovery || "");
+      const removedByGearGuard = rawAdjustedItems.length && next.adjustedItems.length !== rawAdjustedItems.length;
+      const stillHasUnavailableGear = next.adjustedItems.some((item) => hasUnavailableGearForState(item, payload.state || {}));
 
-      if(!next.adjustedItems.length || planItemsSignature(next.adjustedItems) === planItemsSignature(day.items)){
+      if(!next.adjustedItems.length || stillHasUnavailableGear || planItemsSignature(next.adjustedItems) === planItemsSignature(day.items)){
         next.adjustedItems = fallback.adjustedItems;
         next.mode = fallback.mode;
         next.message = next.message || fallback.message;
         next.warnings = Array.from(new Set([...(next.warnings || []), ...fallback.warnings]));
         next.recovery = next.recovery || fallback.recovery;
+      }
+      if(removedByGearGuard || String(payload.state?.gear || "") !== "完整"){
+        const gearText = payload.state?.gear ? `已按“${payload.state.gear}”过滤不可用动作。` : "已按器材限制过滤不可用动作。";
+        next.warnings = Array.from(new Set([gearText, ...(next.warnings || [])]));
       }
       return next;
     }
@@ -10847,7 +10985,7 @@
       const box = $("aiDailyAdjustResult");
       if(box){
         box.style.display = "block";
-        box.innerHTML = renderAiObject(latestAiDailyAdjust) + `<div class="btns"><button class="btn-outline" id="copyDailyAdjustBtn" type="button">复制建议</button><button class="btn" id="useDailyAdjustBtn" type="button">临时使用此计划</button><button class="btn-outline" id="recordDailyAdjustBtn" type="button">使用并记到日历</button></div>`;
+        box.innerHTML = renderAiObject(latestAiDailyAdjust) + `<div class="btns daily-adjust-actions"><button class="btn-outline" id="copyDailyAdjustBtn" type="button">复制建议</button><button class="btn" id="useDailyAdjustBtn" type="button">临时使用此计划</button><button class="btn-outline" id="recordDailyAdjustBtn" type="button">使用并记到日历</button></div>`;
         const copyBtn = $("copyDailyAdjustBtn");
         if(copyBtn) copyBtn.onclick = () => copyText(JSON.stringify(latestAiDailyAdjust, null, 2), "已复制今日调整建议");
         const useBtn = $("useDailyAdjustBtn");
