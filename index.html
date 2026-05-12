@@ -2269,6 +2269,67 @@
       min-height:34px;
       padding:7px 12px;
       font-size:12px;
+      flex:0 0 auto;
+    }
+
+    .training-capture-recent-entry{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:18px;
+      background:rgba(255,255,255,.66);
+      border:1px solid rgba(148,163,184,.18);
+      box-shadow:0 8px 18px rgba(15,23,42,.06), inset 0 1px 0 rgba(255,255,255,.72);
+      color:#0f172a;
+    }
+
+    .training-capture-recent-text{
+      min-width:0;
+      font-size:13px;
+      line-height:1.45;
+      color:#334155;
+    }
+
+    .training-capture-recent-text b{
+      display:block;
+      color:#0f172a;
+      font-size:13px;
+    }
+
+    .training-capture-recent-actions{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex:0 0 auto;
+    }
+
+    .training-capture-recent-actions button{
+      min-height:34px;
+      padding:7px 11px;
+      font-size:12px;
+    }
+
+    @media (max-width:480px){
+      .training-capture-card-actions,
+      .training-capture-recent-entry,
+      .training-capture-recent-actions{
+        gap:7px;
+      }
+      .training-capture-recent-entry{
+        align-items:stretch;
+        flex-direction:column;
+      }
+      .training-capture-recent-actions{
+        display:grid;
+        grid-template-columns:repeat(3, minmax(0,1fr));
+      }
+      .training-capture-recent-actions button,
+      .training-capture-card-actions button{
+        width:100%;
+        min-height:38px;
+      }
     }
 
     .ai-coach-panel-modal{
@@ -4510,6 +4571,8 @@
     const ACTIVE_CHARACTER_CARD_ID_KEY = "gain-active-character-card-id";
     const CHARACTER_CHAT_HISTORY_KEY = "gain-character-chat-history";
     const TRAINING_CAPTURE_CARDS_KEY = "gain-training-capture-cards";
+    const TRAINING_CAPTURE_RECENT_KEY = "gain-training-capture-recent-session";
+    const TRAINING_CAPTURE_PENDING_KEY = "gain-training-capture-pending-context";
     const AI_WEEKLY_SUMMARIES_KEY = "gain-ai-weekly-summaries";
     const PLAN_CHECK_META_KEY = "gain-plan-check-meta";
     const TRAINING_SESSION_KEY = "gain-training-session";
@@ -5231,6 +5294,17 @@
       const previousId = getActiveCharacterCardId();
       const exists = id && getCharacterCards().some((card) => card.id === id);
       const nextId = exists ? id : "";
+      if(previousId !== nextId && isOpenTrainingSession(getTrainingSession())){
+        pushTrainingCaptureCard({
+          kind:"warn",
+          title:"先结束当前训练会话",
+          message:"训练会话绑定进入时的角色。要切换角色，请先结束并保存或放弃当前训练会话。",
+          trainingSessionActions:true,
+          canUndo:false,
+          canModify:false
+        });
+        return;
+      }
       if(exists){
         localStorage.setItem(ACTIVE_CHARACTER_CARD_ID_KEY, id);
       }else{
@@ -5238,6 +5312,8 @@
       }
       if(previousId !== nextId){
         localStorage.removeItem(CHARACTER_CHAT_HISTORY_KEY);
+        clearTrainingCaptureRecentSession();
+        clearPendingTrainingCaptureContext();
       }
       renderCharacterCards();
       if(options.sync !== false) queueAutoSync("当前角色卡更新");
@@ -5967,22 +6043,47 @@
     function parseCaptureQuantity(text){
       const raw = String(text || "");
       const numberToken = "(\\d+(?:\\.\\d+)?|[一二两三四五六七八九十]+)";
-      const setsMatch = raw.match(new RegExp(`${numberToken}\\s*组`));
-      const eachRepsMatch = raw.match(new RegExp(`每组\\s*${numberToken}\\s*(?:个|次|reps?)?`, "i"));
-      const repsMatch = raw.match(new RegExp(`${numberToken}\\s*(?:个|次|下|reps?)`, "i"));
+      const quantity = {};
+      const setRegex = new RegExp(`${numberToken}\\s*组`);
+      const setsMatch = raw.match(setRegex);
+      const eachRepsMatch = raw.match(new RegExp(`每\\s*组\\s*${numberToken}\\s*(?:个|次|下|reps?)?`, "i"));
+      const bestSetMatch = raw.match(new RegExp(`(?:最高|最多|最佳|最好)(?:一组|单组)?[^\\d一二两三四五六七八九十]{0,8}${numberToken}\\s*(?:个|次|下|reps?)?`, "i"));
+      const totalPatterns = [
+        new RegExp(`(?:总共|总计|合计|累计|一共|总量|总次数)[^\\d一二两三四五六七八九十]{0,8}${numberToken}\\s*(?:个|次|下|reps?)?`, "i"),
+        new RegExp(`${numberToken}\\s*(?:个|次|下|reps?)?[^。！？；;，,]{0,12}(?:总共|总计|合计|累计|一共|总量|总次数)`, "i")
+      ];
       const durationMatch = raw.match(/(\d+(?:\.\d+)?)\s*(分钟|min|秒|s)(?:\b|$)?/i);
       const weightMatch = raw.match(/(\d+(?:\.\d+)?)\s*(?:kg|公斤|千克)/i);
-      const bestSetMatch = raw.match(new RegExp(`最高(?:一组)?[^\\d一二两三四五六七八九十]*${numberToken}`));
-      const quantity = {};
       if(setsMatch) quantity.sets = parseChineseTrainingNumber(setsMatch[1]);
       if(eachRepsMatch) quantity.repsPerSet = parseChineseTrainingNumber(eachRepsMatch[1]);
-      if(repsMatch) quantity.reps = parseChineseTrainingNumber(repsMatch[1]);
+      for(const pattern of totalPatterns){
+        const totalMatch = raw.match(pattern);
+        if(totalMatch){
+          quantity.reps = parseChineseTrainingNumber(totalMatch[1]);
+          break;
+        }
+      }
+      if(quantity.reps == null){
+        const plainReps = [...raw.matchAll(new RegExp(`${numberToken}\\s*(?:个|次|下|reps?)`, "gi"))]
+          .map((m) => ({ value:parseChineseTrainingNumber(m[1]), index:m.index || 0, text:m[0] }))
+          .filter((m) => Number.isFinite(m.value));
+        const excluded = [];
+        if(bestSetMatch) excluded.push(bestSetMatch.index || 0);
+        if(eachRepsMatch) excluded.push(eachRepsMatch.index || 0);
+        const candidate = plainReps.find((m) => !excluded.some((idx) => Math.abs(m.index - idx) <= 6));
+        if(candidate) quantity.reps = candidate.value;
+      }
       if(durationMatch){
         quantity.duration = Number(durationMatch[1]);
         quantity.durationUnit = /秒|s/i.test(durationMatch[2]) ? "秒" : "分钟";
       }
       if(weightMatch) quantity.weightKg = Number(weightMatch[1]);
       if(bestSetMatch) quantity.bestSetReps = parseChineseTrainingNumber(bestSetMatch[1]);
+      if(quantity.bestSetReps && quantity.reps && quantity.bestSetReps > quantity.reps){
+        const maybeTotal = quantity.bestSetReps;
+        quantity.bestSetReps = quantity.reps;
+        quantity.reps = maybeTotal;
+      }
       Object.keys(quantity).forEach((key) => {
         if(quantity[key] == null || Number.isNaN(quantity[key])) delete quantity[key];
       });
@@ -6006,6 +6107,136 @@
 
     function hasExplicitTrainingCaptureDate(text){
       return /今天|刚刚|昨天|昨晚|前天|上周|周[一二三四五六日天]/.test(String(text || ""));
+    }
+
+    function hasTrainingCaptureQuantity(value = {}){
+      return !!(value.reps || value.bestSetReps || value.sets || value.repsPerSet || value.duration || value.weightKg || value.sleep || value.fatigueScore);
+    }
+
+    function shouldAskForTrainingQuantity(recordType, value = {}, text = ""){
+      if(recordType !== "training_fact") return false;
+      const raw = String(text || value.text || "");
+      if(/做完|完成|练完|打卡了|全做完|没练|跳过|休息/.test(raw)) return false;
+      if(value.duration || value.sets || value.reps || value.repsPerSet || value.bestSetReps || value.weightKg) return false;
+      return !!value.exercise;
+    }
+
+    function mergeCaptureValues(base = {}, patch = {}){
+      const merged = { ...(base || {}), ...(patch || {}) };
+      const texts = [base.text, patch.text].filter(Boolean).map(String);
+      merged.text = texts.length ? Array.from(new Set(texts)).join("；") : (merged.text || "");
+      merged.exercise = patch.exercise || base.exercise || "";
+      ["reps","bestSetReps","sets","repsPerSet","duration","durationUnit","weightKg","sleep","fatigueScore","status"].forEach((key) => {
+        if(patch[key] == null && base[key] != null) merged[key] = base[key];
+      });
+      if(merged.bestSetReps && merged.reps && merged.bestSetReps > merged.reps){
+        const maybeTotal = merged.bestSetReps;
+        merged.bestSetReps = merged.reps;
+        merged.reps = maybeTotal;
+      }
+      return merged;
+    }
+
+    function getCurrentCaptureRoleKey(){
+      const card = getActiveCharacterCard();
+      return card?.id || "__no_character__";
+    }
+
+    function getPendingTrainingCaptureContext(){
+      const ctx = safeJsonParse(localStorage.getItem(TRAINING_CAPTURE_PENDING_KEY) || "null", null);
+      if(!ctx || typeof ctx !== "object") return null;
+      if(ctx.roleKey && ctx.roleKey !== getCurrentCaptureRoleKey()) return null;
+      const ageMs = Date.now() - Date.parse(ctx.updatedAt || ctx.createdAt || "");
+      if(!Number.isFinite(ageMs) || ageMs > 5 * 60 * 1000){
+        clearPendingTrainingCaptureContext();
+        return null;
+      }
+      return ctx;
+    }
+
+    function setPendingTrainingCaptureContext(ctx){
+      if(!ctx){
+        clearPendingTrainingCaptureContext();
+        return null;
+      }
+      const next = {
+        id: ctx.id || `pending_capture_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        roleKey:getCurrentCaptureRoleKey(),
+        createdAt:ctx.createdAt || new Date().toISOString(),
+        updatedAt:new Date().toISOString(),
+        ...ctx
+      };
+      localStorage.setItem(TRAINING_CAPTURE_PENDING_KEY, JSON.stringify(next));
+      return next;
+    }
+
+    function clearPendingTrainingCaptureContext(){
+      localStorage.removeItem(TRAINING_CAPTURE_PENDING_KEY);
+    }
+
+    function buildMergedIntentFromPending(pending, text, options = {}){
+      if(!pending) return null;
+      const incoming = extractLocalTrainingCaptureIntent(text, { ...options, skipPendingMerge:true });
+      const hasIncomingData = incoming?.action === "write" || /^(一共|总共|总计|合计|累计|最高|最多|最佳|每组|\d|[一二两三四五六七八九十])/.test(String(text || "").trim());
+      if(!hasIncomingData && incoming?.action !== "follow_up") return null;
+      const incomingValue = incoming?.action === "write" ? incoming.currentValue : buildCaptureCurrentValue(text, pending.recordType || "training_fact", { canonical:pending.currentValue?.exercise || "" });
+      const mergedValue = mergeCaptureValues(pending.currentValue || {}, incomingValue || {});
+      if(!pending.date && incoming?.date) pending.date = incoming.date;
+      if(!mergedValue.exercise && !incomingValue.exercise) return null;
+      const recordType = pending.recordType || incoming?.recordType || "training_fact";
+      if(shouldAskForTrainingQuantity(recordType, mergedValue, mergedValue.text)){
+        setPendingTrainingCaptureContext({ ...pending, currentValue:mergedValue, recordType, date:pending.date || incoming?.date });
+        return {
+          action:"follow_up",
+          reason:"pending_missing_quantity",
+          prompt:`可以，我先不乱记。${mergedValue.exercise ? `${mergedValue.exercise} ` : ""}一共多少个？最高一组几个？`
+        };
+      }
+      return {
+        action:"write",
+        date: pending.date || incoming?.date || resolveTrainingCaptureDate(mergedValue.text, options.now || new Date()),
+        sourceType: pending.sourceType || incoming?.sourceType || "character_chat",
+        trainingSessionId: pending.trainingSessionId || incoming?.trainingSessionId || "",
+        recordType,
+        currentValue:enrichCaptureValueWithMatchedPlan(mergedValue, { date:pending.date || incoming?.date, recordType }),
+        originalValue:{ ...(pending.originalValue || pending.currentValue || {}), ...(incoming?.originalValue || incomingValue || {}) },
+        originalText:[pending.originalText, text].filter(Boolean).join("\n"),
+        completedExplicit: !!(pending.completedExplicit || incoming?.completedExplicit),
+        confidence:"medium",
+        mergedFromPending:true
+      };
+    }
+
+    function getTrainingCaptureRecentSession(){
+      const rec = safeJsonParse(localStorage.getItem(TRAINING_CAPTURE_RECENT_KEY) || "null", null);
+      if(!rec || typeof rec !== "object") return { roleKey:getCurrentCaptureRoleKey(), records:[] };
+      if(rec.roleKey && rec.roleKey !== getCurrentCaptureRoleKey()) return { roleKey:getCurrentCaptureRoleKey(), records:[] };
+      return { roleKey:getCurrentCaptureRoleKey(), records:Array.isArray(rec.records) ? rec.records.slice(0, 8) : [] };
+    }
+
+    function setTrainingCaptureRecentSession(rec){
+      const safe = { roleKey:getCurrentCaptureRoleKey(), records:Array.isArray(rec?.records) ? rec.records.slice(0, 8) : [] };
+      localStorage.setItem(TRAINING_CAPTURE_RECENT_KEY, JSON.stringify(safe));
+      renderTrainingCaptureCards();
+      return safe;
+    }
+
+    function clearTrainingCaptureRecentSession(){
+      localStorage.removeItem(TRAINING_CAPTURE_RECENT_KEY);
+      renderTrainingCaptureCards();
+    }
+
+    function rememberTrainingCaptureRecord(record){
+      if(!record || !record.id) return;
+      const rec = getTrainingCaptureRecentSession();
+      const item = { recordId:record.id, date:record.date, summary:summarizeTrainingCaptureRecord(record), createdAt:new Date().toISOString() };
+      rec.records = [item, ...rec.records.filter((it) => it.recordId !== item.recordId)].slice(0, 8);
+      setTrainingCaptureRecentSession(rec);
+    }
+
+    function getLatestRecentTrainingCapture(){
+      const rec = getTrainingCaptureRecentSession();
+      return rec.records.find((item) => findTrainingCaptureRecord(item.recordId)?.record && !findTrainingCaptureRecord(item.recordId)?.record.revoked) || rec.records[0] || null;
     }
 
     function getActiveTrainingSessionForCapture(options = {}){
@@ -6067,6 +6298,11 @@
     }
 
     function extractLocalTrainingCaptureIntent(text, options = {}){
+      if(!options.skipPendingMerge){
+        const pending = getPendingTrainingCaptureContext();
+        const merged = buildMergedIntentFromPending(pending, text, options);
+        if(merged) return merged;
+      }
       const intent = classifyCharacterTrainingIntent(text, options);
       if(intent.action === "none" || intent.action === "no_record") return { action:intent.action, reason:intent.reason };
       if(intent.action === "follow_up"){
@@ -6096,7 +6332,21 @@
         { date, recordType }
       );
       const completedExplicit = /做完|完成|练完|打卡了|全做完/.test(String(text || ""));
-      const canWriteWithoutAi = !!(recordType !== "training_fact" || currentValue.exercise || currentValue.duration || currentValue.reps || currentValue.sets);
+      if(shouldAskForTrainingQuantity(recordType, currentValue, text)){
+        setPendingTrainingCaptureContext({
+          date,
+          sourceType: options.sourceType || (activeSession ? "training_session" : "character_chat"),
+          trainingSessionId: activeSession?.id || "",
+          recordType,
+          currentValue,
+          originalValue:{ ...currentValue },
+          originalText:String(text || ""),
+          completedExplicit,
+          confidence:"low"
+        });
+        return { action:"follow_up", reason:"missing_training_quantity", prompt:`可以，我先不乱记。${currentValue.exercise} 一共多少个？最高一组几个？` };
+      }
+      const canWriteWithoutAi = !!(recordType !== "training_fact" || currentValue.exercise || currentValue.duration || currentValue.reps || currentValue.sets || currentValue.bestSetReps || completedExplicit);
       if(!canWriteWithoutAi){
         return { action:"follow_up", reason:"low_confidence", prompt:"这条我不敢直接猜，补一下动作或数量我再记录。" };
       }
@@ -6147,36 +6397,82 @@
       if(!stack) return;
       const cards = getTrainingCaptureCards();
       if(!cards.length){
-        stack.innerHTML = "";
-        return;
-      }
-      stack.innerHTML = cards.map((card) => {
-        const kindClass = card.kind === "error" ? "error" : (card.kind === "warn" ? "warn" : "");
-        const actions = [];
-        if(card.recordId && card.canUndo !== false) actions.push(`<button class="btn-outline" type="button" data-capture-undo="${escapeHtml(card.recordId)}">撤回</button>`);
-        if(card.recordId && card.canModify !== false) actions.push(`<button class="btn-outline" type="button" data-capture-modify="${escapeHtml(card.recordId)}">修改</button>`);
-        if(card.trainingSessionActions){
-          actions.push(`<button class="btn" type="button" data-training-session-continue="1">继续训练</button>`);
-          actions.push(`<button class="btn-outline" type="button" data-training-session-finish="1">结束并保存</button>`);
-          actions.push(`<button class="btn-danger" type="button" data-training-session-discard="1">放弃训练</button>`);
+        const recent = getTrainingCaptureRecentSession();
+        const latest = recent.records.find((item) => {
+          const found = findTrainingCaptureRecord(item.recordId);
+          return found?.record && !found.record.revoked;
+        }) || null;
+        if(!latest){
+          stack.innerHTML = "";
+          return;
         }
-        if(card.canDismiss !== false) actions.push(`<button class="btn-outline" type="button" data-capture-dismiss="${escapeHtml(card.id)}">收起</button>`);
-        return `
-          <div class="training-capture-card ${kindClass}">
-            <div class="training-capture-card-title">${escapeHtml(card.title || "训练记录")}</div>
-            <div class="training-capture-card-message">${escapeHtml(card.message || "")}</div>
-            ${actions.length ? `<div class="training-capture-card-actions">${actions.join("")}</div>` : ""}
+        stack.innerHTML = `
+          <div class="training-capture-recent-entry">
+            <div class="training-capture-recent-text">
+              <b>最近自动记录</b>
+              ${escapeHtml(latest.date || "")} · ${escapeHtml(latest.summary || "可查看、修改或撤回")}
+            </div>
+            <div class="training-capture-recent-actions">
+              <button class="btn-outline" type="button" data-capture-view-latest="1">查看</button>
+              <button class="btn-outline" type="button" data-capture-modify="${escapeHtml(latest.recordId)}">修改</button>
+              <button class="btn-danger" type="button" data-capture-undo="${escapeHtml(latest.recordId)}">撤回</button>
+            </div>
           </div>
         `;
-      }).join("");
+      }else{
+        stack.innerHTML = cards.map((card) => {
+          const kindClass = card.kind === "error" ? "error" : (card.kind === "warn" ? "warn" : "");
+          const actions = [];
+          if(card.recordIds && Array.isArray(card.recordIds) && card.recordIds.length){
+            actions.push(`<button class="btn-outline" type="button" data-capture-view-group="${escapeHtml(card.recordIds.join(","))}">查看</button>`);
+            actions.push(`<button class="btn-danger" type="button" data-capture-undo-group="${escapeHtml(card.recordIds.join(","))}">撤回全部</button>`);
+          }else{
+            if(card.recordId && card.canUndo !== false) actions.push(`<button class="btn-outline" type="button" data-capture-undo="${escapeHtml(card.recordId)}">撤回</button>`);
+            if(card.recordId && card.canModify !== false) actions.push(`<button class="btn-outline" type="button" data-capture-modify="${escapeHtml(card.recordId)}">修改</button>`);
+          }
+          if(card.trainingSessionActions){
+            actions.push(`<button class="btn" type="button" data-training-session-continue="1">继续训练</button>`);
+            actions.push(`<button class="btn-outline" type="button" data-training-session-finish="1">结束并保存</button>`);
+            actions.push(`<button class="btn-danger" type="button" data-training-session-discard="1">放弃训练</button>`);
+          }
+          if(card.canDismiss !== false) actions.push(`<button class="btn-outline" type="button" data-capture-dismiss="${escapeHtml(card.id)}">收起</button>`);
+          return `
+            <div class="training-capture-card ${kindClass}">
+              <div class="training-capture-card-title">${escapeHtml(card.title || "训练记录")}</div>
+              <div class="training-capture-card-message">${escapeHtml(card.message || "")}</div>
+              ${actions.length ? `<div class="training-capture-card-actions">${actions.join("")}</div>` : ""}
+            </div>
+          `;
+        }).join("");
+      }
       stack.querySelectorAll("[data-capture-undo]").forEach((btn) => {
         btn.onclick = () => undoTrainingCaptureRecord(btn.getAttribute("data-capture-undo") || "");
+      });
+      stack.querySelectorAll("[data-capture-undo-group]").forEach((btn) => {
+        btn.onclick = () => {
+          const ids = String(btn.getAttribute("data-capture-undo-group") || "").split(",").filter(Boolean);
+          ids.forEach((id) => undoTrainingCaptureRecord(id));
+        };
       });
       stack.querySelectorAll("[data-capture-modify]").forEach((btn) => {
         btn.onclick = () => {
           const id = btn.getAttribute("data-capture-modify") || "";
-          const next = prompt("输入修改后的记录内容，例如：引体向上 12 个");
+          const next = prompt("输入修改后的记录内容，例如：引体向上 12 个，最高一组 6 个");
           if(next) modifyLatestTrainingCaptureRecord(id, next);
+        };
+      });
+      stack.querySelectorAll("[data-capture-view-latest]").forEach((btn) => {
+        btn.onclick = () => {
+          const latest = getLatestRecentTrainingCapture();
+          const found = latest ? findTrainingCaptureRecord(latest.recordId) : null;
+          alert(found?.record ? formatTrainingCaptureCardMessage(found.record) : "没有可查看的最近记录");
+        };
+      });
+      stack.querySelectorAll("[data-capture-view-group]").forEach((btn) => {
+        btn.onclick = () => {
+          const ids = String(btn.getAttribute("data-capture-view-group") || "").split(",").filter(Boolean);
+          const text = ids.map((id) => findTrainingCaptureRecord(id)?.record).filter(Boolean).map(formatTrainingCaptureCardMessage).join("\n");
+          alert(text || "没有可查看的记录");
         };
       });
       stack.querySelectorAll("[data-capture-dismiss]").forEach((btn) => {
@@ -6459,7 +6755,16 @@
       refreshAiWeeklySummaryDraftForDate(dateKey);
       renderPlan();
       if(options.createCard !== false){
-        pushTrainingCaptureCard({
+        const synthetic = {
+          id:`session_check_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+          date:dateKey,
+          sourceType:"training_session",
+          trainingSessionId:intent.trainingSessionId || getTrainingSession()?.id || "",
+          recordType:"training_fact",
+          currentValue:{ text:`已完成计划项：${match.item}`, exercise:match.item }
+        };
+        rememberTrainingCaptureRecord(synthetic);
+        updateTrainingSessionAggregateCard(synthetic) || pushTrainingCaptureCard({
           title:"已完成计划项",
           message:`已在 ${dateKey} 勾选：${match.item}`,
           canUndo:false,
@@ -6513,8 +6818,75 @@
       return `已记录到 ${record.date}：${summarizeTrainingCaptureRecord(record)}`;
     }
 
+    function normalizeTrainingRecordIntent(intent, options = {}){
+      if(!intent || intent.action !== "write") return { ok:false, reason:"no_write_intent" };
+      const dateKey = intent.date || formatDateKey(new Date());
+      const recordType = intent.recordType || "training_fact";
+      const currentValue = mergeCaptureValues({}, intent.currentValue || {});
+      if(recordType === "training_fact" && !currentValue.exercise && !currentValue.duration && !currentValue.reps && !currentValue.sets && !currentValue.bestSetReps){
+        return { ok:false, reason:"low_confidence", prompt:"缺少可确认的动作或数量，不自动写入。" };
+      }
+      if(recordType === "technical_feedback" && !currentValue.exercise && !currentValue.text){
+        return { ok:false, reason:"missing_feedback_target", prompt:"缺少反馈对象，不自动写入。" };
+      }
+      if(recordType === "safety_feedback") currentValue.safetyFlag = true;
+      const writeType = recordType === "safety_feedback"
+        ? "abnormal_note"
+        : (recordType === "training_fact" && (intent.completedExplicit || hasTrainingCaptureQuantity(currentValue)) ? "completion_with_note" : "note_only");
+      return {
+        ok:true,
+        intent:{
+          ...intent,
+          date:dateKey,
+          recordType,
+          currentValue,
+          originalValue:intent.originalValue || currentValue,
+          writeType,
+          allowAutoComplete: writeType === "completion_with_note" && recordType === "training_fact"
+        }
+      };
+    }
+
+    function updateTrainingSessionAggregateCard(record){
+      if(!record || record.sourceType !== "training_session") return false;
+      const session = getTrainingSession();
+      const cards = getTrainingCaptureCards();
+      const existingIndex = cards.findIndex((card) => card.trainingSessionAggregate && card.trainingSessionId === (record.trainingSessionId || session?.id || ""));
+      const sessionRecords = Object.values(getDailyLogs()).flatMap((log) => Array.isArray(log.aiCaptureRecords) ? log.aiCaptureRecords : [])
+        .filter((item) => !item.revoked && item.sourceType === "training_session" && (item.trainingSessionId || "") === (record.trainingSessionId || session?.id || ""));
+      const ids = sessionRecords.map((item) => item.id).filter(Boolean);
+      const latestSummary = sessionRecords.slice(-4).map((item) => summarizeTrainingCaptureRecord(item)).join("；");
+      const card = {
+        id: existingIndex >= 0 ? cards[existingIndex].id : `capture_card_session_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        createdAt: existingIndex >= 0 ? cards[existingIndex].createdAt : new Date().toISOString(),
+        kind:"success",
+        title:"本次训练记录",
+        message:`本次训练已记录 ${sessionRecords.length || 1} 项${latestSummary ? `：${latestSummary}` : "。"}`,
+        trainingSessionAggregate:true,
+        trainingSessionId: record.trainingSessionId || session?.id || "",
+        trainingSessionActions:true,
+        recordIds:ids,
+        canUndo:false,
+        canModify:false
+      };
+      if(existingIndex >= 0){
+        cards[existingIndex] = card;
+        setTrainingCaptureCards(cards);
+      }else{
+        setTrainingCaptureCards([card, ...cards].slice(0, 5));
+      }
+      return true;
+    }
+
     function writeTrainingCaptureIntent(intent, options = {}){
-      if(!intent || intent.action !== "write") return { status:"ignored", reason:"no_write_intent" };
+      const normalized = normalizeTrainingRecordIntent(intent, options);
+      if(!normalized.ok){
+        if(options.createCard !== false && normalized.prompt){
+          pushTrainingCaptureCard({ kind:"warn", title:"需要确认", message:normalized.prompt, canUndo:false, canModify:false });
+        }
+        return { status:"ignored", reason:normalized.reason || "invalid_intent" };
+      }
+      intent = normalized.intent;
       const logs = getDailyLogs();
       const dateKey = intent.date || formatDateKey(new Date());
       const log = buildDailyLogShell(dateKey, logs[dateKey] || {});
@@ -6547,9 +6919,11 @@
         revoked:false,
         autoCompletedPlanChecks:[],
         localUpdatedAt:new Date().toISOString(),
-        cloudVersion:0
+        cloudVersion:0,
+        mergedFromPending:!!intent.mergedFromPending,
+        writeType:intent.writeType || "note_only"
       };
-      record.autoCompletedPlanChecks = maybeAutoCompletePlanItemForCapture(intent, record.id);
+      record.autoCompletedPlanChecks = intent.allowAutoComplete === false ? [] : maybeAutoCompletePlanItemForCapture(intent, record.id);
       log.aiCaptureRecords = [...(Array.isArray(log.aiCaptureRecords) ? log.aiCaptureRecords : []), record];
       syncDailyLogCompletionFromPlan(log, dateKey);
       log.aiDailySummary = generateAiDailySummaryForLog(log);
@@ -6558,13 +6932,19 @@
       logs[dateKey] = log;
       persistDailyLogsAfterTrainingCapture(logs, { syncToCloud:true });
       refreshAiWeeklySummaryDraftForDate(dateKey);
+      rememberTrainingCaptureRecord(record);
+      clearPendingTrainingCaptureContext();
       if(options.createCard !== false){
-        pushTrainingCaptureCard({
-          kind: record.recordType === "safety_feedback" ? "warn" : "success",
-          title: record.recordType === "safety_feedback" ? "已记录安全反馈" : "已记录",
-          message:formatTrainingCaptureCardMessage(record),
-          recordId:record.id
-        });
+        if(record.sourceType === "training_session" && options.aggregateSessionCard !== false){
+          updateTrainingSessionAggregateCard(record);
+        }else{
+          pushTrainingCaptureCard({
+            kind: record.recordType === "safety_feedback" ? "warn" : "success",
+            title: record.recordType === "safety_feedback" ? "已记录安全反馈" : (record.mergedFromPending ? "已合并记录" : "已记录"),
+            message:formatTrainingCaptureCardMessage(record),
+            recordId:record.id
+          });
+        }
       }
       return { status:"recorded", recordId:record.id, record, date:dateKey };
     }
@@ -6613,6 +6993,7 @@
         recordId:record.id,
         canUndo:false
       });
+      renderTrainingCaptureCards();
       return { status:"undone", recordId:record.id };
     }
 
@@ -6643,8 +7024,9 @@
     }
 
     function modifyLatestTrainingCaptureRecord(recordId, text){
-      const intent = extractLocalTrainingCaptureIntent(text);
+      const intent = extractLocalTrainingCaptureIntent(text, { skipPendingMerge:true });
       const patch = intent?.action === "write" ? { currentValue:intent.currentValue } : { currentValue:{ text:String(text || "") } };
+      clearPendingTrainingCaptureContext();
       return modifyTrainingCaptureRecord(recordId, patch);
     }
 
@@ -6671,19 +7053,13 @@
       const classified = classifyCharacterTrainingIntent(text, options);
       if(classified.action === "none") return { status:"ignored", reason:classified.reason };
       if(classified.action === "no_record"){
+        clearPendingTrainingCaptureContext();
         const latest = findLatestRelatedTrainingCaptureRecord();
         if(latest) return undoTrainingCaptureRecord(latest.id);
         return { status:"declined", reason:"user_declined_recording" };
       }
       if(!settings.trainingIntentTrigger){
         if(classified.action === "safety"){
-          pushTrainingCaptureCard({
-            kind:"warn",
-            title:"安全提醒",
-            message:"训练意图触发已关闭，所以不会读取训练上下文或写入记录；但如果有胸闷、头晕、疼痛或麻木，请先停止相关训练，必要时寻求专业帮助。",
-            canUndo:false,
-            canModify:false
-          });
           return { status:"safety_minimum", reason:"trainingIntentTrigger" };
         }
         return { status:"disabled", reason:"trainingIntentTrigger" };
@@ -6697,8 +7073,10 @@
       if(intent.action === "follow_up"){
         pushTrainingCaptureCard({
           kind:"warn",
-          title:"需要确认",
-          message:intent.prompt || "这条训练信息还不够明确，我先不写入。"
+          title:intent.reason === "missing_training_quantity" || intent.reason === "pending_missing_quantity" ? "等待补充" : "需要确认",
+          message:intent.prompt || "这条训练信息还不够明确，我先不写入。",
+          canUndo:false,
+          canModify:false
         });
         return { status:"follow_up", reason:intent.reason, prompt:intent.prompt };
       }
@@ -6799,6 +7177,7 @@
           action:"write",
           date:session.date || formatDateKey(new Date()),
           sourceType:"training_session",
+          trainingSessionId:session.id || "",
           recordType:"training_fact",
           currentValue:{
             text:`训练会话结束：${session.dayName || ""}`,
@@ -6952,11 +7331,19 @@
     }
 
     function buildCharacterChatSystemPrompt(card, trainingContext = null){
+      const trainingModeLines = trainingContext ? [
+        "本轮消息触发训练意图：可以临时读取训练上下文，并用 AI 教练能力判断训练事实、训练反馈、恢复和风险。",
+        "训练判断必须专业、清楚、可执行；角色语气只影响怎么说，不能改变安全、记录和计划判断。",
+        "不要编造训练数据；如果没有记录就明确说还没看到记录。疼痛、头晕、胸闷、麻木等风险必须优先提醒停止相关训练。"
+      ] : [
+        "普通角色聊天模式：默认不要主动带入训练计划、打卡进度、教练身份或训练复盘。",
+        "只有用户明确提到训练、恢复、疼痛、体重、睡眠等影响训练的话题时，才进入训练相关回复。",
+        "如果用户在普通聊天里提到明显疼痛、头晕、胸闷或麻木，只给最低限度常识安全提醒，不鼓励继续危险训练。"
+      ];
       return [
         "你正在和用户进行角色聊天。请自然回复普通文本，不要返回 JSON、Markdown 表格、代码块或接口原始响应。",
         "保持角色卡的人设、语气、关系和场景；不要跳出角色解释角色卡。",
-        "你也是用户的训练督促伙伴：可以结合本周计划、打卡进度、历史训练记录来提醒、鼓励、催促用户完成训练。",
-        "角色语气要在，但训练建议必须具体、可执行；不要编造训练数据，没记录就说还没看到记录。",
+        ...trainingModeLines,
         "如果用户要求危险、违法或明显越界内容，拒绝并保持角色语气。",
         characterCardPromptBlock(card),
         buildCharacterTrainingContextPrompt(trainingContext)
@@ -7703,7 +8090,7 @@
     }
 
     function normalizeTrainingCountValue(value, options = {}){
-      const raw = String(value ?? "").match(/(\d+(?:\.\d+)?)/);
+      const raw = String(value ?? "").match(/(\d+(?:\.\d+)?)/);
       if(!raw) return "";
       const n = Number(raw[1]);
       const min = Number.isFinite(options.min) ? options.min : 0;
@@ -7733,13 +8120,22 @@
       const totalWord = /总量|总共|合计|总计|累计|一共|总数|总次数|共/;
       const result = {};
       let lastExercise = "";
+      let pendingBestNoExercise = "";
 
       clauses.forEach((clause) => {
         const hasPullup = pullupWord.test(clause);
         const hasOtherExercise = otherExerciseWord.test(clause);
         const isPullupContext = hasPullup || (lastExercise === "pullup" && !hasOtherExercise);
         if(!isPullupContext){
-          if(hasOtherExercise) lastExercise = "other";
+          const looseBest = !hasOtherExercise ? pickFirstCount(clause, [
+            /(?:最高一组|单组最高|一组最高|一组最多|最多一组|最好一组|单组|最高|最多)\s*(?:是|为|到|有|做了|做)?\s*(\d+(?:\.\d+)?)/,
+            /(\d+(?:\.\d+)?)\s*(?:个|次)?\s*(?:最高一组|单组最高|一组最高|一组最多|最多一组|最好一组|单组)/
+          ], { min:1, max:80 }) : "";
+          if(looseBest) pendingBestNoExercise = looseBest;
+          if(hasOtherExercise){
+            lastExercise = "other";
+            pendingBestNoExercise = "";
+          }
           return;
         }
 
@@ -7748,6 +8144,10 @@
           /(\d+(?:\.\d+)?)\s*(?:个|次)?\s*(?:最高一组|单组最高|一组最高|一组最多|最多一组|最好一组|单组)/
         ], { min:1, max:80 });
         if(best) result.pullupBest = best;
+        else if(hasPullup && pendingBestNoExercise && !result.pullupBest){
+          result.pullupBest = pendingBestNoExercise;
+          pendingBestNoExercise = "";
+        }
 
         const explicitTotal = pickFirstCount(clause, [
           /(?:总量|总共|合计|总计|累计|一共|总数|总次数|共)\s*(?:是|为|到|有|做了|完成)?\s*(\d+(?:\.\d+)?)/,
