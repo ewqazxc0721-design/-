@@ -710,11 +710,11 @@
     }
 
     .exercise-library-detail{
-      margin-top:12px;
-      border:1px solid rgba(148,163,184,.28);
-      border-radius:8px;
-      padding:12px;
-      background:rgba(248,250,252,.86);
+      margin-top:10px;
+      border:0;
+      border-radius:0;
+      padding:0;
+      background:transparent;
     }
 
     .exercise-library-media{
@@ -4721,7 +4721,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.05.14-exercise-library-audit";
+    const APP_VERSION = "v2026.05.14-exercise-library-modal";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const TEMP_DAILY_PLAN_OVERRIDES_KEY = "gain-temp-daily-plan-overrides";
     const DAILY_LOGS_KEY = "gain-daily-logs";
@@ -5683,22 +5683,51 @@
       const box = $("exerciseLibraryDetail");
       if(!box) return;
       if(!action){
-        box.innerHTML = `<div class="help">选择一个动作后，这里会显示图解、发力重点和注意事项。</div>`;
+        box.innerHTML = `<div class="help">点一下训练动作，会弹出和计划图解一样的卡片。</div>`;
+        return;
+      }
+      box.innerHTML = `<div class="help">已选：${escapeHtml(action.displayName)}。图解会在弹出的动作卡片中显示。</div>`;
+    }
+
+    function renderExerciseLibraryGuideModal(action){
+      const content = $("planGuideModalContent");
+      if(!content) return;
+      if(!action){
+        content.innerHTML = `
+          <div style="font-size:22px;font-weight:800;margin-bottom:10px;">训练动作库</div>
+          <div class="softbox">选择一个训练动作后，这里会显示图解、发力重点和注意事项。</div>
+        `;
         return;
       }
       const cautions = (action.guide?.cautions || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
       const aliases = (action.aliases || []).filter((alias) => alias !== action.displayName).slice(0, 12).join("、");
-      box.innerHTML = `
-        <div class="exercise-library-entry-title">${escapeHtml(action.displayName)}</div>
-        <div class="exercise-library-entry-meta">${escapeHtml(formatExerciseLibraryMeta(action))}</div>
-        <div class="guide-meta">exerciseKey：${escapeHtml(action.exerciseKey)}</div>
-        ${aliases ? `<div class="guide-meta">别名：${escapeHtml(aliases)}</div>` : ""}
-        ${action.media?.path ? `<img class="exercise-library-media" src="${escapeHtml(action.media.path)}" alt="${escapeHtml(action.media.label || action.displayName)}" loading="lazy" decoding="async">` : ""}
-        ${action.media?.note ? `<div class="guide-meta">${escapeHtml(action.media.note)}</div>` : ""}
-        ${action.guide?.diagram ? `<div class="guide-diagram">${escapeHtml(action.guide.diagram)}</div>` : ""}
-        ${cautions ? `<ul class="guide-list">${cautions}</ul>` : ""}
-        ${action.media?.sourceUrl ? `<div class="guide-meta"><a class="guide-source-link" href="${escapeHtml(action.media.sourceUrl)}" target="_blank" rel="noopener">${escapeHtml(action.media.sourceLabel || "素材来源")}</a></div>` : ""}
+      content.innerHTML = `
+        <div class="guide-result" style="margin-top:0;background:transparent;border:none;padding:0;">
+          <div class="guide-top">
+            <div>
+              <div class="guide-title">${escapeHtml(action.displayName)}</div>
+              <div class="guide-meta">来自：训练动作库</div>
+              <div class="guide-meta">${escapeHtml(formatExerciseLibraryMeta(action))}</div>
+              <div class="guide-meta">exerciseKey：${escapeHtml(action.exerciseKey)}</div>
+              ${aliases ? `<div class="guide-meta">别名：${escapeHtml(aliases)}</div>` : ""}
+            </div>
+          </div>
+          ${renderGuideMediaCard(action.media, { fallbackLabel:action.displayName })}
+          ${action.guide?.diagram ? `<div class="guide-diagram">${escapeHtml(action.guide.diagram)}</div>` : ""}
+          ${cautions ? `<ul class="guide-list">${cautions}</ul>` : ""}
+        </div>
       `;
+    }
+
+    function openExerciseLibraryGuideModal(exerciseKey){
+      const raw = String(exerciseKey || "").trim();
+      const action = getExerciseLibrary().find((entry) => entry.exerciseKey === raw) || readExerciseLibraryAction(raw);
+      if(!action) return { status:"not_found" };
+      activeExerciseLibraryKey = action.exerciseKey;
+      renderExerciseLibraryGuideModal(action);
+      const modal = $("planGuideModal");
+      if(modal) modal.style.display = "flex";
+      return { status:"opened", action };
     }
 
     function renderExerciseLibrary(){
@@ -5710,8 +5739,8 @@
       if(status){
         status.textContent = `已加载 ${library.length} 个动作；当前显示 ${actions.length} 个。`;
       }
-      if(!activeExerciseLibraryKey || !library.some((action) => action.exerciseKey === activeExerciseLibraryKey)){
-        activeExerciseLibraryKey = actions[0]?.exerciseKey || "";
+      if(activeExerciseLibraryKey && !library.some((action) => action.exerciseKey === activeExerciseLibraryKey)){
+        activeExerciseLibraryKey = "";
       }
       list.innerHTML = actions.map((action) => `
         <button class="exercise-library-entry ${action.exerciseKey === activeExerciseLibraryKey ? "active" : ""}" data-exercise-key="${escapeHtml(action.exerciseKey)}" type="button">
@@ -5723,9 +5752,10 @@
         btn.onclick = () => {
           activeExerciseLibraryKey = btn.getAttribute("data-exercise-key") || "";
           renderExerciseLibrary();
+          openExerciseLibraryGuideModal(activeExerciseLibraryKey);
         };
       });
-      renderExerciseLibraryDetail(library.find((action) => action.exerciseKey === activeExerciseLibraryKey) || actions[0] || null);
+      renderExerciseLibraryDetail(library.find((action) => action.exerciseKey === activeExerciseLibraryKey) || null);
     }
 
     function bindExerciseLibraryControls(){
@@ -11588,6 +11618,28 @@
       };
     }
 
+    function renderGuideMediaCard(media, options = {}){
+      const path = media?.path || (media?.gif ? `gifs/${media.gif}` : "");
+      if(!path){
+        return `<div class="softbox" style="margin-top:14px;">${escapeHtml(options.emptyText || "当前这个动作没有匹配到本地 GIF，先显示文字图解和注意事项。")}</div>`;
+      }
+      const label = media?.label || options.fallbackLabel || "动作图解";
+      const note = media?.note || options.defaultNote || "本地 GIF 动作轨迹演示。";
+      const sourceLink = media?.sourceUrl
+        ? `<div class="guide-meta" style="margin-top:6px;"><a class="guide-source-link" href="${escapeHtml(media.sourceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(media.sourceLabel || "素材来源")}</a></div>`
+        : "";
+      return `
+        <div style="margin-top:14px;border-radius:18px;overflow:hidden;border:1px solid rgba(148,163,184,.16);background:rgba(255,255,255,.62);">
+          <img class="exercise-library-media" src="${escapeHtml(path)}" alt="${escapeHtml(label)} 动图" style="display:block;width:100%;max-height:min(42vh,360px);object-fit:contain;background:#ffffff;padding:8px;margin-top:0;" loading="lazy" decoding="async" />
+          <div style="padding:12px 14px;">
+            <div style="font-size:14px;font-weight:700;line-height:1.5;">${escapeHtml(label)}</div>
+            <div class="guide-meta" style="margin-top:6px;">${escapeHtml(note)}</div>
+            ${sourceLink}
+          </div>
+        </div>
+      `;
+    }
+
     function doesGuideMatchQuery(itemText, keyword){
       const query = normalizeGuideQuery(keyword);
       if(!query) return false;
@@ -11625,22 +11677,7 @@
       const cautions = guide?.cautions?.length
         ? guide.cautions.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
         : `<li>先用你能稳定控制的重量和幅度。</li><li>有明显关节疼痛时立即停下。</li>`;
-      const sourceLink = gifInfo?.sourceUrl
-        ? `<div class="guide-meta" style="margin-top:6px;"><a class="guide-source-link" href="${escapeHtml(gifInfo.sourceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(gifInfo.sourceLabel || "素材来源")}</a></div>`
-        : "";
-
-      const gifBlock = gifInfo ? `
-        <div style="margin-top:14px;border-radius:18px;overflow:hidden;border:1px solid rgba(148,163,184,.16);background:rgba(255,255,255,.62);">
-          <img src="gifs/${gifInfo.gif}" alt="${escapeHtml(gifInfo.label)} 动图" style="display:block;width:100%;max-height:min(42vh,360px);object-fit:contain;background:#ffffff;padding:8px;" />
-          <div style="padding:12px 14px;">
-            <div style="font-size:14px;font-weight:700;line-height:1.5;">${escapeHtml(gifInfo.label)}</div>
-            <div class="guide-meta" style="margin-top:6px;">${escapeHtml(gifInfo.note || "本地 GIF 动作轨迹演示。")}</div>
-            ${sourceLink}
-          </div>
-        </div>
-      ` : `
-        <div class="softbox" style="margin-top:14px;">当前这个动作没有匹配到本地 GIF，先显示文字图解和注意事项。</div>
-      `;
+      const gifBlock = renderGuideMediaCard(gifInfo, { fallbackLabel:guide?.title || activeGuideItemText });
 
       content.innerHTML = `
         <div class="guide-result" style="margin-top:0;background:transparent;border:none;padding:0;">
