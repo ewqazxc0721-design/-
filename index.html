@@ -1095,6 +1095,66 @@
       font-size:14px;
     }
 
+    .calendar-progress-list{
+      display:grid;
+      gap:8px;
+      padding-left:0;
+      list-style:none;
+    }
+
+    .calendar-progress-item{
+      border:1px solid rgba(148,163,184,.18);
+      border-radius:14px;
+      padding:10px 12px;
+      background:rgba(248,250,252,.78);
+    }
+
+    .calendar-progress-item.completed{
+      background:rgba(236,253,245,.82);
+      border-color:rgba(16,185,129,.24);
+    }
+
+    .calendar-progress-name{
+      font-weight:800;
+      line-height:1.45;
+    }
+
+    .calendar-progress-meta{
+      margin-top:5px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.5;
+    }
+
+    .calendar-progress-badges{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      margin-top:8px;
+    }
+
+    .calendar-progress-badge{
+      display:inline-flex;
+      align-items:center;
+      min-height:24px;
+      border-radius:999px;
+      padding:3px 9px;
+      font-size:12px;
+      font-weight:800;
+      color:#334155;
+      background:rgba(226,232,240,.86);
+    }
+
+    .calendar-progress-badge.done{
+      color:#047857;
+      background:rgba(187,247,208,.78);
+    }
+
+    .calendar-progress-badge.todo{
+      color:#92400e;
+      background:rgba(254,243,199,.86);
+    }
+
     .history-card{
       background:var(--soft);
       border-radius:18px;
@@ -4721,7 +4781,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.05.14-exercise-library-modal";
+    const APP_VERSION = "v2026.05.14-calendar-plan-progress";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const TEMP_DAILY_PLAN_OVERRIDES_KEY = "gain-temp-daily-plan-overrides";
     const DAILY_LOGS_KEY = "gain-daily-logs";
@@ -13719,6 +13779,74 @@
       });
     }
 
+    function formatCalendarProgressAmount(value, unit = "项"){
+      const amount = Number(value || 0);
+      const safe = Number.isInteger(amount) ? String(amount) : amount.toFixed(1).replace(/\.0$/, "");
+      const suffix = unit == null ? "项" : String(unit);
+      return `${safe}${suffix}`;
+    }
+
+    function getCalendarPlanProgressItems(log){
+      const items = Array.isArray(log?.planProgressItems) ? log.planProgressItems : [];
+      if(items.length) return items;
+      const allItems = Array.isArray(log?.allItems) ? log.allItems : [];
+      const completedItems = new Set(Array.isArray(log?.completedItems) ? log.completedItems : []);
+      return allItems.map((item, index) => ({
+        itemId:`legacy_${index}`,
+        snapshotDisplayName:getPlanItemExerciseName(item) || item,
+        snapshotItemText:item,
+        targetAmount:1,
+        completedAmount:completedItems.has(item) ? 1 : 0,
+        unit:"项",
+        status:completedItems.has(item) ? "completed" : "active"
+      }));
+    }
+
+    function getCalendarProgressSummary(progressItems = []){
+      const totalItems = progressItems.length;
+      const completedItems = progressItems.filter((item) => {
+        const completed = Number(item.completedAmount || 0);
+        const target = Number(item.targetAmount || 0);
+        return target > 0 && completed >= target;
+      }).length;
+      const byUnit = new Map();
+      progressItems.forEach((item) => {
+        const unit = item.unit || "项";
+        const current = byUnit.get(unit) || { completed:0, target:0 };
+        current.completed += Number(item.completedAmount || 0);
+        current.target += Number(item.targetAmount || 0);
+        byUnit.set(unit, current);
+      });
+      const amountText = Array.from(byUnit.entries())
+        .filter(([, value]) => value.target > 0)
+        .map(([unit, value]) => `${formatCalendarProgressAmount(value.completed, "")}/${formatCalendarProgressAmount(value.target, unit)}`)
+        .join("，");
+      return { totalItems, completedItems, amountText };
+    }
+
+    function renderCalendarPlanProgressList(log){
+      const progressItems = getCalendarPlanProgressItems(log);
+      if(!progressItems.length) return "<li>暂无记录</li>";
+      return progressItems.map((item) => {
+        const unit = item.unit || "项";
+        const target = Math.max(0, Number(item.targetAmount || 0));
+        const completed = Math.min(Math.max(0, Number(item.completedAmount || 0)), target || Number(item.completedAmount || 0));
+        const remaining = Math.max(0, target - completed);
+        const isCompleted = target > 0 && completed >= target;
+        const plannedText = [item.plannedRepsText, item.plannedDurationText].filter(Boolean).join(" · ");
+        return `
+          <li class="calendar-progress-item ${isCompleted ? "completed" : ""}">
+            <div class="calendar-progress-name">${escapeHtml(item.snapshotDisplayName || item.snapshotItemText || "训练动作")}</div>
+            <div class="calendar-progress-meta">${escapeHtml(item.snapshotItemText || "")}${plannedText ? ` · ${escapeHtml(plannedText)}` : ""}</div>
+            <div class="calendar-progress-badges">
+              <span class="calendar-progress-badge ${isCompleted ? "done" : ""}">已完成 ${escapeHtml(`${formatCalendarProgressAmount(completed, "")}/${formatCalendarProgressAmount(target, unit)}`)}</span>
+              <span class="calendar-progress-badge ${remaining ? "todo" : "done"}">未完成 ${escapeHtml(formatCalendarProgressAmount(remaining, unit))}</span>
+            </div>
+          </li>
+        `;
+      }).join("");
+    }
+
     function renderCalendarDetail(){
       const box = $("calendarDetail");
       if(!box) return;
@@ -13733,11 +13861,12 @@
         return;
       }
 
-      const completedItems = Array.isArray(log.completedItems) ? log.completedItems : [];
-      const allItems = Array.isArray(log.allItems) ? log.allItems : [];
-      const displayItems = completedItems.length ? completedItems : allItems;
+      const progressItems = getCalendarPlanProgressItems(log);
+      const progressSummary = getCalendarProgressSummary(progressItems);
       const aiCaptureRecords = (Array.isArray(log.aiCaptureRecords) ? log.aiCaptureRecords : []);
-      const activeAiCaptureRecords = aiCaptureRecords.filter((record) => !record.revoked);
+      const activeAiCaptureRecords = aiCaptureRecords
+        .filter((record) => !record.revoked)
+        .filter((record) => record.structuredWrite?.status !== "plan_progress");
       const revokedAiCaptureRecords = aiCaptureRecords.filter((record) => record.revoked);
       const aiDailySummary = log.aiDailySummary || generateAiDailySummaryForLog(log);
 
@@ -13746,12 +13875,13 @@
         <div class="help" style="margin-top:6px;">训练重点：${escapeHtml(log.focus || "-")}</div>
         ${log.isTemporaryPlan ? `<div class="softbox" style="margin-top:10px;">这一天记录的是 AI 临时调整计划。${escapeHtml(log.aiAdjustMessage || "")}</div>` : ""}
         <div class="mini-grid" style="margin-top:12px;">
-          <div class="mini">完成项：${escapeHtml(String(log.completedCount || 0))}/${escapeHtml(String(log.totalItems || 0))}</div>
+          <div class="mini">完成项：${escapeHtml(String(progressSummary.completedItems))}/${escapeHtml(String(progressSummary.totalItems || log.totalItems || 0))}</div>
+          <div class="mini">完成量：${escapeHtml(progressSummary.amountText || "-")}</div>
           <div class="mini">云端：${escapeHtml(getDailyLogCloudStatus(log))}</div>
         </div>
 
-        <div class="label">当天完成动作</div>
-        <ul class="calendar-items">${displayItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("") || "<li>暂无记录</li>"}</ul>
+        <div class="label">当天计划进度</div>
+        <ul class="calendar-items calendar-progress-list">${renderCalendarPlanProgressList(log)}</ul>
 
         <div class="label">自动捕捉记录</div>
         <ul class="calendar-items">
