@@ -665,6 +665,85 @@
       margin-top:12px;
     }
 
+    .exercise-library-toolbar{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:10px;
+      align-items:center;
+      margin-top:12px;
+    }
+
+    .exercise-library-list{
+      display:grid;
+      gap:8px;
+      margin-top:12px;
+      max-height:310px;
+      overflow:auto;
+      padding-right:2px;
+    }
+
+    .exercise-library-entry{
+      border:1px solid rgba(148,163,184,.28);
+      background:rgba(255,255,255,.68);
+      border-radius:8px;
+      padding:10px 12px;
+      text-align:left;
+      color:var(--text);
+      cursor:pointer;
+    }
+
+    .exercise-library-entry.active{
+      border-color:rgba(37,99,235,.48);
+      box-shadow:0 0 0 3px rgba(37,99,235,.10);
+    }
+
+    .exercise-library-entry-title{
+      font-weight:800;
+      line-height:1.35;
+    }
+
+    .exercise-library-entry-meta{
+      margin-top:4px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
+    }
+
+    .exercise-library-detail{
+      margin-top:12px;
+      border:1px solid rgba(148,163,184,.28);
+      border-radius:8px;
+      padding:12px;
+      background:rgba(248,250,252,.86);
+    }
+
+    .exercise-library-media{
+      width:100%;
+      max-height:280px;
+      object-fit:contain;
+      border-radius:8px;
+      background:#fff;
+      margin-top:10px;
+    }
+
+    .plan-progress-chip{
+      display:inline-flex;
+      align-items:center;
+      min-height:24px;
+      margin-top:6px;
+      border-radius:999px;
+      padding:3px 9px;
+      font-size:12px;
+      font-weight:800;
+      color:#1f2937;
+      background:rgba(226,232,240,.9);
+    }
+
+    .day-row.done .plan-progress-chip{
+      color:#065f46;
+      background:rgba(187,247,208,.82);
+    }
+
     .mini-btn{
       position:relative;
       overflow:hidden;
@@ -4139,6 +4218,22 @@
 
       <div class="card">
         <div class="collapsible-card-head">
+          <h2>训练动作库</h2>
+          <button class="btn-outline collapsible-toggle-btn" id="exerciseLibraryCollapseBtn" type="button" aria-expanded="false" aria-controls="exerciseLibraryBody">展开</button>
+        </div>
+        <div id="exerciseLibraryBody" class="collapsible-card-body collapsed">
+          <div class="exercise-library-toolbar">
+            <input id="exerciseLibrarySearch" placeholder="搜索动作、别名或部位" />
+            <button class="btn-outline" id="reloadExerciseLibraryBtn" type="button">刷新</button>
+          </div>
+          <div id="exerciseLibraryStatus" class="help" style="margin-top:8px;"></div>
+          <div id="exerciseLibraryList" class="exercise-library-list"></div>
+          <div id="exerciseLibraryDetail" class="exercise-library-detail"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="collapsible-card-head">
           <h2>今天状态不一样？</h2>
           <button class="btn-outline collapsible-toggle-btn" id="dailyAdjustCollapseBtn" type="button" aria-expanded="false" aria-controls="dailyAdjustBody">展开</button>
         </div>
@@ -4626,10 +4721,15 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.05.12-95-no-false-plank";
+    const APP_VERSION = "v2026.05.14-exercise-library-audit";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const TEMP_DAILY_PLAN_OVERRIDES_KEY = "gain-temp-daily-plan-overrides";
     const DAILY_LOGS_KEY = "gain-daily-logs";
+    const DAILY_LOG_SCHEMA_VERSION = 2;
+    const EXERCISE_LIBRARY_FILE = "训练动作库/actions.json";
+    const CUSTOM_EXERCISE_LIBRARY_KEY = "gain-exercise-library-custom";
+    const EXERCISE_TEMPLATE_DRAFTS_KEY = "gain-exercise-template-drafts";
+    const ACTIVE_TRAINING_REFERENCE_KEY = "gain-active-training-reference";
     const LAST_CLOUD_SYNC_AT_KEY = "gain-last-cloud-sync-at";
     const FORM_KEY = "gain-tracker-form";
     const HISTORY_KEY = "gain-tracker-history";
@@ -4802,12 +4902,28 @@
         cautions:["不要耸肩","下放时别只点头，胸和髋一起下","肩不舒服时不要过度加宽手距"]
       },
       {
-        id:"pushup",
-        title:"俯卧撑 / 窄距俯卧撑 / 机械递减俯卧撑",
-        keywords:["俯卧撑","窄距俯卧撑","机械递减俯卧撑"],
+        id:"standard-pushup",
+        title:"俯卧撑",
+        keywords:["俯卧撑","标准俯卧撑","徒手俯卧撑"],
         focus:["胸","三头","核心稳定"],
-        diagram:"标准：手在肩下或略宽\n窄距：双手更靠近，肘更贴身体\n机械递减：高难度做到接近力竭，再切到更容易的版本继续",
-        cautions:["全程身体一条线","窄距更吃肘腕，手腕不适先减量","机械递减不要追求动作变形后的数量"]
+        diagram:"起始：手在肩下或略宽，身体从头到脚保持一条线\n下降：胸口主动靠近地面，肩胛自然回收\n推起：掌根发力推回起始位，核心保持收紧",
+        cautions:["全程身体一条线","不要耸肩或塌腰","胸和髋一起移动，不要只点头"]
+      },
+      {
+        id:"close-grip-pushup",
+        title:"窄距俯卧撑",
+        keywords:["窄距俯卧撑","窄距"],
+        focus:["肱三头","胸","核心稳定"],
+        diagram:"起始：双手比标准俯卧撑更靠近\n下降：肘更贴近身体两侧，胸口向双手之间下放\n推起：三头和胸共同发力，保持身体一线",
+        cautions:["手腕不适先减量或略放宽手距","肘不要外张过多","不要为了次数牺牲躯干稳定"]
+      },
+      {
+        id:"mechanical-drop-pushup",
+        title:"机械递减俯卧撑",
+        keywords:["机械递减俯卧撑","跪姿俯卧撑递减"],
+        focus:["胸","三头","容量补足"],
+        diagram:"先做较难版本到接近力竭，再切到更容易的俯卧撑版本继续完成训练量\n常见顺序：标准俯卧撑 -> 跪姿俯卧撑，或下斜/标准 -> 标准/跪姿",
+        cautions:["递减后仍要保持动作形态","不要用塌腰或耸肩换次数","肩肘不适时提前停止"]
       },
       {
         id:"pike-pushup",
@@ -4850,6 +4966,22 @@
         cautions:["不要借摆动甩上去","手肘略高于手腕更容易找肩","不必刻意抬太高，肩高附近即可"]
       },
       {
+        id:"single-arm-lateral-raise",
+        title:"单臂侧平举",
+        keywords:["单臂侧平举","单侧侧平举"],
+        focus:["肩中束","左右侧控制"],
+        diagram:"起始：单手持铃或拉力器手柄，身体保持稳定\n抬起：手臂向身体侧方抬到接近肩高\n下放：控制回到起始位，避免身体侧摆借力",
+        cautions:["不要用躯干晃动带起重量","保持肩胛稳定，不要耸肩","两侧分别完成，弱侧优先控制动作质量"]
+      },
+      {
+        id:"band-lateral-raise",
+        title:"弹力绳侧平举",
+        keywords:["弹力绳侧平举","弹力带侧平举","阻力带侧平举"],
+        focus:["肩中束","弹力绳持续张力"],
+        diagram:"起始：踩住弹力绳，手握绳端在身体侧方\n抬起：沿侧方抬到接近肩高，保持肘微屈\n下放：慢慢回位，不要让弹力绳突然回弹",
+        cautions:["确认弹力绳固定稳","不要借身体摆动","张力太大时缩短幅度或换轻阻力"]
+      },
+      {
         id:"front-raise",
         title:"前平举",
         keywords:["前平举"],
@@ -4858,28 +4990,100 @@
         cautions:["避免惯性甩重","肩前侧紧张时减重量","不要抬到头顶"]
       },
       {
-        id:"leg-raise-core",
-        title:"仰卧举腿 / 反向卷腹",
-        keywords:["仰卧举腿","反向卷腹"],
-        focus:["下腹控制","骨盆后倾"],
-        diagram:"仰卧举腿：双腿伸直上抬，再慢慢下放\n反向卷腹：膝向胸收，小幅度卷起骨盆",
-        cautions:["腰离地太多就降低幅度","重点是腹部卷动，不是甩腿","下放越慢越有效"]
+        id:"leg-raise",
+        title:"仰卧举腿",
+        keywords:["仰卧举腿"],
+        focus:["下腹控制","髋屈控制"],
+        diagram:"起始：仰卧，双腿伸直或微屈\n上抬：腹部收紧，把双腿抬到接近垂直\n下放：慢慢下放到腰仍能贴住地面的范围",
+        cautions:["腰离地太多就缩短下放幅度","不要甩腿借力","下放越慢越能练到控制"]
       },
       {
-        id:"plank-side-plank-deadbug-crunch",
-        title:"平板支撑 / 侧桥 / 死虫 / 卷腹 / 俄罗斯转体",
-        keywords:["平板支撑","侧桥","死虫","卷腹","俄罗斯转体"],
-        focus:["核心稳定","抗伸展 / 抗旋转"],
-        diagram:"平板：前臂撑地，身体一线\n侧桥：侧撑保持身体成直线\n死虫：对侧手脚交替伸展\n卷腹：上背卷起\n俄罗斯转体：躯干微后仰，左右转体",
-        cautions:["核心动作宁慢勿快","腰部不适时先减幅度","俄罗斯转体别完全靠手臂甩动"]
+        id:"reverse-crunch",
+        title:"反向卷腹",
+        keywords:["反向卷腹"],
+        focus:["下腹卷动","骨盆后倾"],
+        diagram:"起始：仰卧屈膝，骨盆保持可控\n卷起：膝向胸口方向收，小幅度卷起骨盆\n回位：慢慢放回，不要让腰猛地砸回地面",
+        cautions:["重点是骨盆卷动，不是大幅甩腿","动作范围小也有效","腰不适时先减少次数和幅度"]
+      },
+      {
+        id:"short-plank",
+        title:"短平板支撑",
+        keywords:["短平板支撑"],
+        focus:["核心稳定","抗伸展"],
+        diagram:"起始：前臂撑地，身体成一条线\n保持：收紧腹部和臀部，短时间高质量维持\n结束：保持控制，不要突然塌腰落地",
+        cautions:["短时间也要保持标准姿势","腰酸明显时立刻停下调整","不要屏气硬撑"]
+      },
+      {
+        id:"plank",
+        title:"平板支撑",
+        keywords:["平板支撑"],
+        focus:["核心稳定","抗伸展"],
+        diagram:"起始：前臂撑地，肩在肘上方，身体从头到脚一线\n保持：腹部、臀部同时收紧，稳定呼吸\n结束：膝盖先落地，再放松身体",
+        cautions:["不要塌腰或撅臀","肩膀不要耸到耳朵旁","宁可缩短时间，也不要靠变形硬撑"]
+      },
+      {
+        id:"side-plank",
+        title:"侧桥",
+        keywords:["侧桥","侧平板","侧向平板支撑"],
+        focus:["侧腹","抗侧屈","肩胛稳定"],
+        diagram:"起始：侧身前臂撑地，双脚叠放或前后错开\n撑起：让肩、髋、脚形成一条线\n保持：侧腹发力，骨盆不要向下掉",
+        cautions:["支撑肩不舒服时缩短时间","骨盆不要前后转动","先做短组数，保证左右侧质量一致"]
+      },
+      {
+        id:"dead-bug",
+        title:"死虫",
+        keywords:["死虫","Dead Bug"],
+        focus:["核心稳定","抗伸展","上下肢协调"],
+        diagram:"起始：仰卧，手臂朝上，髋膝约 90 度\n伸展：对侧手脚慢慢向远处伸直\n回位：腰背保持贴地，回到起始位后换边",
+        cautions:["腰离地就缩短伸展幅度","动作越慢越有效","不要为了伸得远而失去骨盆控制"]
+      },
+      {
+        id:"crunch",
+        title:"卷腹",
+        keywords:["卷腹","Crunch"],
+        focus:["腹直肌","上腹卷动"],
+        diagram:"起始：仰卧屈膝，手轻放头侧或胸前\n卷起：上背离地，肋骨向骨盆靠近\n回位：控制下放，不要用脖子猛拉",
+        cautions:["不要拉脖子","下背保持自然贴近地面","顶端短暂停顿再下放"]
+      },
+      {
+        id:"russian-twist",
+        title:"俄罗斯转体",
+        keywords:["俄罗斯转体"],
+        focus:["腹斜肌","抗旋转控制"],
+        diagram:"起始：坐姿，躯干微后仰，核心收紧\n转体：胸口带动躯干左右旋转\n回正：每次转动都保持腰背稳定，不要只甩手",
+        cautions:["腰不舒服时缩小幅度或双脚落地","不要靠手臂快速甩动","保持呼吸，不要憋气"]
       },
       {
         id:"pullup",
-        title:"引体向上 / 离心引体向上",
-        keywords:["引体向上","离心引体向上"],
+        title:"引体向上",
+        keywords:["引体向上","引体","正手引体"],
         focus:["背阔肌","圆肌","肱二头"],
-        diagram:"起始：肩胛下沉，身体稳定\n上拉：胸口主动找杠\n顶端：下巴过杠或接近杠\n离心：缓慢控制下降 3–5 秒",
-        cautions:["先做肩胛下沉，不要耸肩硬拉","避免大幅摆腿","离心阶段别突然掉下去"]
+        diagram:"起始：肩胛下沉，身体稳定\n上拉：胸口主动找杠，肘向身体两侧下压\n顶端：下巴过杠或接近杠\n下放：受控回到悬垂，不要突然掉下去",
+        cautions:["先做肩胛下沉，不要耸肩硬拉","避免大幅摆腿","下放阶段保持控制"]
+      },
+      {
+        id:"eccentric-pullup",
+        title:"离心引体向上",
+        keywords:["离心引体向上","引体离心"],
+        focus:["背阔肌","肱二头","离心控制"],
+        diagram:"起始：借助跳起或垫脚到引体顶端\n下降：用 3–5 秒慢慢下放到手臂接近伸直\n重置：脚落地后重新进入顶端，不要连续乱摆",
+        cautions:["不要从顶端直接掉下去","肩肘不适时减少离心时间","每次重置后再开始下一次"]
+      },
+      {
+        id:"pull-up-hold",
+        title:"引体向上顶峰停留",
+        keywords:["引体向上顶峰停留","顶峰停留引体","引体顶峰停留"],
+        focus:["背阔肌","肩胛下沉","顶端控制"],
+        diagram:"起始：拉到引体向上顶端或借助踏台到顶端\n保持：下巴接近或超过杠，肩胛下沉，胸口靠近杠\n结束：受控下放或脚落地重置",
+        cautions:["不要耸肩硬卡在顶端","保持下巴微收，不要仰头凑杠","无法稳定停留时先缩短秒数"]
+      },
+      {
+        id:"pullup-or-band-pulldown",
+        title:"引体向上/弹力绳高位下拉",
+        keywords:["引体向上/弹力绳高位下拉","引体向上/弹力绳下拉"],
+        focus:["背阔肌","肩胛下沉"],
+        diagram:"组合项：能做引体时优先做引体向上；需要降阶时改做弹力绳高位下拉\n两者都先完成肩胛下沉，再让肘向下向后带",
+        cautions:["不要把两个动作都算成同一组额外加量","当天疲劳高时选择弹力绳版本","腰不要后仰借力"]
       },
       {
         id:"scapular-pull",
@@ -4890,12 +5094,28 @@
         cautions:["不要做成半个引体向上","全程手臂尽量伸直","先小幅度找背阔发力"]
       },
       {
-        id:"row",
-        title:"单臂哑铃划船 / 俯身双哑铃划船 / 弹力绳划船",
-        keywords:["单臂哑铃划船","俯身双哑铃划船","弹力绳划船","划船"],
+        id:"single-arm-db-row",
+        title:"单臂哑铃划船",
+        keywords:["单臂哑铃划船","单臂划船"],
         focus:["背阔肌","中下斜方肌","菱形肌"],
-        diagram:"起始：髋折叠，胸口打开，脊柱中立\n拉起：肘向后向髋方向带\n顶端：背部夹紧\n下放：肩胛前伸，受控回位",
-        cautions:["不要耸肩拉","不要只用手臂弯举","下背不稳时先减重量或扶支撑"]
+        diagram:"起始：一侧手膝或手扶稳定支撑，另一手持哑铃\n拉起：肘向后向髋方向带，背部夹紧\n下放：肩胛前伸，受控回到底部",
+        cautions:["不要耸肩拉","不要把动作做成手臂弯举","躯干不要跟着大幅扭转"]
+      },
+      {
+        id:"bent-over-db-row",
+        title:"俯身双哑铃划船",
+        keywords:["俯身双哑铃划船","双哑铃划船"],
+        focus:["背阔肌","中下斜方肌","下背等长稳定"],
+        diagram:"起始：髋折叠俯身，双手持哑铃，脊柱中立\n拉起：双肘向后向髋方向带\n下放：保持背部稳定，控制哑铃回到起始位",
+        cautions:["下背不稳时先减重量","不要用躯干猛甩哑铃","胸口保持打开，脖子放松"]
+      },
+      {
+        id:"band-row",
+        title:"弹力绳划船",
+        keywords:["弹力绳划船","弹力带划船","阻力带划船"],
+        focus:["背阔肌","菱形肌","肩胛后缩"],
+        diagram:"起始：弹力绳固定在身前，双手握住绳端\n拉起：肩胛后缩，肘向后贴近身体带动\n回位：控制弹力绳回弹，保持胸口打开",
+        cautions:["确认弹力绳固定稳","不要耸肩拉","回位不要完全松掉张力"]
       },
       {
         id:"lat-pulldown-band",
@@ -4914,20 +5134,36 @@
         cautions:["不要弯肘做成下压","别用腰后仰借力","重量宁轻，先找背阔收缩"]
       },
       {
-        id:"facepull",
-        title:"弹力绳面拉 / 俯身反向飞鸟",
-        keywords:["弹力绳面拉","俯身反向飞鸟","面拉","反向飞鸟"],
+        id:"band-face-pull",
+        title:"弹力绳面拉",
+        keywords:["弹力绳面拉","面拉","弹力带面拉"],
         focus:["后束","中下斜方肌","肩胛稳定"],
-        diagram:"面拉：手向脸两侧拉开，肘外展\n反飞鸟：俯身后双臂向两侧打开",
-        cautions:["不要耸肩","注意肩胛后缩而不是下背代偿","重量过大容易变成摆动"]
+        diagram:"起始：弹力绳固定在脸部高度附近，双手握绳\n拉起：手向脸两侧拉开，肘外展，肩胛后缩\n回位：受控放回，保持张力",
+        cautions:["不要耸肩","不要用下背后仰代偿","重量过大容易变成摆动"]
       },
       {
-        id:"curl",
-        title:"哑铃弯举 / 锤式弯举",
-        keywords:["哑铃弯举","锤式弯举","弯举"],
-        focus:["肱二头","肱肌","肱桡肌"],
-        diagram:"弯举：掌心向上卷起\n锤式：掌心相对卷起\n全程上臂尽量固定",
+        id:"reverse-fly",
+        title:"俯身反向飞鸟",
+        keywords:["俯身反向飞鸟","反向飞鸟","后束飞鸟"],
+        focus:["后束","菱形肌","肩胛稳定"],
+        diagram:"起始：髋折叠俯身，双臂自然下垂，肘微屈\n打开：双臂向身体两侧抬起，像展开翅膀\n下放：控制回到起始位",
+        cautions:["不要耸肩","重量宁轻勿重","保持躯干稳定，不要靠摆动甩起"]
+      },
+      {
+        id:"db-curl",
+        title:"哑铃弯举",
+        keywords:["哑铃弯举"],
+        focus:["肱二头"],
+        diagram:"起始：双手持哑铃，掌心向前或自然旋转\n弯举：上臂尽量固定，前臂向上卷起\n下放：控制回到底部，不要完全放松张力",
         cautions:["不要摆腰借力","手腕别后折","顶端停顿一下会更容易找到发力"]
+      },
+      {
+        id:"hammer-curl",
+        title:"锤式弯举",
+        keywords:["锤式弯举"],
+        focus:["肱肌","肱桡肌","肱二头辅助"],
+        diagram:"起始：双手持哑铃，掌心相对\n弯举：保持锤式握法向上卷起\n下放：控制回到底部，保持肘部位置稳定",
+        cautions:["不要摆腰借力","肘不要向前飘太多","重量过大时容易变成甩动"]
       },
       {
         id:"triceps-overhead",
@@ -4986,12 +5222,44 @@
         cautions:["只要拉伸感，不追求疼痛","酸痛明显时减小幅度","两侧都做，注意左右差异"]
       },
       {
-        id:"walk-stretch",
-        title:"快走 / 散步 / 拉伸",
-        keywords:["快走","散步","拉伸"],
-        focus:["恢复","循环","活动度"],
-        diagram:"快走/散步：保持轻微气喘但能说话\n拉伸：缓慢进入拉伸位，保持呼吸稳定",
-        cautions:["恢复日不要做成高强度有氧","拉伸不要弹震","有疼痛而不是拉伸感时立即停"]
+        id:"brisk-walk",
+        title:"快走",
+        keywords:["快走"],
+        focus:["恢复","循环","低强度有氧"],
+        diagram:"保持轻微气喘但能说话的节奏，步幅自然，手臂轻微摆动\n结束前逐渐放慢，不要突然停下",
+        cautions:["恢复日不要做成高强度冲刺","膝踝不适时降低速度","保持能稳定呼吸的强度"]
+      },
+      {
+        id:"walk",
+        title:"散步",
+        keywords:["散步"],
+        focus:["恢复","循环","放松"],
+        diagram:"保持轻松步速，呼吸自然，身体放松\n适合休息日或训练后作为低压力活动",
+        cautions:["不要为了补量走到疲劳明显","脚底或膝盖不适时减少时长","天气或路面差时优先安全"]
+      },
+      {
+        id:"upper-body-stretch",
+        title:"胸、背、肩拉伸",
+        keywords:["胸、背、肩拉伸","胸、背、髋部拉伸","肩背拉伸","肩部轻拉伸"],
+        focus:["胸背肩活动度","恢复"],
+        diagram:"围绕胸、背、肩做轻柔拉伸，每个方向保持稳定呼吸\n需要髋部放松时另加髋屈肌或内收肌拉伸",
+        cautions:["拉伸不要弹震","只要拉伸感，不追求疼痛","肩前侧不适时缩小幅度"]
+      },
+      {
+        id:"full-body-stretch",
+        title:"全身拉伸",
+        keywords:["全身拉伸","全身轻拉伸"],
+        focus:["全身恢复","活动度"],
+        diagram:"按肩背、髋、腿后侧、内侧等部位依次轻柔拉伸\n每个动作保持稳定呼吸，整体以恢复为主",
+        cautions:["不要把恢复拉伸做成高强度训练","酸痛明显的部位缩短时间","出现刺痛或麻木立即停止"]
+      },
+      {
+        id:"general-stretch",
+        title:"拉伸",
+        keywords:["拉伸","通用拉伸"],
+        focus:["恢复","活动度"],
+        diagram:"缓慢进入拉伸位，保持稳定呼吸，再缓慢退出\n具体部位按当天计划文字执行",
+        cautions:["不要弹震","有疼痛而不是拉伸感时立即停","训练后拉伸以放松为主"]
       }
     ];
 
@@ -5022,15 +5290,19 @@
       "下斜俯卧撑": { gif:"0279.gif", label:"下斜俯卧撑", note:"" },
       "宽距俯卧撑": { gif:"1311.gif", label:"宽距俯卧撑", note:"" },
       "俯卧撑": { gif:"0662.gif", label:"标准俯卧撑", note:"" },
+      "标准俯卧撑": { gif:"0662.gif", label:"标准俯卧撑", note:"" },
       "窄距俯卧撑": { gif:"0259.gif", label:"窄距俯卧撑", note:"" },
       "机械递减俯卧撑": { gif:"3211.gif", label:"机械递减参考：跪姿俯卧撑", note:"用于演示力竭后切到更容易版本的思路。" },
-      "哑铃地板卧推": { gif:"0289.gif", label:"近似替代图示：哑铃卧推", note:"源库未收录同名 floor press GIF，已用最接近的哑铃卧推动作替代。" },
+      "哑铃地板卧推": { gif:"custom_dumbbell_floor_press.webp", label:"哑铃地板卧推", note:"现成动作图，用于参考地板卧推的肘部触地和受控推起。", sourceUrl:"https://loadmuscle.com/exercises/dumbbell-alternating-floor-press", sourceLabel:"素材来源：LoadMuscle" },
       "哑铃飞鸟": { gif:"0308.gif", label:"哑铃飞鸟", note:"" },
       "哑铃肩推": { gif:"0405.gif", label:"哑铃肩推", note:"演示为坐姿版本。" },
       "侧平举": { gif:"0334.gif", label:"侧平举", note:"" },
+      "单臂侧平举": { gif:"custom_single_arm_lateral_raise.webp", label:"单臂侧平举", note:"现成动作图，用于参考单侧抬臂轨迹；素材为拉力器单臂侧平举，发力路径与哑铃单臂侧平举接近。", sourceUrl:"https://loadmuscle.com/exercises/cable-single-arm-lateral-raise", sourceLabel:"素材来源：LoadMuscle" },
+      "弹力绳侧平举": { gif:"custom_band_lateral_raise.webp", label:"弹力绳侧平举", note:"现成动作图，用于参考弹力绳侧平举的持续张力和抬臂轨迹。", sourceUrl:"https://loadmuscle.com/exercises/band-lateral-raise", sourceLabel:"素材来源：LoadMuscle" },
       "前平举": { gif:"0310.gif", label:"前平举", note:"" },
       "仰卧举腿": { gif:"0620.gif", label:"仰卧举腿", note:"" },
       "反向卷腹": { gif:"0872.gif", label:"反向卷腹", note:"" },
+      "短平板支撑": { gif:"2135.gif", label:"近似替代图示：短平板支撑", note:"使用平板支撑动作姿势参考；短平板支撑区别在于保持时间更短、质量优先。" },
       "平板支撑": { gif:"2135.gif", label:"近似替代图示：平板支撑", note:"源库仅提供加重版平板支撑 GIF，可作为动作姿势参考。" },
       "侧桥": { gif:"0705.gif", label:"侧桥", note:"" },
       "死虫": { gif:"0276.gif", label:"死虫", note:"" },
@@ -5038,6 +5310,8 @@
       "俄罗斯转体": { gif:"0687.gif", label:"俄罗斯转体", note:"" },
       "引体向上": { gif:"0652.gif", label:"引体向上", note:"" },
       "离心引体向上": { gif:"0652.gif", label:"离心引体向上说明", note:"使用同一动作轨迹参考：可借助跳起到顶点，然后用 3–5 秒慢慢下放。" },
+      "引体向上顶峰停留": { gif:"custom_pull_up_hold.webp", label:"引体向上顶峰停留", note:"现成动作图，用于参考顶端保持时的下巴、肩胛和躯干位置。", sourceUrl:"https://loadmuscle.com/exercises/top-pull-up-hold", sourceLabel:"素材来源：LoadMuscle" },
+      "引体向上/弹力绳高位下拉": { gif:"0652.gif", label:"组合项参考：引体向上", note:"组合项按当天能力在引体向上和弹力绳高位下拉之间选择；弹力绳版本请查看对应动作。" },
       "单臂哑铃划船": { gif:"1330.gif", label:"近似替代图示：单臂哑铃划船", note:"源库为单臂哑铃划船变式。" },
       "俯身双哑铃划船": { gif:"0293.gif", label:"俯身双哑铃划船", note:"" },
       "弹力绳划船": { gif:"0988.gif", label:"弹力绳划船", note:"" },
@@ -5050,6 +5324,431 @@
       "哑铃杯式深蹲": { gif:"1760.gif", label:"哑铃杯式深蹲", note:"" },
       "哑铃罗马尼亚硬拉": { gif:"1459.gif", label:"哑铃罗马尼亚硬拉", note:"" }
     };
+
+    let externalExerciseLibraryActions = [];
+    let exerciseLibraryCache = null;
+
+    function stableTextHash(text){
+      const raw = String(text || "");
+      let hash = 2166136261;
+      for(let i = 0; i < raw.length; i += 1){
+        hash ^= raw.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+      }
+      return (hash >>> 0).toString(36);
+    }
+
+    function makeExerciseKey(prefix, text){
+      return `${prefix}_${stableTextHash(text)}`;
+    }
+
+    function uniqueCleanList(values){
+      const seen = new Set();
+      return (Array.isArray(values) ? values : [values])
+        .flatMap((value) => Array.isArray(value) ? value : [value])
+        .map((value) => String(value || "").trim())
+        .filter((value) => {
+          if(!value || seen.has(value)) return false;
+          seen.add(value);
+          return true;
+        });
+    }
+
+    function inferExerciseCategory(name, focus = []){
+      const text = `${name || ""} ${uniqueCleanList(focus).join(" ")}`;
+      if(/拉伸|散步|快走|恢复|放松/.test(text)) return "recovery";
+      if(/胸|俯卧撑|卧推|飞鸟/.test(text)) return "push";
+      if(/背|划船|引体|下拉|面拉/.test(text)) return "pull";
+      if(/肩|平举|肩推/.test(text)) return "shoulder";
+      if(/腿|蹲|硬拉|提踵|臀|腘/.test(text)) return "legs";
+      if(/腹|核心|平板|侧桥|死虫|卷腹|转体/.test(text)) return "core";
+      return "general";
+    }
+
+    function normalizeExerciseLibraryAction(action, fallback = {}){
+      const displayName = String(action?.displayName || action?.title || action?.name || fallback.displayName || "").trim();
+      const aliases = uniqueCleanList([
+        displayName,
+        action?.aliases,
+        action?.keywords,
+        fallback.aliases
+      ]);
+      const sourceName = displayName || aliases[0] || fallback.displayName || fallback.exerciseKey || "自定义动作";
+      const exerciseKey = String(action?.exerciseKey || action?.id || fallback.exerciseKey || makeExerciseKey("ex", sourceName)).trim();
+      const mediaPath = action?.media?.path || action?.mediaPath || action?.gifPath || (action?.gif ? `gifs/${action.gif}` : fallback.media?.path || "");
+      const sourceUrl = action?.sourceUrl || action?.media?.sourceUrl || fallback.sourceUrl || "";
+      const sourceLabel = action?.sourceLabel || action?.media?.sourceLabel || fallback.sourceLabel || "";
+      const focus = uniqueCleanList([action?.muscleGroups, action?.focus, fallback.muscleGroups]);
+      const normalized = {
+        exerciseKey,
+        displayName: sourceName,
+        aliases,
+        category: action?.category || fallback.category || inferExerciseCategory(sourceName, focus),
+        muscleGroups: focus,
+        normalizationTags: uniqueCleanList([action?.normalizationTags, fallback.normalizationTags, action?.category]),
+        userCreated: !!(action?.userCreated || fallback.userCreated),
+        status: action?.status || fallback.status || "confirmed",
+        auditLog: Array.isArray(action?.auditLog) ? action.auditLog : (fallback.auditLog || []),
+        guide: {
+          diagram: action?.guide?.diagram || action?.diagram || fallback.guide?.diagram || "",
+          cautions: uniqueCleanList([action?.guide?.cautions, action?.cautions, fallback.guide?.cautions])
+        },
+        media: mediaPath ? {
+          path: mediaPath,
+          label: action?.media?.label || action?.label || fallback.media?.label || sourceName,
+          note: action?.media?.note || action?.note || fallback.media?.note || "",
+          sourceUrl,
+          sourceLabel
+        } : null
+      };
+      if(sourceUrl || sourceLabel){
+        normalized.auditLog = [
+          ...normalized.auditLog,
+          {
+            type:"source",
+            sourceUrl,
+            sourceLabel,
+            status:normalized.status,
+            at: action?.sourceCheckedAt || fallback.sourceCheckedAt || ""
+          }
+        ].filter((item) => item.sourceUrl || item.sourceLabel || item.type !== "source");
+      }
+      return normalized;
+    }
+
+    function mergeExerciseLibraryAction(base, patch){
+      const next = normalizeExerciseLibraryAction({
+        ...base,
+        ...patch,
+        aliases: uniqueCleanList([base?.aliases, patch?.aliases]),
+        muscleGroups: uniqueCleanList([base?.muscleGroups, patch?.muscleGroups]),
+        normalizationTags: uniqueCleanList([base?.normalizationTags, patch?.normalizationTags]),
+        auditLog: [...(Array.isArray(base?.auditLog) ? base.auditLog : []), ...(Array.isArray(patch?.auditLog) ? patch.auditLog : [])],
+        guide: {
+          diagram: patch?.guide?.diagram || base?.guide?.diagram || "",
+          cautions: uniqueCleanList([base?.guide?.cautions, patch?.guide?.cautions])
+        },
+        media: patch?.media || base?.media || null
+      }, base);
+      return next;
+    }
+
+    function findExerciseGuideForName(name){
+      const raw = String(name || "").trim();
+      if(!raw) return null;
+      const candidates = (EXERCISE_GUIDES || []).map((guide) => {
+        const titleParts = String(guide.title || "").split(/[\/／]/).map((part) => part.trim()).filter(Boolean);
+        return { guide, keywords:uniqueCleanList([guide.keywords, titleParts, guide.title]) };
+      });
+      const exact = candidates.find((entry) => entry.keywords.some((keyword) => keyword === raw));
+      if(exact) return exact.guide;
+      const containsRaw = candidates.find((entry) => entry.keywords.some((keyword) => keyword.includes(raw)));
+      if(containsRaw) return containsRaw.guide;
+      const rawContainsKeyword = candidates.find((entry) => entry.keywords.some((keyword) => raw.includes(keyword)));
+      return rawContainsKeyword?.guide || null;
+    }
+
+    function addExerciseLibraryAction(map, action, fallback = {}){
+      const normalized = normalizeExerciseLibraryAction(action, fallback);
+      const existing = map.get(normalized.exerciseKey);
+      map.set(normalized.exerciseKey, existing ? mergeExerciseLibraryAction(existing, normalized) : normalized);
+      return map.get(normalized.exerciseKey);
+    }
+
+    function getCustomExerciseLibraryActions(){
+      const list = safeJsonParse(localStorage.getItem(CUSTOM_EXERCISE_LIBRARY_KEY) || "[]", []);
+      return Array.isArray(list) ? list : [];
+    }
+
+    function setCustomExerciseLibraryActions(actions){
+      const safe = Array.isArray(actions) ? actions.map((action) => normalizeExerciseLibraryAction(action)) : [];
+      localStorage.setItem(CUSTOM_EXERCISE_LIBRARY_KEY, JSON.stringify(safe));
+      exerciseLibraryCache = null;
+      return safe;
+    }
+
+    function getExerciseTemplateDrafts(){
+      const drafts = safeJsonParse(localStorage.getItem(EXERCISE_TEMPLATE_DRAFTS_KEY) || "[]", []);
+      return Array.isArray(drafts) ? drafts : [];
+    }
+
+    function setExerciseTemplateDrafts(drafts){
+      const safe = Array.isArray(drafts) ? drafts : [];
+      localStorage.setItem(EXERCISE_TEMPLATE_DRAFTS_KEY, JSON.stringify(safe));
+      return safe;
+    }
+
+    function createExerciseTemplateDraft(name, options = {}){
+      const displayName = String(name || "").trim();
+      if(!displayName) return null;
+      const existing = readExerciseLibraryAction(displayName);
+      if(existing) return { status:"existing", action:existing };
+      const draft = {
+        id:`draft_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        displayName,
+        aliases:uniqueCleanList([displayName, options.aliases]),
+        explanation:options.explanation || "",
+        guide:{
+          diagram:options.diagram || "",
+          cautions:uniqueCleanList(options.cautions || [])
+        },
+        muscleGroups:uniqueCleanList(options.muscleGroups || []),
+        normalizationTags:uniqueCleanList(options.normalizationTags || []),
+        sources:uniqueCleanList(options.sources || ["user_chat"]),
+        status:"pending_confirmation",
+        sourceText:options.sourceText || "",
+        createdAt:new Date().toISOString()
+      };
+      setExerciseTemplateDrafts([draft, ...getExerciseTemplateDrafts().filter((item) => item.displayName !== displayName)].slice(0, 20));
+      return { status:"draft", draft };
+    }
+
+    function confirmExerciseTemplateDraft(draftId){
+      const drafts = getExerciseTemplateDrafts();
+      const draft = drafts.find((item) => item.id === draftId);
+      if(!draft) return { status:"not_found" };
+      if(!draft.guide?.cautions?.length){
+        return { status:"needs_review", reason:"missing_cautions", draft };
+      }
+      const action = normalizeExerciseLibraryAction({
+        ...draft,
+        exerciseKey: makeExerciseKey("custom", draft.displayName),
+        userCreated:true,
+        status:"confirmed",
+        auditLog:[{ type:"user_confirmed", at:new Date().toISOString(), sourceText:draft.sourceText || "" }]
+      });
+      setCustomExerciseLibraryActions([action, ...getCustomExerciseLibraryActions().filter((item) => item.exerciseKey !== action.exerciseKey)]);
+      setExerciseTemplateDrafts(drafts.filter((item) => item.id !== draftId));
+      return { status:"confirmed", action };
+    }
+
+    function getExerciseLibraryAliasPatches(){
+      return {
+        pullup:["引体","正手引体"],
+        "eccentric-pullup":["引体离心"],
+        "standard-pushup":["标准俯卧撑","徒手俯卧撑"],
+        "close-grip-pushup":["窄距"],
+        "lat-pulldown-band":["弹力带高位下拉","阻力带高位下拉"],
+        "band-row":["弹力带划船","阻力带划船"],
+        "single-arm-db-row":["单臂划船"],
+        "band-face-pull":["面拉","弹力带面拉"],
+        "reverse-fly":["反向飞鸟","后束飞鸟"],
+        "side-plank":["侧平板","侧向平板支撑"]
+      };
+    }
+
+    function getDefaultExerciseLibrary(){
+      const map = new Map();
+      (EXERCISE_GUIDES || []).forEach((guide) => {
+        const displayName = String(guide.title || "").split(/[\/／]/)[0].trim() || guide.title;
+        addExerciseLibraryAction(map, {
+          exerciseKey: guide.id || makeExerciseKey("guide", displayName),
+          displayName,
+          aliases: uniqueCleanList([guide.title, guide.keywords]),
+          muscleGroups: guide.focus || [],
+          normalizationTags: [guide.id || "", inferExerciseCategory(displayName, guide.focus)],
+          guide:{
+            diagram:guide.diagram || "",
+            cautions:guide.cautions || []
+          },
+          status:"confirmed"
+        });
+      });
+      Object.entries(EXERCISE_GIF_MAP || {}).forEach(([name, media]) => {
+        const guide = findExerciseGuideForName(name) || findExerciseGuideForName(media?.label);
+        const exerciseKey = guide?.id || makeExerciseKey("gif", media?.label || name);
+        const displayName = guide ? String(guide.title || "").split(/[\/／]/)[0].trim() : (media?.label || name);
+        addExerciseLibraryAction(map, {
+          exerciseKey,
+          displayName,
+          aliases: uniqueCleanList([name, media?.label, guide?.keywords, guide?.title]),
+          muscleGroups: guide?.focus || [],
+          normalizationTags: [guide?.id || "", "gif_media"].filter(Boolean),
+          guide:{
+            diagram:guide?.diagram || "",
+            cautions:guide?.cautions || []
+          },
+          media:{
+            path:`gifs/${media.gif}`,
+            label:media.label || displayName,
+            note:media.note || "",
+            sourceUrl:media.sourceUrl || "",
+            sourceLabel:media.sourceLabel || ""
+          },
+          sourceUrl:media.sourceUrl || "",
+          sourceLabel:media.sourceLabel || "",
+          status:"confirmed"
+        });
+      });
+      (TRAINING_CAPTURE_ACTION_ALIASES || []).forEach((entry) => {
+        const guide = findExerciseGuideForName(entry.canonical);
+        addExerciseLibraryAction(map, {
+          exerciseKey: guide?.id || makeExerciseKey("alias", entry.canonical),
+          displayName: entry.canonical,
+          aliases: entry.aliases || [],
+          muscleGroups: guide?.focus || [],
+          normalizationTags:["capture_alias"]
+        });
+      });
+      const patches = getExerciseLibraryAliasPatches();
+      Object.entries(patches).forEach(([exerciseKey, aliases]) => {
+        const existing = map.get(exerciseKey);
+        if(existing){
+          map.set(exerciseKey, mergeExerciseLibraryAction(existing, { exerciseKey, aliases }));
+        }
+      });
+      [...externalExerciseLibraryActions, ...getCustomExerciseLibraryActions()].forEach((action) => {
+        addExerciseLibraryAction(map, action);
+      });
+      return Array.from(map.values()).sort((a, b) => a.displayName.localeCompare(b.displayName, "zh-CN"));
+    }
+
+    function getExerciseLibrary(options = {}){
+      if(!exerciseLibraryCache || options.refresh){
+        exerciseLibraryCache = getDefaultExerciseLibrary();
+      }
+      return exerciseLibraryCache.map((entry) => ({ ...entry, aliases:[...(entry.aliases || [])] }));
+    }
+
+    function getExerciseLibraryMediaKeys(){
+      return Object.keys(EXERCISE_GIF_MAP || {});
+    }
+
+    function isExerciseLibraryMatch(entry, query){
+      const raw = String(query || "").trim();
+      if(!raw || !entry) return false;
+      const normalizedRaw = normalizeTrainingSearchText(raw);
+      const names = uniqueCleanList([entry.displayName, entry.aliases]);
+      return names.some((name) => {
+        const normalizedName = normalizeTrainingSearchText(name);
+        if(name === raw || normalizedName === normalizedRaw) return true;
+        if(name.includes(raw) || normalizedName.includes(normalizedRaw)) return raw.length >= 2;
+        const isSpecificAlias = raw.length <= String(name || "").length || String(name || "").length >= 3 || /^[a-z0-9 ]+$/i.test(name);
+        return isSpecificAlias && (raw.includes(name) || normalizedRaw.includes(normalizedName));
+      });
+    }
+
+    function readExerciseLibraryAction(query){
+      const raw = String(query || "").trim();
+      if(!raw) return null;
+      const library = getExerciseLibrary();
+      const exact = library.find((entry) => uniqueCleanList([entry.displayName, entry.aliases]).some((name) => name === raw));
+      if(exact) return exact;
+      return library.find((entry) => isExerciseLibraryMatch(entry, raw)) || null;
+    }
+
+    function getExerciseActionForPlanItem(itemText){
+      const name = getPlanItemExerciseName(itemText);
+      return readExerciseLibraryAction(name) || readExerciseLibraryAction(itemText) || normalizeExerciseLibraryAction({
+        exerciseKey: makeExerciseKey("custom", name || itemText),
+        displayName: name || itemText,
+        aliases:[name, itemText],
+        userCreated:true,
+        status:"draft"
+      });
+    }
+
+    async function loadExerciseLibraryFromFiles(){
+      try{
+        const response = await fetch(EXERCISE_LIBRARY_FILE, { cache:"no-cache" });
+        if(!response || !response.ok) return { status:"fallback", actions:getExerciseLibrary() };
+        const data = await response.json();
+        externalExerciseLibraryActions = Array.isArray(data?.actions) ? data.actions : (Array.isArray(data) ? data : []);
+        exerciseLibraryCache = null;
+        return { status:"loaded", actions:getExerciseLibrary({ refresh:true }) };
+      }catch(err){
+        return { status:"fallback", actions:getExerciseLibrary() };
+      }
+    }
+
+    let exerciseLibraryQuery = "";
+    let activeExerciseLibraryKey = "";
+
+    function getFilteredExerciseLibrary(){
+      const query = String(exerciseLibraryQuery || "").trim();
+      const library = getExerciseLibrary();
+      if(!query) return library.slice(0, 80);
+      return library.filter((entry) => isExerciseLibraryMatch(entry, query)).slice(0, 80);
+    }
+
+    function formatExerciseLibraryMeta(action){
+      return [
+        action.category || "",
+        (action.muscleGroups || []).slice(0, 4).join(" / "),
+        action.media?.path ? "有图解" : ""
+      ].filter(Boolean).join(" · ");
+    }
+
+    function renderExerciseLibraryDetail(action){
+      const box = $("exerciseLibraryDetail");
+      if(!box) return;
+      if(!action){
+        box.innerHTML = `<div class="help">选择一个动作后，这里会显示图解、发力重点和注意事项。</div>`;
+        return;
+      }
+      const cautions = (action.guide?.cautions || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+      const aliases = (action.aliases || []).filter((alias) => alias !== action.displayName).slice(0, 12).join("、");
+      box.innerHTML = `
+        <div class="exercise-library-entry-title">${escapeHtml(action.displayName)}</div>
+        <div class="exercise-library-entry-meta">${escapeHtml(formatExerciseLibraryMeta(action))}</div>
+        <div class="guide-meta">exerciseKey：${escapeHtml(action.exerciseKey)}</div>
+        ${aliases ? `<div class="guide-meta">别名：${escapeHtml(aliases)}</div>` : ""}
+        ${action.media?.path ? `<img class="exercise-library-media" src="${escapeHtml(action.media.path)}" alt="${escapeHtml(action.media.label || action.displayName)}" loading="lazy" decoding="async">` : ""}
+        ${action.media?.note ? `<div class="guide-meta">${escapeHtml(action.media.note)}</div>` : ""}
+        ${action.guide?.diagram ? `<div class="guide-diagram">${escapeHtml(action.guide.diagram)}</div>` : ""}
+        ${cautions ? `<ul class="guide-list">${cautions}</ul>` : ""}
+        ${action.media?.sourceUrl ? `<div class="guide-meta"><a class="guide-source-link" href="${escapeHtml(action.media.sourceUrl)}" target="_blank" rel="noopener">${escapeHtml(action.media.sourceLabel || "素材来源")}</a></div>` : ""}
+      `;
+    }
+
+    function renderExerciseLibrary(){
+      const list = $("exerciseLibraryList");
+      const status = $("exerciseLibraryStatus");
+      if(!list) return;
+      const actions = getFilteredExerciseLibrary();
+      const library = getExerciseLibrary();
+      if(status){
+        status.textContent = `已加载 ${library.length} 个动作；当前显示 ${actions.length} 个。`;
+      }
+      if(!activeExerciseLibraryKey || !library.some((action) => action.exerciseKey === activeExerciseLibraryKey)){
+        activeExerciseLibraryKey = actions[0]?.exerciseKey || "";
+      }
+      list.innerHTML = actions.map((action) => `
+        <button class="exercise-library-entry ${action.exerciseKey === activeExerciseLibraryKey ? "active" : ""}" data-exercise-key="${escapeHtml(action.exerciseKey)}" type="button">
+          <div class="exercise-library-entry-title">${escapeHtml(action.displayName)}</div>
+          <div class="exercise-library-entry-meta">${escapeHtml(formatExerciseLibraryMeta(action))}</div>
+        </button>
+      `).join("") || `<div class="softbox">没有找到匹配动作。</div>`;
+      list.querySelectorAll("[data-exercise-key]").forEach((btn) => {
+        btn.onclick = () => {
+          activeExerciseLibraryKey = btn.getAttribute("data-exercise-key") || "";
+          renderExerciseLibrary();
+        };
+      });
+      renderExerciseLibraryDetail(library.find((action) => action.exerciseKey === activeExerciseLibraryKey) || actions[0] || null);
+    }
+
+    function bindExerciseLibraryControls(){
+      const input = $("exerciseLibrarySearch");
+      if(input && input.dataset.bound !== "1"){
+        input.dataset.bound = "1";
+        input.addEventListener("input", () => {
+          exerciseLibraryQuery = input.value;
+          activeExerciseLibraryKey = "";
+          renderExerciseLibrary();
+        });
+      }
+      const reload = $("reloadExerciseLibraryBtn");
+      if(reload && reload.dataset.bound !== "1"){
+        reload.dataset.bound = "1";
+        reload.onclick = async () => {
+          const status = $("exerciseLibraryStatus");
+          if(status) status.textContent = "正在刷新动作库...";
+          await loadExerciseLibraryFromFiles();
+          renderExerciseLibrary();
+        };
+      }
+    }
 
     let planGuideQuery = "";
     let activeGuideItemText = "";
@@ -6151,26 +6850,37 @@
 
     const TRAINING_CAPTURE_ACTION_ALIASES = [
       { canonical:"引体向上", aliases:["引体向上","引体","pull up","pull-up","pullup","pull ups","pull-ups"] },
+      { canonical:"离心引体向上", aliases:["离心引体向上","引体离心","eccentric pull up","eccentric pull-up"] },
+      { canonical:"引体向上顶峰停留", aliases:["引体向上顶峰停留","顶峰停留引体","引体顶峰停留","pull up hold","pull-up hold"] },
       { canonical:"俯卧撑", aliases:["俯卧撑","push up","push-up","pushups","push ups"] },
+      { canonical:"窄距俯卧撑", aliases:["窄距俯卧撑","close grip push up","close-grip push-up"] },
+      { canonical:"机械递减俯卧撑", aliases:["机械递减俯卧撑","mechanical drop pushup","mechanical drop push-up"] },
       { canonical:"侧平举", aliases:["侧平举","侧平","lateral raise","side raise"] },
+      { canonical:"单臂侧平举", aliases:["单臂侧平举","单侧侧平举","single arm lateral raise","single-arm lateral raise"] },
+      { canonical:"弹力绳侧平举", aliases:["弹力绳侧平举","弹力带侧平举","band lateral raise"] },
       { canonical:"哑铃飞鸟", aliases:["哑铃飞鸟","dumbbell fly","db fly"] },
       { canonical:"俯身反向飞鸟", aliases:["俯身反向飞鸟","反向飞鸟","reverse fly","rear delt fly"] },
       { canonical:"哑铃肩推", aliases:["哑铃肩推","肩推","shoulder press"] },
       { canonical:"哑铃地板卧推", aliases:["哑铃地板卧推","地板卧推","卧推","bench press","floor press"] },
       { canonical:"哑铃杯式深蹲", aliases:["哑铃杯式深蹲","杯式深蹲","深蹲","squat","goblet squat"] },
       { canonical:"哑铃罗马尼亚硬拉", aliases:["哑铃罗马尼亚硬拉","罗马尼亚硬拉","硬拉","rdl","deadlift"] },
-      { canonical:"单臂哑铃划船", aliases:["单臂哑铃划船","哑铃划船","划船","row","dumbbell row"] },
+      { canonical:"单臂哑铃划船", aliases:["单臂哑铃划船","单臂划船","single arm dumbbell row","single-arm dumbbell row"] },
+      { canonical:"俯身双哑铃划船", aliases:["俯身双哑铃划船","双哑铃划船","bent over dumbbell row","bent-over dumbbell row"] },
+      { canonical:"弹力绳划船", aliases:["弹力绳划船","弹力带划船","阻力带划船","band row"] },
       { canonical:"弹力绳面拉", aliases:["弹力绳面拉","面拉","face pull"] },
-      { canonical:"哑铃弯举", aliases:["哑铃弯举","弯举","curl"] },
+      { canonical:"哑铃弯举", aliases:["哑铃弯举","dumbbell curl","db curl"] },
       { canonical:"锤式弯举", aliases:["锤式弯举","hammer curl"] },
       { canonical:"平板支撑", aliases:["平板支撑","plank"] },
+      { canonical:"短平板支撑", aliases:["短平板支撑","short plank"] },
       { canonical:"侧桥", aliases:["侧桥","侧平板","侧向平板支撑","side plank","side plank hold"] },
       { canonical:"死虫", aliases:["死虫","dead bug","deadbug"] },
       { canonical:"卷腹", aliases:["卷腹","crunch","crunches"] },
-      { canonical:"反向卷腹", aliases:["反向卷腹","仰卧举腿","reverse crunch","leg raise"] },
+      { canonical:"反向卷腹", aliases:["反向卷腹","reverse crunch"] },
+      { canonical:"仰卧举腿", aliases:["仰卧举腿","leg raise"] },
       { canonical:"俄罗斯转体", aliases:["俄罗斯转体","russian twist"] },
       { canonical:"跑步", aliases:["跑步","跑了","慢跑","run","running"] },
       { canonical:"快走", aliases:["快走","walk","walking"] },
+      { canonical:"散步", aliases:["散步","stroll"] },
       { canonical:"腿部训练", aliases:["练腿","腿练","练完腿","腿部训练"] }
     ];
 
@@ -6269,6 +6979,9 @@
       if(skip) return { action:"capture", recordType:"skipped_training", reason:"skipped_training" };
       const metric = /体重\s*\d|睡了\s*\d|睡眠\s*\d|主观疲劳\s*\d|疲劳\s*\d\s*分/.test(raw);
       if(metric) return { action:"capture", recordType:"body_metric", reason:"body_metric" };
+      if(isShortTrainingReferenceText(raw)){
+        return { action:"capture", recordType:"training_fact", reason:"short_training_reference" };
+      }
       const exercise = matchExerciseFromText(raw, options);
       const trainingVerb = /做了|做完|完成|练了|练完|跑了|走了|打卡|组|每组|次数|reps?|kg|公斤|分钟|min/.test(t);
       const trainingFeeling = /练完|训练后|练得|发力|没感觉|酸|泵感|重量|力竭|代偿|状态/.test(raw);
@@ -6384,12 +7097,18 @@
       const base = now instanceof Date && Number.isFinite(now.getTime()) ? now : new Date();
       if(/前天/.test(raw)) return formatDateKey(addDays(base, -2));
       if(/昨天|昨晚/.test(raw)) return formatDateKey(addDays(base, -1));
-      const weekMatch = raw.match(/(上周)?周([一二三四五六日天])/);
+      const weekMatch = raw.match(/(?:(上周|本周|这周)([一二三四五六日天])|周([一二三四五六日天]))/);
       if(weekMatch){
-        const weekday = { 一:1, 二:2, 三:3, 四:4, 五:5, 六:6, 日:7, 天:7 }[weekMatch[2]];
+        const weekdayText = weekMatch[2] || weekMatch[3];
+        const weekday = { 一:1, 二:2, 三:3, 四:4, 五:5, 六:6, 日:7, 天:7 }[weekdayText];
         const range = getCurrentWeekRange(base);
         const currentWeekDate = parseDateKey(range.dates[weekday - 1]);
-        return formatDateKey(addDays(currentWeekDate, weekMatch[1] ? -7 : 0));
+        if(weekMatch[1] === "上周") return formatDateKey(addDays(currentWeekDate, -7));
+        const futurePlanIntent = /这周|本周|要|准备|打算|计划/.test(raw);
+        if(!futurePlanIntent && currentWeekDate && currentWeekDate.getTime() > base.getTime()){
+          return formatDateKey(addDays(currentWeekDate, -7));
+        }
+        return formatDateKey(currentWeekDate);
       }
       return formatDateKey(base);
     }
@@ -6617,10 +7336,21 @@
         ? activeSession.date
         : resolveTrainingCaptureDate(text, options.now || new Date());
       const recordType = inferRecordTypeFromText(text, intent);
-      const currentValue = enrichCaptureValueWithMatchedPlan(
+      const baseCurrentValue = applyActiveTrainingReferenceToValue(
         buildCaptureCurrentValue(text, recordType, exerciseMatch),
+        date
+      );
+      const currentValue = enrichCaptureValueWithMatchedPlan(
+        baseCurrentValue,
         { date, recordType }
       );
+      if(recordType === "training_fact" && isShortTrainingReferenceText(text) && !currentValue.exercise){
+        return {
+          action:"follow_up",
+          reason:"ambiguous_short_training_reference",
+          prompt:"这条我还不能确定要续在哪个动作上，所以先不记录。你说一下动作名我再帮你记。"
+        };
+      }
       const completedExplicit = /做完|完成|练完|打卡了|全做完/.test(String(text || ""));
       if(recordType === "training_fact" && completedExplicit && exerciseMatches.length > 1){
         currentValue.completedExercises = exerciseMatches.map((match) => match.canonical);
@@ -6810,20 +7540,132 @@
       return (date.getDay() + 6) % 7;
     }
 
+    function getPlanDayType(day = {}){
+      const text = `${day.day || ""} ${day.focus || ""}`.trim();
+      return /恢复|休息/.test(text) ? "note_only" : "training";
+    }
+
+    function getPlanItemTargetDose(itemText){
+      const text = String(itemText || "");
+      const dose = parsePlanItemTrainingDose(text);
+      if(dose.plannedSets) return { targetAmount:dose.plannedSets, unit:"组", plannedRepsText:dose.plannedRepsText || "", plannedDurationText:dose.plannedDurationText || "" };
+      const rounds = text.match(/(\d+)\s*轮/);
+      if(rounds) return { targetAmount:Number(rounds[1]), unit:"轮", plannedRepsText:"", plannedDurationText:"" };
+      const duration = text.match(/(\d+(?:\.\d+)?)\s*(分钟|min|秒|s)/i);
+      if(duration) return { targetAmount:Number(duration[1]), unit:/秒|s/i.test(duration[2]) ? "秒" : "分钟", plannedRepsText:"", plannedDurationText:dose.plannedDurationText || `${duration[1]}${duration[2]}` };
+      const reps = text.match(/(\d+)\s*(次|个|下|reps?)/i);
+      if(reps) return { targetAmount:Number(reps[1]), unit:reps[2] || "次", plannedRepsText:dose.plannedRepsText || `${reps[1]}${reps[2] || "次"}`, plannedDurationText:"" };
+      return { targetAmount:1, unit:"项", plannedRepsText:dose.plannedRepsText || "", plannedDurationText:dose.plannedDurationText || "" };
+    }
+
+    function makePlanProgressItemId(dayIndex, itemIndex, itemText, action){
+      const exerciseKey = action?.exerciseKey || makeExerciseKey("item", getPlanItemExerciseName(itemText) || itemText);
+      return `d${dayIndex}_i${itemIndex}_${exerciseKey}`;
+    }
+
+    function buildPlanProgressItem(dayIndex, itemIndex, itemText, previousItems = [], checks = getPlanChecks()){
+      const action = getExerciseActionForPlanItem(itemText);
+      const dose = getPlanItemTargetDose(itemText);
+      const itemId = makePlanProgressItemId(dayIndex, itemIndex, itemText, action);
+      const previous = previousItems.find((item) => item?.itemId === itemId)
+        || previousItems.find((item) => item?.exerciseKey === action.exerciseKey && item?.snapshotDisplayName === action.displayName)
+        || null;
+      const checkKey = `d${dayIndex}_i${itemIndex}`;
+      const checked = !!checks[checkKey];
+      const completedAmount = checked
+        ? dose.targetAmount
+        : Math.min(Number(previous?.completedAmount || 0), dose.targetAmount);
+      return {
+        itemId,
+        planCheckKey:checkKey,
+        sourcePlanItemIndex:itemIndex,
+        exerciseKey:action.exerciseKey,
+        snapshotDisplayName:action.displayName,
+        snapshotItemText:itemText,
+        snapshotAliases:uniqueCleanList(action.aliases),
+        snapshotTags:uniqueCleanList([action.category, action.normalizationTags]),
+        targetAmount:dose.targetAmount,
+        unit:dose.unit,
+        completedAmount,
+        plannedRepsText:dose.plannedRepsText || "",
+        plannedDurationText:dose.plannedDurationText || "",
+        status:completedAmount >= dose.targetAmount ? "completed" : "active",
+        updatedAt:previous?.updatedAt || ""
+      };
+    }
+
+    function buildPlanProgressItemsForDate(dateKey, day, previous = {}){
+      if(previous.dayType === "note_only") return [];
+      if(getPlanDayType(day) !== "training") return [];
+      const dayIndex = getPlanDayIndexForDate(dateKey);
+      const previousItems = Array.isArray(previous.planProgressItems) ? previous.planProgressItems : [];
+      const checks = getPlanChecks();
+      return normalizePlanItemsList(day.items || previous.allItems || [])
+        .map((item, itemIndex) => buildPlanProgressItem(dayIndex, itemIndex, item, previousItems, checks));
+    }
+
+    function buildLegacyCompatibility(previous = {}, nextProgressItems = []){
+      const oldAiRecords = Array.isArray(previous.aiCaptureRecords) ? previous.aiCaptureRecords : [];
+      const removedPlanItems = Array.isArray(previous.planProgressItems)
+        ? previous.planProgressItems
+            .filter((oldItem) => Number(oldItem.completedAmount || 0) > 0 && !nextProgressItems.some((item) => item.itemId === oldItem.itemId))
+            .map((oldItem) => ({
+              itemId:oldItem.itemId,
+              exerciseKey:oldItem.exerciseKey,
+              snapshotDisplayName:oldItem.snapshotDisplayName,
+              completedAmount:oldItem.completedAmount,
+              targetAmount:oldItem.targetAmount,
+              unit:oldItem.unit,
+              removedAt:new Date().toISOString()
+            }))
+        : [];
+      return {
+        ...(previous.legacyCompatibility || {}),
+        allItemsMigrated:Array.isArray(previous.allItems),
+        completedItemsMigrated:Array.isArray(previous.completedItems),
+        aiCaptureRecords:Array.isArray(previous.legacyCompatibility?.aiCaptureRecords)
+          ? previous.legacyCompatibility.aiCaptureRecords
+          : oldAiRecords.map((record) => ({ id:record.id || "", status:"legacy_review", excludedFromSummary:!!record.revoked })),
+        removedPlanItems:[
+          ...(Array.isArray(previous.legacyCompatibility?.removedPlanItems) ? previous.legacyCompatibility.removedPlanItems : []),
+          ...removedPlanItems
+        ]
+      };
+    }
+
+    function normalizeDailyLogV2(dateKey, previous = {}){
+      return buildDailyLogShell(dateKey, previous || {});
+    }
+
     function buildDailyLogShell(dateKey, previous = {}){
       const dayIndex = getPlanDayIndexForDate(dateKey);
       const day = getPlanDays()[dayIndex] || {};
       const checks = getPlanChecks();
       const items = normalizePlanItemsList(day.items || previous.allItems || []);
       const completedItems = items.filter((_, itemIndex) => checks[`d${dayIndex}_i${itemIndex}`]);
+      const dayType = previous.dayType || getPlanDayType(day);
+      const planProgressItems = buildPlanProgressItemsForDate(dateKey, day, previous);
       return {
+        schemaVersion: DAILY_LOG_SCHEMA_VERSION,
         date: dateKey,
+        dayType,
+        snapshotVersion:Number(previous.snapshotVersion || 0) || 1,
         planDay: previous.planDay || day.day || "",
         focus: previous.focus || day.focus || "",
         allItems: previous.allItems || items,
         baseItems: previous.baseItems || day.baseItems || [],
         isTemporaryPlan: !!(previous.isTemporaryPlan || day.isTemporary),
         aiAdjustMessage: previous.aiAdjustMessage || day.temporaryMessage || "",
+        planSource: previous.planSource || (day.isTemporary ? "temporary_ai_plan" : "weekly_plan"),
+        planProgressItems,
+        extraTrainingEvents:Array.isArray(previous.extraTrainingEvents) ? previous.extraTrainingEvents : [],
+        feedbackEvents:Array.isArray(previous.feedbackEvents) ? previous.feedbackEvents : [],
+        temporaryPlanContext: previous.temporaryPlanContext || null,
+        bodyState:{
+          ...(previous.bodyState || {}),
+          weight: previous.bodyState?.weight || previous.weight || "",
+          sleep: previous.bodyState?.sleep || previous.sleep || ""
+        },
         completedItems,
         completedCount: completedItems.length,
         totalItems: Number(previous.totalItems || items.length || 0),
@@ -6832,6 +7674,7 @@
         note: previous.note || "",
         aiCaptureRecords: Array.isArray(previous.aiCaptureRecords) ? previous.aiCaptureRecords : [],
         aiDailySummary: previous.aiDailySummary || null,
+        legacyCompatibility: buildLegacyCompatibility(previous, planProgressItems),
         createdAt: previous.createdAt || new Date().toLocaleString("zh-CN"),
         updatedAt: new Date().toLocaleString("zh-CN"),
         updatedAtIso: new Date().toISOString()
@@ -6847,7 +7690,79 @@
       log.totalItems = items.length;
       log.completedItems = items.filter((_, itemIndex) => checks[`d${dayIndex}_i${itemIndex}`]);
       log.completedCount = log.completedItems.length;
+      log.schemaVersion = DAILY_LOG_SCHEMA_VERSION;
+      log.dayType = log.dayType || getPlanDayType(day);
+      log.planProgressItems = buildPlanProgressItemsForDate(dateKey, day, log);
+      log.legacyCompatibility = buildLegacyCompatibility(log, log.planProgressItems);
       return log;
+    }
+
+    function ensureDailyLogSnapshot(dateOrKey = new Date(), options = {}){
+      const dateKey = typeof dateOrKey === "string" ? dateOrKey : formatDateKey(dateOrKey);
+      const logs = getDailyLogs();
+      const previous = logs[dateKey] || {};
+      const needsBuild = !previous.schemaVersion || Number(previous.schemaVersion) < DAILY_LOG_SCHEMA_VERSION || options.refresh;
+      const next = needsBuild ? buildDailyLogShell(dateKey, previous) : syncDailyLogCompletionFromPlan({ ...previous }, dateKey);
+      logs[dateKey] = next;
+      if(needsBuild || options.persist !== false){
+        setDailyLogs(logs, { syncToCloud: !!options.syncToCloud });
+      }
+      return next;
+    }
+
+    function ensureTodayDailyLogSnapshot(now = new Date()){
+      return ensureDailyLogSnapshot(formatDateKey(now), { persist:true });
+    }
+
+    function getActiveTrainingReference(){
+      const ref = safeJsonParse(localStorage.getItem(ACTIVE_TRAINING_REFERENCE_KEY) || "null", null);
+      if(!ref || typeof ref !== "object") return null;
+      const ageMs = Date.now() - Date.parse(ref.lastUpdatedAt || "");
+      if(!Number.isFinite(ageMs) || ageMs > 5 * 60 * 1000){
+        localStorage.removeItem(ACTIVE_TRAINING_REFERENCE_KEY);
+        return null;
+      }
+      return ref;
+    }
+
+    function setActiveTrainingReference(ref){
+      if(!ref){
+        localStorage.removeItem(ACTIVE_TRAINING_REFERENCE_KEY);
+        return null;
+      }
+      const next = { ...ref, lastUpdatedAt:new Date().toISOString() };
+      localStorage.setItem(ACTIVE_TRAINING_REFERENCE_KEY, JSON.stringify(next));
+      return next;
+    }
+
+    function clearActiveTrainingReference(){
+      localStorage.removeItem(ACTIVE_TRAINING_REFERENCE_KEY);
+    }
+
+    function isShortTrainingReferenceText(text){
+      const raw = String(text || "").trim();
+      if(!raw) return false;
+      return /^(又|再|再来|继续|同样|刚才那个|上一项)?\s*(一|二|两|三|四|五|六|七|八|九|十|\d+)\s*(组|次|个|下|分钟|min|秒|s)?$/.test(raw)
+        || /^(又|再|再来|继续)\s*(一组|一组吧|一组了|做一组|来一组)$/.test(raw);
+    }
+
+    function applyActiveTrainingReferenceToValue(currentValue, dateKey){
+      if(currentValue?.exercise || !isShortTrainingReferenceText(currentValue?.text)) return currentValue;
+      const ref = getActiveTrainingReference();
+      if(!ref || ref.targetDate !== dateKey) return currentValue;
+      const log = getDailyLogs()[dateKey];
+      const item = (Array.isArray(log?.planProgressItems) ? log.planProgressItems : [])
+        .find((progress) => progress.itemId === ref.itemId && progress.exerciseKey === ref.exerciseKey && Number(progress.snapshotVersion || log.snapshotVersion || 1) === Number(ref.snapshotVersion || log.snapshotVersion || 1));
+      if(!item || item.status === "completed" || Number(item.completedAmount || 0) >= Number(item.targetAmount || 0)) return currentValue;
+      return {
+        ...currentValue,
+        exercise:item.snapshotDisplayName,
+        matchedPlanItem:item.snapshotItemText,
+        matchedPlanKey:item.planCheckKey,
+        plannedSets:item.unit === "组" ? item.targetAmount : currentValue.plannedSets,
+        plannedRepsText:item.plannedRepsText || currentValue.plannedRepsText || "",
+        plannedDurationText:item.plannedDurationText || currentValue.plannedDurationText || ""
+      };
     }
 
     function splitTrainingExerciseNames(text){
@@ -6962,11 +7877,91 @@
       return pieces.join(" ") || value.text || "训练事实";
     }
 
+    function collectDailyFacts(dateOrLog){
+      const log = typeof dateOrLog === "string" ? getDailyLogs()[dateOrLog] : dateOrLog;
+      const activeRecords = (Array.isArray(log?.aiCaptureRecords) ? log.aiCaptureRecords : []).filter((record) => !record.revoked);
+      const planProgress = (Array.isArray(log?.planProgressItems) ? log.planProgressItems : [])
+        .filter((item) => Number(item.completedAmount || 0) > 0)
+        .map((item) => ({
+          itemId:item.itemId,
+          exerciseKey:item.exerciseKey,
+          displayName:item.snapshotDisplayName,
+          completedAmount:Number(item.completedAmount || 0),
+          targetAmount:Number(item.targetAmount || 0),
+          unit:item.unit || "项",
+          status:item.status || "active",
+          countsTowardTraining:log?.dayType === "training"
+        }));
+      const extraTraining = (Array.isArray(log?.extraTrainingEvents) ? log.extraTrainingEvents : [])
+        .filter((event) => !event.revoked)
+        .map((event) => ({
+          id:event.id,
+          exerciseKey:event.exerciseKey,
+          displayName:event.snapshotDisplayName,
+          amount:Number(event.amount || 0),
+          unit:event.unit || "项",
+          countsTowardTraining:log?.dayType === "training"
+        }));
+      const feedback = (Array.isArray(log?.feedbackEvents) ? log.feedbackEvents : []).filter((event) => !event.revoked);
+      const safetyFeedback = [
+        ...feedback.filter((event) => event.feedbackType === "safety"),
+        ...activeRecords.filter((record) => record.recordType === "safety_feedback").map((record) => ({
+          id:record.id,
+          text:record.currentValue?.text || record.originalText || "",
+          countsTowardTraining:false
+        }))
+      ];
+      const technicalFeedback = [
+        ...feedback.filter((event) => event.feedbackType === "technical"),
+        ...activeRecords.filter((record) => record.recordType === "technical_feedback").map((record) => ({
+          id:record.id,
+          text:record.currentValue?.text || record.originalText || "",
+          countsTowardTraining:false
+        }))
+      ];
+      const bodyState = {
+        ...(log?.bodyState || {}),
+        weight: log?.bodyState?.weight || log?.weight || "",
+        sleep: log?.bodyState?.sleep || log?.sleep || ""
+      };
+      const legacyCaptureRecords = activeRecords
+        .filter((record) => !record.structuredWrite || !["plan_progress","extra_training","body_state","safety","technical"].includes(record.structuredWrite.status))
+        .map((record) => summarizeTrainingCaptureRecord(record));
+      return {
+        date:log?.date || "",
+        dayType:log?.dayType || "training",
+        planProgress,
+        extraTraining,
+        safetyFeedback:safetyFeedback.map((event) => ({ ...event, countsTowardTraining:false })),
+        technicalFeedback:technicalFeedback.map((event) => ({ ...event, countsTowardTraining:false })),
+        bodyState,
+        dietNotes:[],
+        notes:log?.note ? [String(log.note)] : [],
+        legacyCaptureRecords
+      };
+    }
+
     function generateAiDailySummaryForLog(log){
-      const records = (Array.isArray(log?.aiCaptureRecords) ? log.aiCaptureRecords : []).filter((record) => !record.revoked);
-      const text = records.length
-        ? `AI 日总结：${records.map((record) => summarizeTrainingCaptureRecord(record)).join("；")}。`
-        : "AI 日总结：暂无有效自动捕捉记录。";
+      const facts = collectDailyFacts(log);
+      const pieces = [];
+      if(facts.planProgress.length){
+        pieces.push(`计划进度：${facts.planProgress.map((item) => `${item.displayName} ${item.completedAmount}/${item.targetAmount}${item.unit}`).join("、")}`);
+      }
+      if(facts.extraTraining.length){
+        pieces.push(`额外训练：${facts.extraTraining.map((item) => `${item.displayName} +${item.amount}${item.unit}`).join("、")}`);
+      }
+      if(facts.safetyFeedback.length){
+        pieces.push(`安全反馈：${facts.safetyFeedback.map((item) => item.text || item.snapshotDisplayName || "安全反馈").join("、")}`);
+      }
+      if(facts.technicalFeedback.length){
+        pieces.push(`技术反馈：${facts.technicalFeedback.map((item) => item.text || item.snapshotDisplayName || "技术反馈").join("、")}`);
+      }
+      if(facts.bodyState.weight) pieces.push(`体重：${facts.bodyState.weight}`);
+      if(facts.bodyState.sleep) pieces.push(`睡眠：${facts.bodyState.sleep}`);
+      if(facts.legacyCaptureRecords.length) pieces.push(`自动捕捉：${facts.legacyCaptureRecords.join("、")}`);
+      const text = pieces.length
+        ? `AI 日总结：${pieces.join("；")}。`
+        : "AI 日总结：暂无有效训练日历事实。";
       return {
         source:"ai_daily_summary",
         text,
@@ -6981,23 +7976,27 @@
       return range.dates.map((dateKey) => {
         const log = logs[dateKey];
         if(!log) return null;
+        const facts = collectDailyFacts(log);
         const completedItems = Array.isArray(log.completedItems) ? log.completedItems.filter(Boolean) : [];
-        const records = (Array.isArray(log.aiCaptureRecords) ? log.aiCaptureRecords : [])
-          .filter((record) => !record.revoked)
-          .map((record) => summarizeTrainingCaptureRecord(record));
+        const planProgress = facts.planProgress.map((item) => `${item.displayName} ${item.completedAmount}/${item.targetAmount}${item.unit}`);
+        const extraTraining = facts.extraTraining.map((item) => `${item.displayName} +${item.amount}${item.unit}`);
+        const records = [...planProgress, ...extraTraining, ...facts.legacyCaptureRecords];
         const pieces = [];
         if(completedItems.length) pieces.push(`完成计划：${completedItems.join("、")}`);
+        if(planProgress.length) pieces.push(`计划进度：${planProgress.join("、")}`);
+        if(extraTraining.length) pieces.push(`额外训练：${extraTraining.join("、")}`);
+        if(facts.safetyFeedback.length) pieces.push(`安全反馈：${facts.safetyFeedback.map((item) => item.text || "安全反馈").join("、")}`);
         if(records.length) pieces.push(`自动捕捉：${records.join("、")}`);
-        if(log.weight) pieces.push(`体重：${log.weight}`);
-        if(log.sleep) pieces.push(`睡眠：${log.sleep}`);
+        if(facts.bodyState.weight) pieces.push(`体重：${facts.bodyState.weight}`);
+        if(facts.bodyState.sleep) pieces.push(`睡眠：${facts.bodyState.sleep}`);
         if(log.note) pieces.push(`备注：${String(log.note).slice(0, 120)}`);
         if(!pieces.length) return null;
         return {
           date: dateKey,
           completedItems,
           records,
-          weight: log.weight || "",
-          sleep: log.sleep || "",
+          weight: facts.bodyState.weight || "",
+          sleep: facts.bodyState.sleep || "",
           note: log.note || "",
           text: pieces.join("；")
         };
@@ -7121,7 +8120,22 @@
 
     function findPlanItemMatchForCapture(intent){
       const matches = findPlanItemMatchesForCapture(intent);
-      return matches.length === 1 ? matches[0] : null;
+      if(matches.length <= 1) return matches[0] || null;
+      const exercise = String(intent?.currentValue?.exercise || "").trim();
+      if(!exercise) return null;
+      const scored = matches
+        .map((match) => {
+          const itemExercise = getPlanItemExerciseName(match.item);
+          let score = 0;
+          if(itemExercise === exercise) score += 100;
+          if(match.item.includes(exercise)) score += 60;
+          if(exercise.includes(itemExercise) && itemExercise.length >= 2) score += 25;
+          return { match, score };
+        })
+        .filter((entry) => entry.score > 0)
+        .sort((a, b) => b.score - a.score);
+      if(!scored.length) return null;
+      return scored.length === 1 || scored[0].score > scored[1].score ? scored[0].match : null;
     }
 
     function isPreciseQuantityMatch(intent, itemText){
@@ -7205,7 +8219,7 @@
       const completedKeys = [];
       matches.forEach((match) => {
         const plannedDose = parsePlanItemTrainingDose(match.item);
-        if(matches.length === 1 && plannedDose.plannedSets && value.sets && value.sets < plannedDose.plannedSets) return;
+        if(plannedDose.plannedSets && value.sets && value.sets < plannedDose.plannedSets) return;
         if(!intent.completedExplicit && !isPreciseQuantityMatch(intent, match.item)) return;
         if(checks[match.key]) return;
         checks[match.key] = true;
@@ -7230,6 +8244,126 @@
         const recordSignature = `${record.recordType}:${record.currentValue?.exercise || ""}:${record.currentValue?.text || ""}:${record.currentValue?.reps || ""}:${record.currentValue?.duration || ""}`;
         return recordSignature === signature;
       }) || null;
+    }
+
+    function findPlanProgressItemForMatch(log, match){
+      if(!log || !match) return null;
+      const items = Array.isArray(log.planProgressItems) ? log.planProgressItems : [];
+      return items.find((item) => item.planCheckKey === match.key)
+        || items.find((item) => item.sourcePlanItemIndex === match.itemIndex)
+        || null;
+    }
+
+    function getStructuredTrainingAmount(value = {}, progressItem = {}){
+      if(value.sets) return { amount:Number(value.sets), unit:"组" };
+      if(value.duration) return { amount:Number(value.duration), unit:value.durationUnit || progressItem.unit || "分钟" };
+      if(value.reps) return { amount:Number(value.reps), unit:"次" };
+      if(value.repsPerSet && progressItem.unit !== "组") return { amount:Number(value.repsPerSet), unit:"次" };
+      return { amount:1, unit:progressItem.unit || "项" };
+    }
+
+    function createExtraTrainingEvent(intent, progressItem, amountInfo, recordId){
+      return {
+        id:`extra_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        sourceMessageId:recordId || intent.id || "",
+        exerciseKey:progressItem?.exerciseKey || readExerciseLibraryAction(intent.currentValue?.exercise)?.exerciseKey || makeExerciseKey("extra", intent.currentValue?.exercise || intent.originalText),
+        snapshotDisplayName:progressItem?.snapshotDisplayName || intent.currentValue?.exercise || "额外训练",
+        amount:Number(amountInfo.amount || 0),
+        unit:amountInfo.unit || "项",
+        targetDate:intent.date || formatDateKey(new Date()),
+        rawText:intent.originalText || intent.currentValue?.text || "",
+        revoked:false,
+        correctedFrom:null,
+        createdAt:new Date().toISOString()
+      };
+    }
+
+    function applyTrainingFactToStructuredLog(log, intent, recordId){
+      if(!log || intent.recordType !== "training_fact") return { status:"skipped" };
+      if(log.dayType !== "training" || !Array.isArray(log.planProgressItems) || !log.planProgressItems.length){
+        return { status:"note_only", reason:"no_training_snapshot" };
+      }
+      const match = findPlanItemMatchForCapture(intent);
+      const progressItem = findPlanProgressItemForMatch(log, match);
+      const value = intent.currentValue || {};
+      if(!progressItem){
+        if(!value.exercise) return { status:"skipped" };
+        const amountInfo = getStructuredTrainingAmount(value, {});
+        const event = createExtraTrainingEvent(intent, null, amountInfo, recordId);
+        log.extraTrainingEvents = [...(Array.isArray(log.extraTrainingEvents) ? log.extraTrainingEvents : []), event];
+        return { status:"extra_training", eventId:event.id, amount:amountInfo.amount, unit:amountInfo.unit };
+      }
+      const amountInfo = intent.completedExplicit && !value.sets && !value.duration && !value.reps
+        ? { amount:progressItem.targetAmount, unit:progressItem.unit }
+        : getStructuredTrainingAmount(value, progressItem);
+      if(!Number.isFinite(amountInfo.amount) || amountInfo.amount <= 0) return { status:"skipped" };
+      const isExtra = isExtraTrainingCaptureText(intent.originalText || value.text || "");
+      const current = Number(progressItem.completedAmount || 0);
+      const target = Number(progressItem.targetAmount || 0) || amountInfo.amount;
+      if(isExtra || current >= target){
+        const event = createExtraTrainingEvent(intent, progressItem, amountInfo, recordId);
+        log.extraTrainingEvents = [...(Array.isArray(log.extraTrainingEvents) ? log.extraTrainingEvents : []), event];
+        return { status:"extra_training", itemId:progressItem.itemId, eventId:event.id, amount:amountInfo.amount, unit:amountInfo.unit };
+      }
+      const nextAmount = Math.min(target, current + Number(amountInfo.amount || 0));
+      progressItem.completedAmount = nextAmount;
+      progressItem.status = nextAmount >= target ? "completed" : "active";
+      progressItem.updatedAt = new Date().toISOString();
+      if(nextAmount >= target){
+        const checks = getPlanChecks();
+        const meta = getPlanCheckMeta();
+        checks[progressItem.planCheckKey] = true;
+        if(!meta[progressItem.planCheckKey]){
+          meta[progressItem.planCheckKey] = { source:"structured_progress", recordId:recordId || "", updatedAt:new Date().toISOString() };
+        }
+        setPlanChecks(checks);
+        setPlanCheckMeta(meta);
+      }
+      setActiveTrainingReference({
+        exerciseKey:progressItem.exerciseKey,
+        itemId:progressItem.itemId,
+        targetDate:log.date,
+        snapshotVersion:log.snapshotVersion || 1
+      });
+      return { status:"plan_progress", itemId:progressItem.itemId, previousAmount:current, completedAmount:nextAmount, targetAmount:target, amount:amountInfo.amount, unit:progressItem.unit };
+    }
+
+    function applyFeedbackOrBodyFactToStructuredLog(log, intent, recordId){
+      if(!log || !intent) return { status:"skipped" };
+      const value = intent.currentValue || {};
+      if(intent.recordType === "body_metric"){
+        log.bodyState = {
+          ...(log.bodyState || {}),
+          weight: value.weightKg ? String(value.weightKg) : (log.bodyState?.weight || log.weight || ""),
+          sleep: value.sleep || log.bodyState?.sleep || log.sleep || "",
+          fatigueScore: value.fatigueScore || log.bodyState?.fatigueScore || ""
+        };
+        if(value.weightKg) log.weight = String(value.weightKg);
+        if(value.sleep) log.sleep = value.sleep;
+        return { status:"body_state" };
+      }
+      if(intent.recordType === "safety_feedback" || intent.recordType === "technical_feedback"){
+        const action = readExerciseLibraryAction(value.exercise || value.text || "");
+        const event = {
+          id:`feedback_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+          sourceMessageId:recordId || "",
+          feedbackType:intent.recordType === "safety_feedback" ? "safety" : "technical",
+          exerciseKey:action?.exerciseKey || "",
+          snapshotDisplayName:action?.displayName || value.exercise || "",
+          text:value.text || intent.originalText || "",
+          countsTowardTraining:false,
+          createdAt:new Date().toISOString()
+        };
+        log.feedbackEvents = [...(Array.isArray(log.feedbackEvents) ? log.feedbackEvents : []), event];
+        return { status:event.feedbackType };
+      }
+      return { status:"skipped" };
+    }
+
+    function applyStructuredDailyLogWrite(log, intent, recordId){
+      const training = applyTrainingFactToStructuredLog(log, intent, recordId);
+      if(training.status !== "skipped") return training;
+      return applyFeedbackOrBodyFactToStructuredLog(log, intent, recordId);
     }
 
     function persistDailyLogsAfterTrainingCapture(logs, options = {}){
@@ -7270,6 +8404,17 @@
           allowAutoComplete: writeType === "completion_with_note" && recordType === "training_fact"
         }
       };
+    }
+
+    function shouldBlockTrainingWithoutExistingSnapshot(intent, logs, options = {}){
+      if(intent.recordType !== "training_fact") return false;
+      if(logs[intent.date]) return false;
+      if(intent.sourceType === "training_session" || intent.trainingSessionId) return false;
+      if(!hasExplicitTrainingCaptureDate(intent.originalText || intent.currentValue?.text || "")) return false;
+      const target = parseDateKey(intent.date);
+      const today = parseDateKey(formatDateKey(options.now || new Date()));
+      if(!target || !today) return false;
+      return target.getTime() < today.getTime();
     }
 
     function updateTrainingSessionAggregateCard(record){
@@ -7314,6 +8459,26 @@
       intent = normalized.intent;
       const logs = getDailyLogs();
       const dateKey = intent.date || formatDateKey(new Date());
+      if(shouldBlockTrainingWithoutExistingSnapshot(intent, logs, options)){
+        const note = `未写入结构化训练：${intent.originalText || intent.currentValue?.text || ""}`;
+        logs[dateKey] = buildDailyLogShell(dateKey, {
+          ...(logs[dateKey] || {}),
+          dayType:"note_only",
+          note:[logs[dateKey]?.note, note].filter(Boolean).join("\n")
+        });
+        logs[dateKey].aiDailySummary = generateAiDailySummaryForLog(logs[dateKey]);
+        persistDailyLogsAfterTrainingCapture(logs, { syncToCloud:true });
+        if(options.createCard !== false){
+          pushTrainingCaptureCard({
+            kind:"warn",
+            title:"暂不记录结构化训练",
+            message:"目标日期没有训练日快照，这条只留下备注，不进入训练统计。",
+            canUndo:false,
+            canModify:false
+          });
+        }
+        return { status:"not_recorded", reason:"missing_training_snapshot", date:dateKey };
+      }
       const log = buildDailyLogShell(dateKey, logs[dateKey] || {});
       const duplicate = findDuplicateCaptureRecord(log, intent);
       if(duplicate){
@@ -7349,6 +8514,7 @@
         writeType:intent.writeType || "note_only"
       };
       record.autoCompletedPlanChecks = intent.allowAutoComplete === false ? [] : maybeAutoCompletePlanItemForCapture(intent, record.id);
+      record.structuredWrite = applyStructuredDailyLogWrite(log, intent, record.id);
       log.aiCaptureRecords = [...(Array.isArray(log.aiCaptureRecords) ? log.aiCaptureRecords : []), record];
       if(record.autoCompletedPlanChecks.length) renderPlan();
       syncDailyLogCompletionFromPlan(log, dateKey);
@@ -7385,10 +8551,57 @@
       return null;
     }
 
+    function rollbackStructuredWriteForRecord(log, record){
+      const structured = record?.structuredWrite || {};
+      if(!structured.status) return false;
+      let changed = false;
+      if(structured.status === "plan_progress" && structured.itemId){
+        const item = (Array.isArray(log.planProgressItems) ? log.planProgressItems : []).find((progress) => progress.itemId === structured.itemId);
+        if(item){
+          const previousAmount = Number.isFinite(Number(structured.previousAmount))
+            ? Number(structured.previousAmount)
+            : Math.max(0, Number(item.completedAmount || 0) - Number(structured.amount || record.currentValue?.sets || 1));
+          item.completedAmount = Math.max(0, previousAmount);
+          item.status = item.completedAmount >= Number(item.targetAmount || 0) && Number(item.targetAmount || 0) > 0 ? "completed" : "active";
+          item.updatedAt = new Date().toISOString();
+          const checks = getPlanChecks();
+          const meta = getPlanCheckMeta();
+          if(item.planCheckKey && item.status !== "completed"){
+            delete checks[item.planCheckKey];
+            delete meta[item.planCheckKey];
+            setPlanChecks(checks);
+            setPlanCheckMeta(meta);
+          }
+          changed = true;
+        }
+      }
+      if(structured.status === "extra_training"){
+        const events = Array.isArray(log.extraTrainingEvents) ? log.extraTrainingEvents : [];
+        events.forEach((event) => {
+          if(event.id === structured.eventId || event.sourceMessageId === record.id){
+            event.revoked = true;
+            event.revokedAt = new Date().toISOString();
+            changed = true;
+          }
+        });
+      }
+      if(structured.status === "safety" || structured.status === "technical"){
+        (Array.isArray(log.feedbackEvents) ? log.feedbackEvents : []).forEach((event) => {
+          if(event.sourceMessageId === record.id){
+            event.revoked = true;
+            event.revokedAt = new Date().toISOString();
+            changed = true;
+          }
+        });
+      }
+      return changed;
+    }
+
     function undoTrainingCaptureRecord(recordId){
       const found = findTrainingCaptureRecord(recordId);
       if(!found) return { status:"not_found" };
       const { logs, dateKey, log, records, index, record } = found;
+      rollbackStructuredWriteForRecord(log, record);
       records[index] = {
         ...record,
         revoked:true,
@@ -7946,6 +9159,7 @@
     }
 
     function bindDefaultCollapsedCards(){
+      bindDefaultCollapsedCard("exerciseLibraryCollapseBtn", "exerciseLibraryBody");
       bindDefaultCollapsedCard("dailyAdjustCollapseBtn", "dailyAdjustBody");
       bindDefaultCollapsedCard("planTemplateCollapseBtn", "planTemplateBody");
       bindDefaultCollapsedCard("cloudSyncCollapseBtn", "cloudSyncBody");
@@ -9922,6 +11136,8 @@
         activeCharacterCardId: getActiveCharacterCardId(),
         characterChatHistory: getCharacterChatHistory(),
         trainingSession: getTrainingSession(),
+        customExerciseLibrary: getCustomExerciseLibraryActions(),
+        exerciseTemplateDrafts: getExerciseTemplateDrafts(),
         updatedAt: getLocalUpdatedAt()
       };
     }
@@ -9948,6 +11164,8 @@
       const embeddedActiveCharacterCardId = safeForm.__activeCharacterCardId;
       const embeddedCharacterChatHistory = safeForm.__characterChatHistory;
       const embeddedTrainingSession = safeForm.__trainingSession;
+      const embeddedCustomExerciseLibrary = safeForm.__customExerciseLibrary;
+      const embeddedExerciseTemplateDrafts = safeForm.__exerciseTemplateDrafts;
       delete safeForm.__pageBackground;
       delete safeForm.__dailyLogs;
       delete safeForm.__planChecks;
@@ -9967,6 +11185,8 @@
       delete safeForm.__activeCharacterCardId;
       delete safeForm.__characterChatHistory;
       delete safeForm.__trainingSession;
+      delete safeForm.__customExerciseLibrary;
+      delete safeForm.__exerciseTemplateDrafts;
 
       const safeHistory = payload && Array.isArray(payload.history) ? payload.history : [];
       const safeDailyLogs = payload && payload.dailyLogs ? payload.dailyLogs : (embeddedDailyLogs && typeof embeddedDailyLogs === "object" ? embeddedDailyLogs : {});
@@ -9986,6 +11206,8 @@
       const safeActiveCharacterCardId = String((payload && payload.activeCharacterCardId) || embeddedActiveCharacterCardId || "");
       const safeCharacterChatHistory = Array.isArray(payload && payload.characterChatHistory) ? payload.characterChatHistory : (Array.isArray(embeddedCharacterChatHistory) ? embeddedCharacterChatHistory : []);
       const safeTrainingSession = payload && payload.trainingSession ? payload.trainingSession : (embeddedTrainingSession || null);
+      const safeCustomExerciseLibrary = Array.isArray(payload && payload.customExerciseLibrary) ? payload.customExerciseLibrary : (Array.isArray(embeddedCustomExerciseLibrary) ? embeddedCustomExerciseLibrary : []);
+      const safeExerciseTemplateDrafts = Array.isArray(payload && payload.exerciseTemplateDrafts) ? payload.exerciseTemplateDrafts : (Array.isArray(embeddedExerciseTemplateDrafts) ? embeddedExerciseTemplateDrafts : []);
       const updatedAt = (payload && payload.updatedAt) || embeddedUpdatedAt || new Date().toISOString();
 
       suppressAutoSync = true;
@@ -10012,6 +11234,8 @@
         }
         localStorage.setItem(CHARACTER_CHAT_HISTORY_KEY, JSON.stringify(safeCharacterChatHistory.slice(-40)));
         if(safeTrainingSession) localStorage.setItem(TRAINING_SESSION_KEY, JSON.stringify(safeTrainingSession)); else localStorage.removeItem(TRAINING_SESSION_KEY);
+        setCustomExerciseLibraryActions(safeCustomExerciseLibrary);
+        setExerciseTemplateDrafts(safeExerciseTemplateDrafts);
         setLastCloudSyncAt((payload && payload.lastCloudSyncAt) || embeddedLastCloudSyncAt || updatedAt);
         applyPageBackground(pageBackground);
         markLocalStateChanged("从云端恢复到本机", updatedAt);
@@ -11930,6 +13154,25 @@
       alert("已清空全部训练打卡");
     }
 
+    function getPlanProgressForPlanRow(dayIndex, itemIndex, itemText){
+      const day = getPlanDays()[dayIndex];
+      const dateKey = getDateForPlanDayInCurrentWeek(day?.day, dayIndex);
+      const log = getDailyLogs()[dateKey];
+      const items = Array.isArray(log?.planProgressItems) ? log.planProgressItems : [];
+      const key = `d${dayIndex}_i${itemIndex}`;
+      return items.find((item) => item.planCheckKey === key)
+        || items.find((item) => item.snapshotItemText === itemText)
+        || null;
+    }
+
+    function renderPlanProgressChip(progress){
+      if(!progress || !Number(progress.targetAmount)) return "";
+      const completed = Number(progress.completedAmount || 0);
+      const target = Number(progress.targetAmount || 0);
+      if(!completed && progress.status !== "completed") return "";
+      return `<div class="plan-progress-chip">${escapeHtml(`${completed}/${target}${progress.unit || "项"}`)}</div>`;
+    }
+
     function renderPlan(){
       const days = getPlanDays();
       const checks = getPlanChecks();
@@ -11963,9 +13206,10 @@
           const done = !!checks[key];
           const hit = doesGuideMatchQuery(item, planGuideQuery);
           const guideActive = activeGuideItemText && item === activeGuideItemText && d.day === activeGuideDayName;
+          const progress = getPlanProgressForPlanRow(dayIndex, itemIndex, item);
           return `
             <div class="day-row guide-clickable ${done ? "done" : ""} ${hit ? "search-hit" : ""} ${guideActive ? "guide-active" : ""}" data-guide-open="${dayIndex}" data-guide-item="${escapeHtml(item)}" data-guide-day="${escapeHtml(d.day)}">
-              <div class="day-item">${escapeHtml(item)}</div>
+              <div class="day-item">${escapeHtml(item)}${renderPlanProgressChip(progress)}</div>
               <button class="check-btn ${done ? "done" : ""}" data-check="${key}" aria-label="完成打卡">${done ? "✓" : ""}</button>
             </div>
           `;
@@ -12084,6 +13328,8 @@
       fillPlanEditorFromActiveDay();
       renderInlinePlanGuidePanel();
       renderPlanGuideSearchResults();
+      bindExerciseLibraryControls();
+      renderExerciseLibrary();
       requestAnimationFrame(() => scrollActiveDayTabIntoView("smooth"));
     }
 
@@ -12538,26 +13784,20 @@
       const dateKey = getDateForPlanDayInCurrentWeek(day.day, dayIndex);
       const logs = getDailyLogs();
 
-      logs[dateKey] = {
-        date: dateKey,
+      const shell = buildDailyLogShell(dateKey, {
+        ...(logs[dateKey] || {}),
         planDay: day.day,
         focus: day.focus,
         allItems: day.items || [],
         baseItems: day.baseItems || [],
         isTemporaryPlan: !!day.isTemporary,
-        aiAdjustMessage: day.temporaryMessage || "",
-        completedItems,
-        completedCount: completedItems.length,
-        totalItems: (day.items || []).length,
-        weight: logs[dateKey]?.weight || "",
-        sleep: logs[dateKey]?.sleep || "",
-        note: logs[dateKey]?.note || "",
-        aiCaptureRecords: Array.isArray(logs[dateKey]?.aiCaptureRecords) ? logs[dateKey].aiCaptureRecords : [],
-        aiDailySummary: logs[dateKey]?.aiDailySummary || null,
-        createdAt: logs[dateKey]?.createdAt || new Date().toLocaleString("zh-CN"),
-        updatedAt: new Date().toLocaleString("zh-CN"),
-        updatedAtIso: new Date().toISOString()
-      };
+        aiAdjustMessage: day.temporaryMessage || ""
+      });
+      shell.completedItems = completedItems;
+      shell.completedCount = completedItems.length;
+      shell.totalItems = (day.items || []).length;
+      shell.aiDailySummary = generateAiDailySummaryForLog(shell);
+      logs[dateKey] = shell;
 
       selectedCalendarDate = dateKey;
       setDailyLogs(logs, { syncToCloud: true });
@@ -13439,7 +14679,9 @@
         characterCards: getCharacterCards(),
         activeCharacterCardId: getActiveCharacterCardId(),
         characterChatHistory: getCharacterChatHistory(),
-        trainingSession: getTrainingSession()
+        trainingSession: getTrainingSession(),
+        customExerciseLibrary: getCustomExerciseLibraryActions(),
+        exerciseTemplateDrafts: getExerciseTemplateDrafts()
       };
       const ok = confirm("导出的备份可能包含 AI API Key，请不要发送给他人。继续导出吗？");
       if(!ok) return;
@@ -13552,6 +14794,12 @@
             localStorage.setItem(TRAINING_SESSION_KEY, JSON.stringify(payload.trainingSession));
           }else{
             localStorage.removeItem(TRAINING_SESSION_KEY);
+          }
+          if(Array.isArray(payload.customExerciseLibrary)){
+            setCustomExerciseLibraryActions(payload.customExerciseLibrary);
+          }
+          if(Array.isArray(payload.exerciseTemplateDrafts)){
+            setExerciseTemplateDrafts(payload.exerciseTemplateDrafts);
           }
           applyPageBackground(payload.pageBackground || "");
 
@@ -14805,6 +16053,9 @@
     updateRestoreDraftButton();
     bindPlanSwipeNavigation();
     normalizeInitialActivePlanDayForIos();
+    ensureTodayDailyLogSnapshot(new Date());
+    bindExerciseLibraryControls();
+    loadExerciseLibraryFromFiles().then(() => renderExerciseLibrary()).catch(() => renderExerciseLibrary());
     renderPlan();
     attachDayDockInteractions();
     repairIosDayDockLayout({ immediate:true });

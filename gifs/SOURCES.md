@@ -11,6 +11,10 @@
 - `custom_band_straight_arm_pulldown.gif`：LoadMuscle，Band Straight Arm Pulldown，https://loadmuscle.com/exercises/band-straight-arm-pulldown
 - `custom_bulgarian_split_squat.gif`：LoadMuscle，Bulgarian Split Squat，https://loadmuscle.com/exercises/bulgarian-split-squat
 - `custom_dumbbell_calf_raise.gif`：LoadMuscle，Dumbbell Standing Calf Raise，https://loadmuscle.com/exercises/dumbbell-standing-calf-raise
+- `custom_band_lateral_raise.webp`：LoadMuscle，Band Lateral Raise，https://loadmuscle.com/exercises/band-lateral-raise
+- `custom_single_arm_lateral_raise.webp`：LoadMuscle，Cable Single Arm Lateral Raise，https://loadmuscle.com/exercises/cable-single-arm-lateral-raise
+- `custom_pull_up_hold.webp`：LoadMuscle，Top Pull Up Hold，https://loadmuscle.com/exercises/top-pull-up-hold
+- `custom_dumbbell_floor_press.webp`：LoadMuscle，Dumbbell Alternating Floor Press，https://loadmuscle.com/exercises/dumbbell-alternating-floor-press
 
 说明：Wikimedia 的 Pike Push Ups 和 walking GIF 在下载时被限流，因此改用可访问的 LoadMuscle 动作素材。
 

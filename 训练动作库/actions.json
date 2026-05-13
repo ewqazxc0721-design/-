@@ -1,0 +1,556 @@
+{
+  "schemaVersion": 1,
+  "source": "角色聊天与训练记录优化：按每周训练 JSON 与联网核验扩充的动作库",
+  "actions": [
+    {
+      "exerciseKey": "decline-pushup",
+      "displayName": "下斜俯卧撑",
+      "aliases": ["下斜俯卧撑", "脚抬高俯卧撑"],
+      "category": "push",
+      "muscleGroups": ["上胸", "前三角", "肱三头"],
+      "normalizationTags": ["pushup", "incline-feet"],
+      "status": "confirmed",
+      "media": { "path": "gifs/0279.gif", "label": "下斜俯卧撑" }
+    },
+    {
+      "exerciseKey": "wide-pushup",
+      "displayName": "宽距俯卧撑",
+      "aliases": ["宽距俯卧撑", "宽距"],
+      "category": "push",
+      "muscleGroups": ["胸大肌外侧", "前三角", "肱三头"],
+      "normalizationTags": ["pushup", "wide"],
+      "status": "confirmed",
+      "media": { "path": "gifs/1311.gif", "label": "宽距俯卧撑" }
+    },
+    {
+      "exerciseKey": "standard-pushup",
+      "displayName": "俯卧撑",
+      "aliases": ["俯卧撑", "标准俯卧撑", "徒手俯卧撑", "push up", "push-up"],
+      "category": "push",
+      "muscleGroups": ["胸", "肱三头", "核心稳定"],
+      "normalizationTags": ["pushup", "bodyweight"],
+      "status": "confirmed",
+      "media": { "path": "gifs/0662.gif", "label": "标准俯卧撑" }
+    },
+    {
+      "exerciseKey": "close-grip-pushup",
+      "displayName": "窄距俯卧撑",
+      "aliases": ["窄距俯卧撑", "窄距"],
+      "category": "push",
+      "muscleGroups": ["肱三头", "胸", "核心稳定"],
+      "normalizationTags": ["pushup", "close-grip"],
+      "status": "confirmed",
+      "media": { "path": "gifs/0259.gif", "label": "窄距俯卧撑" }
+    },
+    {
+      "exerciseKey": "mechanical-drop-pushup",
+      "displayName": "机械递减俯卧撑",
+      "aliases": ["机械递减俯卧撑", "跪姿俯卧撑递减"],
+      "category": "push",
+      "muscleGroups": ["胸", "肱三头", "核心稳定"],
+      "normalizationTags": ["pushup", "drop-set"],
+      "status": "confirmed",
+      "media": { "path": "gifs/3211.gif", "label": "机械递减参考：跪姿俯卧撑" }
+    },
+    {
+      "exerciseKey": "pike-pushup",
+      "displayName": "下犬式俯卧撑",
+      "aliases": ["下犬式俯卧撑", "Pike Push-up", "Pike Pushup", "派克俯卧撑"],
+      "category": "shoulder",
+      "muscleGroups": ["肩前束", "肩中束", "肱三头"],
+      "normalizationTags": ["shoulder", "pushup"],
+      "status": "confirmed",
+      "media": {
+        "path": "gifs/pike_push_up.webp",
+        "label": "下犬式俯卧撑 / Pike Push-up",
+        "sourceUrl": "https://loadmuscle.com/exercises/pike-push-up",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
+    },
+    {
+      "exerciseKey": "db-floor-press",
+      "displayName": "哑铃地板卧推",
+      "aliases": ["哑铃地板卧推", "地板卧推"],
+      "category": "push",
+      "muscleGroups": ["胸", "前三角", "肱三头"],
+      "normalizationTags": ["press", "floor"],
+      "status": "confirmed",
+      "media": {
+        "path": "gifs/custom_dumbbell_floor_press.webp",
+        "label": "哑铃地板卧推",
+        "sourceUrl": "https://loadmuscle.com/exercises/dumbbell-alternating-floor-press",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
+    },
+    {
+      "exerciseKey": "db-fly",
+      "displayName": "哑铃飞鸟",
+      "aliases": ["哑铃飞鸟"],
+      "category": "push",
+      "muscleGroups": ["胸"],
+      "normalizationTags": ["fly", "dumbbell"],
+      "status": "confirmed",
+      "media": { "path": "gifs/0308.gif", "label": "哑铃飞鸟" }
+    },
+    {
+      "exerciseKey": "db-shoulder-press",
+      "displayName": "哑铃肩推",
+      "aliases": ["哑铃肩推", "肩推"],
+      "category": "shoulder",
+      "muscleGroups": ["肩前束", "肩中束", "肱三头"],
+      "normalizationTags": ["shoulder", "press"],
+      "status": "confirmed",
+      "media": { "path": "gifs/0405.gif", "label": "哑铃肩推" }
+    },
+    {
+      "exerciseKey": "lateral-raise",
+      "displayName": "侧平举",
+      "aliases": ["侧平举", "侧平", "lateral raise"],
+      "category": "shoulder",
+      "muscleGroups": ["肩中束"],
+      "normalizationTags": ["shoulder", "raise"],
+      "status": "confirmed",
+      "media": { "path": "gifs/0334.gif", "label": "侧平举" }
+    },
+    {
+      "exerciseKey": "single-arm-lateral-raise",
+      "displayName": "单臂侧平举",
+      "aliases": ["单臂侧平举", "单侧侧平举"],
+      "category": "shoulder",
+      "muscleGroups": ["肩中束", "左右侧控制"],
+      "normalizationTags": ["shoulder", "raise", "unilateral"],
+      "status": "confirmed",
+      "media": {
+        "path": "gifs/custom_single_arm_lateral_raise.webp",
+        "label": "单臂侧平举",
+        "sourceUrl": "https://loadmuscle.com/exercises/cable-single-arm-lateral-raise",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
+    },
+    {
+      "exerciseKey": "band-lateral-raise",
+      "displayName": "弹力绳侧平举",
+      "aliases": ["弹力绳侧平举", "弹力带侧平举", "阻力带侧平举"],
+      "category": "shoulder",
+      "muscleGroups": ["肩中束"],
+      "normalizationTags": ["shoulder", "raise", "band"],
+      "status": "confirmed",
+      "media": {
+        "path": "gifs/custom_band_lateral_raise.webp",
+        "label": "弹力绳侧平举",
+        "sourceUrl": "https://loadmuscle.com/exercises/band-lateral-raise",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
+    },
+    {
+      "exerciseKey": "front-raise",
+      "displayName": "前平举",
+      "aliases": ["前平举"],
+      "category": "shoulder",
+      "muscleGroups": ["肩前束"],
+      "normalizationTags": ["shoulder", "raise"],
+      "status": "confirmed",
+      "media": { "path": "gifs/0310.gif", "label": "前平举" }
+    },
+    {
+      "exerciseKey": "pullup",
+      "displayName": "引体向上",
+      "aliases": ["引体向上", "引体", "正手引体", "pull up", "pull-up", "pullup"],
+      "category": "pull",
+      "muscleGroups": ["背阔肌", "圆肌", "肱二头"],
+      "normalizationTags": ["pullup"],
+      "status": "confirmed",
+      "media": { "path": "gifs/0652.gif", "label": "引体向上" }
+    },
+    {
+      "exerciseKey": "eccentric-pullup",
+      "displayName": "离心引体向上",
+      "aliases": ["离心引体向上", "引体离心"],
+      "category": "pull",
+      "muscleGroups": ["背阔肌", "肱二头", "离心控制"],
+      "normalizationTags": ["pullup", "eccentric"],
+      "status": "confirmed",
+      "media": { "path": "gifs/0652.gif", "label": "离心引体向上说明" }
+    },
+    {
+      "exerciseKey": "pull-up-hold",
+      "displayName": "引体向上顶峰停留",
+      "aliases": ["引体向上顶峰停留", "顶峰停留引体", "引体顶峰停留"],
+      "category": "pull",
+      "muscleGroups": ["背阔肌", "肩胛下沉", "顶端控制"],
+      "normalizationTags": ["pullup", "isometric"],
+      "status": "confirmed",
+      "media": {
+        "path": "gifs/custom_pull_up_hold.webp",
+        "label": "引体向上顶峰停留",
+        "sourceUrl": "https://loadmuscle.com/exercises/top-pull-up-hold",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
+    },
+    {
+      "exerciseKey": "scapular-pull",
+      "displayName": "肩胛引体",
+      "aliases": ["肩胛引体/沉肩悬垂", "肩胛引体", "沉肩悬垂"],
+      "category": "pull",
+      "muscleGroups": ["肩胛下沉", "背阔肌启动", "下斜方肌"],
+      "normalizationTags": ["pullup", "scapular"],
+      "status": "confirmed",
+      "media": {
+        "path": "gifs/custom_scapular_pull.gif",
+        "label": "肩胛引体 / 沉肩悬垂",
+        "sourceUrl": "https://loadmuscle.com/exercises/scapular-pull-up",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
+    },
+    {
+      "exerciseKey": "pullup-or-band-pulldown",
+      "displayName": "引体向上/弹力绳高位下拉",
+      "aliases": ["引体向上/弹力绳高位下拉", "引体向上/弹力绳下拉"],
+      "category": "pull",
+      "muscleGroups": ["背阔肌", "肩胛下沉"],
+      "normalizationTags": ["pullup", "band", "choice"],
+      "status": "confirmed",
+      "media": { "path": "gifs/0652.gif", "label": "组合项参考：引体向上" }
+    },
+    {
+      "exerciseKey": "single-arm-db-row",
+      "displayName": "单臂哑铃划船",
+      "aliases": ["单臂哑铃划船", "单臂划船"],
+      "category": "pull",
+      "muscleGroups": ["背阔肌", "中下斜方肌", "菱形肌"],
+      "normalizationTags": ["row", "dumbbell", "unilateral"],
+      "status": "confirmed",
+      "media": { "path": "gifs/1330.gif", "label": "近似替代图示：单臂哑铃划船" }
+    },
+    {
+      "exerciseKey": "bent-over-db-row",
+      "displayName": "俯身双哑铃划船",
+      "aliases": ["俯身双哑铃划船", "双哑铃划船"],
+      "category": "pull",
+      "muscleGroups": ["背阔肌", "中下斜方肌", "下背等长稳定"],
+      "normalizationTags": ["row", "dumbbell", "bilateral"],
+      "status": "confirmed",
+      "media": { "path": "gifs/0293.gif", "label": "俯身双哑铃划船" }
+    },
+    {
+      "exerciseKey": "band-row",
+      "displayName": "弹力绳划船",
+      "aliases": ["弹力绳划船", "弹力带划船", "阻力带划船"],
+      "category": "pull",
+      "muscleGroups": ["背阔肌", "菱形肌", "肩胛后缩"],
+      "normalizationTags": ["row", "band"],
+      "status": "confirmed",
+      "media": { "path": "gifs/0988.gif", "label": "弹力绳划船" }
+    },
+    {
+      "exerciseKey": "lat-pulldown-band",
+      "displayName": "弹力绳高位下拉",
+      "aliases": ["弹力绳高位下拉", "弹力绳下拉", "弹力带高位下拉", "阻力带高位下拉"],
+      "category": "pull",
+      "muscleGroups": ["背阔肌", "肩胛下沉"],
+      "normalizationTags": ["pulldown", "band"],
+      "status": "confirmed",
+      "media": { "path": "gifs/0983.gif", "label": "弹力绳高位下拉" }
+    },
+    {
+      "exerciseKey": "band-straight-arm-pulldown",
+      "displayName": "弹力绳直臂下拉",
+      "aliases": ["弹力绳直臂下拉", "直臂下拉"],
+      "category": "pull",
+      "muscleGroups": ["背阔肌", "肩胛下沉", "核心稳定"],
+      "normalizationTags": ["pulldown", "band", "straight-arm"],
+      "status": "confirmed",
+      "media": {
+        "path": "gifs/custom_band_straight_arm_pulldown.gif",
+        "label": "弹力绳直臂下拉",
+        "sourceUrl": "https://loadmuscle.com/exercises/band-straight-arm-pulldown",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
+    },
+    {
+      "exerciseKey": "band-face-pull",
+      "displayName": "弹力绳面拉",
+      "aliases": ["弹力绳面拉", "面拉", "弹力带面拉"],
+      "category": "pull",
+      "muscleGroups": ["后束", "中下斜方肌", "肩胛稳定"],
+      "normalizationTags": ["face-pull", "band"],
+      "status": "confirmed",
+      "media": { "path": "gifs/1022.gif", "label": "近似替代图示：弹力绳面拉" }
+    },
+    {
+      "exerciseKey": "reverse-fly",
+      "displayName": "俯身反向飞鸟",
+      "aliases": ["俯身反向飞鸟", "反向飞鸟", "后束飞鸟"],
+      "category": "shoulder",
+      "muscleGroups": ["后束", "菱形肌", "肩胛稳定"],
+      "normalizationTags": ["rear-delt", "fly"],
+      "status": "confirmed",
+      "media": { "path": "gifs/0383.gif", "label": "俯身反向飞鸟" }
+    },
+    {
+      "exerciseKey": "db-curl",
+      "displayName": "哑铃弯举",
+      "aliases": ["哑铃弯举"],
+      "category": "arms",
+      "muscleGroups": ["肱二头"],
+      "normalizationTags": ["curl", "dumbbell"],
+      "status": "confirmed",
+      "media": { "path": "gifs/1677.gif", "label": "近似替代图示：哑铃弯举" }
+    },
+    {
+      "exerciseKey": "hammer-curl",
+      "displayName": "锤式弯举",
+      "aliases": ["锤式弯举"],
+      "category": "arms",
+      "muscleGroups": ["肱肌", "肱桡肌", "肱二头辅助"],
+      "normalizationTags": ["curl", "hammer"],
+      "status": "confirmed",
+      "media": { "path": "gifs/0313.gif", "label": "锤式弯举" }
+    },
+    {
+      "exerciseKey": "triceps-overhead",
+      "displayName": "过顶哑铃臂屈伸",
+      "aliases": ["过顶哑铃臂屈伸", "臂屈伸"],
+      "category": "arms",
+      "muscleGroups": ["肱三头长头"],
+      "normalizationTags": ["triceps", "dumbbell"],
+      "status": "confirmed",
+      "media": { "path": "gifs/0430.gif", "label": "过顶哑铃臂屈伸" }
+    },
+    {
+      "exerciseKey": "goblet-squat",
+      "displayName": "哑铃杯式深蹲",
+      "aliases": ["哑铃杯式深蹲", "杯式深蹲"],
+      "category": "legs",
+      "muscleGroups": ["股四头", "臀", "核心"],
+      "normalizationTags": ["squat", "dumbbell"],
+      "status": "confirmed",
+      "media": { "path": "gifs/1760.gif", "label": "哑铃杯式深蹲" }
+    },
+    {
+      "exerciseKey": "rdl",
+      "displayName": "哑铃罗马尼亚硬拉",
+      "aliases": ["哑铃罗马尼亚硬拉", "罗马尼亚硬拉"],
+      "category": "legs",
+      "muscleGroups": ["腘绳肌", "臀", "下背等长稳定"],
+      "normalizationTags": ["hinge", "dumbbell"],
+      "status": "confirmed",
+      "media": { "path": "gifs/1459.gif", "label": "哑铃罗马尼亚硬拉" }
+    },
+    {
+      "exerciseKey": "bulgarian-split-squat",
+      "displayName": "保加利亚分腿蹲",
+      "aliases": ["保加利亚分腿蹲", "分腿蹲"],
+      "category": "legs",
+      "muscleGroups": ["股四头", "臀", "单腿稳定"],
+      "normalizationTags": ["legs", "single-leg"],
+      "status": "confirmed",
+      "media": {
+        "path": "gifs/custom_bulgarian_split_squat.gif",
+        "label": "保加利亚分腿蹲",
+        "sourceUrl": "https://loadmuscle.com/exercises/bulgarian-split-squat",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
+    },
+    {
+      "exerciseKey": "db-calf-raise",
+      "displayName": "哑铃提踵",
+      "aliases": ["哑铃提踵", "提踵"],
+      "category": "legs",
+      "muscleGroups": ["腓肠肌", "比目鱼肌", "脚踝稳定"],
+      "normalizationTags": ["calf", "dumbbell"],
+      "status": "confirmed",
+      "media": {
+        "path": "gifs/custom_dumbbell_calf_raise.gif",
+        "label": "哑铃提踵",
+        "sourceUrl": "https://loadmuscle.com/exercises/dumbbell-standing-calf-raise",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
+    },
+    {
+      "exerciseKey": "leg-raise",
+      "displayName": "仰卧举腿",
+      "aliases": ["仰卧举腿"],
+      "category": "core",
+      "muscleGroups": ["下腹控制", "髋屈控制"],
+      "normalizationTags": ["core", "leg-raise"],
+      "status": "confirmed",
+      "media": { "path": "gifs/0620.gif", "label": "仰卧举腿" }
+    },
+    {
+      "exerciseKey": "reverse-crunch",
+      "displayName": "反向卷腹",
+      "aliases": ["反向卷腹"],
+      "category": "core",
+      "muscleGroups": ["下腹卷动", "骨盆后倾"],
+      "normalizationTags": ["core", "crunch"],
+      "status": "confirmed",
+      "media": { "path": "gifs/0872.gif", "label": "反向卷腹" }
+    },
+    {
+      "exerciseKey": "short-plank",
+      "displayName": "短平板支撑",
+      "aliases": ["短平板支撑"],
+      "category": "core",
+      "muscleGroups": ["核心稳定", "抗伸展"],
+      "normalizationTags": ["core", "plank", "short"],
+      "status": "confirmed",
+      "media": { "path": "gifs/2135.gif", "label": "近似替代图示：短平板支撑" }
+    },
+    {
+      "exerciseKey": "plank",
+      "displayName": "平板支撑",
+      "aliases": ["平板支撑"],
+      "category": "core",
+      "muscleGroups": ["核心稳定", "抗伸展"],
+      "normalizationTags": ["core", "plank"],
+      "status": "confirmed",
+      "media": { "path": "gifs/2135.gif", "label": "近似替代图示：平板支撑" }
+    },
+    {
+      "exerciseKey": "side-plank",
+      "displayName": "侧桥",
+      "aliases": ["侧桥", "侧平板", "侧向平板支撑"],
+      "category": "core",
+      "muscleGroups": ["侧腹", "抗侧屈", "肩胛稳定"],
+      "normalizationTags": ["core", "side-plank"],
+      "status": "confirmed",
+      "media": { "path": "gifs/0705.gif", "label": "侧桥" }
+    },
+    {
+      "exerciseKey": "dead-bug",
+      "displayName": "死虫",
+      "aliases": ["死虫", "Dead Bug"],
+      "category": "core",
+      "muscleGroups": ["核心稳定", "抗伸展"],
+      "normalizationTags": ["core", "dead-bug"],
+      "status": "confirmed",
+      "media": { "path": "gifs/0276.gif", "label": "死虫" }
+    },
+    {
+      "exerciseKey": "crunch",
+      "displayName": "卷腹",
+      "aliases": ["卷腹", "Crunch"],
+      "category": "core",
+      "muscleGroups": ["腹直肌", "上腹卷动"],
+      "normalizationTags": ["core", "crunch"],
+      "status": "confirmed",
+      "media": { "path": "gifs/0274.gif", "label": "卷腹" }
+    },
+    {
+      "exerciseKey": "russian-twist",
+      "displayName": "俄罗斯转体",
+      "aliases": ["俄罗斯转体"],
+      "category": "core",
+      "muscleGroups": ["腹斜肌", "抗旋转控制"],
+      "normalizationTags": ["core", "rotation"],
+      "status": "confirmed",
+      "media": { "path": "gifs/0687.gif", "label": "俄罗斯转体" }
+    },
+    {
+      "exerciseKey": "bird-dog",
+      "displayName": "鸟狗",
+      "aliases": ["鸟狗", "Bird Dog"],
+      "category": "core",
+      "muscleGroups": ["核心稳定", "臀", "肩胛稳定"],
+      "normalizationTags": ["core", "bird-dog"],
+      "status": "confirmed",
+      "media": {
+        "path": "gifs/bird_dog.gif",
+        "label": "鸟狗",
+        "sourceUrl": "https://tenor.com/view/bird-dog-gif-27559649",
+        "sourceLabel": "素材来源：Tenor"
+      }
+    },
+    {
+      "exerciseKey": "brisk-walk",
+      "displayName": "快走",
+      "aliases": ["快走"],
+      "category": "recovery",
+      "muscleGroups": ["恢复", "循环", "低强度有氧"],
+      "normalizationTags": ["walk", "recovery"],
+      "status": "confirmed",
+      "media": {
+        "path": "gifs/marching_on_spot.webp",
+        "label": "快走 / 原地踏步参考",
+        "sourceUrl": "https://loadmuscle.com/exercises/marching-on-spot",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
+    },
+    {
+      "exerciseKey": "walk",
+      "displayName": "散步",
+      "aliases": ["散步"],
+      "category": "recovery",
+      "muscleGroups": ["恢复", "循环", "放松"],
+      "normalizationTags": ["walk", "recovery"],
+      "status": "confirmed",
+      "media": {
+        "path": "gifs/marching_on_spot.webp",
+        "label": "散步 / 原地踏步参考",
+        "sourceUrl": "https://loadmuscle.com/exercises/marching-on-spot",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
+    },
+    {
+      "exerciseKey": "upper-body-stretch",
+      "displayName": "胸、背、肩拉伸",
+      "aliases": ["胸、背、肩拉伸", "胸、背、髋部拉伸", "肩背拉伸", "肩部轻拉伸"],
+      "category": "recovery",
+      "muscleGroups": ["胸背肩活动度", "恢复"],
+      "normalizationTags": ["stretch", "upper-body"],
+      "status": "confirmed",
+      "media": {
+        "path": "gifs/standing_back_rotation_stretch.webp",
+        "label": "胸背肩拉伸参考",
+        "sourceUrl": "https://loadmuscle.com/exercises/standing-reach-up-back-rotation-stretch",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
+    },
+    {
+      "exerciseKey": "full-body-stretch",
+      "displayName": "全身拉伸",
+      "aliases": ["全身拉伸", "全身轻拉伸"],
+      "category": "recovery",
+      "muscleGroups": ["全身恢复", "活动度"],
+      "normalizationTags": ["stretch", "full-body"],
+      "status": "confirmed",
+      "media": {
+        "path": "gifs/standing_back_rotation_stretch.webp",
+        "label": "全身拉伸参考",
+        "sourceUrl": "https://loadmuscle.com/exercises/standing-reach-up-back-rotation-stretch",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
+    },
+    {
+      "exerciseKey": "general-stretch",
+      "displayName": "拉伸",
+      "aliases": ["拉伸", "通用拉伸"],
+      "category": "recovery",
+      "muscleGroups": ["恢复", "活动度"],
+      "normalizationTags": ["stretch", "general"],
+      "status": "confirmed",
+      "media": {
+        "path": "gifs/standing_back_rotation_stretch.webp",
+        "label": "通用拉伸参考",
+        "sourceUrl": "https://loadmuscle.com/exercises/standing-reach-up-back-rotation-stretch",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
+    },
+    {
+      "exerciseKey": "adductor-stretch",
+      "displayName": "大腿内侧拉伸",
+      "aliases": ["大腿内侧拉伸", "大腿内侧放松拉伸", "大腿内侧轻度放松"],
+      "category": "recovery",
+      "muscleGroups": ["内收肌", "髋部活动度", "恢复"],
+      "normalizationTags": ["stretch", "adductor"],
+      "status": "confirmed",
+      "media": {
+        "path": "gifs/adductor_stretch.webp",
+        "label": "大腿内侧拉伸",
+        "sourceUrl": "https://loadmuscle.com/exercises/standing-wide-knees-adductor-stretch",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
+    }
+  ]
+}
