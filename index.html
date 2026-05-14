@@ -2419,6 +2419,30 @@
       line-height:1.55;
       color:#334155;
     }
+    .training-capture-card.is-collapsed{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+    }
+    .training-capture-card.is-collapsed .training-capture-card-compact-copy{
+      min-width:0;
+    }
+    .training-capture-card.is-collapsed .training-capture-card-title{
+      margin-bottom:2px;
+    }
+    .training-capture-card.is-collapsed .training-capture-card-message{
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .training-capture-card-expand-btn{
+      min-height:34px;
+      padding:7px 14px;
+      font-size:12px;
+      flex:0 0 auto;
+    }
     .training-capture-card-actions{
       display:flex;
       gap:8px;
@@ -2489,6 +2513,15 @@
       .training-capture-card-actions button{
         width:100%;
         min-height:38px;
+      }
+      .training-capture-card.is-collapsed{
+        gap:8px;
+        padding:9px 10px;
+        border-radius:14px;
+      }
+      .training-capture-card-expand-btn{
+        min-height:36px;
+        padding:7px 12px;
       }
     }
 
@@ -3550,10 +3583,6 @@
     }
 
     #dayTabs .day-tab{
-      flex: 0 0 calc((100% - 40px) / 4) !important;
-      width: calc((100% - 40px) / 4) !important;
-      min-width: calc((100% - 40px) / 4) !important;
-      max-width: calc((100% - 40px) / 4) !important;
       min-height: 60px !important;
       height: 60px !important;
     }
@@ -3574,10 +3603,6 @@
         padding: 8px 20px !important;
       }
       #dayTabs .day-tab{
-        flex: 0 0 calc((100% - 40px) / 4) !important;
-        width: calc((100% - 40px) / 4) !important;
-        min-width: calc((100% - 40px) / 4) !important;
-        max-width: calc((100% - 40px) / 4) !important;
         min-height: 56px !important;
         height: 56px !important;
       }
@@ -3736,6 +3761,26 @@
           text-align: center !important;
           line-height: 1 !important;
           letter-spacing: 0 !important;
+        }
+      }
+    }
+
+
+    /* --- Patch v98: stable weekly day dock geometry on desktop and iOS --- */
+    #dayTabs .day-tab{
+      flex: 0 0 25% !important;
+      width: 25% !important;
+      min-width: 25% !important;
+      max-width: 25% !important;
+    }
+
+    @supports (-webkit-touch-callout: none){
+      @media (max-width: 480px){
+        #dayTabs .day-tab{
+          flex: 0 0 25% !important;
+          width: 25% !important;
+          min-width: 25% !important;
+          max-width: 25% !important;
         }
       }
     }
@@ -4653,7 +4698,24 @@
             <div class="help" id="characterCardStatus">当前角色：未选择</div>
             <div id="characterCardList" class="character-card-list"></div>
             <div class="softbox">聊天入口在右下角 AI 气泡里。选择角色后，点按气泡或头像就能打开聊天框。</div>
-            <div class="help">当前只解析 .json；.png 角色卡解析 TODO。</div>
+            <div class="help">当前只解析 .json；.png 角色卡解析留待后续。</div>
+          </div>
+          <div class="ai-settings-subsection">
+            <h3>记录协议管理</h3>
+            <div class="softbox">记录协议独立于角色卡，负责从角色聊天中提取隐藏训练记录候选；聊天窗口默认只显示自然回复。</div>
+            <div class="tool-row" style="margin-top:12px;">
+              <button class="btn" id="importRecordProtocolBtn" type="button">导入记录协议 JSON</button>
+              <button class="btn-outline" id="recordProtocolEnabledBtn" type="button">记录协议：开启</button>
+              <button class="btn-outline" id="recordProtocolDebugBtn" type="button">调试模式：关闭</button>
+            </div>
+            <div class="tool-row" style="margin-top:10px;">
+              <button class="btn-outline" id="exportRecordProtocolBtn" type="button">导出当前协议</button>
+              <button class="btn-outline" id="restoreDefaultRecordProtocolBtn" type="button">恢复默认协议</button>
+            </div>
+            <input type="file" id="recordProtocolFileInput" accept="application/json,.json" style="display:none" />
+            <div class="help" id="recordProtocolStatus">当前协议：默认训练记录协议 v1.0.0</div>
+            <div id="recordProtocolList" class="character-card-list"></div>
+            <div id="recordProtocolDebugPanel" class="softbox" style="display:none;margin-top:12px;"></div>
           </div>
         </div>
       </div>
@@ -4781,7 +4843,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.05.14-calendar-plan-progress";
+    const APP_VERSION = "v2026.05.15-record-protocol";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const TEMP_DAILY_PLAN_OVERRIDES_KEY = "gain-temp-daily-plan-overrides";
     const DAILY_LOGS_KEY = "gain-daily-logs";
@@ -4790,6 +4852,10 @@
     const CUSTOM_EXERCISE_LIBRARY_KEY = "gain-exercise-library-custom";
     const EXERCISE_TEMPLATE_DRAFTS_KEY = "gain-exercise-template-drafts";
     const ACTIVE_TRAINING_REFERENCE_KEY = "gain-active-training-reference";
+    const RECORD_PROTOCOLS_KEY = "gain-record-protocols";
+    const ACTIVE_RECORD_PROTOCOL_ID_KEY = "gain-active-record-protocol-id";
+    const RECORD_PROTOCOL_DEBUG_KEY = "gain-record-protocol-debug";
+    const RECORD_PROTOCOL_LAST_DEBUG_KEY = "gain-record-protocol-last-debug";
     const LAST_CLOUD_SYNC_AT_KEY = "gain-last-cloud-sync-at";
     const FORM_KEY = "gain-tracker-form";
     const HISTORY_KEY = "gain-tracker-history";
@@ -4818,6 +4884,8 @@
     const TRAINING_CAPTURE_CARDS_KEY = "gain-training-capture-cards";
     const TRAINING_CAPTURE_RECENT_KEY = "gain-training-capture-recent-session";
     const TRAINING_CAPTURE_PENDING_KEY = "gain-training-capture-pending-context";
+    const TRAINING_CAPTURE_AUTO_COLLAPSE_MS = 2600;
+    const TRAINING_CAPTURE_MANUAL_EXPAND_MS = 12000;
     const AI_WEEKLY_SUMMARIES_KEY = "gain-ai-weekly-summaries";
     const PLAN_CHECK_META_KEY = "gain-plan-check-meta";
     const TRAINING_SESSION_KEY = "gain-training-session";
@@ -5873,6 +5941,7 @@
     let timerHoldInterval = 0;
     let aiBubbleHideTimer = 0;
     let aiPendingFeedbackTimer = 0;
+    let trainingCaptureAutoCollapseTimer = 0;
     let latestAiWeeklyResult = null;
     let latestAiPlanResult = null;
     let latestAiDailyAdjust = null;
@@ -5903,6 +5972,261 @@
       }catch(e){
         return fallback;
       }
+    }
+
+    const RECORD_PROTOCOL_DISABLED_ID = "__disabled__";
+    const DEFAULT_RECORD_PROTOCOL_ID = "default-training-capture-v1";
+    const RECORD_PROTOCOL_SUPPORTED_CANDIDATE_TYPES = [
+      "plan_progress",
+      "extra_training",
+      "body_state",
+      "feedback",
+      "note",
+      "correction",
+      "revoke",
+      "exercise_template_draft",
+      "consultation_request"
+    ];
+    const RECORD_CANDIDATE_ALLOWED_FIELDS = [
+      "candidateType",
+      "intent",
+      "rawText",
+      "targetDate",
+      "exerciseRef",
+      "amount",
+      "unit",
+      "needsConfirmation",
+      "confidence",
+      "reason",
+      "text",
+      "feedbackType",
+      "bodyState",
+      "note"
+    ];
+
+    function getDefaultRecordProtocol(){
+      return {
+        schema: "gain-record-protocol/v1",
+        id: DEFAULT_RECORD_PROTOCOL_ID,
+        name: "默认训练记录协议",
+        version: "1.0.0",
+        description: "用于角色聊天中提取训练事实、身体状态、反馈、修正和撤回。",
+        language: "zh-CN",
+        builtIn: true,
+        visibility: {
+          showCandidatesToUser: false,
+          debugInspectable: true
+        },
+        prompt: {
+          system: [
+            "你要在保持角色自然回复的同时，从用户消息和最近聊天上下文里提取隐藏训练记录候选。",
+            "必须返回一个 JSON envelope，键名固定为 reply 和 record_candidates。",
+            "reply 是用户可见的自然中文角色回复；record_candidates 是数组，只给网页端校验写入，不能在 reply 中展示 JSON。"
+          ].join("\n"),
+          outputContract: JSON.stringify({
+            reply: "用户可见的角色回复",
+            record_candidates: []
+          }, null, 2),
+          rules: [
+            "角色卡只影响 reply 的语气，不能改变候选字段、写入目标、确认规则或安全判断。",
+            "计划内训练进度使用 candidateType=plan_progress；额外加练使用 extra_training；疼痛、动作反馈使用 feedback；备注使用 note；咨询请求使用 consultation_request 或空数组。",
+            "用户明确动作名和数量时生成 mentioned 候选；用户说“又一组、再来一组、刚刚又补了一组”等省略动作名时，优先引用 activeTrainingReference。",
+            "上下文不唯一或候选需要确认时设置 needsConfirmation=true，reply 必须追问具体动作，不要让网页端弹窗确认。",
+            "AI 只生成候选，最终是否写入由网页端校验；不要声称已经写入网页没有确认的记录。"
+          ]
+        },
+        candidateSchema: {
+          allowedTypes: RECORD_PROTOCOL_SUPPORTED_CANDIDATE_TYPES.slice()
+        },
+        examples: [
+          {
+            user: "我完成了一组深蹲",
+            output: {
+              reply: "收到，先按深蹲 1 组记上。",
+              record_candidates: [{
+                candidateType: "plan_progress",
+                intent: "new_fact",
+                rawText: "我完成了一组深蹲",
+                targetDate: "today",
+                exerciseRef: { type: "mentioned", displayName: "深蹲" },
+                amount: 1,
+                unit: "set",
+                needsConfirmation: false,
+                confidence: 0.9
+              }]
+            }
+          },
+          {
+            user: "我又做完一组",
+            output: {
+              reply: "好，接着上一项继续记 1 组。",
+              record_candidates: [{
+                candidateType: "plan_progress",
+                intent: "additional_volume",
+                rawText: "我又做完一组",
+                targetDate: "today",
+                exerciseRef: { type: "activeTrainingReference" },
+                amount: 1,
+                unit: "set",
+                needsConfirmation: false,
+                confidence: 0.92
+              }]
+            }
+          }
+        ]
+      };
+    }
+
+    function normalizeRecordProtocol(raw, fileName = ""){
+      const root = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+      const prompt = root.prompt && typeof root.prompt === "object" && !Array.isArray(root.prompt)
+        ? {
+            system: String(root.prompt.system || ""),
+            outputContract: String(root.prompt.outputContract || ""),
+            rules: Array.isArray(root.prompt.rules) ? root.prompt.rules.map((item) => String(item || "").trim()).filter(Boolean) : []
+          }
+        : null;
+      const rawAllowedTypes = Array.isArray(root.candidateSchema?.allowedTypes) ? root.candidateSchema.allowedTypes : [];
+      const allowedTypes = rawAllowedTypes
+        .map((type) => String(type || "").trim())
+        .filter((type, index, arr) => RECORD_PROTOCOL_SUPPORTED_CANDIDATE_TYPES.includes(type) && arr.indexOf(type) === index);
+      return {
+        schema: String(root.schema || ""),
+        id: String(root.id || "").trim() || String(fileName || "").replace(/\.[^.]+$/, "").trim(),
+        name: String(root.name || "").trim(),
+        version: String(root.version || "").trim(),
+        description: String(root.description || "").trim(),
+        language: String(root.language || "zh-CN").trim() || "zh-CN",
+        builtIn: !!root.builtIn,
+        visibility: {
+          showCandidatesToUser: false,
+          debugInspectable: root.visibility?.debugInspectable !== false
+        },
+        prompt,
+        candidateSchema: root.candidateSchema && typeof root.candidateSchema === "object" && !Array.isArray(root.candidateSchema)
+          ? { allowedTypes: allowedTypes.length ? allowedTypes : RECORD_PROTOCOL_SUPPORTED_CANDIDATE_TYPES.slice() }
+          : null,
+        examples: Array.isArray(root.examples) ? root.examples.slice(0, 20) : [],
+        importedAt: root.importedAt || new Date().toISOString()
+      };
+    }
+
+    function validateRecordProtocol(protocol){
+      if(!protocol || typeof protocol !== "object"){
+        return { ok:false, reason:"invalid_json", message:"记录协议导入失败：JSON 格式不对" };
+      }
+      if(protocol.schema !== "gain-record-protocol/v1"){
+        return { ok:false, reason:"unsupported_schema", message:"记录协议导入失败：schema 不支持" };
+      }
+      const missing = [];
+      ["id","name","version"].forEach((field) => {
+        if(!String(protocol[field] || "").trim()) missing.push(field);
+      });
+      if(!protocol.prompt || typeof protocol.prompt !== "object") missing.push("prompt");
+      if(!protocol.candidateSchema || typeof protocol.candidateSchema !== "object") missing.push("candidateSchema");
+      if(missing.length){
+        return { ok:false, reason:"missing_required_fields", missing, message:"记录协议导入失败：缺少必要字段" };
+      }
+      const allowed = Array.isArray(protocol.candidateSchema.allowedTypes) ? protocol.candidateSchema.allowedTypes : [];
+      const unsupported = allowed.filter((type) => !RECORD_PROTOCOL_SUPPORTED_CANDIDATE_TYPES.includes(type));
+      if(unsupported.length){
+        return { ok:false, reason:"unsupported_candidate_type", unsupported, message:"记录协议导入失败：schema 不支持" };
+      }
+      return { ok:true };
+    }
+
+    function getRecordProtocols(){
+      const stored = safeJsonParse(localStorage.getItem(RECORD_PROTOCOLS_KEY) || "[]", []);
+      const list = Array.isArray(stored) ? stored : [];
+      const map = new Map();
+      const fallback = getDefaultRecordProtocol();
+      map.set(fallback.id, fallback);
+      list.forEach((item) => {
+        const protocol = normalizeRecordProtocol(item);
+        const validation = validateRecordProtocol(protocol);
+        if(validation.ok) map.set(protocol.id, protocol);
+      });
+      return Array.from(map.values());
+    }
+
+    function setRecordProtocols(protocols){
+      const safe = [];
+      const seen = new Set();
+      (Array.isArray(protocols) ? protocols : []).forEach((item) => {
+        const protocol = normalizeRecordProtocol(item);
+        const validation = validateRecordProtocol(protocol);
+        if(!validation.ok || seen.has(protocol.id)) return;
+        seen.add(protocol.id);
+        safe.push(protocol);
+      });
+      localStorage.setItem(RECORD_PROTOCOLS_KEY, JSON.stringify(safe));
+      renderRecordProtocolUi();
+      queueAutoSync("记录协议更新");
+      return getRecordProtocols();
+    }
+
+    function isRecordProtocolEnabled(){
+      return localStorage.getItem(ACTIVE_RECORD_PROTOCOL_ID_KEY) !== RECORD_PROTOCOL_DISABLED_ID;
+    }
+
+    function setRecordProtocolEnabled(enabled){
+      if(enabled){
+        const current = localStorage.getItem(ACTIVE_RECORD_PROTOCOL_ID_KEY);
+        if(!current || current === RECORD_PROTOCOL_DISABLED_ID){
+          localStorage.setItem(ACTIVE_RECORD_PROTOCOL_ID_KEY, DEFAULT_RECORD_PROTOCOL_ID);
+        }
+      }else{
+        localStorage.setItem(ACTIVE_RECORD_PROTOCOL_ID_KEY, RECORD_PROTOCOL_DISABLED_ID);
+      }
+      renderRecordProtocolUi();
+      queueAutoSync("记录协议启用状态更新");
+    }
+
+    function getActiveRecordProtocol(){
+      if(!isRecordProtocolEnabled()) return null;
+      const protocols = getRecordProtocols();
+      const activeId = localStorage.getItem(ACTIVE_RECORD_PROTOCOL_ID_KEY) || DEFAULT_RECORD_PROTOCOL_ID;
+      return protocols.find((protocol) => protocol.id === activeId) || protocols.find((protocol) => protocol.id === DEFAULT_RECORD_PROTOCOL_ID) || null;
+    }
+
+    function setActiveRecordProtocolId(id){
+      const target = String(id || "").trim();
+      const protocols = getRecordProtocols();
+      const next = protocols.some((protocol) => protocol.id === target) ? target : DEFAULT_RECORD_PROTOCOL_ID;
+      localStorage.setItem(ACTIVE_RECORD_PROTOCOL_ID_KEY, next);
+      renderRecordProtocolUi();
+      queueAutoSync("当前记录协议更新");
+      return getActiveRecordProtocol();
+    }
+
+    function isRecordProtocolDebugEnabled(){
+      return localStorage.getItem(RECORD_PROTOCOL_DEBUG_KEY) === "1";
+    }
+
+    function setRecordProtocolDebugEnabled(enabled){
+      if(enabled){
+        localStorage.setItem(RECORD_PROTOCOL_DEBUG_KEY, "1");
+      }else{
+        localStorage.removeItem(RECORD_PROTOCOL_DEBUG_KEY);
+      }
+      renderRecordProtocolUi();
+      return isRecordProtocolDebugEnabled();
+    }
+
+    function getRecordProtocolLastDebug(){
+      const debug = safeJsonParse(localStorage.getItem(RECORD_PROTOCOL_LAST_DEBUG_KEY) || "null", null);
+      return debug && typeof debug === "object" ? debug : null;
+    }
+
+    function setRecordProtocolLastDebug(debug){
+      const safe = debug && typeof debug === "object" ? { ...debug, updatedAt:new Date().toISOString() } : null;
+      if(safe){
+        localStorage.setItem(RECORD_PROTOCOL_LAST_DEBUG_KEY, JSON.stringify(safe));
+      }else{
+        localStorage.removeItem(RECORD_PROTOCOL_LAST_DEBUG_KEY);
+      }
+      renderRecordProtocolUi();
+      return safe;
     }
 
     function getDefaultAiSettings(){
@@ -6149,6 +6473,32 @@
       };
       setCharacterChatHistory([...history, entry], { sync:true });
       return entry;
+    }
+
+    let characterChatScrollSerial = 0;
+
+    function scrollCharacterChatToLatest(options = {}){
+      const log = $("characterChatLog");
+      if(!log) return;
+      const setToBottom = () => {
+        const nextLog = $("characterChatLog");
+        if(!nextLog) return;
+        nextLog.scrollTop = nextLog.scrollHeight || 0;
+      };
+
+      setToBottom();
+      if(options.defer === false) return;
+
+      const serial = ++characterChatScrollSerial;
+      const run = () => {
+        if(serial !== characterChatScrollSerial) return;
+        setToBottom();
+      };
+      requestAnimationFrame(() => {
+        run();
+        requestAnimationFrame(run);
+      });
+      [60, 180, 360].forEach((delay) => setTimeout(run, delay));
     }
 
     function setCharacterCards(cards, options = {}){
@@ -6923,6 +7273,7 @@
         recentDailyLogs: getRecentDailyLogsBrief(14),
         recentWeeklyRecords: getWeeklyRecordsForCharacterChat(5),
         aiWeeklySummaries: getAiWeeklySummaries(),
+        activeTrainingReference: getActiveTrainingReference(),
         activeTrainingSession: getTrainingSession()
       };
     }
@@ -7065,6 +7416,15 @@
       }
       const safety = /疼|痛|刺痛|头晕|胸闷|胸痛|呼吸不|麻木|扭伤|拉伤|膝盖|肩膀怪|不舒服|眩晕|恶心/.test(raw);
       if(safety) return { action:"safety", reason:"safety_risk" };
+      if(isTrainingSessionStartRequest(raw)){
+        return { action:"start_training_session", reason:"user_started_training" };
+      }
+      if(isTrainingSessionDiscardRequest(raw)){
+        return { action:"discard_training_session", reason:"user_discarded_training" };
+      }
+      if(isTrainingSessionFinishRequest(raw)){
+        return { action:"finish_training_session", reason:"user_finished_training" };
+      }
       const skip = /今天没练|没训练|跳过|休息一天|今天休息|没去健身房|没练完/.test(raw);
       if(skip) return { action:"capture", recordType:"skipped_training", reason:"skipped_training" };
       const metric = /体重\s*\d|睡了\s*\d|睡眠\s*\d|主观疲劳\s*\d|疲劳\s*\d\s*分/.test(raw);
@@ -7083,11 +7443,48 @@
       return { action:"none", reason:"ordinary_chat" };
     }
 
+    function isTrainingSessionStartRequest(text){
+      const raw = String(text || "").trim();
+      if(!raw) return false;
+      const consultation = /\u600e\u4e48|\u5982\u4f55|\u8be5\u7ec3\u4ec0\u4e48|\u7ec3\u4ec0\u4e48|\u5206\u6790|\u770b\u770b|\u5efa\u8bae|\u5b89\u6392|\u52a8\u4f5c\u8981\u70b9|\u8ba1\u5212|\u5417|\u4e48|\?/.test(raw);
+      const activeStart = /\u5f00\u7ec3|\u5f00\u8bad|\u7ec3\u8d77\u6765|\u5f00\u59cb\u4eca\u5929\u8bad\u7ec3|\u5f00\u59cb\u4eca\u65e5\u8bad\u7ec3|\u8fdb\u5165\u8bad\u7ec3\u6a21\u5f0f|\u6211\u8981\u8bad\u7ec3|\u6211\u8981\u5f00\u59cb\u8bad\u7ec3|\u6211\u60f3\u5f00\u59cb\u8bad\u7ec3|\u51c6\u5907\u8bad\u7ec3|\u73b0\u5728\u8bad\u7ec3|\u4eca\u5929\u8bad\u7ec3\u4e86|\u4eca\u65e5\u8bad\u7ec3\u4e86/.test(raw);
+      if(consultation && !activeStart) return false;
+      return activeStart
+        || /(?:\u6211\u8981|\u6211\u60f3|\u51c6\u5907|\u73b0\u5728|\u4eca\u5929|\u4eca\u65e5).{0,8}(?:\u5f00\u59cb\u7ec3|\u53bb\u8bad\u7ec3|\u8bad\u7ec3\u4e86|\u5065\u8eab\u4e86)/.test(raw)
+        || /(?:\u5f00\u59cb|\u542f\u52a8|\u5f00\u542f|\u8fdb\u5165).{0,8}(?:\u4eca\u5929|\u4eca\u65e5|\u672c\u6b21)?(?:\u8bad\u7ec3|\u5065\u8eab)/.test(raw);
+    }
+
+    function isTrainingSessionFinishRequest(text){
+      const raw = String(text || "").trim();
+      if(!raw) return false;
+      const consultation = /\u600e\u4e48|\u5982\u4f55|\u8981\u4e0d\u8981|\u53ef\u4ee5|\u5417|\u4e48|\?/.test(raw);
+      const activeFinish = /\u7ed3\u675f\u8bad\u7ec3|\u7ed3\u675f\u5e76\u4fdd\u5b58|\u7ed3\u675f\u8bad\u7ec3\u5e76\u4fdd\u5b58|\u4fdd\u5b58\u8bad\u7ec3|\u4fdd\u5b58\u672c\u6b21\u8bad\u7ec3|\u5b8c\u6210\u8bad\u7ec3|\u4eca\u5929\u8bad\u7ec3\u7ed3\u675f\u4e86|\u8bad\u7ec3\u7ed3\u675f|\u7ec3\u5b8c\u4e86|\u7ec3\u5b8c\u4fdd\u5b58|\u6536\u5c3e\u4fdd\u5b58/.test(raw);
+      if(consultation) return false;
+      return activeFinish
+        || /(?:\u7ed3\u675f|\u5b8c\u6210|\u4fdd\u5b58|\u6536\u5c3e).{0,8}(?:\u8bad\u7ec3|\u672c\u6b21|\u4f1a\u8bdd)/.test(raw);
+    }
+
+    function isTrainingSessionDiscardRequest(text){
+      const raw = String(text || "").trim();
+      if(!raw) return false;
+      const consultation = /\u600e\u4e48|\u5982\u4f55|\u8981\u4e0d\u8981|\u53ef\u4ee5|\u5417|\u4e48|\?/.test(raw);
+      const activeDiscard = /\u653e\u5f03\u8bad\u7ec3|\u653e\u5f03\u672c\u6b21\u8bad\u7ec3|\u53d6\u6d88\u8bad\u7ec3|\u4e22\u5f03\u8bad\u7ec3|\u4f5c\u5e9f\u8bad\u7ec3|\u4e0d\u4fdd\u5b58|\u4e0d\u7528\u4fdd\u5b58|\u4e0d\u8981\u4fdd\u5b58|\u8fd9\u6b21\u4e0d\u7b97|\u672c\u6b21\u4e0d\u7b97|\u8bad\u7ec3\u4f5c\u5e9f/.test(raw);
+      if(consultation) return false;
+      return activeDiscard
+        || /(?:\u653e\u5f03|\u53d6\u6d88|\u4e22\u5f03|\u4f5c\u5e9f|\u4e0d\u4fdd\u5b58).{0,8}(?:\u8bad\u7ec3|\u672c\u6b21|\u4f1a\u8bdd|\u8bb0\u5f55)/.test(raw);
+    }
+
+    function getTodayTrainingSessionDayIndex(){
+      const days = getPlanDays();
+      const todayIndex = getTodayPlanDayIndex(days);
+      return Number.isInteger(Number(todayIndex)) ? Number(todayIndex) : activePlanDay;
+    }
+
     function shouldAttachTrainingContextToCharacterChat(userText){
       const settings = getAiSettings();
       if(!settings.trainingIntentTrigger) return false;
       const intent = classifyCharacterTrainingIntent(userText);
-      return ["capture","follow_up","safety"].includes(intent.action);
+      return ["capture","follow_up","safety","start_training_session","finish_training_session","discard_training_session"].includes(intent.action);
     }
 
     function parseChineseTrainingNumber(value){
@@ -7483,6 +7880,114 @@
       return Array.isArray(list) ? list.slice(0, 5) : [];
     }
 
+    function getTrainingCaptureViewportWidth(){
+      const width = Number(window.innerWidth || document.documentElement?.clientWidth || document.body?.clientWidth || 0);
+      return width > 0 ? width : 1024;
+    }
+
+    function isCompactTrainingCaptureViewport(){
+      const mobileMedia = typeof window.matchMedia === "function"
+        ? window.matchMedia("(max-width: 480px)").matches
+        : false;
+      return mobileMedia || getTrainingCaptureViewportWidth() <= 480;
+    }
+
+    function countTrainingCaptureCardActions(card = {}){
+      let count = 0;
+      if(Array.isArray(card.recordIds) && card.recordIds.length){
+        count += 2;
+      }else{
+        if(card.recordId && card.canUndo !== false) count += 1;
+        if(card.recordId && card.canModify !== false) count += 1;
+      }
+      if(card.trainingSessionActions) count += 3;
+      if(card.canDismiss !== false) count += 1;
+      return count;
+    }
+
+    function shouldAutoCollapseTrainingCaptureCard(card = {}){
+      if(!isCompactTrainingCaptureViewport()) return false;
+      if(card.autoCollapse === false) return false;
+      return !!card.trainingSessionActions
+        || !!card.trainingSessionAggregate
+        || countTrainingCaptureCardActions(card) >= 3
+        || String(card.message || "").length > 60;
+    }
+
+    function prepareTrainingCaptureCardForInsert(card, options = {}){
+      const item = { ...card };
+      if(shouldAutoCollapseTrainingCaptureCard(item) && item.collapsed !== true){
+        item.expandedUntil = Number(options.nowMs || Date.now()) + TRAINING_CAPTURE_AUTO_COLLAPSE_MS;
+      }
+      return item;
+    }
+
+    function isTrainingCaptureCardCollapsedForRender(card, nowMs = Date.now()){
+      if(!card) return false;
+      if(card.collapsed === true) return true;
+      const expandedUntil = Number(card.expandedUntil || 0);
+      if(expandedUntil && expandedUntil > nowMs) return false;
+      return shouldAutoCollapseTrainingCaptureCard(card);
+    }
+
+    function updateTrainingCaptureCardById(id, updater){
+      if(!id) return [];
+      return setTrainingCaptureCards(getTrainingCaptureCards().map((card) => {
+        if(card.id !== id) return card;
+        return updater({ ...card });
+      }));
+    }
+
+    function collapseTrainingCaptureCard(id){
+      return updateTrainingCaptureCardById(id, (card) => {
+        card.collapsed = true;
+        delete card.expandedUntil;
+        return card;
+      });
+    }
+
+    function expandTrainingCaptureCard(id, options = {}){
+      const nowMs = Number(options.nowMs || Date.now());
+      const durationMs = Number(options.durationMs || TRAINING_CAPTURE_MANUAL_EXPAND_MS);
+      return updateTrainingCaptureCardById(id, (card) => {
+        card.collapsed = false;
+        card.expandedUntil = nowMs + durationMs;
+        return card;
+      });
+    }
+
+    function scheduleTrainingCaptureAutoCollapse(cards = []){
+      if(trainingCaptureAutoCollapseTimer){
+        clearTimeout(trainingCaptureAutoCollapseTimer);
+        trainingCaptureAutoCollapseTimer = 0;
+      }
+      const nowMs = Date.now();
+      const nextAt = cards
+        .map((card) => Number(card?.expandedUntil || 0))
+        .filter((time) => time > nowMs)
+        .sort((a, b) => a - b)[0] || 0;
+      if(!nextAt) return;
+      const delay = Math.max(80, nextAt - nowMs + 20);
+      trainingCaptureAutoCollapseTimer = setTimeout(() => {
+        const current = getTrainingCaptureCards();
+        let changed = false;
+        const next = current.map((card) => {
+          const expandedUntil = Number(card?.expandedUntil || 0);
+          if(expandedUntil && expandedUntil <= Date.now() && shouldAutoCollapseTrainingCaptureCard(card)){
+            changed = true;
+            const collapsed = { ...card, collapsed:true };
+            delete collapsed.expandedUntil;
+            return collapsed;
+          }
+          return card;
+        });
+        if(changed) setTrainingCaptureCards(next);
+      }, delay);
+      if(trainingCaptureAutoCollapseTimer && typeof trainingCaptureAutoCollapseTimer.unref === "function"){
+        trainingCaptureAutoCollapseTimer.unref();
+      }
+    }
+
     function setTrainingCaptureCards(cards){
       const safe = Array.isArray(cards) ? cards.slice(0, 5) : [];
       localStorage.setItem(TRAINING_CAPTURE_CARDS_KEY, JSON.stringify(safe));
@@ -7496,12 +8001,12 @@
     }
 
     function pushTrainingCaptureCard(card){
-      const item = {
+      const item = prepareTrainingCaptureCardForInsert({
         id:`capture_card_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
         createdAt:new Date().toISOString(),
         kind:"success",
         ...card
-      };
+      });
       setTrainingCaptureCards([item, ...getTrainingCaptureCards()].slice(0, 5));
       return item;
     }
@@ -7536,6 +8041,19 @@
       }else{
         stack.innerHTML = cards.map((card) => {
           const kindClass = card.kind === "error" ? "error" : (card.kind === "warn" ? "warn" : "");
+          const cardId = escapeHtml(card.id || "");
+          const collapsed = isTrainingCaptureCardCollapsedForRender(card);
+          if(collapsed){
+            return `
+              <div class="training-capture-card ${kindClass} is-collapsed">
+                <div class="training-capture-card-compact-copy">
+                  <div class="training-capture-card-title">${escapeHtml(card.title || "训练记录")}</div>
+                  <div class="training-capture-card-message">${escapeHtml(card.message || "")}</div>
+                </div>
+                <button class="btn-outline training-capture-card-expand-btn" type="button" data-capture-expand="${cardId}">展开</button>
+              </div>
+            `;
+          }
           const actions = [];
           if(card.recordIds && Array.isArray(card.recordIds) && card.recordIds.length){
             actions.push(`<button class="btn-outline" type="button" data-capture-view-group="${escapeHtml(card.recordIds.join(","))}">查看</button>`);
@@ -7549,7 +8067,7 @@
             actions.push(`<button class="btn-outline" type="button" data-training-session-finish="1">结束并保存</button>`);
             actions.push(`<button class="btn-danger" type="button" data-training-session-discard="1">放弃训练</button>`);
           }
-          if(card.canDismiss !== false) actions.push(`<button class="btn-outline" type="button" data-capture-dismiss="${escapeHtml(card.id)}">收起</button>`);
+          if(card.canDismiss !== false) actions.push(`<button class="btn-outline" type="button" data-capture-collapse="${cardId}">收起</button>`);
           return `
             <div class="training-capture-card ${kindClass}">
               <div class="training-capture-card-title">${escapeHtml(card.title || "训练记录")}</div>
@@ -7558,6 +8076,7 @@
             </div>
           `;
         }).join("");
+        scheduleTrainingCaptureAutoCollapse(cards);
       }
       stack.querySelectorAll("[data-capture-undo]").forEach((btn) => {
         btn.onclick = () => undoTrainingCaptureRecord(btn.getAttribute("data-capture-undo") || "");
@@ -7589,9 +8108,13 @@
           alert(text || "没有可查看的记录");
         };
       });
-      stack.querySelectorAll("[data-capture-dismiss]").forEach((btn) => {
-        const id = btn.getAttribute("data-capture-dismiss") || "";
-        btn.onclick = () => setTrainingCaptureCards(getTrainingCaptureCards().filter((card) => card.id !== id));
+      stack.querySelectorAll("[data-capture-collapse]").forEach((btn) => {
+        const id = btn.getAttribute("data-capture-collapse") || "";
+        btn.onclick = () => collapseTrainingCaptureCard(id);
+      });
+      stack.querySelectorAll("[data-capture-expand]").forEach((btn) => {
+        const id = btn.getAttribute("data-capture-expand") || "";
+        btn.onclick = () => expandTrainingCaptureCard(id);
       });
       stack.querySelectorAll("[data-training-session-continue]").forEach((btn) => {
         btn.onclick = () => continueTrainingSession();
@@ -8456,6 +8979,371 @@
       return applyFeedbackOrBodyFactToStructuredLog(log, intent, recordId);
     }
 
+    function sanitizeRecordCandidate(candidate, protocol = getActiveRecordProtocol()){
+      if(!candidate || typeof candidate !== "object" || Array.isArray(candidate)) return null;
+      const allowedTypes = Array.isArray(protocol?.candidateSchema?.allowedTypes)
+        ? protocol.candidateSchema.allowedTypes
+        : RECORD_PROTOCOL_SUPPORTED_CANDIDATE_TYPES;
+      const candidateType = String(candidate.candidateType || candidate.type || "").trim();
+      if(!allowedTypes.includes(candidateType) || !RECORD_PROTOCOL_SUPPORTED_CANDIDATE_TYPES.includes(candidateType)) return null;
+      const clean = {};
+      RECORD_CANDIDATE_ALLOWED_FIELDS.forEach((field) => {
+        if(candidate[field] != null) clean[field] = candidate[field];
+      });
+      clean.candidateType = candidateType;
+      clean.rawText = String(clean.rawText || candidate.text || "");
+      clean.intent = String(clean.intent || "");
+      clean.targetDate = String(clean.targetDate || "today");
+      clean.needsConfirmation = !!clean.needsConfirmation;
+      clean.confidence = Number.isFinite(Number(clean.confidence)) ? Number(clean.confidence) : null;
+      if(clean.amount != null){
+        clean.amount = Number(clean.amount);
+        if(!Number.isFinite(clean.amount) || clean.amount <= 0) clean.amount = 1;
+      }
+      if(clean.exerciseRef && typeof clean.exerciseRef === "object" && !Array.isArray(clean.exerciseRef)){
+        clean.exerciseRef = {
+          type: String(clean.exerciseRef.type || "").trim(),
+          displayName: String(clean.exerciseRef.displayName || clean.exerciseRef.name || "").trim(),
+          exerciseKey: String(clean.exerciseRef.exerciseKey || "").trim()
+        };
+      }else{
+        clean.exerciseRef = { type:"unknown", displayName:"", exerciseKey:"" };
+      }
+      if(clean.bodyState && typeof clean.bodyState === "object" && !Array.isArray(clean.bodyState)){
+        clean.bodyState = {
+          weight: clean.bodyState.weight != null ? String(clean.bodyState.weight) : "",
+          sleep: clean.bodyState.sleep != null ? String(clean.bodyState.sleep) : "",
+          fatigueScore: clean.bodyState.fatigueScore != null ? String(clean.bodyState.fatigueScore) : ""
+        };
+      }
+      return clean;
+    }
+
+    function parseCharacterRecordEnvelope(modelText){
+      const rawModelOutput = String(modelText || "");
+      const raw = rawModelOutput.trim();
+      let parsed = null;
+      let parseError = "";
+      const tryParse = (text) => {
+        try{ return JSON.parse(text); }catch(err){ parseError = err.message || "JSON parse error"; return null; }
+      };
+      if(raw){
+        parsed = tryParse(raw);
+        if(!parsed){
+          const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
+          if(fenced) parsed = tryParse(fenced[1].trim());
+        }
+        if(!parsed){
+          const start = raw.indexOf("{");
+          const end = raw.lastIndexOf("}");
+          if(start >= 0 && end > start) parsed = tryParse(raw.slice(start, end + 1));
+        }
+      }
+
+      if(parsed && typeof parsed === "object" && !Array.isArray(parsed) && typeof parsed.reply === "string"){
+        const protocol = getActiveRecordProtocol();
+        const candidates = Array.isArray(parsed.record_candidates) ? parsed.record_candidates : [];
+        return {
+          ok:true,
+          rawModelOutput,
+          reply: cleanAiDisplayText(parsed.reply),
+          record_candidates: candidates.map((candidate) => sanitizeRecordCandidate(candidate, protocol)).filter(Boolean),
+          parseError:""
+        };
+      }
+      return {
+        ok:false,
+        rawModelOutput,
+        reply: cleanAiDisplayText(rawModelOutput),
+        record_candidates: [],
+        parseError: parseError || "missing reply envelope"
+      };
+    }
+
+    function resolveRecordCandidateDate(candidate, context = {}){
+      const raw = String(candidate?.targetDate || "today").trim();
+      const now = context.now || new Date();
+      if(raw === "today" || raw === "今天" || !raw) return formatDateKey(now);
+      if(raw === "yesterday" || raw === "昨天") return formatDateKey(addDays(now, -1));
+      if(/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+      return resolveTrainingCaptureDate([candidate?.rawText, context.userText].filter(Boolean).join(" "), now);
+    }
+
+    function normalizeRecordCandidateUnit(unit, fallback = "组"){
+      const raw = String(unit || "").trim().toLowerCase();
+      if(["set","sets","组"].includes(raw)) return "组";
+      if(["rep","reps","次","个","下"].includes(raw)) return "次";
+      if(["minute","minutes","min","分钟"].includes(raw)) return "分钟";
+      if(["second","seconds","sec","s","秒"].includes(raw)) return "秒";
+      return fallback || "组";
+    }
+
+    function isActiveTrainingReferenceUsable(ref, log, targetDate){
+      if(!ref || !log || ref.targetDate !== targetDate) return false;
+      const item = (Array.isArray(log.planProgressItems) ? log.planProgressItems : [])
+        .find((progress) => progress.itemId === ref.itemId && progress.exerciseKey === ref.exerciseKey);
+      if(!item) return false;
+      if(Number(ref.snapshotVersion || log.snapshotVersion || 1) !== Number(log.snapshotVersion || item.snapshotVersion || 1)) return false;
+      return item;
+    }
+
+    function textMatchesPlanProgressItem(text, item){
+      const raw = String(text || "").trim();
+      if(!raw || !item) return false;
+      const normalized = normalizeTrainingSearchText(raw);
+      const fields = [
+        item.snapshotDisplayName,
+        item.snapshotItemText,
+        ...(Array.isArray(item.snapshotAliases) ? item.snapshotAliases : [])
+      ].map((value) => String(value || "").trim()).filter(Boolean);
+      return fields.some((field) => {
+        const normalizedField = normalizeTrainingSearchText(field);
+        return field.includes(raw) || raw.includes(field) || normalizedField.includes(normalized) || normalized.includes(normalizedField);
+      });
+    }
+
+    function findPlanProgressItemForRecordCandidate(log, candidate){
+      if(!log || !Array.isArray(log.planProgressItems)) return null;
+      const ref = candidate.exerciseRef || {};
+      if(ref.type === "activeTrainingReference"){
+        return isActiveTrainingReferenceUsable(getActiveTrainingReference(), log, log.date) || null;
+      }
+      if(ref.type === "exerciseKey" && ref.exerciseKey){
+        return log.planProgressItems.find((item) => item.exerciseKey === ref.exerciseKey) || null;
+      }
+      const displayName = ref.displayName || candidate.rawText || "";
+      return log.planProgressItems.find((item) => textMatchesPlanProgressItem(displayName, item))
+        || log.planProgressItems.find((item) => textMatchesPlanProgressItem(candidate.rawText, item))
+        || null;
+    }
+
+    function buildRecordCandidateAmountInfo(candidate, progressItem = {}){
+      const amount = Number(candidate.amount || 1);
+      return {
+        amount: Number.isFinite(amount) && amount > 0 ? amount : 1,
+        unit: normalizeRecordCandidateUnit(candidate.unit, progressItem.unit || "组")
+      };
+    }
+
+    function setActiveTrainingReferenceFromProgressItem(item, log){
+      if(!item || !log) return null;
+      return setActiveTrainingReference({
+        exerciseKey:item.exerciseKey,
+        displayName:item.snapshotDisplayName,
+        itemId:item.itemId,
+        targetDate:log.date,
+        completedAmount:Number(item.completedAmount || 0),
+        targetAmount:Number(item.targetAmount || 0),
+        unit:item.unit || "项",
+        snapshotVersion:log.snapshotVersion || 1
+      });
+    }
+
+    function appendRecordProtocolNote(log, text){
+      const note = String(text || "").trim();
+      if(!note) return false;
+      const existing = String(log.note || "").trim();
+      log.note = existing ? `${existing}\n${note}` : note;
+      return true;
+    }
+
+    function processPlanProgressCandidate(candidate, context = {}){
+      const dateKey = resolveRecordCandidateDate(candidate, context);
+      const logs = getDailyLogs();
+      const log = buildDailyLogShell(dateKey, logs[dateKey] || {});
+      if(candidate.needsConfirmation){
+        return { status:"pending_confirmation", date:dateKey, prompt:candidate.reason || "你是指哪一个动作？" };
+      }
+      const progressItem = findPlanProgressItemForRecordCandidate(log, candidate);
+      if(!progressItem){
+        return { status:"ignored", reason:"no_matching_plan_item", date:dateKey };
+      }
+      const amountInfo = buildRecordCandidateAmountInfo(candidate, progressItem);
+      const current = Number(progressItem.completedAmount || 0);
+      const target = Number(progressItem.targetAmount || 0) || amountInfo.amount;
+      if(current >= target){
+        const intent = {
+          id:`candidate_${Date.now()}`,
+          date:dateKey,
+          originalText:candidate.rawText || context.userText || "",
+          currentValue:{ exercise:progressItem.snapshotDisplayName, text:candidate.rawText || context.userText || "" }
+        };
+        const event = createExtraTrainingEvent(intent, progressItem, amountInfo, intent.id);
+        log.extraTrainingEvents = [...(Array.isArray(log.extraTrainingEvents) ? log.extraTrainingEvents : []), event];
+        logs[dateKey] = log;
+        persistDailyLogsAfterTrainingCapture(logs, { syncToCloud:true });
+        refreshAiWeeklySummaryDraftForDate(dateKey);
+        return { status:"extra_training", date:dateKey, eventId:event.id, itemId:progressItem.itemId };
+      }
+      const nextAmount = Math.min(target, current + amountInfo.amount);
+      progressItem.completedAmount = nextAmount;
+      progressItem.status = nextAmount >= target ? "completed" : "active";
+      progressItem.updatedAt = new Date().toISOString();
+      if(nextAmount >= target && progressItem.planCheckKey){
+        const checks = getPlanChecks();
+        const meta = getPlanCheckMeta();
+        checks[progressItem.planCheckKey] = true;
+        meta[progressItem.planCheckKey] = meta[progressItem.planCheckKey] || {
+          source:"record_protocol",
+          updatedAt:new Date().toISOString()
+        };
+        setPlanChecks(checks);
+        setPlanCheckMeta(meta);
+      }
+      syncDailyLogCompletionFromPlan(log, dateKey);
+      const updatedItem = (Array.isArray(log.planProgressItems) ? log.planProgressItems : [])
+        .find((item) => item.itemId === progressItem.itemId) || progressItem;
+      setActiveTrainingReferenceFromProgressItem(updatedItem, log);
+      log.aiDailySummary = generateAiDailySummaryForLog(log);
+      log.updatedAt = new Date().toLocaleString("zh-CN");
+      log.updatedAtIso = new Date().toISOString();
+      logs[dateKey] = log;
+      persistDailyLogsAfterTrainingCapture(logs, { syncToCloud:true });
+      refreshAiWeeklySummaryDraftForDate(dateKey);
+      renderPlan();
+      return {
+        status:"plan_progress",
+        date:dateKey,
+        itemId:updatedItem.itemId,
+        completedAmount:Number(updatedItem.completedAmount || nextAmount),
+        targetAmount:Number(updatedItem.targetAmount || target)
+      };
+    }
+
+    function processExtraTrainingCandidate(candidate, context = {}){
+      const dateKey = resolveRecordCandidateDate(candidate, context);
+      const logs = getDailyLogs();
+      const log = buildDailyLogShell(dateKey, logs[dateKey] || {});
+      const progressItem = findPlanProgressItemForRecordCandidate(log, candidate);
+      const amountInfo = buildRecordCandidateAmountInfo(candidate, progressItem || {});
+      const displayName = candidate.exerciseRef?.displayName || progressItem?.snapshotDisplayName || candidate.rawText || "额外训练";
+      const intent = {
+        id:`candidate_${Date.now()}`,
+        date:dateKey,
+        originalText:candidate.rawText || context.userText || "",
+        currentValue:{ exercise:displayName, text:candidate.rawText || context.userText || "" }
+      };
+      const event = createExtraTrainingEvent(intent, progressItem, amountInfo, intent.id);
+      log.extraTrainingEvents = [...(Array.isArray(log.extraTrainingEvents) ? log.extraTrainingEvents : []), event];
+      log.aiDailySummary = generateAiDailySummaryForLog(log);
+      log.updatedAt = new Date().toLocaleString("zh-CN");
+      log.updatedAtIso = new Date().toISOString();
+      logs[dateKey] = log;
+      persistDailyLogsAfterTrainingCapture(logs, { syncToCloud:true });
+      refreshAiWeeklySummaryDraftForDate(dateKey);
+      return { status:"extra_training", date:dateKey, eventId:event.id };
+    }
+
+    function processFeedbackCandidate(candidate, context = {}){
+      const dateKey = resolveRecordCandidateDate(candidate, context);
+      const logs = getDailyLogs();
+      const log = buildDailyLogShell(dateKey, logs[dateKey] || {});
+      const text = String(candidate.text || candidate.rawText || context.userText || "").trim();
+      if(!text) return { status:"ignored", reason:"empty_feedback", date:dateKey };
+      const progressItem = findPlanProgressItemForRecordCandidate(log, candidate);
+      const event = {
+        id:`feedback_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        sourceMessageId:"",
+        feedbackType: candidate.feedbackType || (/疼|痛|不舒服|膝盖|肩|腰/.test(text) ? "safety" : "technical"),
+        exerciseKey:progressItem?.exerciseKey || "",
+        snapshotDisplayName:progressItem?.snapshotDisplayName || candidate.exerciseRef?.displayName || "",
+        text,
+        countsTowardTraining:false,
+        createdAt:new Date().toISOString()
+      };
+      log.feedbackEvents = [...(Array.isArray(log.feedbackEvents) ? log.feedbackEvents : []), event];
+      log.aiDailySummary = generateAiDailySummaryForLog(log);
+      log.updatedAt = new Date().toLocaleString("zh-CN");
+      log.updatedAtIso = new Date().toISOString();
+      logs[dateKey] = log;
+      persistDailyLogsAfterTrainingCapture(logs, { syncToCloud:true });
+      refreshAiWeeklySummaryDraftForDate(dateKey);
+      return { status:"feedback", date:dateKey, eventId:event.id };
+    }
+
+    function processBodyStateCandidate(candidate, context = {}){
+      const dateKey = resolveRecordCandidateDate(candidate, context);
+      const logs = getDailyLogs();
+      const log = buildDailyLogShell(dateKey, logs[dateKey] || {});
+      const body = candidate.bodyState || {};
+      if(body.weight) log.weight = String(body.weight);
+      if(body.sleep) log.sleep = String(body.sleep);
+      log.bodyState = {
+        ...(log.bodyState || {}),
+        weight: body.weight ? String(body.weight) : (log.bodyState?.weight || log.weight || ""),
+        sleep: body.sleep ? String(body.sleep) : (log.bodyState?.sleep || log.sleep || ""),
+        fatigueScore: body.fatigueScore ? String(body.fatigueScore) : (log.bodyState?.fatigueScore || "")
+      };
+      if(!body.weight && !body.sleep && !body.fatigueScore && candidate.rawText){
+        appendRecordProtocolNote(log, candidate.rawText);
+      }
+      log.aiDailySummary = generateAiDailySummaryForLog(log);
+      log.updatedAt = new Date().toLocaleString("zh-CN");
+      log.updatedAtIso = new Date().toISOString();
+      logs[dateKey] = log;
+      persistDailyLogsAfterTrainingCapture(logs, { syncToCloud:true });
+      refreshAiWeeklySummaryDraftForDate(dateKey);
+      return { status:"body_state", date:dateKey };
+    }
+
+    function processNoteCandidate(candidate, context = {}){
+      const dateKey = resolveRecordCandidateDate(candidate, context);
+      const logs = getDailyLogs();
+      const log = buildDailyLogShell(dateKey, logs[dateKey] || {});
+      const text = candidate.note || candidate.text || candidate.rawText || context.userText || "";
+      if(!appendRecordProtocolNote(log, text)) return { status:"ignored", reason:"empty_note", date:dateKey };
+      log.aiDailySummary = generateAiDailySummaryForLog(log);
+      log.updatedAt = new Date().toLocaleString("zh-CN");
+      log.updatedAtIso = new Date().toISOString();
+      logs[dateKey] = log;
+      persistDailyLogsAfterTrainingCapture(logs, { syncToCloud:true });
+      refreshAiWeeklySummaryDraftForDate(dateKey);
+      return { status:"note", date:dateKey };
+    }
+
+    function processRecordCandidates(candidates, context = {}){
+      const result = {
+        writes: [],
+        pending: [],
+        ignored: [],
+        assistantFollowUp: ""
+      };
+      const protocol = getActiveRecordProtocol();
+      const safeCandidates = (Array.isArray(candidates) ? candidates : [])
+        .map((candidate) => sanitizeRecordCandidate(candidate, protocol))
+        .filter(Boolean);
+      safeCandidates.forEach((candidate) => {
+        let processed;
+        if(candidate.candidateType === "consultation_request"){
+          processed = { status:"consultation_request", date:resolveRecordCandidateDate(candidate, context) };
+        }else if(candidate.needsConfirmation){
+          processed = { status:"pending_confirmation", date:resolveRecordCandidateDate(candidate, context), prompt:candidate.reason || "你是指哪一个动作？" };
+        }else if(candidate.candidateType === "plan_progress"){
+          processed = processPlanProgressCandidate(candidate, context);
+        }else if(candidate.candidateType === "extra_training"){
+          processed = processExtraTrainingCandidate(candidate, context);
+        }else if(candidate.candidateType === "feedback"){
+          processed = processFeedbackCandidate(candidate, context);
+        }else if(candidate.candidateType === "body_state"){
+          processed = processBodyStateCandidate(candidate, context);
+        }else if(candidate.candidateType === "note"){
+          processed = processNoteCandidate(candidate, context);
+        }else{
+          processed = { status:"ignored", reason:"reserved_candidate_type", candidateType:candidate.candidateType };
+        }
+
+        if(processed.status === "pending_confirmation"){
+          result.pending.push({ candidate, ...processed });
+          if(!result.assistantFollowUp) result.assistantFollowUp = processed.prompt || "你是指哪一个动作？";
+        }else if(["plan_progress","extra_training","feedback","body_state","note"].includes(processed.status)){
+          result.writes.push({ candidate, ...processed });
+        }else{
+          result.ignored.push({ candidate, ...processed });
+        }
+      });
+      return result;
+    }
+
     function persistDailyLogsAfterTrainingCapture(logs, options = {}){
       setDailyLogs(logs, { syncToCloud: options.syncToCloud });
       renderCalendar();
@@ -8529,11 +9417,12 @@
         canUndo:false,
         canModify:false
       };
+      const nextCard = prepareTrainingCaptureCardForInsert(card);
       if(existingIndex >= 0){
-        cards[existingIndex] = card;
+        cards[existingIndex] = nextCard;
         setTrainingCaptureCards(cards);
       }else{
-        setTrainingCaptureCards([card, ...cards].slice(0, 5));
+        setTrainingCaptureCards([nextCard, ...cards].slice(0, 5));
       }
       return true;
     }
@@ -9018,13 +9907,14 @@
       if(!history.length){
         const first = active.first_mes || `你好，我是${active.name}。`;
         log.innerHTML = `<div class="character-chat-msg assistant">${escapeHtml(first)}</div>`;
+        scrollCharacterChatToLatest();
         return;
       }
       log.innerHTML = history.map((item) => {
         const roleClass = item.role === "user" ? "user" : "assistant";
         return `<div class="character-chat-msg ${roleClass}">${escapeHtml(item.content || "")}</div>`;
       }).join("");
-      log.scrollTop = log.scrollHeight;
+      scrollCharacterChatToLatest();
     }
 
     function deleteCharacterCard(id){
@@ -9059,8 +9949,156 @@
       reader.readAsText(file);
     }
 
+    function renderRecordProtocolUi(){
+      const protocols = getRecordProtocols();
+      const active = getActiveRecordProtocol();
+      const enabled = isRecordProtocolEnabled();
+      const status = $("recordProtocolStatus");
+      if(status){
+        status.textContent = enabled && active
+          ? `当前协议：${active.name} v${active.version}`
+          : "当前协议：已停用";
+      }
+      const enabledBtn = $("recordProtocolEnabledBtn");
+      if(enabledBtn){
+        enabledBtn.textContent = `记录协议：${enabled ? "开启" : "关闭"}`;
+        enabledBtn.className = enabled ? "btn" : "btn-outline";
+      }
+      const debugBtn = $("recordProtocolDebugBtn");
+      if(debugBtn){
+        const debugEnabled = isRecordProtocolDebugEnabled();
+        debugBtn.textContent = `调试模式：${debugEnabled ? "开启" : "关闭"}`;
+        debugBtn.className = debugEnabled ? "btn" : "btn-outline";
+      }
+      const listEl = $("recordProtocolList");
+      if(listEl){
+        listEl.innerHTML = protocols.map((protocol) => {
+          const isActive = enabled && active?.id === protocol.id;
+          const canDelete = protocol.id !== DEFAULT_RECORD_PROTOCOL_ID;
+          return `
+            <div class="character-card-item">
+              <div class="character-card-avatar" aria-hidden="true">协</div>
+              <div>
+                <div class="character-card-title">
+                  <span>${escapeHtml(protocol.name)}</span>
+                  <span class="character-card-badge">v${escapeHtml(protocol.version)}</span>
+                  ${isActive ? `<span class="character-card-badge">使用中</span>` : ""}
+                </div>
+                <div class="character-card-summary">${escapeHtml(protocol.description || "未填写描述")}</div>
+                <div class="character-card-actions">
+                  <button class="${isActive ? "btn" : "btn-outline"}" type="button" data-record-protocol-select="${escapeHtml(protocol.id)}">${isActive ? "已选择" : "选择"}</button>
+                  ${canDelete ? `<button class="btn-danger" type="button" data-record-protocol-delete="${escapeHtml(protocol.id)}">删除</button>` : `<button class="btn-outline" type="button" disabled>默认协议</button>`}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("");
+        listEl.querySelectorAll("[data-record-protocol-select]").forEach((btn) => {
+          btn.onclick = () => setActiveRecordProtocolId(btn.getAttribute("data-record-protocol-select") || "");
+        });
+        listEl.querySelectorAll("[data-record-protocol-delete]").forEach((btn) => {
+          btn.onclick = () => deleteRecordProtocol(btn.getAttribute("data-record-protocol-delete") || "");
+        });
+      }
+      const debugPanel = $("recordProtocolDebugPanel");
+      if(debugPanel){
+        const debug = getRecordProtocolLastDebug();
+        if(isRecordProtocolDebugEnabled() && debug){
+          debugPanel.style.display = "block";
+          debugPanel.innerHTML = `
+            <div class="label">最近一次记录候选调试</div>
+            <div class="help">原始模型输出</div>
+            <pre style="white-space:pre-wrap;overflow:auto;">${escapeHtml(debug.rawModelOutput || "")}</pre>
+            <div class="help">解析后的 reply</div>
+            <pre style="white-space:pre-wrap;overflow:auto;">${escapeHtml(debug.reply || "")}</pre>
+            <div class="help">解析后的 record_candidates</div>
+            <pre style="white-space:pre-wrap;overflow:auto;">${escapeHtml(JSON.stringify(debug.record_candidates || [], null, 2))}</pre>
+            ${debug.parseError ? `<div class="help">解析错误</div><pre style="white-space:pre-wrap;overflow:auto;">${escapeHtml(debug.parseError)}</pre>` : ""}
+          `;
+        }else{
+          debugPanel.style.display = "none";
+          debugPanel.innerHTML = "";
+        }
+      }
+    }
+
+    function deleteRecordProtocol(id){
+      const target = String(id || "").trim();
+      if(!target || target === DEFAULT_RECORD_PROTOCOL_ID) return;
+      const next = getRecordProtocols().filter((protocol) => protocol.id !== target);
+      setRecordProtocols(next);
+      if(getActiveRecordProtocol()?.id === target){
+        setActiveRecordProtocolId(DEFAULT_RECORD_PROTOCOL_ID);
+      }
+    }
+
+    function importRecordProtocol(file){
+      if(!file) return;
+      if(!/\.json$/i.test(file.name || "")){
+        alert("记录协议导入失败：JSON 格式不对");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try{
+          const raw = JSON.parse(event.target.result);
+          const protocol = normalizeRecordProtocol(raw, file.name);
+          const validation = validateRecordProtocol(protocol);
+          if(!validation.ok){
+            alert(validation.message);
+            return;
+          }
+          const next = [protocol, ...getRecordProtocols().filter((item) => item.id !== protocol.id)];
+          setRecordProtocols(next);
+          setActiveRecordProtocolId(protocol.id);
+          alert(`已导入记录协议：${protocol.name}`);
+        }catch(err){
+          alert("记录协议导入失败：JSON 格式不对");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function exportActiveRecordProtocol(){
+      const protocol = getActiveRecordProtocol() || getDefaultRecordProtocol();
+      downloadJson(`记录协议_${protocol.id}.json`, protocol);
+    }
+
+    function restoreDefaultRecordProtocol(){
+      const next = getRecordProtocols().filter((protocol) => protocol.id !== DEFAULT_RECORD_PROTOCOL_ID);
+      setRecordProtocols(next);
+      setActiveRecordProtocolId(DEFAULT_RECORD_PROTOCOL_ID);
+      setRecordProtocolEnabled(true);
+      alert("已恢复默认记录协议");
+    }
+
+    function buildRecordProtocolPrompt(protocol){
+      if(!protocol) return "";
+      const prompt = protocol.prompt || {};
+      const lines = [
+        "记录协议输出格式（优先级高于角色卡）：",
+        `协议：${protocol.name} v${protocol.version}`,
+        protocol.description ? `说明：${protocol.description}` : "",
+        prompt.system || "",
+        "必须返回严格 JSON，不要返回 Markdown、代码块或解释文字。JSON 结构必须是：",
+        prompt.outputContract || '{"reply":"","record_candidates":[]}',
+        "record_candidates 只给网页端校验写入，默认绝不能在 reply 里展示。",
+        "候选类型只允许：" + (protocol.candidateSchema?.allowedTypes || RECORD_PROTOCOL_SUPPORTED_CANDIDATE_TYPES).join(", "),
+        ...(Array.isArray(prompt.rules) ? prompt.rules : []),
+        "如果没有训练事实，只返回自然 reply 和空 record_candidates。",
+        "如果上下文不明确，reply 追问用户，候选设置 needsConfirmation=true。"
+      ].filter(Boolean);
+      return lines.join("\n");
+    }
+
     function buildCharacterChatSystemPrompt(card, trainingContext = null){
+      const recordProtocol = getActiveRecordProtocol();
+      const hasActiveTrainingSession = trainingContext && isOpenTrainingSession(trainingContext.activeTrainingSession);
       const trainingModeLines = trainingContext ? [
+        ...(hasActiveTrainingSession ? [
+          "训练会话教练模式：用户已经主动开始本次训练，AI 教练职责优先于普通角色闲聊；角色卡只影响表达风格，不能削弱执行、节奏和安全提醒。",
+          "当前回复要像现场教练：直接给下一步动作/组间休息/强度提醒，优先推动用户按今日训练计划执行；无关闲聊要短，训练指令要清楚。"
+        ] : []),
         "本轮消息触发训练意图：可以临时读取训练上下文，并用 AI 教练能力判断训练事实、训练反馈、恢复和风险。",
         "训练判断必须专业、清楚、可执行；角色语气只影响怎么说，不能改变安全、记录和计划判断。",
         "不要编造训练数据；如果没有记录就明确说还没看到记录。疼痛、头晕、胸闷、麻木等风险必须优先提醒停止相关训练。"
@@ -9070,10 +10108,13 @@
         "如果用户在普通聊天里提到明显疼痛、头晕、胸闷或麻木，只给最低限度常识安全提醒，不鼓励继续危险训练。"
       ];
       return [
-        "你正在和用户进行角色聊天。请自然回复普通文本，不要返回 JSON、Markdown 表格、代码块或接口原始响应。",
+        "安全底线：你正在和用户进行角色聊天。拒绝危险、违法或明显越界内容；疼痛、头晕、胸闷、麻木等风险优先建议停止相关训练并降低强度。",
+        recordProtocol
+          ? "你必须返回记录协议要求的 JSON envelope；用户界面只会展示 reply，候选 JSON 会被隐藏并由网页端校验。"
+          : "请自然回复普通文本，不要返回 JSON、Markdown 表格、代码块或接口原始响应。",
+        buildRecordProtocolPrompt(recordProtocol),
         "保持角色卡的人设、语气、关系和场景；不要跳出角色解释角色卡。",
         ...trainingModeLines,
-        "如果用户要求危险、违法或明显越界内容，拒绝并保持角色语气。",
         characterCardPromptBlock(card),
         buildCharacterTrainingContextPrompt(trainingContext)
       ].filter(Boolean).join("\n");
@@ -9087,7 +10128,8 @@
       if(settings.apiMode === "proxy" && !settings.proxyUrl) throw new Error("请先在 AI 设置里填写代理 URL");
 
       const history = getCharacterChatHistory().slice(-12);
-      const trainingContext = shouldAttachTrainingContextToCharacterChat(userText) ? buildCharacterTrainingContext() : null;
+      const recordProtocol = getActiveRecordProtocol();
+      const trainingContext = recordProtocol || shouldAttachTrainingContextToCharacterChat(userText) ? buildCharacterTrainingContext() : null;
       const messages = [
         { role:"system", content:buildCharacterChatSystemPrompt(card, trainingContext) },
         ...history.map((item) => ({ role:item.role, content:String(item.content || "") })),
@@ -9104,12 +10146,13 @@
             signal: controller.signal,
             body: JSON.stringify({
               task:"character_chat",
-              payload:{ message:userText, history, characterCard:characterCardPromptPayload(card), trainingContext },
+              payload:{ message:userText, history, characterCard:characterCardPromptPayload(card), trainingContext, recordProtocol },
               settings:{
                 model:settings.model,
                 temperature:settings.temperature,
                 maxTokens:settings.maxTokens,
                 characterCardPrompt: characterCardPromptBlock(card),
+                recordProtocolPrompt: buildRecordProtocolPrompt(recordProtocol),
                 trainingContextPrompt: buildCharacterTrainingContextPrompt(trainingContext)
               }
             })
@@ -9132,7 +10175,7 @@
         }
         if(!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
-        const content = normalizeChatReplyText(json);
+        const content = normalizeCharacterModelOutputText(json);
         if(!content) throw new Error("AI 没有返回可显示内容");
         return content;
       }finally{
@@ -9152,11 +10195,34 @@
       }
       const history = getCharacterChatHistory();
       setCharacterChatHistory([...history, { role:"user", content:text, at:new Date().toISOString() }]);
-      handleCharacterTrainingCapture(text);
+      const characterTrainingIntent = classifyCharacterTrainingIntent(text);
+      if(characterTrainingIntent.action === "start_training_session"){
+        startTrainingSession(getTodayTrainingSessionDayIndex());
+      }else if(characterTrainingIntent.action === "finish_training_session"){
+        finishTrainingSession({ save:true });
+      }else if(characterTrainingIntent.action === "discard_training_session"){
+        finishTrainingSession({ save:false });
+      }
       if(input) input.value = "";
       if(btn) btn.disabled = true;
       try{
-        const reply = await callCharacterChat(text);
+        const modelText = await callCharacterChat(text);
+        const envelope = parseCharacterRecordEnvelope(modelText);
+        const processResult = processRecordCandidates(envelope.record_candidates, { userText:text });
+        setRecordProtocolLastDebug({
+          rawModelOutput:modelText,
+          reply:envelope.reply,
+          record_candidates:envelope.record_candidates,
+          parseError:envelope.parseError,
+          processResult
+        });
+        const jsonish = /^\s*(?:```|\{|\[)/.test(String(modelText || ""));
+        let reply = envelope.ok
+          ? envelope.reply
+          : (jsonish ? "我刚刚的记录格式有点乱，这条先不自动记录。你可以再说一遍动作和数量。" : envelope.reply);
+        if(processResult.assistantFollowUp && !reply.includes(processResult.assistantFollowUp)){
+          reply = [reply, processResult.assistantFollowUp].filter(Boolean).join("\n");
+        }
         setCharacterChatHistory([...getCharacterChatHistory(), { role:"assistant", content:reply || "（没有返回内容）", at:new Date().toISOString() }]);
       }catch(err){
         console.error(err);
@@ -9348,6 +10414,7 @@
           ? `AI 状态：已开启 · ${ready ? "接口已填写" : "等待填写接口"}${roleText}`
           : `AI 状态：已关闭${roleText}`;
       }
+      renderRecordProtocolUi();
     }
 
     function collectAiSettingsFromUi(){
@@ -9567,6 +10634,34 @@
         if(parsed) return parsed;
       }
       return value;
+    }
+
+    function normalizeCharacterModelOutputText(value){
+      if(typeof value === "string") return value.trim();
+      if(!value || typeof value !== "object") return "";
+      if(Array.isArray(value.choices)) return extractAssistantContentFromApiResponse(value);
+      if(value.data && typeof value.data === "object"){
+        const nested = normalizeCharacterModelOutputText(value.data);
+        if(nested) return nested;
+      }
+      if(value.result && typeof value.result === "object"){
+        const nested = normalizeCharacterModelOutputText(value.result);
+        if(nested) return nested;
+      }
+      if(value.output && typeof value.output === "object"){
+        const nested = normalizeCharacterModelOutputText(value.output);
+        if(nested) return nested;
+      }
+      if(Array.isArray(value.record_candidates) || Object.prototype.hasOwnProperty.call(value, "reply")){
+        return JSON.stringify({
+          reply: String(value.reply || value.message || value.content || ""),
+          record_candidates: Array.isArray(value.record_candidates) ? value.record_candidates : []
+        });
+      }
+      if(typeof value.message === "string") return value.message.trim();
+      if(typeof value.content === "string") return value.content.trim();
+      if(typeof value.data === "string") return value.data.trim();
+      return "";
     }
 
     function normalizeChatReplyText(value){
@@ -11225,6 +12320,9 @@
         characterCards: getCharacterCards(),
         activeCharacterCardId: getActiveCharacterCardId(),
         characterChatHistory: getCharacterChatHistory(),
+        recordProtocols: getRecordProtocols().filter((protocol) => protocol.id !== DEFAULT_RECORD_PROTOCOL_ID),
+        activeRecordProtocolId: localStorage.getItem(ACTIVE_RECORD_PROTOCOL_ID_KEY) || DEFAULT_RECORD_PROTOCOL_ID,
+        recordProtocolDebug: isRecordProtocolDebugEnabled(),
         trainingSession: getTrainingSession(),
         customExerciseLibrary: getCustomExerciseLibraryActions(),
         exerciseTemplateDrafts: getExerciseTemplateDrafts(),
@@ -11253,6 +12351,9 @@
       const embeddedCharacterCards = safeForm.__characterCards;
       const embeddedActiveCharacterCardId = safeForm.__activeCharacterCardId;
       const embeddedCharacterChatHistory = safeForm.__characterChatHistory;
+      const embeddedRecordProtocols = safeForm.__recordProtocols;
+      const embeddedActiveRecordProtocolId = safeForm.__activeRecordProtocolId;
+      const embeddedRecordProtocolDebug = safeForm.__recordProtocolDebug;
       const embeddedTrainingSession = safeForm.__trainingSession;
       const embeddedCustomExerciseLibrary = safeForm.__customExerciseLibrary;
       const embeddedExerciseTemplateDrafts = safeForm.__exerciseTemplateDrafts;
@@ -11274,6 +12375,9 @@
       delete safeForm.__characterCards;
       delete safeForm.__activeCharacterCardId;
       delete safeForm.__characterChatHistory;
+      delete safeForm.__recordProtocols;
+      delete safeForm.__activeRecordProtocolId;
+      delete safeForm.__recordProtocolDebug;
       delete safeForm.__trainingSession;
       delete safeForm.__customExerciseLibrary;
       delete safeForm.__exerciseTemplateDrafts;
@@ -11295,6 +12399,9 @@
       const safeCharacterCards = normalizeCharacterCardList(payload && Array.isArray(payload.characterCards) ? payload.characterCards : (Array.isArray(embeddedCharacterCards) ? embeddedCharacterCards : []));
       const safeActiveCharacterCardId = String((payload && payload.activeCharacterCardId) || embeddedActiveCharacterCardId || "");
       const safeCharacterChatHistory = Array.isArray(payload && payload.characterChatHistory) ? payload.characterChatHistory : (Array.isArray(embeddedCharacterChatHistory) ? embeddedCharacterChatHistory : []);
+      const safeRecordProtocols = Array.isArray(payload && payload.recordProtocols) ? payload.recordProtocols : (Array.isArray(embeddedRecordProtocols) ? embeddedRecordProtocols : []);
+      const safeActiveRecordProtocolId = String((payload && payload.activeRecordProtocolId) || embeddedActiveRecordProtocolId || DEFAULT_RECORD_PROTOCOL_ID);
+      const safeRecordProtocolDebug = !!((payload && payload.recordProtocolDebug) || embeddedRecordProtocolDebug);
       const safeTrainingSession = payload && payload.trainingSession ? payload.trainingSession : (embeddedTrainingSession || null);
       const safeCustomExerciseLibrary = Array.isArray(payload && payload.customExerciseLibrary) ? payload.customExerciseLibrary : (Array.isArray(embeddedCustomExerciseLibrary) ? embeddedCustomExerciseLibrary : []);
       const safeExerciseTemplateDrafts = Array.isArray(payload && payload.exerciseTemplateDrafts) ? payload.exerciseTemplateDrafts : (Array.isArray(embeddedExerciseTemplateDrafts) ? embeddedExerciseTemplateDrafts : []);
@@ -11323,6 +12430,9 @@
           localStorage.removeItem(ACTIVE_CHARACTER_CARD_ID_KEY);
         }
         localStorage.setItem(CHARACTER_CHAT_HISTORY_KEY, JSON.stringify(safeCharacterChatHistory.slice(-40)));
+        setRecordProtocols(safeRecordProtocols);
+        localStorage.setItem(ACTIVE_RECORD_PROTOCOL_ID_KEY, safeActiveRecordProtocolId);
+        if(safeRecordProtocolDebug) localStorage.setItem(RECORD_PROTOCOL_DEBUG_KEY, "1"); else localStorage.removeItem(RECORD_PROTOCOL_DEBUG_KEY);
         if(safeTrainingSession) localStorage.setItem(TRAINING_SESSION_KEY, JSON.stringify(safeTrainingSession)); else localStorage.removeItem(TRAINING_SESSION_KEY);
         setCustomExerciseLibraryActions(safeCustomExerciseLibrary);
         setExerciseTemplateDrafts(safeExerciseTemplateDrafts);
@@ -11853,6 +12963,8 @@
       if(modal) modal.style.display = "flex";
       renderPlan();
     }
+
+    let dayDockRepairSerial = 0;
 
     function getDayDragExtraScale(){
       const tabsEl = $("dayTabs");
@@ -12512,6 +13624,43 @@
           updateDayTabIndicator({ immediate:true, noForce: activePlanDay === 0 });
         }, delay);
       });
+    }
+
+    function repairDayDockLayout(options = {}){
+      if(dayDockDrag.active || dayDockHold.active) return;
+      const immediate = options.immediate !== false;
+      if(isIosDayDockMode()){
+        repairIosDayDockLayout({ immediate });
+        return;
+      }
+      if(!syncRenderedActivePlanDay(activePlanDay)) return;
+      const tabs = $("dayTabs");
+      const active = tabs ? tabs.querySelector(".day-tab.active") : null;
+      if(active && options.scroll !== false){
+        active.scrollIntoView({ behavior:"auto", inline:"center", block:"nearest" });
+      }
+      updateDayTabIndicator({ immediate });
+    }
+
+    function scheduleDayDockPostLayoutRepair(options = {}){
+      const serial = ++dayDockRepairSerial;
+      const run = () => {
+        if(serial !== dayDockRepairSerial) return;
+        repairDayDockLayout({
+          immediate: options.immediate !== false,
+          scroll: options.scroll !== false
+        });
+      };
+
+      run();
+      requestAnimationFrame(() => {
+        run();
+        requestAnimationFrame(run);
+      });
+      [80, 180, 360].forEach((delay) => setTimeout(run, delay));
+      if(document.fonts && document.fonts.ready){
+        document.fonts.ready.then(run).catch(() => {});
+      }
     }
 
     function preserveIosDayIndicatorVisualStart(oldVisualLeft){
@@ -13360,8 +14509,7 @@
         indicator.style.opacity = "0";
       }
       requestAnimationFrame(() => {
-        updateDayTabIndicator({ immediate:true });
-        scrollActiveDayTabIntoView("auto");
+        scheduleDayDockPostLayoutRepair({ immediate:true });
       });
 
       container.querySelectorAll("[data-check]").forEach((btn) => {
@@ -14788,7 +15936,7 @@
     }
 
     window.addEventListener("resize", () => {
-      updateDayTabIndicator();
+      scheduleDayDockPostLayoutRepair({ immediate:true });
       updateTabIndicator();
     });
 
@@ -14846,6 +15994,9 @@
         characterCards: getCharacterCards(),
         activeCharacterCardId: getActiveCharacterCardId(),
         characterChatHistory: getCharacterChatHistory(),
+        recordProtocols: getRecordProtocols().filter((protocol) => protocol.id !== DEFAULT_RECORD_PROTOCOL_ID),
+        activeRecordProtocolId: localStorage.getItem(ACTIVE_RECORD_PROTOCOL_ID_KEY) || DEFAULT_RECORD_PROTOCOL_ID,
+        recordProtocolDebug: isRecordProtocolDebugEnabled(),
         trainingSession: getTrainingSession(),
         customExerciseLibrary: getCustomExerciseLibraryActions(),
         exerciseTemplateDrafts: getExerciseTemplateDrafts()
@@ -14876,6 +16027,15 @@
             if(Array.isArray(nextForm.__characterChatHistory) && !Array.isArray(payload.characterChatHistory)){
               payload.characterChatHistory = nextForm.__characterChatHistory;
             }
+            if(Array.isArray(nextForm.__recordProtocols) && !Array.isArray(payload.recordProtocols)){
+              payload.recordProtocols = nextForm.__recordProtocols;
+            }
+            if(typeof nextForm.__activeRecordProtocolId === "string" && typeof payload.activeRecordProtocolId !== "string"){
+              payload.activeRecordProtocolId = nextForm.__activeRecordProtocolId;
+            }
+            if(typeof nextForm.__recordProtocolDebug === "boolean" && typeof payload.recordProtocolDebug !== "boolean"){
+              payload.recordProtocolDebug = nextForm.__recordProtocolDebug;
+            }
             if(nextForm.__tempDailyPlanOverrides && typeof nextForm.__tempDailyPlanOverrides === "object" && !payload.tempDailyPlanOverrides){
               payload.tempDailyPlanOverrides = nextForm.__tempDailyPlanOverrides;
             }
@@ -14895,6 +16055,9 @@
             delete nextForm.__characterCards;
             delete nextForm.__activeCharacterCardId;
             delete nextForm.__characterChatHistory;
+            delete nextForm.__recordProtocols;
+            delete nextForm.__activeRecordProtocolId;
+            delete nextForm.__recordProtocolDebug;
             delete nextForm.__trainingSession;
             localStorage.setItem(FORM_KEY, JSON.stringify(nextForm));
           }
@@ -14956,6 +16119,16 @@
           }
           if(Array.isArray(payload.characterChatHistory)){
             localStorage.setItem(CHARACTER_CHAT_HISTORY_KEY, JSON.stringify(payload.characterChatHistory.slice(-40)));
+          }
+          if(Array.isArray(payload.recordProtocols)){
+            setRecordProtocols(payload.recordProtocols);
+          }
+          if(typeof payload.activeRecordProtocolId === "string"){
+            localStorage.setItem(ACTIVE_RECORD_PROTOCOL_ID_KEY, payload.activeRecordProtocolId);
+          }
+          if(typeof payload.recordProtocolDebug === "boolean"){
+            if(payload.recordProtocolDebug) localStorage.setItem(RECORD_PROTOCOL_DEBUG_KEY, "1");
+            else localStorage.removeItem(RECORD_PROTOCOL_DEBUG_KEY);
           }
           if(payload.trainingSession){
             localStorage.setItem(TRAINING_SESSION_KEY, JSON.stringify(payload.trainingSession));
@@ -15019,6 +16192,11 @@
       localStorage.removeItem(CHARACTER_CARDS_KEY);
       localStorage.removeItem(ACTIVE_CHARACTER_CARD_ID_KEY);
       localStorage.removeItem(CHARACTER_CHAT_HISTORY_KEY);
+      localStorage.removeItem(RECORD_PROTOCOLS_KEY);
+      localStorage.removeItem(ACTIVE_RECORD_PROTOCOL_ID_KEY);
+      localStorage.removeItem(RECORD_PROTOCOL_DEBUG_KEY);
+      localStorage.removeItem(RECORD_PROTOCOL_LAST_DEBUG_KEY);
+      localStorage.removeItem(ACTIVE_TRAINING_REFERENCE_KEY);
       localStorage.removeItem(TRAINING_CAPTURE_CARDS_KEY);
       localStorage.removeItem(TRAINING_SESSION_KEY);
       localStorage.removeItem(FORM_DRAFT_BACKUP_KEY);
@@ -15723,6 +16901,9 @@
       const historyBtn = $("aiPanelHistoryBtn");
       if(historyBtn) historyBtn.className = showHistory ? "btn" : "btn-outline";
       modal.style.display = "flex";
+      if(!showHistory){
+        scrollCharacterChatToLatest();
+      }
       if(options.focusChat){
         setTimeout(() => $("characterChatInput")?.focus(), 60);
       }
@@ -15829,6 +17010,28 @@
           }
         };
       }
+      if($("importRecordProtocolBtn")){
+        $("importRecordProtocolBtn").onclick = () => $("recordProtocolFileInput")?.click();
+      }
+      if($("recordProtocolFileInput")){
+        $("recordProtocolFileInput").addEventListener("change", (event) => {
+          const file = event.target.files && event.target.files[0];
+          if(file) importRecordProtocol(file);
+          event.target.value = "";
+        });
+      }
+      if($("recordProtocolEnabledBtn")){
+        $("recordProtocolEnabledBtn").onclick = () => setRecordProtocolEnabled(!isRecordProtocolEnabled());
+      }
+      if($("recordProtocolDebugBtn")){
+        $("recordProtocolDebugBtn").onclick = () => setRecordProtocolDebugEnabled(!isRecordProtocolDebugEnabled());
+      }
+      if($("exportRecordProtocolBtn")){
+        $("exportRecordProtocolBtn").onclick = exportActiveRecordProtocol;
+      }
+      if($("restoreDefaultRecordProtocolBtn")){
+        $("restoreDefaultRecordProtocolBtn").onclick = restoreDefaultRecordProtocol;
+      }
       if($("characterChatInput")){
         $("characterChatInput").addEventListener("keydown", (event) => {
           if((event.ctrlKey || event.metaKey) && event.key === "Enter"){
@@ -15905,7 +17108,7 @@
 
     window.addEventListener("resize", () => {
       updateTabIndicator();
-      repairIosDayDockLayout({ immediate:true });
+      scheduleDayDockPostLayoutRepair({ immediate:true });
       attachTabPress();
       attachTabHold();
       attachTabDrag();
@@ -16225,7 +17428,7 @@
     loadExerciseLibraryFromFiles().then(() => renderExerciseLibrary()).catch(() => renderExerciseLibrary());
     renderPlan();
     attachDayDockInteractions();
-    repairIosDayDockLayout({ immediate:true });
+    scheduleDayDockPostLayoutRepair({ immediate:true });
     setForm(JSON.parse(localStorage.getItem(FORM_KEY) || JSON.stringify(defaultForm)));
     repairFalseGuideAliasTrainingRecords();
     renderHistory();
@@ -16258,19 +17461,19 @@
       }else{
         handleTimerWakeCheck();
         maybeTriggerLateNightSleepReminder().catch((err) => console.error("深夜睡觉提醒检查失败", err));
-        repairIosDayDockLayout({ immediate:true });
+        scheduleDayDockPostLayoutRepair({ immediate:true });
       }
     });
 
     window.addEventListener("pageshow", () => {
       handleTimerWakeCheck();
       maybeTriggerLateNightSleepReminder().catch((err) => console.error("深夜睡觉提醒检查失败", err));
-      repairIosDayDockLayout({ immediate:true });
+      scheduleDayDockPostLayoutRepair({ immediate:true });
     });
     window.addEventListener("focus", () => {
       handleTimerWakeCheck();
       maybeTriggerLateNightSleepReminder().catch((err) => console.error("深夜睡觉提醒检查失败", err));
-      repairIosDayDockLayout({ immediate:true });
+      scheduleDayDockPostLayoutRepair({ immediate:true });
     });
 
     if("serviceWorker" in navigator){
