@@ -5346,6 +5346,14 @@
         cautions:["不要摆腰借力","肘不要向前飘太多","重量过大时容易变成甩动"]
       },
       {
+        id:"band-curl",
+        title:"弹力绳弯举",
+        keywords:["弹力绳弯举","弹力带弯举","阻力带弯举"],
+        focus:["肱二头","弹力绳持续张力"],
+        diagram:"起始：双脚踩住弹力绳，双手握住绳端，肘贴近身体两侧\n弯举：上臂尽量固定，前臂向上卷起\n下放：受控回到底部，保持弹力绳仍有张力",
+        cautions:["确认脚下固定稳","不要摆腰借力","张力太大时换轻阻力或缩短站距"]
+      },
+      {
         id:"triceps-overhead",
         title:"过顶哑铃臂屈伸",
         keywords:["过顶哑铃臂屈伸","臂屈伸"],
@@ -5499,6 +5507,7 @@
       "弹力绳面拉": { gif:"1022.gif", label:"近似替代图示：弹力绳面拉", note:"源库未收录同名面拉 GIF，已用最接近的后束划船型动作替代。" },
       "俯身反向飞鸟": { gif:"0383.gif", label:"俯身反向飞鸟", note:"" },
       "哑铃弯举": { gif:"1677.gif", label:"近似替代图示：哑铃弯举", note:"演示为坐姿弯举。" },
+      "弹力绳弯举": { gif:"1677.gif", label:"近似替代图示：弹力绳弯举", note:"源库未收录同名弹力绳弯举 GIF，先用弯举轨迹作为肱二头动作参考；实际训练保持弹力绳持续张力。" },
       "锤式弯举": { gif:"0313.gif", label:"锤式弯举", note:"" },
       "过顶哑铃臂屈伸": { gif:"0430.gif", label:"过顶哑铃臂屈伸", note:"演示为站姿版本。" },
       "哑铃杯式深蹲": { gif:"1760.gif", label:"哑铃杯式深蹲", note:"" },
@@ -6046,7 +6055,11 @@
       "candidateType",
       "intent",
       "rawText",
+      "evidenceText",
       "targetDate",
+      "targetDateText",
+      "targetDateIso",
+      "dateSource",
       "exerciseRef",
       "amount",
       "unit",
@@ -6060,7 +6073,12 @@
       "completedExplicit",
       "needsConfirmation",
       "confidence",
+      "evidenceSource",
+      "riskLevel",
+      "scope",
       "reason",
+      "writeIntent",
+      "correction",
       "text",
       "feedbackType",
       "bodyState",
@@ -6357,9 +6375,12 @@
           if(candidate[field] != null) clean[field] = candidate[field];
         });
         clean.candidateType = candidateType;
-        clean.rawText = String(clean.rawText || candidate.text || "");
+        clean.rawText = String(clean.rawText || candidate.text || clean.evidenceText || "");
+        ["evidenceText", "targetDateText", "targetDateIso", "dateSource", "writeIntent", "evidenceSource", "riskLevel", "scope"].forEach((field) => {
+          if(clean[field] != null) clean[field] = String(clean[field] || "").trim();
+        });
         clean.intent = String(clean.intent || "");
-        clean.targetDate = String(clean.targetDate || "today");
+        clean.targetDate = String(clean.targetDate || clean.targetDateText || "today");
         clean.needsConfirmation = !!clean.needsConfirmation;
         clean.completedExplicit = clean.completedExplicit === true;
         clean.confidence = Number.isFinite(Number(clean.confidence)) ? Number(clean.confidence) : null;
@@ -6389,6 +6410,9 @@
             sleep: clean.bodyState.sleep != null ? String(clean.bodyState.sleep) : "",
             fatigueScore: clean.bodyState.fatigueScore != null ? String(clean.bodyState.fatigueScore) : ""
           };
+        }
+        if(clean.correction && (typeof clean.correction !== "object" || Array.isArray(clean.correction))){
+          delete clean.correction;
         }
         if(needsConfirmation(clean)){
           clean.needsConfirmation = true;
@@ -6485,7 +6509,12 @@
         const history = Array.isArray(request.history) ? request.history.slice(-12) : [];
         const protocol = request.protocol || null;
         const trainingContext = request.trainingContext || null;
-        const messages = [
+        const providedMessages = Array.isArray(request.messages)
+          ? request.messages
+            .filter((item) => item && ["system","user","assistant"].includes(String(item.role || "")))
+            .map((item) => ({ role:String(item.role || ""), content:String(item.content || "") }))
+          : [];
+        const messages = providedMessages.length ? providedMessages : [
           { role:"system", content:buildSystemPrompt(request.card, trainingContext, protocol) },
           ...history.map((item) => ({ role:item.role, content:String(item.content || "") })),
           { role:"user", content:message }
@@ -7419,6 +7448,457 @@
       cleanText: cleanAiDisplayText
     });
 
+    function hashRecordProtocolText(text = ""){
+      const raw = String(text || "");
+      let hash = 2166136261;
+      for(let index = 0; index < raw.length; index += 1){
+        hash ^= raw.charCodeAt(index);
+        hash = Math.imul(hash, 16777619);
+      }
+      return `fnv1a-${(hash >>> 0).toString(16)}`;
+    }
+
+    function normalizeRecordProtocolSource(source = {}){
+      const rawTextPreview = String(source.rawTextPreview || source.rawText || "").slice(0, 80);
+      const rawTextHash = String(source.rawTextHash || hashRecordProtocolText(rawTextPreview || source.messageId || ""));
+      return {
+        kind:String(source.kind || "chat"),
+        messageId:String(source.messageId || rawTextHash),
+        capturedAtIso:String(source.capturedAtIso || new Date().toISOString()),
+        rawTextHash,
+        rawTextPreview
+      };
+    }
+
+    function makeRecordProtocolCandidateId(candidate = {}, index = 0, source = {}){
+      if(candidate.candidateId) return String(candidate.candidateId);
+      const sourceId = String(source.messageId || source.rawTextHash || "candidate");
+      return `${sourceId}:candidate-${index + 1}`;
+    }
+
+    function resolveRecordProtocolCandidateDate(candidate = {}, context = {}, currentState = {}){
+      const targetDateText = String(candidate.targetDateText || "").trim();
+      if(!targetDateText) return { resolved:false, attempted:false };
+      if(targetDateText === "today" && String(context.todayIso || "").trim()){
+        return {
+          resolved:true,
+          attempted:true,
+          targetDateIso:String(context.todayIso).trim()
+        };
+      }
+      const visibleWeekDates = [
+        ...(Array.isArray(context.visibleWeekDates) ? context.visibleWeekDates : []),
+        ...(Array.isArray(currentState.visibleWeekDates) ? currentState.visibleWeekDates : [])
+      ];
+      const weekdayMatch = visibleWeekDates.find((day) => (
+        day &&
+        String(day.weekday || "").trim() === targetDateText &&
+        String(day.iso || "").trim()
+      ));
+      if(weekdayMatch){
+        return {
+          resolved:true,
+          attempted:true,
+          targetDateIso:String(weekdayMatch.iso).trim()
+        };
+      }
+      return { resolved:false, attempted:true };
+    }
+
+    function adaptAiRecordEnvelope(input = {}){
+      const envelope = input.envelope && typeof input.envelope === "object" ? input.envelope : {};
+      const source = normalizeRecordProtocolSource(input.source || envelope.source || {});
+      const rawCandidates = Array.isArray(envelope.candidates)
+        ? envelope.candidates
+        : (Array.isArray(envelope.record_candidates) ? envelope.record_candidates : []);
+      return {
+        protocolVersion:"record-protocol/v1",
+        source,
+        reply:String(envelope.reply || ""),
+        candidates:rawCandidates.map((candidate, index) => {
+          const clean = candidate && typeof candidate === "object" && !Array.isArray(candidate) ? { ...candidate } : {};
+          if(!String(clean.evidenceText || "").trim() && String(clean.rawText || "").trim()){
+            clean.evidenceText = String(clean.rawText || "").trim();
+          }
+          if(!String(clean.targetDateText || "").trim() && String(clean.targetDate || "").trim()){
+            clean.targetDateText = String(clean.targetDate || "").trim();
+          }
+          if(!String(clean.dateSource || "").trim() && String(clean.targetDateText || "").trim()){
+            clean.dateSource = clean.targetDateText === "today" ? "default_today" : "explicit";
+          }
+          return {
+            ...clean,
+            candidateId:makeRecordProtocolCandidateId(clean, index, source)
+          };
+        })
+      };
+    }
+
+    function describeRecordProtocolCorrection(candidate = {}, context = {}, currentState = {}){
+      const correction = candidate.correction && typeof candidate.correction === "object" && !Array.isArray(candidate.correction)
+        ? candidate.correction
+        : {};
+      const targetRecordRef = correction.targetRecordRef && typeof correction.targetRecordRef === "object" && !Array.isArray(correction.targetRecordRef)
+        ? { ...correction.targetRecordRef }
+        : {};
+      const newDate = correction.newDate && typeof correction.newDate === "object" && !Array.isArray(correction.newDate)
+        ? correction.newDate
+        : {};
+      const newDateResolution = resolveRecordProtocolCandidateDate(newDate, context, currentState);
+      return {
+        operation:String(correction.operation || ""),
+        targetRecordRef,
+        previousDateIso:String(targetRecordRef.previousDateIso || ""),
+        ...(newDate.targetDateText ? { targetDateText:String(newDate.targetDateText || "") } : {}),
+        ...(newDateResolution.targetDateIso ? { targetDateIso:newDateResolution.targetDateIso } : {})
+      };
+    }
+
+    function isRecordProtocolEngineCandidateType(candidateType = ""){
+      return [
+        "plan_progress",
+        "extra_training",
+        "feedback",
+        "body_state",
+        "note",
+        "correction",
+        "consultation_request"
+      ].includes(String(candidateType || ""));
+    }
+
+    function decideRecordProtocolCandidate(candidate = {}, context = {}, currentState = {}){
+      const candidateId = candidate.candidateId;
+      const dateResolution = resolveRecordProtocolCandidateDate(candidate, context, currentState);
+      const withResolvedDate = (decision) => dateResolution.targetDateIso
+        ? { ...decision, targetDateIso:dateResolution.targetDateIso }
+        : decision;
+      if(!String(candidate.evidenceText || "").trim()){
+        return withResolvedDate({
+          candidateId,
+          decision:"ignored",
+          reason:"missing_evidence_text"
+        });
+      }
+      if(candidate.candidateType === "consultation_request"){
+        return withResolvedDate({
+          candidateId,
+          decision:"ignored",
+          reason:"consultation_request"
+        });
+      }
+      if(String(candidate.evidenceSource || "").trim() && String(candidate.evidenceSource || "").trim() !== "current_user_message"){
+        return withResolvedDate({
+          candidateId,
+          decision:"pending",
+          reason:"non_current_user_evidence"
+        });
+      }
+      if(String(candidate.riskLevel || "").trim() === "high"){
+        return withResolvedDate({
+          candidateId,
+          decision:"pending",
+          reason:"high_risk_candidate"
+        });
+      }
+      if(String(candidate.scope || "").trim() && String(candidate.scope || "").trim() !== "single_record"){
+        return withResolvedDate({
+          candidateId,
+          decision:"pending",
+          reason:"non_single_record_scope"
+        });
+      }
+      if(candidate.candidateType === "correction"){
+        return withResolvedDate({
+          candidateId,
+          decision:"pending",
+          reason:"correction_requires_confirmation",
+          correction:describeRecordProtocolCorrection(candidate, context, currentState)
+        });
+      }
+      if(!isRecordProtocolEngineCandidateType(candidate.candidateType)){
+        return withResolvedDate({
+          candidateId,
+          decision:"ignored",
+          reason:"unknown_candidate_type"
+        });
+      }
+      if(Number(candidate.confidence) < 0.85){
+        return withResolvedDate({
+          candidateId,
+          decision:"pending",
+          reason:"low_confidence"
+        });
+      }
+      if(candidate.writeIntent === "ignore"){
+        return withResolvedDate({
+          candidateId,
+          decision:"ignored",
+          reason:"write_intent_ignore"
+        });
+      }
+      if(candidate.needsConfirmation){
+        return withResolvedDate({
+          candidateId,
+          decision:"pending",
+          reason:"needs_confirmation"
+        });
+      }
+      if(dateResolution.attempted && !dateResolution.targetDateIso && candidate.dateSource === "explicit"){
+        return {
+          candidateId,
+          decision:"pending",
+          reason:"unresolved_target_date"
+        };
+      }
+      return withResolvedDate({
+        candidateId,
+        decision:"written",
+        reason:"eligible_for_write"
+      });
+    }
+
+    function cloneRecordProtocolDailyLogs(dailyLogs = {}){
+      const safeLogs = dailyLogs && typeof dailyLogs === "object" && !Array.isArray(dailyLogs) ? dailyLogs : {};
+      return Object.fromEntries(Object.entries(safeLogs).map(([dateIso, log]) => {
+        if(!log || typeof log !== "object" || Array.isArray(log)) return [dateIso, {}];
+        return [dateIso, {
+          ...log,
+          records:Array.isArray(log.records) ? log.records.map((record) => ({ ...record })) : []
+        }];
+      }));
+    }
+
+    function makeRecordProtocolWrittenRecordId(candidate = {}){
+      return `record:${String(candidate.candidateId || hashRecordProtocolText(candidate.evidenceText || "")).trim()}`;
+    }
+
+    function makeRecordProtocolPlanProgressRecord(candidate = {}, decision = {}, attemptId = ""){
+      return {
+        recordId:decision.writtenRecordId || makeRecordProtocolWrittenRecordId(candidate),
+        type:String(candidate.candidateType || "plan_progress"),
+        candidateId:String(candidate.candidateId || ""),
+        targetDateIso:String(decision.targetDateIso || ""),
+        exerciseName:String(candidate.exerciseRef?.displayName || candidate.exerciseName || "").trim(),
+        amount:Number.isFinite(Number(candidate.amount)) ? Number(candidate.amount) : undefined,
+        unit:String(candidate.unit || ""),
+        evidenceText:String(candidate.evidenceText || ""),
+        ...(candidate.feedbackType ? { feedbackType:String(candidate.feedbackType || "") } : {}),
+        ...((candidate.text || candidate.note) ? { text:String(candidate.text || candidate.note || "") } : {}),
+        ...(candidate.bodyState && typeof candidate.bodyState === "object" && !Array.isArray(candidate.bodyState)
+          ? { bodyState:{ ...candidate.bodyState } }
+          : {}),
+        aiCapture:{
+          attemptId:String(attemptId || ""),
+          candidateId:String(candidate.candidateId || ""),
+          evidenceText:String(candidate.evidenceText || ""),
+          confidence:Number(candidate.confidence || 0)
+        }
+      };
+    }
+
+    function applyRecordProtocolWrittenDecisions(nextDailyLogs, candidates = [], decisions = [], attemptId = ""){
+      const nextDecisions = decisions.slice();
+      candidates.forEach((candidate, index) => {
+        const decision = nextDecisions[index];
+        if(
+          !decision ||
+          decision.decision !== "written" ||
+          !["plan_progress", "extra_training", "feedback", "body_state", "note"].includes(candidate.candidateType) ||
+          !decision.targetDateIso
+        ) return;
+
+        const writtenRecordId = makeRecordProtocolWrittenRecordId(candidate);
+        const targetDateIso = decision.targetDateIso;
+        const previousLog = nextDailyLogs[targetDateIso] && typeof nextDailyLogs[targetDateIso] === "object" && !Array.isArray(nextDailyLogs[targetDateIso])
+          ? nextDailyLogs[targetDateIso]
+          : {};
+        const records = Array.isArray(previousLog.records) ? previousLog.records.slice() : [];
+        const duplicate = records.find((record) => (
+          record &&
+          (
+            String(record.candidateId || "") === String(candidate.candidateId || "") ||
+            String(record.recordId || "") === writtenRecordId
+          )
+        ));
+        if(duplicate){
+          nextDecisions[index] = {
+            ...decision,
+            decision:"ignored",
+            reason:"duplicate_candidate",
+            existingRecordId:String(duplicate.recordId || writtenRecordId),
+            targetDateIso
+          };
+          return;
+        }
+        const writtenDecision = { ...decision, writtenRecordId };
+        records.push(makeRecordProtocolPlanProgressRecord(candidate, writtenDecision, attemptId));
+        nextDailyLogs[targetDateIso] = {
+          ...previousLog,
+          date:previousLog.date || targetDateIso,
+          records
+        };
+        nextDecisions[index] = writtenDecision;
+      });
+      return nextDecisions;
+    }
+
+    function getRecordProtocolConfirmedCandidateIds(input = {}){
+      return new Set((Array.isArray(input.confirmedCandidateIds) ? input.confirmedCandidateIds : [])
+        .map((candidateId) => String(candidateId || "").trim())
+        .filter(Boolean));
+    }
+
+    function findRecordProtocolReferencedRecord(dailyLogs = {}, targetRecordRef = {}){
+      const recordId = String(targetRecordRef.recordId || "").trim();
+      const previousDateIso = String(targetRecordRef.previousDateIso || "").trim();
+      const originalEvidenceText = String(targetRecordRef.originalEvidenceText || "").trim();
+      const subjectText = String(targetRecordRef.subjectText || "").trim();
+      const dateEntries = previousDateIso && dailyLogs[previousDateIso]
+        ? [[previousDateIso, dailyLogs[previousDateIso]]]
+        : Object.entries(dailyLogs);
+      for(const [dateIso, log] of dateEntries){
+        const records = Array.isArray(log?.records) ? log.records : [];
+        const recordIndex = records.findIndex((record) => {
+          if(!record) return false;
+          if(recordId && String(record.recordId || "") === recordId) return true;
+          if(originalEvidenceText && String(record.evidenceText || "") === originalEvidenceText) return true;
+          if(subjectText && String(record.exerciseName || record.subjectText || "").includes(subjectText)) return true;
+          return false;
+        });
+        if(recordIndex >= 0){
+          return { dateIso, log, records, recordIndex, record:records[recordIndex] };
+        }
+      }
+      return null;
+    }
+
+    function applyRecordProtocolConfirmedCorrections(nextDailyLogs, candidates = [], decisions = [], context = {}, currentState = {}, confirmedCandidateIds = new Set()){
+      const nextDecisions = decisions.slice();
+      candidates.forEach((candidate, index) => {
+        if(candidate.candidateType !== "correction") return;
+        if(!confirmedCandidateIds.has(String(candidate.candidateId || ""))) return;
+        const correction = describeRecordProtocolCorrection(candidate, context, currentState);
+        if(correction.operation !== "move_record_to_date" || !correction.targetDateIso){
+          return;
+        }
+        const found = findRecordProtocolReferencedRecord(nextDailyLogs, correction.targetRecordRef);
+        if(!found){
+          nextDecisions[index] = {
+            candidateId:String(candidate.candidateId || ""),
+            decision:"pending",
+            reason:"target_record_not_found",
+            correction
+          };
+          return;
+        }
+        const movedRecord = {
+          ...found.record,
+          targetDateIso:correction.targetDateIso,
+          movedFromDateIso:found.dateIso
+        };
+        found.records.splice(found.recordIndex, 1);
+        nextDailyLogs[found.dateIso] = {
+          ...(found.log || {}),
+          date:(found.log && found.log.date) || found.dateIso,
+          records:found.records
+        };
+        const targetLog = nextDailyLogs[correction.targetDateIso] && typeof nextDailyLogs[correction.targetDateIso] === "object" && !Array.isArray(nextDailyLogs[correction.targetDateIso])
+          ? nextDailyLogs[correction.targetDateIso]
+          : {};
+        const targetRecords = Array.isArray(targetLog.records) ? targetLog.records.slice() : [];
+        targetRecords.push(movedRecord);
+        nextDailyLogs[correction.targetDateIso] = {
+          ...targetLog,
+          date:targetLog.date || correction.targetDateIso,
+          records:targetRecords
+        };
+        nextDecisions[index] = {
+          candidateId:String(candidate.candidateId || ""),
+          decision:"written",
+          reason:"confirmed_correction_applied",
+          correction,
+          movedRecordId:String(movedRecord.recordId || ""),
+          targetDateIso:correction.targetDateIso
+        };
+      });
+      return nextDecisions;
+    }
+
+    function cloneRecordProtocolCaptureAttempts(captureAttempts = []){
+      return Array.isArray(captureAttempts)
+        ? captureAttempts.map((attempt) => ({
+            ...(attempt && typeof attempt === "object" && !Array.isArray(attempt) ? attempt : {}),
+            source:attempt && typeof attempt.source === "object" && !Array.isArray(attempt.source) ? { ...attempt.source } : {},
+            candidates:Array.isArray(attempt?.candidates) ? attempt.candidates.map((candidate) => ({ ...candidate })) : []
+          }))
+        : [];
+    }
+
+    function makeRecordProtocolAttemptId(source = {}, existingAttempts = []){
+      const sourceId = String(source.messageId || source.rawTextHash || "record-protocol").trim();
+      return `${sourceId}:attempt-${existingAttempts.length + 1}`;
+    }
+
+    function makeRecordProtocolCaptureAttempt(normalizedOutput = {}, decisions = [], attemptId = ""){
+      const source = normalizedOutput.source && typeof normalizedOutput.source === "object" ? normalizedOutput.source : {};
+      return {
+        attemptId,
+        protocolVersion:"record-protocol/v1",
+        capturedAtIso:String(source.capturedAtIso || ""),
+        source:{
+          kind:String(source.kind || "chat"),
+          messageId:String(source.messageId || ""),
+          rawTextHash:String(source.rawTextHash || ""),
+          rawTextPreview:String(source.rawTextPreview || "")
+        },
+        candidates:(Array.isArray(normalizedOutput.candidates) ? normalizedOutput.candidates : []).map((candidate, index) => {
+          const decision = decisions[index] || {};
+          return {
+            candidateId:String(candidate.candidateId || ""),
+            candidateType:String(candidate.candidateType || ""),
+            confidence:Number(candidate.confidence || 0),
+            evidenceText:String(candidate.evidenceText || ""),
+            decision:String(decision.decision || ""),
+            decisionReason:String(decision.reason || ""),
+            ...(decision.writtenRecordId ? { writtenRecordId:String(decision.writtenRecordId) } : {})
+          };
+        })
+      };
+    }
+
+    function limitRecordProtocolCaptureAttempts(captureAttempts = [], limit = 100){
+      const safeLimit = Math.max(1, Number(limit || 100));
+      return Array.isArray(captureAttempts) ? captureAttempts.slice(-safeLimit) : [];
+    }
+
+    function applyRecordProtocol(input = {}){
+      const currentState = input.currentState && typeof input.currentState === "object" ? input.currentState : {};
+      const protocolOutput = input.protocolOutput && typeof input.protocolOutput === "object" ? input.protocolOutput : {};
+      const source = protocolOutput.source && typeof protocolOutput.source === "object"
+        ? protocolOutput.source
+        : (input.context?.source && typeof input.context.source === "object" ? input.context.source : {});
+      const normalizedOutput = protocolOutput.protocolVersion === "record-protocol/v1"
+        ? adaptAiRecordEnvelope({ envelope:protocolOutput, source:protocolOutput.source || source })
+        : adaptAiRecordEnvelope({ envelope:protocolOutput, source });
+      const context = input.context && typeof input.context === "object" ? input.context : {};
+      const nextDailyLogs = cloneRecordProtocolDailyLogs(currentState.dailyLogs);
+      const nextCaptureAttempts = cloneRecordProtocolCaptureAttempts(currentState.captureAttempts);
+      const attemptId = makeRecordProtocolAttemptId(normalizedOutput.source, nextCaptureAttempts);
+      const confirmedCandidateIds = getRecordProtocolConfirmedCandidateIds(input);
+      const baseDecisions = normalizedOutput.candidates.map((candidate) => decideRecordProtocolCandidate(candidate, context, currentState));
+      const correctionDecisions = applyRecordProtocolConfirmedCorrections(nextDailyLogs, normalizedOutput.candidates, baseDecisions, context, currentState, confirmedCandidateIds);
+      const decisions = applyRecordProtocolWrittenDecisions(nextDailyLogs, normalizedOutput.candidates, correctionDecisions, attemptId);
+      nextCaptureAttempts.push(makeRecordProtocolCaptureAttempt(normalizedOutput, decisions, attemptId));
+      return {
+        nextState:{
+          dailyLogs: nextDailyLogs,
+          captureAttempts: limitRecordProtocolCaptureAttempts(nextCaptureAttempts, 100)
+        },
+        decisions,
+        assistantFollowUp:undefined
+      };
+    }
+
     function getRecordProtocols(){
       const stored = safeJsonParse(localStorage.getItem(RECORD_PROTOCOLS_KEY) || "[]", []);
       const list = Array.isArray(stored) ? stored : [];
@@ -7502,9 +7982,32 @@
       return debug && typeof debug === "object" ? debug : null;
     }
 
+    function summarizeRecordProtocolDebugText(text = "", maxChars = 1200){
+      const raw = String(text || "");
+      const limit = Math.max(1, Number(maxChars || 1200));
+      if(raw.length <= limit){
+        return {
+          text:raw,
+          truncated:false,
+          originalLength:raw.length
+        };
+      }
+      const marker = "...[truncated]";
+      const keep = Math.max(1, limit - marker.length);
+      return {
+        text:raw.slice(0, keep) + marker,
+        truncated:true,
+        originalLength:raw.length
+      };
+    }
+
     function setRecordProtocolLastDebug(debug){
       const safe = debug && typeof debug === "object" ? { ...debug, updatedAt:new Date().toISOString() } : null;
       if(safe){
+        const rawModelOutputSummary = summarizeRecordProtocolDebugText(safe.rawModelOutput || "", 1200);
+        safe.rawModelOutput = rawModelOutputSummary.text;
+        safe.rawModelOutputTruncated = rawModelOutputSummary.truncated;
+        safe.rawModelOutputOriginalLength = rawModelOutputSummary.originalLength;
         localStorage.setItem(RECORD_PROTOCOL_LAST_DEBUG_KEY, JSON.stringify(safe));
       }else{
         localStorage.removeItem(RECORD_PROTOCOL_LAST_DEBUG_KEY);
@@ -8571,6 +9074,200 @@
         "训练上下文 JSON：",
         JSON.stringify(context, null, 2)
       ].join("\n");
+    }
+
+    const DEFAULT_RECORD_PROTOCOL_V2_BUDGET = Object.freeze({
+      maxSystemPromptChars:900,
+      maxContextChars:700,
+      maxHistoryTurns:3,
+      maxUserTextChars:500,
+      maxOutputTokens:300
+    });
+
+    function normalizeRecordProtocolV2Budget(budget = {}){
+      const normalized = { ...DEFAULT_RECORD_PROTOCOL_V2_BUDGET };
+      Object.keys(normalized).forEach((key) => {
+        const value = Number(budget[key]);
+        if(Number.isFinite(value) && value > 0) normalized[key] = Math.floor(value);
+      });
+      return normalized;
+    }
+
+    function truncateRecordProtocolV2Text(text = "", maxChars = 500){
+      const raw = String(text || "");
+      const limit = Math.max(1, Number(maxChars || 500));
+      if(raw.length <= limit){
+        return { text:raw, truncated:false };
+      }
+      const marker = "...[truncated]";
+      const keep = Math.max(1, limit - marker.length);
+      return {
+        text:raw.slice(0, keep) + marker,
+        truncated:true
+      };
+    }
+
+    function hasRecordProtocolV2CompletedFactSignal(text = ""){
+      const raw = String(text || "");
+      return /(?:\u505a\u4e86|\u505a\u5b8c|\u5b8c\u6210|\u7ec3\u4e86|\u7ec3\u5b8c|\u52a0\u7ec3|\u6253\u5361|finished|completed|done|trained|logged)/i.test(raw);
+    }
+
+    function hasRecordProtocolV2QuantitySignal(text = ""){
+      const raw = String(text || "");
+      return /(?:\d+(?:\.\d+)?|[\u4e00\u4e8c\u4e24\u4e09\u56db\u4e94\u516d\u4e03\u516b\u4e5d\u5341]+)\s*(?:\u7ec4|\u6b21|\u5206\u949f|\u79d2|sets?|reps?|minutes?|mins?|seconds?|secs?)/i.test(raw);
+    }
+
+    function hasRecordProtocolV2ExerciseSignal(text = "", input = {}){
+      const raw = String(text || "");
+      const active = input.activeTrainingReference && typeof input.activeTrainingReference === "object"
+        ? input.activeTrainingReference
+        : {};
+      const activeName = String(active.exerciseName || active.displayName || active.planItemText || "").trim();
+      if(activeName && raw.includes(activeName)) return true;
+      if(/\u6df1\u8e72|\u5e73\u677f\u652f\u6491|\u62c9\u4f38|\u4fef\u5367\u6491|\u5212\u8239|squat|plank|stretch|push-?up|row/i.test(raw)) return true;
+      try{
+        return Array.isArray(getMatchedTrainingExercisesFromText(raw)) && getMatchedTrainingExercisesFromText(raw).length > 0;
+      }catch(err){
+        return false;
+      }
+    }
+
+    function isRecordProtocolV2SelfContainedRecordText(text = "", input = {}){
+      return hasRecordProtocolV2CompletedFactSignal(text)
+        && hasRecordProtocolV2QuantitySignal(text)
+        && hasRecordProtocolV2ExerciseSignal(text, input);
+    }
+
+    function isRecordProtocolV2ContextDependentCorrectionText(text = ""){
+      const raw = String(text || "");
+      return /(?:\u521a\u624d|\u521a\u521a|\u90a3\u4e2a|\u90a3\u6761|\u8fd9\u4e2a|\u8fd9\u6761|\u6539\u5230|\u6539\u6210|\u4e0d\u662f|\u4e0d\u5bf9|\u4fee\u6b63|\u7ea0\u6b63|\u79fb\u5230|\u5220\u6389|\u64a4\u56de|that|previous|change|correct|move|delete|revoke)/i.test(raw);
+    }
+
+    function getRecordProtocolV2ActiveReferenceText(input = {}){
+      const active = input.activeTrainingReference && typeof input.activeTrainingReference === "object"
+        ? input.activeTrainingReference
+        : {};
+      return [
+        active.exerciseName,
+        active.displayName,
+        active.planItemText,
+        active.subjectText
+      ].map((item) => String(item || "").trim()).filter(Boolean);
+    }
+
+    function isRecordProtocolV2RelevantHistoryTurn(turn = {}, input = {}){
+      const content = String(turn.content || "");
+      if(!content) return false;
+      const activeTexts = getRecordProtocolV2ActiveReferenceText(input);
+      if(activeTexts.some((text) => text && content.includes(text))) return true;
+      return /(?:\u6df1\u8e72|\u5e73\u677f\u652f\u6491|\u62c9\u4f38|\u4fef\u5367\u6491|\u5212\u8239|\u5b8c\u6210|\u505a\u4e86|\u6539\u5230|\u4fee\u6b63|\u7ea0\u6b63|squat|plank|stretch|push-?up|row|completed|finished|correct|change|move)/i.test(content);
+    }
+
+    function buildRecordProtocolV2HistoryTurns(input = {}, budget = DEFAULT_RECORD_PROTOCOL_V2_BUDGET){
+      const maxTurns = Math.max(0, Number(budget.maxHistoryTurns || 0));
+      if(!maxTurns) return [];
+      const history = Array.isArray(input.characterChatHistory)
+        ? input.characterChatHistory
+        : (Array.isArray(input.history) ? input.history : []);
+      return history
+        .filter((turn) => turn && typeof turn === "object" && isRecordProtocolV2RelevantHistoryTurn(turn, input))
+        .slice(-maxTurns)
+        .map((turn) => ({
+          role:["system","user","assistant"].includes(String(turn.role || "")) ? String(turn.role || "") : "user",
+          content:truncateRecordProtocolV2Text(turn.content || "", 180).text
+        }));
+    }
+
+    function buildRecordProtocolV2Prompt(budget = DEFAULT_RECORD_PROTOCOL_V2_BUDGET){
+      const lines = [
+        "record-protocol/v2 compact extraction.",
+        "Return strict JSON only: {\"reply\":\"\",\"record_candidates\":[]}.",
+        "Use only existing v1 candidateType values: " + RECORD_PROTOCOL_SUPPORTED_CANDIDATE_TYPES.join(", ") + ".",
+        "Each candidate should include evidenceText from the current user message.",
+        "For v2 guard fields include evidenceSource, riskLevel, and scope when known.",
+        "Prefer evidenceSource=current_user_message, riskLevel=low, scope=single_record for self-contained facts.",
+        "Do not invent records. If no training fact is present, return an empty record_candidates array."
+      ];
+      return truncateRecordProtocolV2Text(lines.join("\n"), budget.maxSystemPromptChars).text;
+    }
+
+    function buildRecordProtocolV2ContextPrompt(input = {}, budget = DEFAULT_RECORD_PROTOCOL_V2_BUDGET){
+      const context = {
+        todayIso:String(input.todayIso || ""),
+        userTimeZone:String(input.userTimeZone || ""),
+        visibleWeekDates:Array.isArray(input.visibleWeekDates) ? input.visibleWeekDates.slice(0, 7) : [],
+        activeTrainingReference:input.activeTrainingReference || null,
+        activeTrainingSessionSummary:input.activeTrainingSessionSummary || null
+      };
+      const raw = "compact training context JSON:\n" + JSON.stringify(context);
+      return truncateRecordProtocolV2Text(raw, budget.maxContextChars).text;
+    }
+
+    function buildCompactRecordProtocolRequest(input = {}){
+      const budget = normalizeRecordProtocolV2Budget(input.tokenBudget || input.budget || {});
+      const clippedUserText = truncateRecordProtocolV2Text(input.userText || "", budget.maxUserTextChars);
+      const contextDependentCorrection = isRecordProtocolV2ContextDependentCorrectionText(input.userText || "");
+      if(contextDependentCorrection){
+        const recordProtocolPrompt = buildRecordProtocolV2Prompt(budget);
+        const trainingContextPrompt = buildRecordProtocolV2ContextPrompt(input, budget);
+        const historyTurns = buildRecordProtocolV2HistoryTurns(input, budget);
+        return {
+          protocolId:String(input.protocolId || "record-protocol/v2"),
+          mode:"complex_correction",
+          systemPrompt:recordProtocolPrompt,
+          contextPrompt:trainingContextPrompt,
+          recordProtocolPrompt,
+          trainingContextPrompt,
+          historyTurns,
+          userText:clippedUserText.text,
+          userTextTruncated:clippedUserText.truncated,
+          maxOutputTokens:budget.maxOutputTokens,
+          messages:[
+            { role:"system", content:[recordProtocolPrompt, trainingContextPrompt].filter(Boolean).join("\n\n") },
+            ...historyTurns,
+            { role:"user", content:clippedUserText.text }
+          ],
+          budget
+        };
+      }
+      const selfContainedRecord = isRecordProtocolV2SelfContainedRecordText(input.userText || "", input);
+      if(selfContainedRecord){
+        const recordProtocolPrompt = buildRecordProtocolV2Prompt(budget);
+        const trainingContextPrompt = buildRecordProtocolV2ContextPrompt(input, budget);
+        return {
+          protocolId:String(input.protocolId || "record-protocol/v2"),
+          mode:"compact_record_extraction",
+          systemPrompt:recordProtocolPrompt,
+          contextPrompt:trainingContextPrompt,
+          recordProtocolPrompt,
+          trainingContextPrompt,
+          historyTurns:[],
+          userText:clippedUserText.text,
+          userTextTruncated:clippedUserText.truncated,
+          maxOutputTokens:budget.maxOutputTokens,
+          messages:[
+            { role:"system", content:[recordProtocolPrompt, trainingContextPrompt].filter(Boolean).join("\n\n") },
+            { role:"user", content:clippedUserText.text }
+          ],
+          budget
+        };
+      }
+      return {
+        protocolId:String(input.protocolId || "record-protocol/v2"),
+        mode:"ordinary_chat",
+        systemPrompt:"",
+        contextPrompt:"",
+        recordProtocolPrompt:"",
+        trainingContextPrompt:"",
+        historyTurns:[],
+        userText:clippedUserText.text,
+        userTextTruncated:clippedUserText.truncated,
+        maxOutputTokens:budget.maxOutputTokens,
+        messages:[
+          { role:"user", content:clippedUserText.text }
+        ],
+        budget
+      };
     }
 
     const TRAINING_CAPTURE_ACTION_ALIASES = [
@@ -11375,6 +12072,12 @@
             <pre style="white-space:pre-wrap;overflow:auto;">${escapeHtml(debug.reply || "")}</pre>
             <div class="help">解析后的 record_candidates</div>
             <pre style="white-space:pre-wrap;overflow:auto;">${escapeHtml(JSON.stringify(debug.record_candidates || [], null, 2))}</pre>
+            <div class="help">标准协议输出</div>
+            <pre style="white-space:pre-wrap;overflow:auto;">${escapeHtml(JSON.stringify(debug.protocolOutput || null, null, 2))}</pre>
+            <div class="help">引擎决策</div>
+            <pre style="white-space:pre-wrap;overflow:auto;">${escapeHtml(JSON.stringify(debug.engineDecisions || debug.engineResult?.decisions || [], null, 2))}</pre>
+            <div class="help">确定性 fallback 结果</div>
+            <pre style="white-space:pre-wrap;overflow:auto;">${escapeHtml(JSON.stringify(debug.deterministicCaptureResult || null, null, 2))}</pre>
             ${debug.parseError ? `<div class="help">解析错误</div><pre style="white-space:pre-wrap;overflow:auto;">${escapeHtml(debug.parseError)}</pre>` : ""}
           `;
         }else{
@@ -11469,7 +12172,7 @@
 
     function createCharacterChatAiAdapter(){
       return {
-        async send({ settings, message, history, card, trainingContext, protocol, messages, signal } = {}){
+        async send({ settings, message, history, card, trainingContext, protocol, messages, maxOutputTokens, recordProtocolPrompt, trainingContextPrompt, signal } = {}){
           const controller = signal ? null : new AbortController();
           const requestSignal = signal || controller.signal;
           const timeout = controller ? setTimeout(() => controller.abort(), 25000) : null;
@@ -11482,20 +12185,23 @@
                 signal: requestSignal,
                 body: JSON.stringify({
                   task:"character_chat",
-                  payload:{ message, history, characterCard:characterCardPromptPayload(card), trainingContext, recordProtocol:protocol },
+                  payload:{ message, history, characterCard:characterCardPromptPayload(card), trainingContext, recordProtocol:protocol, messages },
                   settings:{
                     model:settings.model,
                     temperature:settings.temperature,
-                    maxTokens:settings.maxTokens,
+                    maxTokens:maxOutputTokens || settings.maxTokens,
                     characterCardPrompt: characterCardPromptBlock(card),
-                    recordProtocolPrompt: recordProtocol.buildPrompt(protocol, {
+                    recordProtocolPrompt: recordProtocolPrompt != null ? String(recordProtocolPrompt || "") : recordProtocol.buildPrompt(protocol, {
                       trainingMode: trainingContext?.activeTrainingSession ? "active_training_session" : (trainingContext ? "training_related_chat" : "ordinary_chat")
                     }),
-                    trainingContextPrompt: buildCharacterTrainingContextPrompt(trainingContext)
+                    trainingContextPrompt: trainingContextPrompt != null ? String(trainingContextPrompt || "") : buildCharacterTrainingContextPrompt(trainingContext)
                   }
                 })
               });
             }else{
+              const directMaxTokens = Number.isFinite(Number(maxOutputTokens))
+                ? Math.max(1, Number(maxOutputTokens))
+                : Math.max(300, settings.maxTokens ?? 700);
               res = await fetch(`${settings.apiBaseUrl.replace(/\/$/, "")}/chat/completions`, {
                 method:"POST",
                 headers:{
@@ -11506,7 +12212,7 @@
                 body: JSON.stringify({
                   model: settings.model || "deepseek-v4-flash",
                   temperature: settings.temperature ?? 0.7,
-                  max_tokens: Math.max(300, settings.maxTokens ?? 700),
+                  max_tokens: directMaxTokens,
                   messages
                 })
               });
@@ -11527,8 +12233,34 @@
       if(settings.apiMode === "direct" && !settings.apiKey) throw new Error("请先在 AI 设置里填写 API Key");
       if(settings.apiMode === "proxy" && !settings.proxyUrl) throw new Error("请先在 AI 设置里填写代理 URL");
 
-      const protocol = getActiveRecordProtocol();
-      const trainingContext = protocol || shouldAttachTrainingContextToCharacterChat(userText) ? buildCharacterTrainingContext() : null;
+      const activeProtocol = getActiveRecordProtocol();
+      const characterTrainingIntent = classifyCharacterTrainingIntent(userText);
+      const chatHistory = getCharacterChatHistory().slice(-12);
+      const priorHistory = chatHistory.filter((item, index) => !(
+        index === chatHistory.length - 1 &&
+        item &&
+        item.role === "user" &&
+        String(item.content || "") === String(userText || "")
+      ));
+      const sessionIntent = ["start_training_session","finish_training_session","discard_training_session"].includes(characterTrainingIntent.action);
+      const hasOpenTrainingSession = isOpenTrainingSession(getTrainingSession());
+      const compactRequest = activeProtocol && !sessionIntent && !hasOpenTrainingSession
+        ? buildCompactRecordProtocolRequest({
+            userText,
+            protocolId:"record-protocol/v2",
+            todayIso:formatDateKey(new Date()),
+            userTimeZone:getRecordProtocolUserTimeZone(),
+            visibleWeekDates:getRecordProtocolVisibleWeekDates(new Date()),
+            activeTrainingReference:getActiveTrainingReference(),
+            activeTrainingSessionSummary:null,
+            characterChatHistory:priorHistory
+          })
+        : null;
+      const shouldUseCompactRecordProtocol = !!(compactRequest && compactRequest.mode !== "ordinary_chat");
+      const protocol = shouldUseCompactRecordProtocol || sessionIntent || hasOpenTrainingSession ? activeProtocol : null;
+      const trainingContext = sessionIntent || hasOpenTrainingSession
+        ? buildCharacterTrainingContext()
+        : null;
       const coach = createAiCoach({
         recordProtocol,
         aiAdapter:createCharacterChatAiAdapter(),
@@ -11541,8 +12273,15 @@
         trainingContext,
         protocol,
         message:userText,
-        history:getCharacterChatHistory().slice(-12),
-        settings
+        history:shouldUseCompactRecordProtocol ? [] : priorHistory,
+        settings,
+        ...(shouldUseCompactRecordProtocol ? {
+          messages:compactRequest.messages,
+          maxOutputTokens:compactRequest.maxOutputTokens,
+          recordProtocolPrompt:compactRequest.recordProtocolPrompt,
+          trainingContextPrompt:compactRequest.trainingContextPrompt,
+          compactRecordProtocolRequest:compactRequest
+        } : {})
       });
     }
 
@@ -11571,6 +12310,80 @@
       }
     }
 
+    function getRecordProtocolVisibleWeekDates(now = new Date()){
+      const weekdays = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
+      return getCurrentWeekRange(now).dates.map((iso, index) => ({
+        iso,
+        weekday:weekdays[index]
+      }));
+    }
+
+    function getRecordProtocolUserTimeZone(){
+      try{
+        return Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+      }catch(err){
+        return "";
+      }
+    }
+
+    function getRecordProtocolStoredCaptureAttempts(){
+      const debug = getRecordProtocolLastDebug();
+      const attempts = debug?.engineResult?.nextState?.captureAttempts;
+      return Array.isArray(attempts) ? attempts : [];
+    }
+
+    function makeRecordProtocolChatSource(userText = "", coachResult = {}){
+      const capturedAtIso = coachResult.sentAt || new Date().toISOString();
+      const rawTextPreview = String(userText || "").slice(0, 120);
+      return {
+        kind:"chat",
+        messageId:`character-chat:${hashRecordProtocolText(`${capturedAtIso}:${rawTextPreview}`)}`,
+        capturedAtIso,
+        rawTextHash:hashRecordProtocolText(userText || ""),
+        rawTextPreview
+      };
+    }
+
+    function runRecordProtocolEngineForCharacterChat(userText = "", coachResult = {}){
+      const now = new Date();
+      const visibleWeekDates = getRecordProtocolVisibleWeekDates(now);
+      const protocolOutput = adaptAiRecordEnvelope({
+        envelope:{
+          reply:coachResult.reply || "",
+          record_candidates:Array.isArray(coachResult.record_candidates) ? coachResult.record_candidates : []
+        },
+        source:makeRecordProtocolChatSource(userText, coachResult)
+      });
+      const currentDailyLogs = getDailyLogs();
+      const engineResult = applyRecordProtocol({
+        protocolOutput,
+        context:{
+          todayIso:formatDateKey(now),
+          userTimeZone:getRecordProtocolUserTimeZone(),
+          visibleWeekDates
+        },
+        currentState:{
+          dailyLogs:currentDailyLogs,
+          captureAttempts:getRecordProtocolStoredCaptureAttempts(),
+          visibleWeekDates
+        }
+      });
+      if(JSON.stringify(engineResult.nextState.dailyLogs || {}) !== JSON.stringify(currentDailyLogs || {})){
+        setDailyLogs(engineResult.nextState.dailyLogs, { syncToCloud:true });
+      }
+      return { protocolOutput, engineResult };
+    }
+
+    function recordProtocolEngineResultToProcessResult(engineResult = {}){
+      const decisions = Array.isArray(engineResult.decisions) ? engineResult.decisions : [];
+      return {
+        writes:decisions.filter((decision) => decision.decision === "written"),
+        pending:decisions.filter((decision) => decision.decision === "pending"),
+        ignored:decisions.filter((decision) => decision.decision === "ignored"),
+        assistantFollowUp:engineResult.assistantFollowUp || ""
+      };
+    }
+
     async function sendCharacterChat(){
       const input = $("characterChatInput");
       const btn = $("sendCharacterChatBtn");
@@ -11595,12 +12408,16 @@
       if(btn) btn.disabled = true;
       try{
         const coachResult = await callCharacterChat(text);
-        const processResult = processRecordCandidates(coachResult.record_candidates, { userText:text });
+        const { protocolOutput, engineResult } = runRecordProtocolEngineForCharacterChat(text, coachResult);
+        const processResult = recordProtocolEngineResultToProcessResult(engineResult);
         const deterministicCaptureResult = maybeRunDeterministicCharacterCaptureFallback(text, processResult, { sourceType:"character_chat" });
         setRecordProtocolLastDebug({
           rawModelOutput:coachResult.rawModelOutput,
           reply:coachResult.reply,
           record_candidates:coachResult.record_candidates,
+          protocolOutput,
+          engineResult,
+          engineDecisions:engineResult.decisions,
           rejected_candidates:coachResult.rejected_candidates || [],
           parseError:coachResult.parseError,
           processResult,
@@ -16622,6 +17439,7 @@
         const pieces = [];
         if(exercise) pieces.push(exercise);
         if(value.sets) pieces.push(`${value.sets}组`);
+        if(value.plannedRepsText) pieces.push(value.plannedRepsText);
         if(value.repsPerSet) pieces.push(`每组${value.repsPerSet}次`);
         if(value.reps && !value.repsPerSet) pieces.push(`${value.reps}次`);
         if(value.bestSetReps) pieces.push(`最高一组${value.bestSetReps}次`);
