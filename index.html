@@ -4896,7 +4896,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.05.17-record-protocol-capture-persistence";
+    const APP_VERSION = "v2026.05.17-record-protocol-correction-capture";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const TEMP_DAILY_PLAN_OVERRIDES_KEY = "gain-temp-daily-plan-overrides";
     const DAILY_LOGS_KEY = "gain-daily-logs";
@@ -8830,7 +8830,12 @@
         new RegExp(`(?:总共|总计|合计|累计|一共|总量|总次数)[^\\d一二两三四五六七八九十]{0,8}${numberToken}\\s*(?:个|次|下|reps?)?`, "i"),
         new RegExp(`${numberToken}\\s*(?:个|次|下|reps?)?[^。！？；;，,]{0,12}(?:总共|总计|合计|累计|一共|总量|总次数)`, "i")
       ];
-      const durationMatch = raw.match(/(\d+(?:\.\d+)?)\s*(分钟|min|秒|s)(?:\b|$)?/i);
+      const durationMatches = [...raw.matchAll(/(\d+(?:\.\d+)?)\s*(分钟|min|秒|s)(?:\b|$)?/gi)];
+      const durationMatch = durationMatches.length
+        ? (/(?:改成|改为|修改为|修正|更正|不对|其实是|应该是|从|到|每组都是|每次都是|每一组都是)/.test(raw)
+          ? durationMatches[durationMatches.length - 1]
+          : durationMatches[0])
+        : null;
       const weightMatch = raw.match(/(\d+(?:\.\d+)?)\s*(?:kg|公斤|千克)/i);
       if(setsMatch) quantity.sets = parseChineseTrainingNumber(setsMatch[1]);
       if(eachRepsMatch) quantity.repsPerSet = parseChineseTrainingNumber(eachRepsMatch[1]);
@@ -8873,27 +8878,14 @@
       const base = now instanceof Date && Number.isFinite(now.getTime()) ? now : new Date();
       if(/前天/.test(raw)) return formatDateKey(addDays(base, -2));
       if(/昨天|昨晚/.test(raw)) return formatDateKey(addDays(base, -1));
-      const weekMatch = raw.match(/(?:(上周|本周|这周|上星期|本星期|这星期)(?:周|星期)?([一二三四五六日天])|(?:周|星期)([一二三四五六日天]))/);
+      const weekMatch = raw.match(/(?:(上周|本周|这周)([一二三四五六日天])|周([一二三四五六日天]))/);
       if(weekMatch){
         const weekdayText = weekMatch[2] || weekMatch[3];
         const weekday = { 一:1, 二:2, 三:3, 四:4, 五:5, 六:6, 日:7, 天:7 }[weekdayText];
         const range = getCurrentWeekRange(base);
         const currentWeekDate = parseDateKey(range.dates[weekday - 1]);
-        if(weekMatch[1] === "上周" || weekMatch[1] === "上星期") return formatDateKey(addDays(currentWeekDate, -7));
-        const futurePlanIntent = /这周|本周|这星期|本星期|要|准备|打算|计划/.test(raw);
-        if(!futurePlanIntent && currentWeekDate && currentWeekDate.getTime() > base.getTime()){
-          return formatDateKey(addDays(currentWeekDate, -7));
-        }
-        return formatDateKey(currentWeekDate);
-      }
-      const englishWeekMatch = raw.match(/(?:(last|this)\s*)?(monday|mon|tuesday|tue|wednesday|wed|thursday|thu|friday|fri|saturday|sat|sunday|sun)\b/i);
-      if(englishWeekMatch){
-        const key = englishWeekMatch[2].slice(0, 3).toLowerCase();
-        const weekday = { mon:1, tue:2, wed:3, thu:4, fri:5, sat:6, sun:7 }[key];
-        const range = getCurrentWeekRange(base);
-        const currentWeekDate = parseDateKey(range.dates[weekday - 1]);
-        if(String(englishWeekMatch[1] || "").toLowerCase() === "last") return formatDateKey(addDays(currentWeekDate, -7));
-        const futurePlanIntent = /\bthis\b|要|准备|打算|计划/.test(raw);
+        if(weekMatch[1] === "上周") return formatDateKey(addDays(currentWeekDate, -7));
+        const futurePlanIntent = /这周|本周|要|准备|打算|计划/.test(raw);
         if(!futurePlanIntent && currentWeekDate && currentWeekDate.getTime() > base.getTime()){
           return formatDateKey(addDays(currentWeekDate, -7));
         }
@@ -10096,11 +10088,36 @@
       );
     }
 
+    function hasRecordCandidateCorrectionSignal(candidate = {}){
+      const raw = getRecordCandidateText(candidate);
+      const intent = String(candidate.intent || "").toLowerCase();
+      return /correction|absolute_progress_correction|correct/.test(intent)
+        || /改成|改为|修改为|修正|更正|不对|其实是|应该是|我说错|记错|不是|从.+到|每组都是|每次都是|每一组都是|一共|总共/.test(raw);
+    }
+
+    function getRecordCandidateFinalDurationCorrection(candidate = {}){
+      if(!hasRecordCandidateCorrectionSignal(candidate)) return null;
+      const raw = getRecordCandidateText(candidate);
+      const matches = [...raw.matchAll(/(\d+(?:\.\d+)?)\s*(分钟|min|秒|s)(?:\b|$)?/gi)];
+      if(!matches.length) return null;
+      const match = matches[matches.length - 1];
+      const duration = Number(match[1]);
+      if(!Number.isFinite(duration) || duration <= 0) return null;
+      return {
+        duration,
+        durationUnit: normalizeRecordCandidateDurationUnit(match[2], /秒|s/i.test(match[2]) ? "秒" : "分钟")
+      };
+    }
+
+    function hasRecordCandidateExplicitRepText(candidate = {}){
+      return /\d+(?:\.\d+)?\s*(次|个|下|reps?)/i.test(getRecordCandidateText(candidate));
+    }
+
     function hasRecordCandidateCompletionSignal(candidate = {}){
       const raw = getRecordCandidateText(candidate);
       return candidate.completedExplicit === true
         || /做了|做完|完成|练了|练完|跑了|走了|打卡|搞定|补了|补完|刚刚|刚才|已经|已|又|再来|继续/.test(raw)
-        || /改成|改为|修改为|修正|更正|不对|其实是|应该是|我说错|记错|不是|每组都是|每次都是|每一组都是|一共|总共/.test(raw);
+        || hasRecordCandidateCorrectionSignal(candidate);
     }
 
     function isPlanOverviewOnlyText(text){
@@ -10136,52 +10153,6 @@
       if(/完成(?:了)?(?:这个|这个动作|这项|这一项|项目|计划项|当天项目|今日项目|全部)|(?:这个|这项|这一项|项目|计划项).{0,8}(?:做完|完成|搞定)|全做完|全部做完|已完成计划项/.test(raw)) return true;
       return false;
     }
-
-    function isRecordCandidateCorrectionText(candidate = {}){
-      const raw = getRecordCandidateText(candidate);
-      const intent = String(candidate.intent || "").toLowerCase();
-      if(/absolute_progress_correction|correction|correct|modify|revision|revise|fix/.test(intent)) return true;
-      return /不对|不是|记错|说错|修正|更正|修改|改成|改为|改到|其实是|应该是|从\s*\d+(?:\.\d+)?\s*(?:s|秒|分钟|min|次|个|下|组)?\s*(?:改到|改成|改为|变成|到)\s*\d+/i.test(raw);
-    }
-
-    function readLastDurationFromRecordCandidateText(text){
-      const raw = String(text || "");
-      const matches = [...raw.matchAll(/(\d+(?:\.\d+)?)\s*(秒|s|分钟|min)(?:\b|$)?/ig)]
-        .filter((match) => Number.isFinite(Number(match[1])));
-      if(!matches.length) return null;
-      const last = matches[matches.length - 1];
-      const duration = Number(last[1]);
-      const unit = /秒|s/i.test(last[2]) ? "秒" : "分钟";
-      return { duration, durationUnit:unit };
-    }
-
-    function coerceRecordCandidateDurationFields(candidate = {}){
-      const next = { ...candidate };
-      const raw = getRecordCandidateText(next);
-      const parsedDuration = readLastDurationFromRecordCandidateText(raw);
-      if(!parsedDuration) return next;
-      const hasExplicitRepUnit = new RegExp(`${parsedDuration.duration}\\s*(?:次|个|下|reps?)`, "i").test(raw);
-      const hasDurationLanguage = /时间|时长|每次|每组|每一组|每组都是|平板|支撑|plank|秒|分钟|\bs\b|\bmin\b|改成|改为|改到|修正|更正|不是|不对|其实是/i.test(raw);
-      if(hasExplicitRepUnit || !hasDurationLanguage) return next;
-      const candidateUnit = normalizeRecordCandidateUnit(next.unit, "");
-      const amount = Number(next.amount);
-      const reps = Number(next.reps);
-      const shouldOverrideAmount = Number.isFinite(amount) && amount === parsedDuration.duration && (!candidateUnit || candidateUnit === "次" || candidateUnit === "秒" || candidateUnit === "分钟");
-      const shouldOverrideReps = Number.isFinite(reps) && reps === parsedDuration.duration;
-      next.duration = parsedDuration.duration;
-      next.durationUnit = parsedDuration.durationUnit;
-      if(shouldOverrideAmount){
-        delete next.amount;
-        if(candidateUnit === "次" || candidateUnit === "秒" || candidateUnit === "分钟") delete next.unit;
-      }
-      if(shouldOverrideReps) delete next.reps;
-      if(next.currentValue && typeof next.currentValue === "object" && !Array.isArray(next.currentValue)){
-        next.currentValue = { ...next.currentValue, duration:parsedDuration.duration, durationUnit:parsedDuration.durationUnit };
-        if(shouldOverrideReps) delete next.currentValue.reps;
-      }
-      return next;
-    }
-
 
     function buildRecordCandidateCurrentValue(candidate = {}, progressItem = {}){
       const existing = candidate.currentValue && typeof candidate.currentValue === "object" && !Array.isArray(candidate.currentValue)
@@ -10229,12 +10200,32 @@
     }
 
     function normalizeRecordCandidateForApp(candidate = {}){
-      let next = { ...candidate };
-      if(next.candidateType === "plan_progress" && isRecordCandidateCorrectionText(next)){
+      const next = { ...candidate };
+      const correctionLike = hasRecordCandidateCorrectionSignal(next);
+      if(next.candidateType === "plan_progress" && correctionLike){
         next.candidateType = "correction";
-        next.intent = next.intent || "absolute_progress_correction";
+        next.intent = /correction|correct/.test(String(next.intent || "").toLowerCase()) ? next.intent : "absolute_progress_correction";
       }
-      next = coerceRecordCandidateDurationFields(next);
+      const finalDuration = getRecordCandidateFinalDurationCorrection(next);
+      if(next.candidateType === "correction" && finalDuration){
+        next.duration = finalDuration.duration;
+        next.durationUnit = finalDuration.durationUnit;
+        if(!hasRecordCandidateExplicitRepText(next)){
+          if(normalizeRecordCandidateUnit(next.unit, "") === "次" && Number(next.amount) === finalDuration.duration){
+            delete next.amount;
+            delete next.unit;
+          }
+          delete next.reps;
+          delete next.repsPerSet;
+          delete next.bestSetReps;
+          if(next.currentValue && typeof next.currentValue === "object" && !Array.isArray(next.currentValue)){
+            next.currentValue = { ...next.currentValue };
+            delete next.currentValue.reps;
+            delete next.currentValue.repsPerSet;
+            delete next.currentValue.bestSetReps;
+          }
+        }
+      }
       if(!next.completedExplicit){
         next.completedExplicit = hasRecordCandidateCompletionSignal(next) && !/可以吗|要不要|能不能|应该|怎么|如何|\?|？/.test(getRecordCandidateText(next));
       }
@@ -10393,7 +10384,7 @@
       if(raw === "today" || raw === "今天" || !raw) return formatDateKey(now);
       if(raw === "yesterday" || raw === "昨天") return formatDateKey(addDays(now, -1));
       if(/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
-      return resolveTrainingCaptureDate([raw, candidate?.rawText, context.userText].filter(Boolean).join(" "), now);
+      return resolveTrainingCaptureDate([candidate?.rawText, context.userText].filter(Boolean).join(" "), now);
     }
 
     function normalizeRecordCandidateUnit(unit, fallback = "组"){
@@ -10483,46 +10474,7 @@
       return true;
     }
 
-    
-    function appendRecordProtocolCaptureRecord(log, candidate, dateKey, currentValue = {}, structuredWrite = {}, options = {}){
-      if(!log || !dateKey) return null;
-      const recordId = options.recordId || makeTrainingCaptureRecordId();
-      const card = getActiveCharacterCard();
-      const recordType = options.recordType || (
-        candidate.candidateType === "feedback"
-          ? (options.feedbackType === "safety" || candidate.feedbackType === "safety" ? "safety_feedback" : "technical_feedback")
-          : candidate.candidateType === "body_state" ? "body_metric"
-          : candidate.candidateType === "note" ? "note"
-          : "training_fact"
-      );
-      const record = {
-        id:recordId,
-        date:dateKey,
-        capturedAt:new Date().toISOString(),
-        sourceType:"record_protocol",
-        trainingSessionId:"",
-        capturedRoleId:card?.id || "",
-        capturedRoleName:card?.name || "",
-        candidateType:candidate.candidateType || "plan_progress",
-        recordType,
-        currentValue:{ ...(currentValue || {}) },
-        originalValue:{ ...(currentValue || {}) },
-        originalText:candidate.rawText || currentValue?.text || "",
-        confidence:candidate.confidence || "medium",
-        userModified:false,
-        revoked:false,
-        autoCompletedPlanChecks:Array.isArray(options.autoCompletedPlanChecks) ? options.autoCompletedPlanChecks : [],
-        structuredWrite:{ ...(structuredWrite || {}) },
-        localUpdatedAt:new Date().toISOString(),
-        cloudVersion:0,
-        writeType:options.writeType || (recordType === "training_fact" ? "completion_with_note" : "note_only")
-      };
-      log.aiCaptureRecords = [...(Array.isArray(log.aiCaptureRecords) ? log.aiCaptureRecords : []), record];
-      rememberTrainingCaptureRecord(record);
-      return record;
-    }
-
-function processPlanProgressCandidate(candidate, context = {}){
+    function processPlanProgressCandidate(candidate, context = {}){
       const dateKey = resolveRecordCandidateDate(candidate, context);
       const logs = getDailyLogs();
       const log = buildDailyLogShell(dateKey, logs[dateKey] || {});
@@ -10542,72 +10494,35 @@ function processPlanProgressCandidate(candidate, context = {}){
       if(!Number.isFinite(Number(amountInfo.amount)) || Number(amountInfo.amount) <= 0){
         return { status:"ignored", reason:amountInfo.durationOnly ? "duration_without_sets_for_set_based_item" : "invalid_amount", date:dateKey };
       }
-
-      const recordId = makeTrainingCaptureRecordId();
-      const currentValue = {
-        ...buildRecordCandidateCurrentValue(candidate, progressItem),
-        exercise:progressItem.snapshotDisplayName,
-        text:candidate.rawText || context.userText || ""
-      };
-
       if(current >= target){
         const intent = {
-          id:recordId,
+          id:`candidate_${Date.now()}`,
           date:dateKey,
           originalText:candidate.rawText || context.userText || "",
-          currentValue:currentValue
+          currentValue:{ ...buildRecordCandidateCurrentValue(candidate, progressItem), exercise:progressItem.snapshotDisplayName, text:candidate.rawText || context.userText || "" }
         };
-        const event = createExtraTrainingEvent(intent, progressItem, amountInfo, recordId);
+        const event = createExtraTrainingEvent(intent, progressItem, amountInfo, intent.id);
         log.extraTrainingEvents = [...(Array.isArray(log.extraTrainingEvents) ? log.extraTrainingEvents : []), event];
-        const record = appendRecordProtocolCaptureRecord(log, candidate, dateKey, currentValue, {
-          status:"extra_training",
-          itemId:progressItem.itemId,
-          eventId:event.id,
-          amount:Number(amountInfo.amount || 0),
-          unit:amountInfo.unit || progressItem.unit
-        }, { recordId });
-        log.aiDailySummary = generateAiDailySummaryForLog(log);
-        log.updatedAt = new Date().toLocaleString("zh-CN");
-        log.updatedAtIso = new Date().toISOString();
         logs[dateKey] = log;
         persistDailyLogsAfterTrainingCapture(logs, { syncToCloud:true });
         refreshAiWeeklySummaryDraftForDate(dateKey);
-        return { status:"extra_training", date:dateKey, eventId:event.id, itemId:progressItem.itemId, recordId:record?.id || recordId, record };
+        return { status:"extra_training", date:dateKey, eventId:event.id, itemId:progressItem.itemId };
       }
-
       const nextAmount = Math.min(target, current + Number(amountInfo.amount || 0));
       progressItem.completedAmount = nextAmount;
       progressItem.status = nextAmount >= target ? "completed" : "active";
       progressItem.updatedAt = new Date().toISOString();
-      const autoCompletedPlanChecks = [];
       if(nextAmount >= target && progressItem.planCheckKey){
         const checks = getPlanChecks();
         const meta = getPlanCheckMeta();
         checks[progressItem.planCheckKey] = true;
-        meta[progressItem.planCheckKey] = {
-          ...(meta[progressItem.planCheckKey] || {}),
+        meta[progressItem.planCheckKey] = meta[progressItem.planCheckKey] || {
           source:"record_protocol",
-          recordId,
           updatedAt:new Date().toISOString()
         };
         setPlanChecks(checks);
         setPlanCheckMeta(meta);
-        autoCompletedPlanChecks.push(progressItem.planCheckKey);
       }
-      const structuredWrite = {
-        status:"plan_progress",
-        itemId:progressItem.itemId,
-        planCheckKey:progressItem.planCheckKey,
-        previousAmount:current,
-        completedAmount:nextAmount,
-        targetAmount:target,
-        amount:Number(amountInfo.amount || 0),
-        unit:amountInfo.unit || progressItem.unit
-      };
-      const record = appendRecordProtocolCaptureRecord(log, candidate, dateKey, currentValue, structuredWrite, {
-        recordId,
-        autoCompletedPlanChecks
-      });
       syncDailyLogCompletionFromPlan(log, dateKey);
       const updatedItem = (Array.isArray(log.planProgressItems) ? log.planProgressItems : [])
         .find((item) => item.itemId === progressItem.itemId) || progressItem;
@@ -10624,9 +10539,7 @@ function processPlanProgressCandidate(candidate, context = {}){
         date:dateKey,
         itemId:updatedItem.itemId,
         completedAmount:Number(updatedItem.completedAmount || nextAmount),
-        targetAmount:Number(updatedItem.targetAmount || target),
-        recordId:record?.id || recordId,
-        record
+        targetAmount:Number(updatedItem.targetAmount || target)
       };
     }
 
@@ -10638,28 +10551,21 @@ function processPlanProgressCandidate(candidate, context = {}){
       const amountInfo = buildRecordCandidateAmountInfo(candidate, progressItem || {});
       const displayName = candidate.exerciseRef?.displayName || progressItem?.snapshotDisplayName || candidate.rawText || "额外训练";
       const currentValue = buildRecordCandidateCurrentValue(candidate, progressItem || {});
-      const recordId = makeTrainingCaptureRecordId();
       const intent = {
-        id:recordId,
+        id:`candidate_${Date.now()}`,
         date:dateKey,
         originalText:candidate.rawText || context.userText || "",
         currentValue:{ ...currentValue, exercise:currentValue.exercise || displayName, text:currentValue.text || candidate.rawText || context.userText || "" }
       };
-      const event = createExtraTrainingEvent(intent, progressItem, amountInfo, recordId);
+      const event = createExtraTrainingEvent(intent, progressItem, amountInfo, intent.id);
       log.extraTrainingEvents = [...(Array.isArray(log.extraTrainingEvents) ? log.extraTrainingEvents : []), event];
-      const record = appendRecordProtocolCaptureRecord(log, candidate, dateKey, intent.currentValue, {
-        status:"extra_training",
-        eventId:event.id,
-        amount:Number(amountInfo.amount || 0),
-        unit:amountInfo.unit || event.unit
-      }, { recordId });
       log.aiDailySummary = generateAiDailySummaryForLog(log);
       log.updatedAt = new Date().toLocaleString("zh-CN");
       log.updatedAtIso = new Date().toISOString();
       logs[dateKey] = log;
       persistDailyLogsAfterTrainingCapture(logs, { syncToCloud:true });
       refreshAiWeeklySummaryDraftForDate(dateKey);
-      return { status:"extra_training", date:dateKey, eventId:event.id, recordId:record?.id || recordId, record };
+      return { status:"extra_training", date:dateKey, eventId:event.id };
     }
 
     function processFeedbackCandidate(candidate, context = {}){
@@ -10680,21 +10586,13 @@ function processPlanProgressCandidate(candidate, context = {}){
         createdAt:new Date().toISOString()
       };
       log.feedbackEvents = [...(Array.isArray(log.feedbackEvents) ? log.feedbackEvents : []), event];
-      const currentValue = {
-        exercise:event.snapshotDisplayName,
-        text
-      };
-      const record = appendRecordProtocolCaptureRecord(log, candidate, dateKey, currentValue, {
-        status:event.feedbackType,
-        eventId:event.id
-      }, { recordId:event.id, recordType:event.feedbackType === "safety" ? "safety_feedback" : "technical_feedback", feedbackType:event.feedbackType, writeType:"note_only" });
       log.aiDailySummary = generateAiDailySummaryForLog(log);
       log.updatedAt = new Date().toLocaleString("zh-CN");
       log.updatedAtIso = new Date().toISOString();
       logs[dateKey] = log;
       persistDailyLogsAfterTrainingCapture(logs, { syncToCloud:true });
       refreshAiWeeklySummaryDraftForDate(dateKey);
-      return { status:"feedback", date:dateKey, eventId:event.id, recordId:record?.id || event.id, record };
+      return { status:"feedback", date:dateKey, eventId:event.id };
     }
 
     function processBodyStateCandidate(candidate, context = {}){
@@ -10713,20 +10611,13 @@ function processPlanProgressCandidate(candidate, context = {}){
       if(!body.weight && !body.sleep && !body.fatigueScore && candidate.rawText){
         appendRecordProtocolNote(log, candidate.rawText);
       }
-      const currentValue = {
-        ...(body || {}),
-        text:candidate.rawText || context.userText || ""
-      };
-      const record = appendRecordProtocolCaptureRecord(log, candidate, dateKey, currentValue, {
-        status:"body_state"
-      }, { recordType:"body_metric", writeType:"note_only" });
       log.aiDailySummary = generateAiDailySummaryForLog(log);
       log.updatedAt = new Date().toLocaleString("zh-CN");
       log.updatedAtIso = new Date().toISOString();
       logs[dateKey] = log;
       persistDailyLogsAfterTrainingCapture(logs, { syncToCloud:true });
       refreshAiWeeklySummaryDraftForDate(dateKey);
-      return { status:"body_state", date:dateKey, recordId:record?.id || "", record };
+      return { status:"body_state", date:dateKey };
     }
 
     function processNoteCandidate(candidate, context = {}){
@@ -10735,17 +10626,13 @@ function processPlanProgressCandidate(candidate, context = {}){
       const log = buildDailyLogShell(dateKey, logs[dateKey] || {});
       const text = candidate.note || candidate.text || candidate.rawText || context.userText || "";
       if(!appendRecordProtocolNote(log, text)) return { status:"ignored", reason:"empty_note", date:dateKey };
-      const currentValue = { text };
-      const record = appendRecordProtocolCaptureRecord(log, candidate, dateKey, currentValue, {
-        status:"note"
-      }, { recordType:"note", writeType:"note_only" });
       log.aiDailySummary = generateAiDailySummaryForLog(log);
       log.updatedAt = new Date().toLocaleString("zh-CN");
       log.updatedAtIso = new Date().toISOString();
       logs[dateKey] = log;
       persistDailyLogsAfterTrainingCapture(logs, { syncToCloud:true });
       refreshAiWeeklySummaryDraftForDate(dateKey);
-      return { status:"note", date:dateKey, recordId:record?.id || "", record };
+      return { status:"note", date:dateKey };
     }
 
     function processRecordCandidates(candidates, context = {}){
@@ -17299,7 +17186,8 @@ function processPlanProgressCandidate(candidate, context = {}){
       const progressSummary = getCalendarProgressSummary(progressItems);
       const aiCaptureRecords = (Array.isArray(log.aiCaptureRecords) ? log.aiCaptureRecords : []);
       const activeAiCaptureRecords = aiCaptureRecords
-        .filter((record) => !record.revoked);
+        .filter((record) => !record.revoked)
+        .filter((record) => record.structuredWrite?.status !== "plan_progress");
       const revokedAiCaptureRecords = aiCaptureRecords.filter((record) => record.revoked);
       const aiDailySummary = log.aiDailySummary || generateAiDailySummaryForLog(log);
 
@@ -20078,6 +19966,63 @@ function processPlanProgressCandidate(candidate, context = {}){
             exerciseRef:{ type:"mentioned", displayName:"俯卧撑" },
             confidence:0.92
           }, protocol);
+          const storageKeysForCorrectionCheck = [
+            PLAN_TEMPLATE_KEY,
+            TEMP_DAILY_PLAN_OVERRIDES_KEY,
+            DAILY_LOGS_KEY,
+            PLAN_CHECKS_KEY,
+            PLAN_CHECK_META_KEY,
+            ACTIVE_PLAN_DAY_KEY
+          ];
+          const savedStorageForCorrectionCheck = Object.fromEntries(storageKeysForCorrectionCheck.map((key) => [key, localStorage.getItem(key)]));
+          let misclassifiedCorrectionWritesCapture = false;
+          try{
+            setPlanTemplate({
+              version:1,
+              meta:{ weekLabel:"2026-05-11 至 2026-05-17", weekStart:"2026-05-11", weekEnd:"2026-05-17", goal:"诊断" },
+              days:[
+                { day:"周一", weekday:1, focus:"", items:["休息"], protein:"" },
+                { day:"周二", weekday:2, focus:"", items:["休息"], protein:"" },
+                { day:"周三", weekday:3, focus:"", items:["休息"], protein:"" },
+                { day:"周四", weekday:4, focus:"", items:["休息"], protein:"" },
+                { day:"周五", weekday:5, focus:"", items:["休息"], protein:"" },
+                { day:"周六", weekday:6, focus:"核心", items:["平板支撑 3组 × 30秒"], protein:"" },
+                { day:"周日", weekday:7, focus:"", items:["休息"], protein:"" }
+              ]
+            }, true);
+            localStorage.removeItem(DAILY_LOGS_KEY);
+            const misclassifiedCorrection = sanitizeRecordCandidate({
+              candidateType:"plan_progress",
+              intent:"new_fact",
+              rawText:"周六的平板支撑时间从30s改到60s",
+              targetDate:"周六",
+              exerciseRef:{ type:"mentioned", displayName:"平板支撑" },
+              amount:60,
+              unit:"rep",
+              confidence:0.86
+            }, protocol);
+            const misclassifiedProcess = processRecordCandidates([misclassifiedCorrection], {
+              userText:"周六的平板支撑时间从30s改到60s",
+              now:new Date("2026-05-17T12:00:00+08:00")
+            });
+            const correctionLog = getDailyLogs()["2026-05-16"];
+            const correctionRecord = correctionLog?.aiCaptureRecords?.[0];
+            misclassifiedCorrectionWritesCapture = !!(
+              misclassifiedCorrection?.candidateType === "correction" &&
+              Number(misclassifiedCorrection.duration) === 60 &&
+              misclassifiedCorrection.durationUnit === "秒" &&
+              misclassifiedProcess.writes[0]?.status === "correction" &&
+              correctionRecord?.currentValue?.duration === 60 &&
+              correctionRecord.currentValue.durationUnit === "秒" &&
+              summarizeTrainingCaptureRecord(correctionRecord).includes("60秒") &&
+              !summarizeTrainingCaptureRecord(correctionRecord).includes("60次")
+            );
+          }finally{
+            storageKeysForCorrectionCheck.forEach((key) => {
+              if(savedStorageForCorrectionCheck[key] == null) localStorage.removeItem(key);
+              else localStorage.setItem(key, savedStorageForCorrectionCheck[key]);
+            });
+          }
 
           const fakeCard = {
             id:"coach-card",
@@ -20239,88 +20184,12 @@ function processPlanProgressCandidate(candidate, context = {}){
           const setKeywordIntents = setKeywordSamples.map((sample) => extractLocalTrainingCaptureIntent(sample, { skipPendingMerge:true, now:new Date("2026-01-05T09:10:00.000Z") }));
           const futureQuestionIntent = extractLocalTrainingCaptureIntent("俯卧撑做一组可以吗？", { skipPendingMerge:true, now:new Date("2026-01-05T09:11:00.000Z") });
 
-          const previousPlanTemplateForProtocolTest = localStorage.getItem(PLAN_TEMPLATE_KEY);
-          const previousDailyLogsForProtocolTest = localStorage.getItem(DAILY_LOGS_KEY);
-          const previousPlanChecksForProtocolTest = localStorage.getItem(PLAN_CHECKS_KEY);
-          const previousPlanCheckMetaForProtocolTest = localStorage.getItem(PLAN_CHECK_META_KEY);
-          let saturdayCorrectionWritesVisibleRecord = false;
-          let saturdayCorrectionCoercesSeconds = false;
-          let protocolPlanProgressWritesAiCaptureRecord = false;
-          try{
-            localStorage.setItem(PLAN_TEMPLATE_KEY, JSON.stringify({
-              meta:{ weekLabel:"测试周" },
-              days:[
-                { day:"周一", weekday:"一", focus:"下肢", items:["深蹲 1组"], protein:"" },
-                { day:"周二", weekday:"二", focus:"休息", items:["拉伸 1组"], protein:"" },
-                { day:"周三", weekday:"三", focus:"上肢", items:["俯卧撑 1组"], protein:"" },
-                { day:"周四", weekday:"四", focus:"恢复", items:["散步 20分钟"], protein:"" },
-                { day:"周五", weekday:"五", focus:"背部", items:["划船 1组"], protein:"" },
-                { day:"周六", weekday:"六", focus:"核心", items:["平板支撑 3组"], protein:"" },
-                { day:"周日", weekday:"日", focus:"休息", items:["拉伸 1组"], protein:"" }
-              ]
-            }));
-            localStorage.setItem(DAILY_LOGS_KEY, "{}");
-            localStorage.setItem(PLAN_CHECKS_KEY, "{}");
-            localStorage.setItem(PLAN_CHECK_META_KEY, "{}");
-
-            const saturdayProcess = processRecordCandidates([{
-              candidateType:"plan_progress",
-              intent:"new_fact",
-              rawText:"将周六的平板支撑时间从30s改到60s",
-              targetDate:"saturday",
-              exerciseRef:{ type:"mentioned", displayName:"平板支撑" },
-              amount:60,
-              unit:"rep",
-              confidence:0.9
-            }], { userText:"将周六的平板支撑时间从30s改到60s", now:new Date("2026-01-11T09:00:00.000Z") });
-            const saturdayLogs = getDailyLogs();
-            const saturdayLog = saturdayLogs["2026-01-10"];
-            const saturdayRecord = saturdayLog?.aiCaptureRecords?.[0];
-            saturdayCorrectionWritesVisibleRecord = saturdayProcess.writes.length === 1
-              && saturdayProcess.writes[0].status === "correction"
-              && !!saturdayRecord
-              && saturdayRecord.candidateType === "correction"
-              && saturdayRecord.structuredWrite?.status === "correction";
-            saturdayCorrectionCoercesSeconds = saturdayRecord
-              && Number(saturdayRecord.currentValue?.duration) === 60
-              && saturdayRecord.currentValue?.durationUnit === "秒"
-              && summarizeTrainingCaptureRecord(saturdayRecord).includes("60秒")
-              && !summarizeTrainingCaptureRecord(saturdayRecord).includes("60次");
-
-            localStorage.setItem(DAILY_LOGS_KEY, "{}");
-            localStorage.setItem(PLAN_CHECKS_KEY, "{}");
-            localStorage.setItem(PLAN_CHECK_META_KEY, "{}");
-            const progressProcess = processRecordCandidates([{
-              candidateType:"plan_progress",
-              intent:"new_fact",
-              rawText:"周六平板支撑完成3组",
-              targetDate:"周六",
-              exerciseRef:{ type:"mentioned", displayName:"平板支撑" },
-              amount:3,
-              unit:"set",
-              confidence:0.9
-            }], { userText:"周六平板支撑完成3组", now:new Date("2026-01-11T09:00:00.000Z") });
-            const progressLog = getDailyLogs()["2026-01-10"];
-            protocolPlanProgressWritesAiCaptureRecord = progressProcess.writes.length === 1
-              && progressProcess.writes[0].status === "plan_progress"
-              && progressLog?.aiCaptureRecords?.length === 1
-              && progressLog.aiCaptureRecords[0].structuredWrite?.status === "plan_progress"
-              && getPlanChecks()["d5_i0"] === true;
-          }finally{
-            if(previousPlanTemplateForProtocolTest == null) localStorage.removeItem(PLAN_TEMPLATE_KEY); else localStorage.setItem(PLAN_TEMPLATE_KEY, previousPlanTemplateForProtocolTest);
-            if(previousDailyLogsForProtocolTest == null) localStorage.removeItem(DAILY_LOGS_KEY); else localStorage.setItem(DAILY_LOGS_KEY, previousDailyLogsForProtocolTest);
-            if(previousPlanChecksForProtocolTest == null) localStorage.removeItem(PLAN_CHECKS_KEY); else localStorage.setItem(PLAN_CHECKS_KEY, previousPlanChecksForProtocolTest);
-            if(previousPlanCheckMetaForProtocolTest == null) localStorage.removeItem(PLAN_CHECK_META_KEY); else localStorage.setItem(PLAN_CHECK_META_KEY, previousPlanCheckMetaForProtocolTest);
-          }
-
           return {
             defaultProtocolIncludesPushupSetExample:protocol.version === "1.0.2" && prompt.includes("完成了一组") && prompt.includes("不要因为没有次数 reps 就漏记组数"),
             defaultProtocolBlocksPlanOverview:planOverviewCandidate === null && protocolCorrectionPromptCovered,
             defaultProtocolKeepsCorrectionCandidate:correctionCandidate && correctionCandidate.candidateType === "correction" && Number(correctionCandidate.sets) === 3 && Number(correctionCandidate.duration) === 60,
+            misclassifiedDurationCorrectionWritesCapture:misclassifiedCorrectionWritesCapture,
             defaultProtocolRecognizesFullCompletion:fullCompletionRecognized === true,
-            saturdayCorrectionWritesVisibleRecord,
-            saturdayCorrectionCoercesSeconds,
-            protocolPlanProgressWritesAiCaptureRecord,
             setKeywordSamplesAllRecognized:setKeywordIntents.every((intent) => intent.action === "write" && intent.currentValue.exercise === "俯卧撑" && Number(intent.currentValue.sets || 0) === 1),
             consultationQuestionDoesNotAutoWrite:futureQuestionIntent.action !== "write",
             promptIncludesProtocol:prompt.includes("记录协议输出格式") && prompt.includes("record_candidates") && prompt.includes("plan_progress"),
