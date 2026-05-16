@@ -2388,6 +2388,17 @@
       margin-bottom:6px;
     }
 
+    .training-capture-toast-stack{
+      position:fixed;
+      left:50%;
+      top:calc(24px + env(safe-area-inset-top, 0px));
+      transform:translateX(-50%);
+      z-index:1200;
+      width:min(840px, calc(100vw - 32px));
+      display:grid;
+      gap:10px;
+      pointer-events:none;
+    }
     .training-capture-card-stack{
       display:grid;
       gap:10px;
@@ -2400,6 +2411,43 @@
       padding:12px;
       color:#0f172a;
       box-shadow:0 10px 24px rgba(15,23,42,.08);
+    }
+    .training-capture-toast-stack .training-capture-card{
+      pointer-events:auto;
+      position:relative;
+      border-radius:18px;
+      padding:13px 52px 13px 16px;
+      box-shadow:0 16px 36px rgba(15,23,42,.16), inset 0 1px 0 rgba(255,255,255,.62);
+      backdrop-filter:blur(18px) saturate(150%);
+      -webkit-backdrop-filter:blur(18px) saturate(150%);
+      animation:training-capture-toast-in .22s var(--glass-spring);
+    }
+    .training-capture-toast-close{
+      position:absolute;
+      right:12px;
+      top:50%;
+      transform:translateY(-50%);
+      width:34px;
+      height:34px;
+      min-width:34px;
+      min-height:34px;
+      padding:0;
+      border:none;
+      border-radius:999px;
+      background:rgba(255,255,255,.72);
+      color:#0f172a;
+      font-size:22px;
+      line-height:1;
+      font-weight:800;
+      cursor:pointer;
+      box-shadow:0 8px 18px rgba(15,23,42,.12), inset 0 1px 0 rgba(255,255,255,.82);
+    }
+    .training-capture-toast-close:active{
+      transform:translateY(-50%) scale(.96);
+    }
+    @keyframes training-capture-toast-in{
+      from{ opacity:0; transform:translateY(-10px) scale(.98); }
+      to{ opacity:1; transform:translateY(0) scale(1); }
     }
     .training-capture-card.warn{
       border-color:rgba(245,158,11,.28);
@@ -2496,6 +2544,10 @@
     }
 
     @media (max-width:480px){
+      .training-capture-toast-stack{
+        top:calc(70px + env(safe-area-inset-top, 0px));
+        width:calc(100vw - 48px);
+      }
       .training-capture-card-actions,
       .training-capture-recent-entry,
       .training-capture-recent-actions{
@@ -4783,6 +4835,7 @@
   </div>
 
   <div id="aiCoachPanelModal" class="ai-coach-panel-modal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:998;align-items:center;justify-content:center;padding:20px;">
+    <div id="trainingCaptureToastStack" class="training-capture-toast-stack" aria-live="polite"></div>
     <div class="ai-coach-panel-card" style="width:min(520px,100%);max-height:min(80vh,760px);overflow:auto;background:rgba(255,255,255,.94);backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);border-radius:24px;padding:22px;box-shadow:0 20px 50px rgba(15,23,42,.2);">
       <div id="aiCoachPanelContent"></div>
       <div id="aiCoachChatBox" class="ai-coach-chat-box">
@@ -4884,8 +4937,7 @@
     const TRAINING_CAPTURE_CARDS_KEY = "gain-training-capture-cards";
     const TRAINING_CAPTURE_RECENT_KEY = "gain-training-capture-recent-session";
     const TRAINING_CAPTURE_PENDING_KEY = "gain-training-capture-pending-context";
-    const TRAINING_CAPTURE_AUTO_COLLAPSE_MS = 2600;
-    const TRAINING_CAPTURE_MANUAL_EXPAND_MS = 12000;
+    const TRAINING_CAPTURE_TOAST_MS = 5000;
     const AI_WEEKLY_SUMMARIES_KEY = "gain-ai-weekly-summaries";
     const PLAN_CHECK_META_KEY = "gain-plan-check-meta";
     const TRAINING_SESSION_KEY = "gain-training-session";
@@ -5941,7 +5993,7 @@
     let timerHoldInterval = 0;
     let aiBubbleHideTimer = 0;
     let aiPendingFeedbackTimer = 0;
-    let trainingCaptureAutoCollapseTimer = 0;
+    let trainingCaptureToastTimer = 0;
     let latestAiWeeklyResult = null;
     let latestAiPlanResult = null;
     let latestAiDailyAdjust = null;
@@ -7875,124 +7927,81 @@
       };
     }
 
+    function normalizeTrainingCaptureToasts(cards, nowMs = Date.now()){
+      return (Array.isArray(cards) ? cards : [])
+        .filter((card) => card && typeof card === "object")
+        .map((card) => {
+          const item = { ...card };
+          const expiresAt = Number(item.expiresAt || 0);
+          if(Number.isFinite(expiresAt) && expiresAt > 0){
+            if(expiresAt <= nowMs) return null;
+            item.expiresAt = expiresAt;
+            return item;
+          }
+          item.expiresAt = nowMs + TRAINING_CAPTURE_TOAST_MS;
+          return item;
+        })
+        .filter(Boolean)
+        .slice(0, 5);
+    }
+
     function getTrainingCaptureCards(){
       const list = safeJsonParse(localStorage.getItem(TRAINING_CAPTURE_CARDS_KEY) || "[]", []);
-      return Array.isArray(list) ? list.slice(0, 5) : [];
-    }
-
-    function getTrainingCaptureViewportWidth(){
-      const width = Number(window.innerWidth || document.documentElement?.clientWidth || document.body?.clientWidth || 0);
-      return width > 0 ? width : 1024;
-    }
-
-    function isCompactTrainingCaptureViewport(){
-      const mobileMedia = typeof window.matchMedia === "function"
-        ? window.matchMedia("(max-width: 480px)").matches
-        : false;
-      return mobileMedia || getTrainingCaptureViewportWidth() <= 480;
-    }
-
-    function countTrainingCaptureCardActions(card = {}){
-      let count = 0;
-      if(Array.isArray(card.recordIds) && card.recordIds.length){
-        count += 2;
-      }else{
-        if(card.recordId && card.canUndo !== false) count += 1;
-        if(card.recordId && card.canModify !== false) count += 1;
+      const safe = normalizeTrainingCaptureToasts(list);
+      const safeJson = JSON.stringify(safe);
+      if(!Array.isArray(list) || JSON.stringify(list) !== safeJson){
+        localStorage.setItem(TRAINING_CAPTURE_CARDS_KEY, safeJson);
       }
-      if(card.trainingSessionActions) count += 3;
-      if(card.canDismiss !== false) count += 1;
-      return count;
-    }
-
-    function shouldAutoCollapseTrainingCaptureCard(card = {}){
-      if(!isCompactTrainingCaptureViewport()) return false;
-      if(card.autoCollapse === false) return false;
-      return !!card.trainingSessionActions
-        || !!card.trainingSessionAggregate
-        || countTrainingCaptureCardActions(card) >= 3
-        || String(card.message || "").length > 60;
+      return safe;
     }
 
     function prepareTrainingCaptureCardForInsert(card, options = {}){
+      const nowMs = Number(options.nowMs || Date.now());
       const item = { ...card };
-      if(shouldAutoCollapseTrainingCaptureCard(item) && item.collapsed !== true){
-        item.expandedUntil = Number(options.nowMs || Date.now()) + TRAINING_CAPTURE_AUTO_COLLAPSE_MS;
-      }
+      delete item.collapsed;
+      delete item.expandedUntil;
+      item.expiresAt = nowMs + TRAINING_CAPTURE_TOAST_MS;
       return item;
     }
 
-    function isTrainingCaptureCardCollapsedForRender(card, nowMs = Date.now()){
-      if(!card) return false;
-      if(card.collapsed === true) return true;
-      const expandedUntil = Number(card.expandedUntil || 0);
-      if(expandedUntil && expandedUntil > nowMs) return false;
-      return shouldAutoCollapseTrainingCaptureCard(card);
+    function expireTrainingCaptureToasts(nowMs = Date.now()){
+      const list = safeJsonParse(localStorage.getItem(TRAINING_CAPTURE_CARDS_KEY) || "[]", []);
+      const safe = normalizeTrainingCaptureToasts(list, nowMs);
+      localStorage.setItem(TRAINING_CAPTURE_CARDS_KEY, JSON.stringify(safe));
+      renderTrainingCaptureCards();
+      return safe;
     }
 
-    function updateTrainingCaptureCardById(id, updater){
-      if(!id) return [];
-      return setTrainingCaptureCards(getTrainingCaptureCards().map((card) => {
-        if(card.id !== id) return card;
-        return updater({ ...card });
-      }));
-    }
-
-    function collapseTrainingCaptureCard(id){
-      return updateTrainingCaptureCardById(id, (card) => {
-        card.collapsed = true;
-        delete card.expandedUntil;
-        return card;
-      });
-    }
-
-    function expandTrainingCaptureCard(id, options = {}){
-      const nowMs = Number(options.nowMs || Date.now());
-      const durationMs = Number(options.durationMs || TRAINING_CAPTURE_MANUAL_EXPAND_MS);
-      return updateTrainingCaptureCardById(id, (card) => {
-        card.collapsed = false;
-        card.expandedUntil = nowMs + durationMs;
-        return card;
-      });
-    }
-
-    function scheduleTrainingCaptureAutoCollapse(cards = []){
-      if(trainingCaptureAutoCollapseTimer){
-        clearTimeout(trainingCaptureAutoCollapseTimer);
-        trainingCaptureAutoCollapseTimer = 0;
+    function scheduleTrainingCaptureToastExpiry(cards = []){
+      if(trainingCaptureToastTimer){
+        clearTimeout(trainingCaptureToastTimer);
+        trainingCaptureToastTimer = 0;
       }
       const nowMs = Date.now();
       const nextAt = cards
-        .map((card) => Number(card?.expandedUntil || 0))
+        .map((card) => Number(card?.expiresAt || 0))
         .filter((time) => time > nowMs)
         .sort((a, b) => a - b)[0] || 0;
       if(!nextAt) return;
       const delay = Math.max(80, nextAt - nowMs + 20);
-      trainingCaptureAutoCollapseTimer = setTimeout(() => {
-        const current = getTrainingCaptureCards();
-        let changed = false;
-        const next = current.map((card) => {
-          const expandedUntil = Number(card?.expandedUntil || 0);
-          if(expandedUntil && expandedUntil <= Date.now() && shouldAutoCollapseTrainingCaptureCard(card)){
-            changed = true;
-            const collapsed = { ...card, collapsed:true };
-            delete collapsed.expandedUntil;
-            return collapsed;
-          }
-          return card;
-        });
-        if(changed) setTrainingCaptureCards(next);
-      }, delay);
-      if(trainingCaptureAutoCollapseTimer && typeof trainingCaptureAutoCollapseTimer.unref === "function"){
-        trainingCaptureAutoCollapseTimer.unref();
+      trainingCaptureToastTimer = setTimeout(() => expireTrainingCaptureToasts(), delay);
+      if(trainingCaptureToastTimer && typeof trainingCaptureToastTimer.unref === "function"){
+        trainingCaptureToastTimer.unref();
       }
     }
 
     function setTrainingCaptureCards(cards){
-      const safe = Array.isArray(cards) ? cards.slice(0, 5) : [];
+      const safe = normalizeTrainingCaptureToasts(cards);
       localStorage.setItem(TRAINING_CAPTURE_CARDS_KEY, JSON.stringify(safe));
       renderTrainingCaptureCards();
+      scheduleTrainingCaptureToastExpiry(safe);
       return safe;
+    }
+
+    function dismissTrainingCaptureToast(id){
+      const targetId = String(id || "");
+      if(!targetId) return getTrainingCaptureCards();
+      return setTrainingCaptureCards(getTrainingCaptureCards().filter((card) => String(card.id || "") !== targetId));
     }
 
     function clearTrainingCaptureCards(){
@@ -8012,119 +8021,30 @@
     }
 
     function renderTrainingCaptureCards(){
-      const stack = $("trainingCaptureCardStack");
+      const stack = $("trainingCaptureToastStack");
       if(!stack) return;
       const cards = getTrainingCaptureCards();
       if(!cards.length){
-        const recent = getTrainingCaptureRecentSession();
-        const latest = recent.records.find((item) => {
-          const found = findTrainingCaptureRecord(item.recordId);
-          return found?.record && !found.record.revoked;
-        }) || null;
-        if(!latest){
-          stack.innerHTML = "";
-          return;
-        }
-        stack.innerHTML = `
-          <div class="training-capture-recent-entry">
-            <div class="training-capture-recent-text">
-              <b>最近自动记录</b>
-              ${escapeHtml(latest.date || "")} · ${escapeHtml(latest.summary || "可查看、修改或撤回")}
-            </div>
-            <div class="training-capture-recent-actions">
-              <button class="btn-outline" type="button" data-capture-view-latest="1">查看</button>
-              <button class="btn-outline" type="button" data-capture-modify="${escapeHtml(latest.recordId)}">修改</button>
-              <button class="btn-danger" type="button" data-capture-undo="${escapeHtml(latest.recordId)}">撤回</button>
-            </div>
+        stack.innerHTML = "";
+        return;
+      }
+      stack.innerHTML = cards.map((card) => {
+        const kindClass = card.kind === "error" ? "error" : (card.kind === "warn" ? "warn" : "");
+        const cardId = escapeHtml(card.id || "");
+        return `
+          <div class="training-capture-card ${kindClass}" role="status">
+            <div class="training-capture-card-title">${escapeHtml(card.title || "训练记录")}</div>
+            <div class="training-capture-card-message">${escapeHtml(card.message || "")}</div>
+            <button class="training-capture-toast-close" type="button" data-capture-toast-dismiss="${cardId}" aria-label="关闭通知" title="关闭">&times;</button>
           </div>
         `;
-      }else{
-        stack.innerHTML = cards.map((card) => {
-          const kindClass = card.kind === "error" ? "error" : (card.kind === "warn" ? "warn" : "");
-          const cardId = escapeHtml(card.id || "");
-          const collapsed = isTrainingCaptureCardCollapsedForRender(card);
-          if(collapsed){
-            return `
-              <div class="training-capture-card ${kindClass} is-collapsed">
-                <div class="training-capture-card-compact-copy">
-                  <div class="training-capture-card-title">${escapeHtml(card.title || "训练记录")}</div>
-                  <div class="training-capture-card-message">${escapeHtml(card.message || "")}</div>
-                </div>
-                <button class="btn-outline training-capture-card-expand-btn" type="button" data-capture-expand="${cardId}">展开</button>
-              </div>
-            `;
-          }
-          const actions = [];
-          if(card.recordIds && Array.isArray(card.recordIds) && card.recordIds.length){
-            actions.push(`<button class="btn-outline" type="button" data-capture-view-group="${escapeHtml(card.recordIds.join(","))}">查看</button>`);
-            actions.push(`<button class="btn-danger" type="button" data-capture-undo-group="${escapeHtml(card.recordIds.join(","))}">撤回全部</button>`);
-          }else{
-            if(card.recordId && card.canUndo !== false) actions.push(`<button class="btn-outline" type="button" data-capture-undo="${escapeHtml(card.recordId)}">撤回</button>`);
-            if(card.recordId && card.canModify !== false) actions.push(`<button class="btn-outline" type="button" data-capture-modify="${escapeHtml(card.recordId)}">修改</button>`);
-          }
-          if(card.trainingSessionActions){
-            actions.push(`<button class="btn" type="button" data-training-session-continue="1">继续训练</button>`);
-            actions.push(`<button class="btn-outline" type="button" data-training-session-finish="1">结束并保存</button>`);
-            actions.push(`<button class="btn-danger" type="button" data-training-session-discard="1">放弃训练</button>`);
-          }
-          if(card.canDismiss !== false) actions.push(`<button class="btn-outline" type="button" data-capture-collapse="${cardId}">收起</button>`);
-          return `
-            <div class="training-capture-card ${kindClass}">
-              <div class="training-capture-card-title">${escapeHtml(card.title || "训练记录")}</div>
-              <div class="training-capture-card-message">${escapeHtml(card.message || "")}</div>
-              ${actions.length ? `<div class="training-capture-card-actions">${actions.join("")}</div>` : ""}
-            </div>
-          `;
-        }).join("");
-        scheduleTrainingCaptureAutoCollapse(cards);
-      }
-      stack.querySelectorAll("[data-capture-undo]").forEach((btn) => {
-        btn.onclick = () => undoTrainingCaptureRecord(btn.getAttribute("data-capture-undo") || "");
+      }).join("");
+      stack.querySelectorAll("[data-capture-toast-dismiss]").forEach((btn) => {
+        const id = btn.getAttribute("data-capture-toast-dismiss") || "";
+        btn.onclick = () => dismissTrainingCaptureToast(id);
       });
-      stack.querySelectorAll("[data-capture-undo-group]").forEach((btn) => {
-        btn.onclick = () => {
-          const ids = String(btn.getAttribute("data-capture-undo-group") || "").split(",").filter(Boolean);
-          ids.forEach((id) => undoTrainingCaptureRecord(id));
-        };
-      });
-      stack.querySelectorAll("[data-capture-modify]").forEach((btn) => {
-        btn.onclick = () => {
-          const id = btn.getAttribute("data-capture-modify") || "";
-          const next = prompt("输入修改后的记录内容，例如：引体向上 12 个，最高一组 6 个");
-          if(next) modifyLatestTrainingCaptureRecord(id, next);
-        };
-      });
-      stack.querySelectorAll("[data-capture-view-latest]").forEach((btn) => {
-        btn.onclick = () => {
-          const latest = getLatestRecentTrainingCapture();
-          const found = latest ? findTrainingCaptureRecord(latest.recordId) : null;
-          alert(found?.record ? formatTrainingCaptureCardMessage(found.record) : "没有可查看的最近记录");
-        };
-      });
-      stack.querySelectorAll("[data-capture-view-group]").forEach((btn) => {
-        btn.onclick = () => {
-          const ids = String(btn.getAttribute("data-capture-view-group") || "").split(",").filter(Boolean);
-          const text = ids.map((id) => findTrainingCaptureRecord(id)?.record).filter(Boolean).map(formatTrainingCaptureCardMessage).join("\n");
-          alert(text || "没有可查看的记录");
-        };
-      });
-      stack.querySelectorAll("[data-capture-collapse]").forEach((btn) => {
-        const id = btn.getAttribute("data-capture-collapse") || "";
-        btn.onclick = () => collapseTrainingCaptureCard(id);
-      });
-      stack.querySelectorAll("[data-capture-expand]").forEach((btn) => {
-        const id = btn.getAttribute("data-capture-expand") || "";
-        btn.onclick = () => expandTrainingCaptureCard(id);
-      });
-      stack.querySelectorAll("[data-training-session-continue]").forEach((btn) => {
-        btn.onclick = () => continueTrainingSession();
-      });
-      stack.querySelectorAll("[data-training-session-finish]").forEach((btn) => {
-        btn.onclick = () => finishTrainingSession({ save:true });
-      });
-      stack.querySelectorAll("[data-training-session-discard]").forEach((btn) => {
-        btn.onclick = () => finishTrainingSession({ save:false });
-      });
+      scheduleTrainingCaptureToastExpiry(cards);
+      return;
     }
 
     function getAiWeeklySummaries(){
@@ -16887,7 +16807,6 @@
       }else{
         content.innerHTML = `
           <div style="font-size:22px;font-weight:800;margin-bottom:10px;">AI 教练${activeCharacterCard ? ` · ${escapeHtml(activeCharacterCard.name)}` : ""}</div>
-          <div id="trainingCaptureCardStack" class="training-capture-card-stack"></div>
         `;
         renderTrainingCaptureCards();
         if(chatBox){
