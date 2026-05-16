@@ -4896,7 +4896,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const APP_VERSION = "v2026.05.16-ai-coach-set-capture";
+    const APP_VERSION = "v2026.05.16-ai-coach-set-capture-daydock-scroll-repair";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const TEMP_DAILY_PLAN_OVERRIDES_KEY = "gain-temp-daily-plan-overrides";
     const DAILY_LOGS_KEY = "gain-daily-logs";
@@ -14246,6 +14246,8 @@
     }
 
     let dayDockRepairSerial = 0;
+    let dayDockScrollRepairRaf = 0;
+    let dayDockScrollRepairTimer = 0;
 
     function getDayDragExtraScale(){
       const tabsEl = $("dayTabs");
@@ -14977,6 +14979,38 @@
       if(indicator) indicator.classList.remove("dragging");
       clearDayDragActiveTab();
       return true;
+    }
+
+    function repairDayDockIndicatorAfterScroll(options = {}){
+      if(dayDockDrag.active || dayDockHold.active) return;
+      if(!syncRenderedActivePlanDay(activePlanDay)) return;
+      updateDayTabIndicator({
+        immediate: options.immediate !== false,
+        noForce: options.noForce === true
+      });
+    }
+
+    function scheduleDayDockScrollRepair(){
+      if(dayDockDrag.active || dayDockHold.active) return;
+      if(dayDockScrollRepairRaf) cancelAnimationFrame(dayDockScrollRepairRaf);
+      dayDockScrollRepairRaf = requestAnimationFrame(() => {
+        dayDockScrollRepairRaf = 0;
+        repairDayDockIndicatorAfterScroll({ immediate:true });
+      });
+
+      clearTimeout(dayDockScrollRepairTimer);
+      dayDockScrollRepairTimer = setTimeout(() => {
+        repairDayDockIndicatorAfterScroll({ immediate:true });
+      }, isIosDayDockMode() ? 120 : 60);
+    }
+
+    function bindDayDockScrollRepair(){
+      const tabsEl = $("dayTabs");
+      if(!tabsEl || tabsEl.dataset.dayDockScrollRepairBound === "1") return;
+      tabsEl.dataset.dayDockScrollRepairBound = "1";
+      tabsEl.addEventListener("scroll", () => {
+        scheduleDayDockScrollRepair();
+      }, { passive:true });
     }
 
     function attachDayDockInteractions(){
@@ -15785,6 +15819,7 @@
         };
       });
       tabs.classList.remove("ready");
+      bindDayDockScrollRepair();
       const indicator = tabs.querySelector(".day-tab-indicator");
       if(indicator){
         indicator.style.opacity = "0";
@@ -19503,6 +19538,7 @@
     loadExerciseLibraryFromFiles().then(() => renderExerciseLibrary()).catch(() => renderExerciseLibrary());
     renderPlan();
     attachDayDockInteractions();
+    bindDayDockScrollRepair();
     scheduleDayDockPostLayoutRepair({ immediate:true });
     setForm(appState.getState().form || defaultForm);
     repairFalseGuideAliasTrainingRecords();
