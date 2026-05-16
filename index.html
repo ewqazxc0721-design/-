@@ -7479,12 +7479,37 @@
     function resolveRecordProtocolCandidateDate(candidate = {}, context = {}, currentState = {}){
       const targetDateText = String(candidate.targetDateText || "").trim();
       if(!targetDateText) return { resolved:false, attempted:false };
-      if(targetDateText === "today" && String(context.todayIso || "").trim()){
+      const todayIso = String(context.todayIso || "").trim();
+      const shiftIsoDate = (days) => {
+        if(!/^\d{4}-\d{2}-\d{2}$/.test(todayIso)) return "";
+        const [year, month, day] = todayIso.split("-").map((part) => Number(part));
+        const date = new Date(Date.UTC(year, month - 1, day + days));
+        return date.toISOString().slice(0, 10);
+      };
+      if(["today", "今天"].includes(targetDateText) && todayIso){
         return {
           resolved:true,
           attempted:true,
-          targetDateIso:String(context.todayIso).trim()
+          targetDateIso:todayIso
         };
+      }
+      const relativeDateOffsets = {
+        yesterday:-1,
+        "昨天":-1,
+        "昨日":-1,
+        "前天":-2,
+        tomorrow:1,
+        "明天":1
+      };
+      if(Object.prototype.hasOwnProperty.call(relativeDateOffsets, targetDateText)){
+        const targetDateIso = shiftIsoDate(relativeDateOffsets[targetDateText]);
+        if(targetDateIso){
+          return {
+            resolved:true,
+            attempted:true,
+            targetDateIso
+          };
+        }
       }
       const visibleWeekDates = [
         ...(Array.isArray(context.visibleWeekDates) ? context.visibleWeekDates : []),
@@ -7681,6 +7706,15 @@
         exerciseName:String(candidate.exerciseRef?.displayName || candidate.exerciseName || "").trim(),
         amount:Number.isFinite(Number(candidate.amount)) ? Number(candidate.amount) : undefined,
         unit:String(candidate.unit || ""),
+        sets:Number.isFinite(Number(candidate.sets)) ? Number(candidate.sets) : undefined,
+        reps:Number.isFinite(Number(candidate.reps)) ? Number(candidate.reps) : undefined,
+        repsPerSet:Number.isFinite(Number(candidate.repsPerSet)) ? Number(candidate.repsPerSet) : undefined,
+        bestSetReps:Number.isFinite(Number(candidate.bestSetReps)) ? Number(candidate.bestSetReps) : undefined,
+        duration:Number.isFinite(Number(candidate.duration)) ? Number(candidate.duration) : undefined,
+        durationUnit:String(candidate.durationUnit || ""),
+        ...(candidate.currentValue && typeof candidate.currentValue === "object" && !Array.isArray(candidate.currentValue)
+          ? { currentValue:{ ...candidate.currentValue } }
+          : {}),
         evidenceText:String(candidate.evidenceText || ""),
         ...(candidate.feedbackType ? { feedbackType:String(candidate.feedbackType || "") } : {}),
         ...((candidate.text || candidate.note) ? { text:String(candidate.text || candidate.note || "") } : {}),
@@ -12310,6 +12344,50 @@
       }
     }
 
+    function isDeterministicCharacterCaptureHandled(result = {}){
+      return ["plan_progress", "extra_training", "checked", "recorded", "modified", "undone"].includes(String(result.status || ""));
+    }
+
+    function maybeBuildLocalDateCorrectionFallback(text = ""){
+      const raw = String(text || "").trim();
+      if(!raw) return null;
+      const dateMatch = raw.match(/(?:改到|移到|挪到|记到|改成|改为)\s*(昨天|前天|今天|周一|周二|周三|周四|周五|周六|周日|周天)/);
+      if(!dateMatch) return null;
+      const exercise = matchExerciseFromText(raw);
+      const exerciseName = exercise && !exercise.ambiguous ? exercise.canonical : "";
+      if(!exerciseName) return null;
+      const targetDateText = dateMatch[1];
+      const prompt = `AI 暂时没有回复，这条日期修正需要确认：是否把${exerciseName}记录改到${targetDateText}？`;
+      pushTrainingCaptureCard({
+        kind:"warn",
+        title:"需要确认",
+        message:prompt,
+        canUndo:false,
+        canModify:false
+      });
+      return {
+        status:"pending_correction",
+        reason:"ai_empty_date_correction",
+        prompt,
+        exerciseName,
+        targetDateText
+      };
+    }
+
+    function buildCharacterChatAiFailureReply(error = {}, deterministicCaptureResult = {}){
+      const message = error?.message || "请检查 AI 配置";
+      if(isDeterministicCharacterCaptureHandled(deterministicCaptureResult)){
+        return `AI 暂时没有回复，但这条训练已用本地规则先记录。`;
+      }
+      if(deterministicCaptureResult?.status === "pending_correction"){
+        return deterministicCaptureResult.prompt || "AI 暂时没有回复，这条修正需要确认后再处理。";
+      }
+      if(deterministicCaptureResult?.status === "follow_up" && deterministicCaptureResult.prompt){
+        return `AI 暂时没有回复，${deterministicCaptureResult.prompt}`;
+      }
+      return `发送失败：${message}`;
+    }
+
     function getRecordProtocolVisibleWeekDates(now = new Date()){
       const weekdays = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
       return getCurrentWeekRange(now).dates.map((iso, index) => ({
@@ -12433,12 +12511,14 @@
         });
         setCharacterChatHistory([...getCharacterChatHistory(), { role:"assistant", content:reply || "（没有返回内容）", at:new Date().toISOString() }]);
       }catch(err){
-        console.error(err);
-        const deterministicCaptureResult = maybeRunDeterministicCharacterCaptureFallback(text, { writes:[], pending:[], ignored:[] }, { sourceType:"character_chat" });
-        const capturedLocally = ["plan_progress", "extra_training", "checked"].includes(deterministicCaptureResult?.status);
-        const failText = capturedLocally
-          ? `发送失败：${err.message || "请检查 AI 配置"}\n但这条训练已用本地规则先记录。`
-          : `发送失败：${err.message || "请检查 AI 配置"}`;
+        let deterministicCaptureResult = maybeRunDeterministicCharacterCaptureFallback(text, { writes:[], pending:[], ignored:[] }, { sourceType:"character_chat" });
+        if(!isDeterministicCharacterCaptureHandled(deterministicCaptureResult) && !["follow_up", "pending_correction"].includes(String(deterministicCaptureResult?.status || ""))){
+          deterministicCaptureResult = maybeBuildLocalDateCorrectionFallback(text) || deterministicCaptureResult;
+        }
+        const failText = buildCharacterChatAiFailureReply(err, deterministicCaptureResult);
+        if(/^发送失败/.test(failText)){
+          console.error(err);
+        }
         setRecordProtocolLastDebug({
           rawModelOutput:"",
           reply:"",
@@ -20458,6 +20538,403 @@
       handleTimerWakeCheck();
       maybeTriggerLateNightSleepReminder().catch((err) => console.error("深夜睡觉提醒检查失败", err));
       scheduleDayDockPostLayoutRepair({ immediate:true });
+    });
+
+    function buildRecordProtocolLiveScenarioPlan(options = {}){
+      const count = Math.max(1, Number(options.count || 100));
+      const exercises = [
+        { name:"平板支撑", alt:"短平板支撑", unitLabel:"秒", unit:"second", quantities:[45,60,75], sets:[2,3,4] },
+        { name:"深蹲", alt:"杯式深蹲", unitLabel:"次", unit:"rep", quantities:[10,12,15], sets:[3,4,5] },
+        { name:"俯卧撑", alt:"窄距俯卧撑", unitLabel:"次", unit:"rep", quantities:[8,12,15], sets:[2,3,4] },
+        { name:"单臂哑铃划船", alt:"弹力绳划船", unitLabel:"次", unit:"rep", quantities:[10,12,14], sets:[3,4,5] },
+        { name:"拉伸", alt:"胸背拉伸", unitLabel:"分钟", unit:"minute", quantities:[5,8,10], sets:[1,2,3] },
+        { name:"俄罗斯转体", alt:"卷腹", unitLabel:"个", unit:"rep", quantities:[16,20,24], sets:[2,3,4] },
+        { name:"哑铃弯举", alt:"锤式弯举", unitLabel:"次", unit:"rep", quantities:[10,12,15], sets:[3,4,5] },
+        { name:"散步", alt:"快走", unitLabel:"分钟", unit:"minute", quantities:[20,25,30], sets:[1,1,1] }
+      ];
+      const dateTexts = ["今天","昨天","前天","周一","周二","周三","周四","周五","周六","周日"];
+      const trainingTimes = ["早上7点", "中午12点半", "下午4点", "晚上8点", "睡前", "训练用了18分钟", "训练用了25分钟", "大概练了半小时"];
+      const cases = [];
+      for(let index = 0; cases.length < count; index += 1){
+        const exercise = exercises[index % exercises.length];
+        const dateText = dateTexts[index % dateTexts.length];
+        const sets = exercise.sets[index % exercise.sets.length];
+        const quantity = exercise.quantities[index % exercise.quantities.length];
+        const nextQuantity = exercise.quantities[(index + 1) % exercise.quantities.length];
+        const timeText = trainingTimes[index % trainingTimes.length];
+        const sessionId = `live-session-${index + 1}`;
+        cases.push({
+          id:`${sessionId}-add`,
+          sessionId,
+          category:"add",
+          userText:`${dateText}${exercise.name}加练${sets}组，每组${quantity}${exercise.unitLabel}，${timeText}`,
+          expected:{
+            mode:"write",
+            exerciseName:exercise.name,
+            dateText,
+            minAmount:sets,
+            unit:"set",
+            perSetUnit:exercise.unit
+          }
+        });
+        if(cases.length >= count) break;
+        cases.push({
+          id:`${sessionId}-context-add`,
+          sessionId,
+          category:"context_add",
+          userText:`刚才那个又补了一组，每组${nextQuantity}${exercise.unitLabel}`,
+          expected:{
+            mode:"write_or_pending",
+            exerciseName:exercise.name,
+            dateText,
+            minAmount:1,
+            unit:"set",
+            contextDependent:true
+          }
+        });
+        if(cases.length >= count) break;
+        cases.push({
+          id:`${sessionId}-modify`,
+          sessionId,
+          category:"modify",
+          userText:`把刚才${exercise.name}那条改成${sets + 1}组，每组${nextQuantity}${exercise.unitLabel}，名称改成${exercise.alt}`,
+          expected:{
+            mode:"pending_mutation",
+            exerciseName:exercise.alt,
+            previousExerciseName:exercise.name,
+            dateText,
+            mutation:"modify"
+          }
+        });
+        if(cases.length >= count) break;
+        cases.push({
+          id:`${sessionId}-delete`,
+          sessionId,
+          category:"delete",
+          userText:`删除刚才那条${exercise.alt}记录，不要记了`,
+          expected:{
+            mode:"pending_mutation",
+            exerciseName:exercise.alt,
+            dateText,
+            mutation:"delete"
+          }
+        });
+      }
+      return cases.slice(0, count).map((item, index) => ({ ...item, index:index + 1 }));
+    }
+
+    function resolveRecordProtocolLiveScenarioDate(dateText = "", todayIso = formatDateKey(new Date()), visibleWeekDates = getRecordProtocolVisibleWeekDates(new Date())){
+      const text = String(dateText || "").trim();
+      const shiftIso = (days) => {
+        if(!/^\d{4}-\d{2}-\d{2}$/.test(todayIso)) return "";
+        const [year, month, day] = todayIso.split("-").map((part) => Number(part));
+        const date = new Date(Date.UTC(year, month - 1, day + days));
+        return date.toISOString().slice(0, 10);
+      };
+      if(["今天","today"].includes(text)) return todayIso;
+      if(["昨天","yesterday"].includes(text)) return shiftIso(-1);
+      if(text === "前天") return shiftIso(-2);
+      const weekday = (Array.isArray(visibleWeekDates) ? visibleWeekDates : []).find((day) => String(day.weekday || "") === text);
+      return weekday?.iso || todayIso;
+    }
+
+    function maskRecordProtocolLiveScenarioEndpoint(settings = {}){
+      if(settings.apiMode === "proxy"){
+        const proxyUrl = String(settings.proxyUrl || "");
+        return proxyUrl ? proxyUrl.replace(/\/\/([^/@]+)@/, "//***@") : "";
+      }
+      return String(settings.apiBaseUrl || "");
+    }
+
+    function collectRecordProtocolLiveRecords(dailyLogs = {}){
+      return Object.entries(dailyLogs && typeof dailyLogs === "object" ? dailyLogs : {}).flatMap(([dateIso, log]) => {
+        const protocolRecords = Array.isArray(log?.records) ? log.records.map((record) => ({
+          source:"record-protocol",
+          dateIso,
+          exerciseName:String(record.exerciseName || ""),
+          amount:record.amount,
+          unit:record.unit,
+          sets:record.sets,
+          reps:record.reps,
+          repsPerSet:record.repsPerSet,
+          duration:record.duration,
+          durationUnit:record.durationUnit,
+          evidenceText:record.evidenceText || "",
+          record
+        })) : [];
+        const captureRecords = Array.isArray(log?.aiCaptureRecords) ? log.aiCaptureRecords.map((record) => ({
+          source:"training-capture",
+          dateIso,
+          exerciseName:String(record.currentValue?.exercise || record.currentValue?.text || ""),
+          amount:record.currentValue?.sets || record.currentValue?.amount || "",
+          unit:record.currentValue?.unit || "",
+          evidenceText:record.originalText || "",
+          record
+        })) : [];
+        return [...protocolRecords, ...captureRecords];
+      });
+    }
+
+    function summarizeRecordProtocolLiveMutation(scenario = {}, protocolOutput = {}, engineResult = {}){
+      const candidates = Array.isArray(protocolOutput.candidates) ? protocolOutput.candidates : [];
+      const decisions = Array.isArray(engineResult.decisions) ? engineResult.decisions : [];
+      const candidateSummary = candidates.map((candidate, index) => {
+        const decision = decisions[index] || {};
+        return {
+          candidateType:String(candidate.candidateType || ""),
+          exerciseName:String(candidate.exerciseRef?.displayName || candidate.exerciseName || ""),
+          evidenceText:String(candidate.evidenceText || ""),
+          decision:String(decision.decision || ""),
+          reason:String(decision.reason || ""),
+          targetDateIso:String(decision.targetDateIso || "")
+        };
+      });
+      const pending = candidateSummary.find((item) => item.decision === "pending");
+      const written = candidateSummary.find((item) => item.decision === "written");
+      const target = pending || written || candidateSummary[0] || null;
+      return {
+        scenarioId:scenario.id || "",
+        category:scenario.category || "",
+        text:scenario.userText || "",
+        status:target?.decision || "no_candidate",
+        summary:target
+          ? `${target.candidateType || "candidate"} ${target.exerciseName || ""} ${target.decision || ""} ${target.targetDateIso || ""}`.replace(/\s+/g, " ").trim()
+          : "AI 未生成候选",
+        candidates:candidateSummary
+      };
+    }
+
+    function evaluateRecordProtocolLiveScenario(scenario = {}, engineResult = {}, protocolOutput = {}, previousState = {}, nextState = {}, context = {}){
+      const expected = scenario.expected || {};
+      const decisions = Array.isArray(engineResult.decisions) ? engineResult.decisions : [];
+      const candidates = Array.isArray(protocolOutput.candidates) ? protocolOutput.candidates : [];
+      const written = decisions.find((decision) => decision.decision === "written");
+      const pending = decisions.find((decision) => decision.decision === "pending");
+      const expectedDateIso = resolveRecordProtocolLiveScenarioDate(expected.dateText, context.todayIso, context.visibleWeekDates);
+      const records = collectRecordProtocolLiveRecords(nextState.dailyLogs);
+      const newRecords = records.filter((record) => (
+        !collectRecordProtocolLiveRecords(previousState.dailyLogs).some((oldRecord) => oldRecord.record?.recordId && oldRecord.record.recordId === record.record?.recordId)
+      ));
+      const candidateText = JSON.stringify(candidates);
+      const result = {
+        pass:false,
+        reason:"",
+        expectedDateIso,
+        writtenCount:decisions.filter((decision) => decision.decision === "written").length,
+        pendingCount:decisions.filter((decision) => decision.decision === "pending").length,
+        ignoredCount:decisions.filter((decision) => decision.decision === "ignored").length
+      };
+      if(expected.mode === "write"){
+        const dateOk = !!written && (!expectedDateIso || written.targetDateIso === expectedDateIso);
+        const recordOk = newRecords.some((record) => (
+          (!expected.exerciseName || record.exerciseName.includes(expected.exerciseName)) &&
+          (!expectedDateIso || record.dateIso === expectedDateIso)
+        ));
+        result.pass = dateOk && recordOk;
+        result.reason = result.pass ? "written_expected_record" : "missing_written_record_or_date";
+        return result;
+      }
+      if(expected.mode === "write_or_pending"){
+        result.pass = !!written || !!pending;
+        result.reason = result.pass ? "context_handled" : "context_not_handled";
+        return result;
+      }
+      if(expected.mode === "pending_mutation"){
+        result.pass = !!pending || /correction|revoke|delete|modify|move_record|撤|删|改/.test(candidateText);
+        result.reason = result.pass ? "mutation_captured_for_confirmation" : "mutation_not_captured";
+        return result;
+      }
+      result.pass = decisions.length > 0;
+      result.reason = result.pass ? "has_decision" : "no_decision";
+      return result;
+    }
+
+    async function callRecordProtocolLiveScenarioModel(settings = {}, scenario = {}, history = [], state = {}, context = {}, options = {}){
+      const protocol = getActiveRecordProtocol();
+      if(!protocol) throw new Error("记录协议未启用");
+      const activeReference = state.activeTrainingReference || null;
+      const compactRequest = buildCompactRecordProtocolRequest({
+        userText:scenario.userText,
+        protocolId:"record-protocol/v2",
+        todayIso:context.todayIso,
+        userTimeZone:context.userTimeZone,
+        visibleWeekDates:context.visibleWeekDates,
+        activeTrainingReference:activeReference,
+        characterChatHistory:history,
+        tokenBudget:options.tokenBudget
+      });
+      const card = { id:"record-protocol-live-test", name:"记录测试员", description:"严格输出训练记录候选的测试角色" };
+      const adapter = createCharacterChatAiAdapter();
+      const rawResponse = await adapter.send({
+        settings,
+        message:scenario.userText,
+        history:compactRequest.historyTurns || history.slice(-3),
+        card,
+        trainingContext:null,
+        protocol,
+        messages:compactRequest.messages,
+        maxOutputTokens:Number(options.maxOutputTokens || 300),
+        recordProtocolPrompt:compactRequest.recordProtocolPrompt,
+        trainingContextPrompt:compactRequest.trainingContextPrompt
+      });
+      const rawModelOutput = normalizeCharacterModelOutputText(rawResponse);
+      if(!rawModelOutput) throw new Error("AI 没有返回可显示内容");
+      const parsed = recordProtocol.parseModelResponse(rawModelOutput, { protocol });
+      return {
+        ok:parsed.ok,
+        reply:parsed.reply,
+        record_candidates:parsed.record_candidates,
+        rejected_candidates:parsed.rejected_candidates || [],
+        parseError:parsed.parseError || "",
+        rawModelOutput:options.includeRawModelOutput ? rawModelOutput : summarizeRecordProtocolDebugText(rawModelOutput, 500).text,
+        compactMode:compactRequest.mode
+      };
+    }
+
+    async function runRecordProtocolLiveScenarioTests(options = {}){
+      const settings = getAiSettings();
+      const ready = settings.apiMode === "proxy" ? !!settings.proxyUrl : !!settings.apiKey;
+      const scenarios = buildRecordProtocolLiveScenarioPlan({ count:options.count || 100 });
+      const startedAt = new Date().toISOString();
+      const report = {
+        ok:false,
+        status:ready ? "running" : "blocked",
+        startedAt,
+        finishedAt:"",
+        settings:{
+          apiMode:settings.apiMode,
+          endpoint:maskRecordProtocolLiveScenarioEndpoint(settings),
+          model:settings.model,
+          hasApiKey:!!settings.apiKey
+        },
+        total:scenarios.length,
+        passed:0,
+        failed:0,
+        blocked:ready ? "" : (settings.apiMode === "proxy" ? "未配置代理 URL" : "未配置 API Key"),
+        coverage:{
+          add:scenarios.filter((item) => item.category === "add").length,
+          contextAdd:scenarios.filter((item) => item.category === "context_add").length,
+          modify:scenarios.filter((item) => item.category === "modify").length,
+          delete:scenarios.filter((item) => item.category === "delete").length,
+          chineseContext:true,
+          dateInference:true,
+          continuousDialogs:true
+        },
+        results:[]
+      };
+      if(!ready){
+        localStorage.setItem("gain-record-protocol-live-test-report", JSON.stringify(report));
+        return report;
+      }
+
+      const todayIso = String(options.todayIso || formatDateKey(new Date()));
+      const context = {
+        todayIso,
+        userTimeZone:getRecordProtocolUserTimeZone(),
+        visibleWeekDates:getRecordProtocolVisibleWeekDates(new Date(`${todayIso}T12:00:00`))
+      };
+      let state = {
+        dailyLogs:{},
+        captureAttempts:[],
+        visibleWeekDates:context.visibleWeekDates,
+        activeTrainingReference:null
+      };
+      let history = [];
+      for(const scenario of scenarios){
+        const previousState = {
+          ...state,
+          dailyLogs:cloneRecordProtocolDailyLogs(state.dailyLogs),
+          captureAttempts:cloneRecordProtocolCaptureAttempts(state.captureAttempts)
+        };
+        let stepResult;
+        try{
+          const coachResult = await callRecordProtocolLiveScenarioModel(settings, scenario, history, state, context, options);
+          const protocolOutput = adaptAiRecordEnvelope({
+            envelope:{
+              reply:coachResult.reply,
+              record_candidates:Array.isArray(coachResult.record_candidates) ? coachResult.record_candidates : []
+            },
+            source:{
+              kind:"live_scenario",
+              messageId:`${scenario.id}:${Date.now()}`,
+              capturedAtIso:new Date().toISOString(),
+              rawTextHash:hashRecordProtocolText(scenario.userText || ""),
+              rawTextPreview:String(scenario.userText || "").slice(0, 120)
+            }
+          });
+          const engineResult = applyRecordProtocol({
+            protocolOutput,
+            context,
+            currentState:state
+          });
+          state = {
+            ...state,
+            dailyLogs:engineResult.nextState.dailyLogs,
+            captureAttempts:engineResult.nextState.captureAttempts,
+            activeTrainingReference:{
+              exerciseName:scenario.expected?.exerciseName || state.activeTrainingReference?.exerciseName || "",
+              subjectText:scenario.expected?.exerciseName || ""
+            }
+          };
+          const evaluation = evaluateRecordProtocolLiveScenario(scenario, engineResult, protocolOutput, previousState, state, context);
+          const mutationSummary = summarizeRecordProtocolLiveMutation(scenario, protocolOutput, engineResult);
+          stepResult = {
+            id:scenario.id,
+            index:scenario.index,
+            category:scenario.category,
+            userText:scenario.userText,
+            pass:evaluation.pass,
+            reason:evaluation.reason,
+            expected:scenario.expected,
+            evaluation,
+            compactMode:coachResult.compactMode,
+            reply:coachResult.reply,
+            rejected_candidates:coachResult.rejected_candidates,
+            parseError:coachResult.parseError,
+            rawModelOutputPreview:coachResult.rawModelOutput,
+            mutationSummary
+          };
+          history.push({ role:"user", content:scenario.userText });
+          history.push({ role:"assistant", content:coachResult.reply || mutationSummary.summary || "" });
+          history = history.slice(-12);
+        }catch(err){
+          stepResult = {
+            id:scenario.id,
+            index:scenario.index,
+            category:scenario.category,
+            userText:scenario.userText,
+            pass:false,
+            reason:"api_or_runner_error",
+            error:err.message || String(err)
+          };
+        }
+        report.results.push(stepResult);
+        if(stepResult.pass) report.passed += 1;
+        else report.failed += 1;
+        report.status = "running";
+        window.dispatchEvent(new CustomEvent("record-protocol-live-scenario-progress", { detail:{ ...stepResult, passed:report.passed, failed:report.failed, total:report.total } }));
+        if(options.stopOnFirstFailure && !stepResult.pass) break;
+        const delayMs = Number(options.delayMs || 0);
+        if(delayMs > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
+      }
+      report.finishedAt = new Date().toISOString();
+      report.status = report.failed ? "failed" : "passed";
+      report.ok = report.failed === 0 && report.results.length === report.total;
+      report.finalState = {
+        dailyLogs:state.dailyLogs,
+        captureAttempts:state.captureAttempts.slice(-10),
+        lastMutationSummary:report.results.at(-1)?.mutationSummary || null
+      };
+      localStorage.setItem("gain-record-protocol-live-test-report", JSON.stringify(report));
+      return report;
+    }
+
+    window.RecordProtocolLiveDiagnostics = Object.freeze({
+      buildScenarioPlan:buildRecordProtocolLiveScenarioPlan,
+      run:runRecordProtocolLiveScenarioTests,
+      getLastReport(){
+        return safeJsonParse(localStorage.getItem("gain-record-protocol-live-test-report") || "null", null);
+      }
     });
 
     function isSmokeTestMode(){
