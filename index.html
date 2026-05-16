@@ -477,6 +477,23 @@
     .section{display:none;}
     .section.active{display:block;}
 
+    /* --- Patch v95: keep iOS bottom dock drag attached to the finger --- */
+    .tabs,
+    .tabs .tab,
+    .tabs .tab-content,
+    .tabs .tab-icon,
+    .tabs .tab-label,
+    .tabs .tab-indicator{
+      touch-action:none;
+      -webkit-user-select:none;
+      user-select:none;
+      -webkit-touch-callout:none;
+    }
+
+    body.bottom-dock-dragging{
+      overscroll-behavior:none;
+    }
+
 
     h2{
       margin:0 0 12px;
@@ -9220,6 +9237,8 @@
         "Each candidate should include evidenceText from the current user message.",
         "For v2 guard fields include evidenceSource, riskLevel, and scope when known.",
         "Prefer evidenceSource=current_user_message, riskLevel=low, scope=single_record for self-contained facts.",
+        "For rename/count/time/date changes, use candidateType=correction with correction.operation=modify_record_fields or move_record_to_date.",
+        "For delete/remove/do not record requests, use candidateType=correction with correction.operation=delete_record and keep it for confirmation.",
         "Do not invent records. If no training fact is present, return an empty record_candidates array."
       ];
       return truncateRecordProtocolV2Text(lines.join("\n"), budget.maxSystemPromptChars).text;
@@ -12252,7 +12271,9 @@
               });
             }
             if(!res.ok) throw new Error(`HTTP ${res.status}`);
-            return await res.json();
+            const json = await res.json();
+            if(extractAiResponseErrorMessage(json)) throw createAiResponseError(json);
+            return json;
           }finally{
             if(timeout) clearTimeout(timeout);
           }
@@ -12892,8 +12913,14 @@
       if(Array.isArray(content)){
         return content.map((part) => {
           if(typeof part === "string") return part;
-          return part?.text || part?.content || "";
+          return readContentBlocks(part);
         }).join("").trim();
+      }
+      if(content && typeof content === "object"){
+        if(typeof content.text === "string") return content.text;
+        if(typeof content.output_text === "string") return content.output_text;
+        if(typeof content.content === "string" || Array.isArray(content.content)) return readContentBlocks(content.content);
+        if(typeof content.message === "string") return content.message;
       }
       return "";
     }
@@ -12901,9 +12928,17 @@
     function extractAssistantContentFromApiResponse(json){
       if(!json || typeof json !== "object") return "";
       if(Array.isArray(json.choices)){
-        const message = json.choices[0]?.message || {};
-        return readContentBlocks(message.content).trim();
+        const choice = json.choices[0] || {};
+        const message = choice.message || choice.delta || {};
+        return (
+          readContentBlocks(message.content).trim() ||
+          readContentBlocks(message.reasoning_content).trim() ||
+          readContentBlocks(choice.text).trim() ||
+          readContentBlocks(choice.content).trim()
+        );
       }
+      if(typeof json.output_text === "string") return json.output_text.trim();
+      if(Array.isArray(json.output)) return readContentBlocks(json.output).trim();
       if(json.data && typeof json.data === "object"){
         const nested = extractAssistantContentFromApiResponse(json.data);
         if(nested) return nested;
@@ -12913,6 +12948,30 @@
       if(typeof json.reply === "string") return json.reply.trim();
       if(typeof json.data?.message === "string") return json.data.message.trim();
       return "";
+    }
+
+    function extractAiResponseErrorMessage(value){
+      if(!value || typeof value !== "object") return "";
+      const directError = value.error;
+      if(typeof directError === "string") return directError.trim();
+      if(directError && typeof directError === "object"){
+        return String(directError.message || directError.error || directError.type || "").trim();
+      }
+      if(value.data && typeof value.data === "object") return extractAiResponseErrorMessage(value.data);
+      if(value.result && typeof value.result === "object") return extractAiResponseErrorMessage(value.result);
+      return "";
+    }
+
+    function createAiResponseError(value){
+      const message = extractAiResponseErrorMessage(value) || "未知 API 错误";
+      const err = new Error(`AI API 错误：${message}`);
+      try{
+        err.rawResponsePreview = summarizeRecordProtocolDebugText(JSON.stringify(value), 800).text;
+      }catch(_err){
+        err.rawResponsePreview = "";
+      }
+      err.responseKeys = value && typeof value === "object" ? Object.keys(value).slice(0, 12) : [];
+      return err;
     }
 
     function unwrapAiCoachEnvelope(value){
@@ -12941,7 +13000,9 @@
     function normalizeCharacterModelOutputText(value){
       if(typeof value === "string") return value.trim();
       if(!value || typeof value !== "object") return "";
+      if(Array.isArray(value)) return readContentBlocks(value).trim();
       if(Array.isArray(value.choices)) return extractAssistantContentFromApiResponse(value);
+      if(typeof value.output_text === "string") return value.output_text.trim();
       if(value.data && typeof value.data === "object"){
         const nested = normalizeCharacterModelOutputText(value.data);
         if(nested) return nested;
@@ -20265,6 +20326,14 @@
       const CANCEL_Y = 12;
       let pointerState = null;
 
+      const lockDockTouch = () => {
+        document.body.classList.add("bottom-dock-dragging");
+      };
+
+      const unlockDockTouch = () => {
+        document.body.classList.remove("bottom-dock-dragging");
+      };
+
       const suppressUpcomingTabClick = (tabName = "", duration = 700) => {
         const until = Date.now() + duration;
         window.__bottomDockSuppressClickUntil = until;
@@ -20290,6 +20359,7 @@
         clearPointerTimer();
         releaseDockPointer();
         pointerState = null;
+        unlockDockTouch();
         resetTabHold();
         setTabsPressed(false);
         if(!tabDrag.active){
@@ -20313,6 +20383,7 @@
 
       const beginPointerDrag = (clientX) => {
         if(!pointerState || pointerState.dragging) return;
+        lockDockTouch();
         clearPointerTimer();
         const state = getButtonSnapState(pointerState.button, getDragExtraScale());
         const startLeft = pointerState.activated && state
@@ -20355,6 +20426,8 @@
         tabHold.startX = startX;
         tabHold.startY = startY;
         setTabsPressed(true);
+        lockDockTouch();
+        if(event.cancelable) event.preventDefault();
 
         if(tabsEl.setPointerCapture){
           try{ tabsEl.setPointerCapture(event.pointerId); }catch(err){}
@@ -20363,10 +20436,17 @@
         pointerState.timer = setTimeout(activatePointerHold, HOLD_DELAY);
       };
 
-      const handlePointerMove = (event) => {
-        if(!pointerState || event.pointerId !== pointerState.pointerId) return;
-        const clientX = Number(event.clientX || 0);
-        const clientY = Number(event.clientY || 0);
+      const recaptureDockPointer = () => {
+        if(!pointerState || !pointerState.captureLost || !tabsEl.setPointerCapture) return;
+        try{
+          tabsEl.setPointerCapture(pointerState.pointerId);
+          pointerState.captureLost = false;
+        }catch(err){}
+      };
+
+      const handleDockMove = (clientX, clientY, nativeEvent = null) => {
+        if(!pointerState) return;
+        recaptureDockPointer();
         const deltaX = clientX - pointerState.startX;
         const deltaY = clientY - pointerState.startY;
         const absX = Math.abs(deltaX);
@@ -20374,14 +20454,14 @@
 
         if(pointerState.dragging || tabDrag.active){
           moveTabDrag(clientX);
-          if(event.cancelable) event.preventDefault();
+          if(nativeEvent && nativeEvent.cancelable) nativeEvent.preventDefault();
           return;
         }
 
         if(!pointerState.activated){
           if(absX > START_DRAG_X && absX >= absY){
             beginPointerDrag(clientX);
-            if(event.cancelable) event.preventDefault();
+            if(nativeEvent && nativeEvent.cancelable) nativeEvent.preventDefault();
             return;
           }
           if(absY > CANCEL_Y && absY > absX){
@@ -20393,7 +20473,12 @@
         if(absX > HELD_DRAG_X){
           beginPointerDrag(clientX);
         }
-        if(event.cancelable) event.preventDefault();
+        if(nativeEvent && nativeEvent.cancelable) nativeEvent.preventDefault();
+      };
+
+      const handlePointerMove = (event) => {
+        if(!pointerState || event.pointerId !== pointerState.pointerId) return;
+        handleDockMove(Number(event.clientX || 0), Number(event.clientY || 0), event);
       };
 
       const finishPointerInteraction = (event) => {
@@ -20418,6 +20503,7 @@
         }
 
         pointerState = null;
+        unlockDockTouch();
         resetTabHold();
         setTabsPressed(false);
       };
@@ -20439,6 +20525,34 @@
         resetPointerState({ restoreIndicator:true });
       };
 
+      const getPrimaryTouchPoint = (event) => {
+        const touches = event.touches && event.touches.length ? event.touches : event.changedTouches;
+        if(!touches || !touches.length) return null;
+        return touches[0];
+      };
+
+      const handleTouchMove = (event) => {
+        if(!pointerState) return;
+        const touch = getPrimaryTouchPoint(event);
+        if(!touch) return;
+        handleDockMove(Number(touch.clientX || 0), Number(touch.clientY || 0), event);
+      };
+
+      const handleTouchEnd = () => {
+        if(!pointerState) return;
+        finishPointerInteraction(null);
+      };
+
+      const handleTouchCancel = () => {
+        if(!pointerState) return;
+        cancelPointerInteraction(null);
+      };
+
+      const handleLostPointerCapture = (event) => {
+        if(!pointerState || (event && event.pointerId !== pointerState.pointerId)) return;
+        pointerState.captureLost = true;
+      };
+
       tabsEl.addEventListener("click", (event) => {
         const suppressedUntil = window.__bottomDockSuppressClickUntil || 0;
         if(Date.now() >= suppressedUntil) return;
@@ -20450,11 +20564,14 @@
         }
       }, true);
 
-      tabsEl.addEventListener("pointerdown", handlePointerDown, { passive:true });
+      tabsEl.addEventListener("pointerdown", handlePointerDown, { passive:false });
       document.addEventListener("pointermove", handlePointerMove, { passive:false, capture:true });
       document.addEventListener("pointerup", finishPointerInteraction, { passive:true, capture:true });
       document.addEventListener("pointercancel", cancelPointerInteraction, { passive:true, capture:true });
-      document.addEventListener("lostpointercapture", cancelPointerInteraction, { passive:true, capture:true });
+      document.addEventListener("lostpointercapture", handleLostPointerCapture, { passive:true, capture:true });
+      document.addEventListener("touchmove", handleTouchMove, { passive:false, capture:true });
+      document.addEventListener("touchend", handleTouchEnd, { passive:true, capture:true });
+      document.addEventListener("touchcancel", handleTouchCancel, { passive:true, capture:true });
       window.addEventListener("blur", () => cancelPointerInteraction());
       window.addEventListener("scroll", () => {
         if(pointerState && !pointerState.dragging) cancelPointerInteraction();
@@ -20778,7 +20895,16 @@
         trainingContextPrompt:compactRequest.trainingContextPrompt
       });
       const rawModelOutput = normalizeCharacterModelOutputText(rawResponse);
-      if(!rawModelOutput) throw new Error("AI 没有返回可显示内容");
+      if(!rawModelOutput){
+        const err = new Error("AI 没有返回可显示内容");
+        try{
+          err.rawResponsePreview = summarizeRecordProtocolDebugText(JSON.stringify(rawResponse), 800).text;
+        }catch(_err){
+          err.rawResponsePreview = "";
+        }
+        err.responseKeys = rawResponse && typeof rawResponse === "object" ? Object.keys(rawResponse).slice(0, 12) : [];
+        throw err;
+      }
       const parsed = recordProtocol.parseModelResponse(rawModelOutput, { protocol });
       return {
         ok:parsed.ok,
@@ -20905,7 +21031,9 @@
             userText:scenario.userText,
             pass:false,
             reason:"api_or_runner_error",
-            error:err.message || String(err)
+            error:err.message || String(err),
+            rawResponsePreview:err.rawResponsePreview || "",
+            responseKeys:Array.isArray(err.responseKeys) ? err.responseKeys : []
           };
         }
         report.results.push(stepResult);
