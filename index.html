@@ -3279,6 +3279,10 @@
 
     #dayTabs.ready .day-tab-indicator{ opacity:1; }
 
+    #dayTabs.first-day-resetting .day-tab-indicator{
+      opacity:0 !important;
+    }
+
     #dayTabs.day-tabs.dragging{
       overflow-y: visible;
       -webkit-mask-image:none;
@@ -3306,10 +3310,10 @@
 
     #dayTabs .day-tab{
       position:relative;
-      flex:0 0 calc((100% - (var(--day-tab-side-padding) * 2)) / 4);
-      width:calc((100% - (var(--day-tab-side-padding) * 2)) / 4);
-      min-width:calc((100% - (var(--day-tab-side-padding) * 2)) / 4);
-      max-width:calc((100% - (var(--day-tab-side-padding) * 2)) / 4);
+      flex:0 0 25%;
+      width:25%;
+      min-width:25%;
+      max-width:25%;
       min-height:var(--day-tab-height);
       height:var(--day-tab-height);
       padding:0;
@@ -3429,10 +3433,10 @@
     }
 
     #dayTabs .day-tab{
-      flex: 0 0 calc((100% - (var(--day-tab-side-padding) * 2)) / 4);
-      width: calc((100% - (var(--day-tab-side-padding) * 2)) / 4);
-      min-width: calc((100% - (var(--day-tab-side-padding) * 2)) / 4);
-      max-width: calc((100% - (var(--day-tab-side-padding) * 2)) / 4);
+      flex: 0 0 25%;
+      width: 25%;
+      min-width: 25%;
+      max-width: 25%;
       min-height: var(--day-tab-height);
       height: var(--day-tab-height);
     }
@@ -3599,10 +3603,10 @@
     }
 
     #dayTabs .day-tab{
-      flex: 0 0 calc((100% - (var(--day-tab-side-padding) * 2)) / 4) !important;
-      width: calc((100% - (var(--day-tab-side-padding) * 2)) / 4) !important;
-      min-width: calc((100% - (var(--day-tab-side-padding) * 2)) / 4) !important;
-      max-width: calc((100% - (var(--day-tab-side-padding) * 2)) / 4) !important;
+      flex: 0 0 25% !important;
+      width: 25% !important;
+      min-width: 25% !important;
+      max-width: 25% !important;
       min-height: var(--day-tab-height) !important;
       height: var(--day-tab-height) !important;
     }
@@ -6988,6 +6992,44 @@
       };
     }
 
+    function createDomainPersistenceAdapter(storage){
+      const target = createStorageAdapter(storage || localStorage);
+      const writeLog = [];
+      function remember(type, key){
+        writeLog.push({ type, key:String(key), at:new Date().toISOString() });
+      }
+      return Object.freeze({
+        setJson(key, value){
+          target.setItem(key, JSON.stringify(value));
+          remember("setJson", key);
+          return value;
+        },
+        setString(key, value){
+          target.setItem(key, String(value));
+          remember("setString", key);
+          return value;
+        },
+        setPresence(key, enabled){
+          if(enabled) target.setItem(key, "1");
+          else target.removeItem(key);
+          remember(enabled ? "setPresence" : "removePresence", key);
+          return !!enabled;
+        },
+        remove(key){
+          target.removeItem(key);
+          remember("remove", key);
+        },
+        getWriteLog(){
+          return writeLog.slice();
+        },
+        clearWriteLog(){
+          writeLog.length = 0;
+        }
+      });
+    }
+
+    const domainPersistence = createDomainPersistenceAdapter(localStorage);
+
     function cloneAppStateValue(value){
       if(value === undefined) return undefined;
       return JSON.parse(JSON.stringify(value));
@@ -8611,7 +8653,7 @@
         seen.add(protocol.id);
         safe.push(protocol);
       });
-      localStorage.setItem(RECORD_PROTOCOLS_KEY, JSON.stringify(safe));
+      domainPersistence.setJson(RECORD_PROTOCOLS_KEY, safe);
       renderRecordProtocolUi();
       queueAutoSync("记录协议更新");
       return getRecordProtocols();
@@ -8625,10 +8667,10 @@
       if(enabled){
         const current = localStorage.getItem(ACTIVE_RECORD_PROTOCOL_ID_KEY);
         if(!current || current === RECORD_PROTOCOL_DISABLED_ID){
-          localStorage.setItem(ACTIVE_RECORD_PROTOCOL_ID_KEY, DEFAULT_RECORD_PROTOCOL_ID);
+          domainPersistence.setString(ACTIVE_RECORD_PROTOCOL_ID_KEY, DEFAULT_RECORD_PROTOCOL_ID);
         }
       }else{
-        localStorage.setItem(ACTIVE_RECORD_PROTOCOL_ID_KEY, RECORD_PROTOCOL_DISABLED_ID);
+        domainPersistence.setString(ACTIVE_RECORD_PROTOCOL_ID_KEY, RECORD_PROTOCOL_DISABLED_ID);
       }
       renderRecordProtocolUi();
       queueAutoSync("记录协议启用状态更新");
@@ -8645,7 +8687,7 @@
       const target = String(id || "").trim();
       const protocols = getRecordProtocols();
       const next = protocols.some((protocol) => protocol.id === target) ? target : DEFAULT_RECORD_PROTOCOL_ID;
-      localStorage.setItem(ACTIVE_RECORD_PROTOCOL_ID_KEY, next);
+      domainPersistence.setString(ACTIVE_RECORD_PROTOCOL_ID_KEY, next);
       renderRecordProtocolUi();
       queueAutoSync("当前记录协议更新");
       return getActiveRecordProtocol();
@@ -8657,9 +8699,9 @@
 
     function setRecordProtocolDebugEnabled(enabled){
       if(enabled){
-        localStorage.setItem(RECORD_PROTOCOL_DEBUG_KEY, "1");
+        domainPersistence.setPresence(RECORD_PROTOCOL_DEBUG_KEY, true);
       }else{
-        localStorage.removeItem(RECORD_PROTOCOL_DEBUG_KEY);
+        domainPersistence.setPresence(RECORD_PROTOCOL_DEBUG_KEY, false);
       }
       renderRecordProtocolUi();
       return isRecordProtocolDebugEnabled();
@@ -8696,9 +8738,9 @@
         safe.rawModelOutput = rawModelOutputSummary.text;
         safe.rawModelOutputTruncated = rawModelOutputSummary.truncated;
         safe.rawModelOutputOriginalLength = rawModelOutputSummary.originalLength;
-        localStorage.setItem(RECORD_PROTOCOL_LAST_DEBUG_KEY, JSON.stringify(safe));
+        domainPersistence.setJson(RECORD_PROTOCOL_LAST_DEBUG_KEY, safe);
       }else{
-        localStorage.removeItem(RECORD_PROTOCOL_LAST_DEBUG_KEY);
+        domainPersistence.remove(RECORD_PROTOCOL_LAST_DEBUG_KEY);
       }
       renderRecordProtocolUi();
       return safe;
@@ -8771,7 +8813,7 @@
     }
 
     function saveAiSettings(settings, options = {}){
-      localStorage.setItem(AI_SETTINGS_KEY, JSON.stringify(normalizeAiSettings(settings)));
+      domainPersistence.setJson(AI_SETTINGS_KEY, normalizeAiSettings(settings));
       updateAiSettingsUi();
       updateAiPetVisibility();
       queueAutoSync("AI 设置更新");
@@ -8858,7 +8900,7 @@
 
     function setCharacterChatHistory(history, options = {}){
       const safe = Array.isArray(history) ? history.filter((item) => item && ["user","assistant"].includes(item.role)).slice(-40) : [];
-      localStorage.setItem(CHARACTER_CHAT_HISTORY_KEY, JSON.stringify(safe));
+      domainPersistence.setJson(CHARACTER_CHAT_HISTORY_KEY, safe);
       renderCharacterChat();
       if(options.sync) queueAutoSync("角色聊天记录更新");
     }
@@ -10819,7 +10861,7 @@
     }
 
     function setPlanCheckMeta(meta){
-      localStorage.setItem(PLAN_CHECK_META_KEY, JSON.stringify(meta || {}));
+      domainPersistence.setJson(PLAN_CHECK_META_KEY, meta || {});
     }
 
     function getPlanDayIndexForDate(dateKey){
@@ -11099,12 +11141,12 @@
     }
 
     function resolveTrainingCaptureDateWithActiveReference(text, options = {}, exerciseMatch = null){
-      if(hasExplicitTrainingCaptureDate(text)) return resolveTrainingCaptureDate(text, options.now || new Date());
+      if(hasExplicitTrainingCaptureDate(text)) return resolveTrainingCaptureDate(text, options.now || new Date(Date.now()));
       const ref = getActiveTrainingReference();
       if(ref?.targetDate && activeTrainingReferenceMatchesText(ref, text, exerciseMatch)){
         return ref.targetDate;
       }
-      return resolveTrainingCaptureDate(text, options.now || new Date());
+      return resolveTrainingCaptureDate(text, options.now || new Date(Date.now()));
     }
 
     function applyPerSetDoseReferenceToValue(currentValue = {}, dateKey = "", text = "", exerciseMatch = null){
@@ -12031,7 +12073,7 @@
       const suggested = pending.mode === "dose_revision" ? pending.suggestedDose : pending.originalDose;
       const revisedItem = pending.mode === "dose_revision" ? applyDailySnapshotDoseRevision(log, item, suggested) : item;
       const reported = pending.reportedDose || {};
-      const fact = buildPlanReconciliationFactFromValue({
+      const fact = planReconciliationWriter.buildFact({
         exercise:pending.displayName || revisedItem.snapshotDisplayName,
         sets:Number(reported.sets || suggested.targetAmount || revisedItem.targetAmount || 1) || 1,
         repsPerSet:Number(reported.repsPerSet || suggested.repsPerSet || 0) || 0,
@@ -12044,13 +12086,13 @@
         evidenceText:pending.evidenceText || ""
       }, revisedItem);
       fact.progressItem = revisedItem;
-      const decision = reconcileTrainingFactWithPlan({
+      const decision = planReconciliationWriter.reconcile({
         fact,
         dateIso:dateKey,
         dailyLog:log,
         activeTrainingReference:getActiveTrainingReference()
       });
-      applyPlanProgressDecisionToLog(log, dateKey, decision, fact, pending.sourceRecordId || pending.id, "plan_reconciliation_confirmed");
+      planReconciliationWriter.applyDecision(log, dateKey, decision, fact, pending.sourceRecordId || pending.id, "plan_reconciliation_confirmed");
       syncDailyLogCompletionFromPlan(log, dateKey);
       log.aiDailySummary = generateAiDailySummaryForLog(log);
       log.updatedAt = new Date().toLocaleString("zh-CN");
@@ -12088,7 +12130,7 @@
       const target = Number(progressItem.targetAmount || 0) || amountInfo.amount;
       const perSetDoseFollowUp = !isExtra && current >= target && isPerSetDoseStatement(intent.originalText || value.text || "");
       if(perSetDoseFollowUp){
-        const fact = buildPlanReconciliationFactFromValue(value, {
+        const fact = planReconciliationWriter.buildFact(value, {
           amountInfo,
           completedExplicit:intent.completedExplicit,
           explicitExtra:false,
@@ -12096,7 +12138,7 @@
           evidenceText:intent.originalText || value.text || ""
         }, progressItem);
         fact.progressItem = progressItem;
-        const decision = reconcileTrainingFactWithPlan({
+        const decision = planReconciliationWriter.reconcile({
           fact,
           dateIso:log.date,
           dailyLog:log,
@@ -12111,7 +12153,7 @@
         log.extraTrainingEvents = [...(Array.isArray(log.extraTrainingEvents) ? log.extraTrainingEvents : []), event];
         return { status:"extra_training", itemId:progressItem.itemId, eventId:event.id, amount:amountInfo.amount, unit:amountInfo.unit };
       }
-      const fact = buildPlanReconciliationFactFromValue(value, {
+      const fact = planReconciliationWriter.buildFact(value, {
         amountInfo,
         completedExplicit:intent.completedExplicit,
         explicitExtra:isExtra,
@@ -12119,7 +12161,7 @@
         evidenceText:intent.originalText || value.text || ""
       }, progressItem);
       fact.progressItem = progressItem;
-      const decision = reconcileTrainingFactWithPlan({
+      const decision = planReconciliationWriter.reconcile({
         fact,
         dateIso:log.date,
         dailyLog:log,
@@ -12133,7 +12175,7 @@
         log.extraTrainingEvents = [...(Array.isArray(log.extraTrainingEvents) ? log.extraTrainingEvents : []), event];
         return { status:"extra_training", itemId:progressItem.itemId, eventId:event.id, amount:amountInfo.amount, unit:amountInfo.unit, reason:decision.reason };
       }
-      return applyPlanProgressDecisionToLog(log, log.date, decision, fact, recordId || "", "structured_progress");
+      return planReconciliationWriter.applyDecision(log, log.date, decision, fact, recordId || "", "structured_progress");
     }
 
     function applyFeedbackOrBodyFactToStructuredLog(log, intent, recordId){
@@ -12173,6 +12215,23 @@
       if(training.status !== "skipped") return training;
       return applyFeedbackOrBodyFactToStructuredLog(log, intent, recordId);
     }
+
+    function createPlanReconciliationWriter(){
+      return Object.freeze({
+        buildFact:buildPlanReconciliationFactFromValue,
+        reconcile:reconcileTrainingFactWithPlan,
+        buildPending:buildPlanReconciliationPending,
+        makePendingResult:makePlanReconciliationPendingResult,
+        applyDecision:applyPlanProgressDecisionToLog,
+        applyDailySnapshotDoseRevision,
+        appendActualTrainingOnlyEvent,
+        handlePendingChatReply:handlePendingPlanReconciliationChatReply,
+        applyTrainingFact:applyTrainingFactToStructuredLog,
+        applyStructuredDailyLogWrite
+      });
+    }
+
+    const planReconciliationWriter = createPlanReconciliationWriter();
 
 
     function normalizeRecordCandidateDurationUnit(unit, fallback = "分钟"){
@@ -12667,7 +12726,7 @@
 
     function resolveRecordCandidateDate(candidate, context = {}){
       const raw = String(candidate?.targetDate || "today").trim();
-      const now = context.now || new Date();
+      const now = context.now || new Date(Date.now());
       if(raw === "today" || raw === "今天" || !raw) return formatDateKey(now);
       if(raw === "yesterday" || raw === "昨天") return formatDateKey(addDays(now, -1));
       if(/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
@@ -12842,7 +12901,7 @@
       if(isRecordCandidateFullCompletion(candidate)){
         amountInfo = { amount:Math.max(0, target - current), unit:progressItem.unit, fullCompletion:true };
       }
-      const fact = buildPlanReconciliationFactFromValue(currentValue, {
+      const fact = planReconciliationWriter.buildFact(currentValue, {
         amountInfo,
         completedExplicit:hasRecordCandidateCompletionSignal(candidate) || candidate.completedExplicit,
         explicitExtra:hasRecordCandidateExplicitExtraIntent(candidate),
@@ -12851,14 +12910,14 @@
         rawText:candidate.rawText || context.userText || ""
       }, progressItem);
       fact.progressItem = progressItem;
-      const decision = reconcileTrainingFactWithPlan({
+      const decision = planReconciliationWriter.reconcile({
         fact,
         dateIso:dateKey,
         dailyLog:log,
         activeTrainingReference:getActiveTrainingReference()
       });
       if(decision.decision === "ask_planned_dose_confirmation" || decision.decision === "dose_revision_pending"){
-        return makePlanReconciliationPendingResult(decision, fact, dateKey, { candidateId:candidate.candidateId || candidate.id || "" });
+        return planReconciliationWriter.makePendingResult(decision, fact, dateKey, { candidateId:candidate.candidateId || candidate.id || "" });
       }
       if(decision.decision === "actual_training_only"){
         return appendExtraTrainingEventForRecordCandidate(logs, log, dateKey, candidate, context, progressItem, amountInfo, currentValue, { reason:decision.reason });
@@ -12866,7 +12925,7 @@
       if(!Number.isFinite(Number(amountInfo.amount)) || Number(amountInfo.amount) <= 0){
         return { status:"ignored", reason:amountInfo.durationOnly ? "duration_without_sets_for_set_based_item" : "invalid_amount", date:dateKey };
       }
-      const structured = applyPlanProgressDecisionToLog(log, dateKey, decision, fact, candidate.recordId || candidate.candidateId || "", "record_protocol");
+      const structured = planReconciliationWriter.applyDecision(log, dateKey, decision, fact, candidate.recordId || candidate.candidateId || "", "record_protocol");
       syncDailyLogCompletionFromPlan(log, dateKey);
       const updatedItem = (Array.isArray(log.planProgressItems) ? log.planProgressItems : [])
         .find((item) => item.itemId === progressItem.itemId) || progressItem;
@@ -13063,7 +13122,7 @@
       if(intent.sourceType === "training_session" || intent.trainingSessionId) return false;
       if(!hasExplicitTrainingCaptureDate(intent.originalText || intent.currentValue?.text || "")) return false;
       const target = parseDateKey(intent.date);
-      const today = parseDateKey(formatDateKey(options.now || new Date()));
+      const today = parseDateKey(formatDateKey(options.now || new Date(Date.now())));
       if(!target || !today) return false;
       return target.getTime() < today.getTime();
     }
@@ -13485,9 +13544,9 @@
 
     function setTrainingSession(session){
       if(session){
-        localStorage.setItem(TRAINING_SESSION_KEY, JSON.stringify(session));
+        domainPersistence.setJson(TRAINING_SESSION_KEY, session);
       }else{
-        localStorage.removeItem(TRAINING_SESSION_KEY);
+        domainPersistence.remove(TRAINING_SESSION_KEY);
       }
       queueAutoSync("训练会话状态更新");
       renderTrainingCaptureCards();
@@ -13665,27 +13724,31 @@
       renderCharacterChat();
     }
 
+    function buildCharacterChatMessageHtml(item){
+      const roleClass = item.role === "user" ? "user" : "assistant";
+      return `<div class="character-chat-msg ${roleClass}">${escapeHtml(item.content || "")}</div>`;
+    }
+
+    function buildCharacterChatLogHtml(active, history = []){
+      if(!active){
+        return `<div class="character-chat-empty-message">选择一个角色卡后开始聊天。</div>`;
+      }
+      if(!history.length){
+        const first = active.first_mes || `你好，我是${active.name}。`;
+        return `<div class="character-chat-msg assistant">${escapeHtml(first)}</div>`;
+      }
+      return history.map((item) => buildCharacterChatMessageHtml(item)).join("");
+    }
+
     function renderCharacterChat(){
       const log = $("characterChatLog");
       if(!log) return;
       const active = getActiveCharacterCard();
       const history = getCharacterChatHistory();
       log.classList.toggle("character-chat-empty", !active);
-      if(!active){
-        log.innerHTML = `<div class="character-chat-empty-message">选择一个角色卡后开始聊天。</div>`;
-        return;
-      }
+      log.innerHTML = buildCharacterChatLogHtml(active, history);
+      if(!active) return;
       log.classList.remove("character-chat-empty");
-      if(!history.length){
-        const first = active.first_mes || `你好，我是${active.name}。`;
-        log.innerHTML = `<div class="character-chat-msg assistant">${escapeHtml(first)}</div>`;
-        scrollCharacterChatToLatest();
-        return;
-      }
-      log.innerHTML = history.map((item) => {
-        const roleClass = item.role === "user" ? "user" : "assistant";
-        return `<div class="character-chat-msg ${roleClass}">${escapeHtml(item.content || "")}</div>`;
-      }).join("");
       scrollCharacterChatToLatest();
     }
 
@@ -14218,7 +14281,7 @@
     function findRecordProtocolFallbackPlanProgressItem(text = "", context = {}){
       const raw = String(text || "").trim();
       if(!raw) return null;
-      const dateKey = resolveTrainingCaptureDate(raw, context.now || new Date());
+      const dateKey = resolveTrainingCaptureDate(raw, context.now || new Date(Date.now()));
       const logs = getDailyLogs();
       const log = buildDailyLogShell(dateKey, logs[dateKey] || {});
       const item = findBestPlanProgressItemForText(log, raw);
@@ -14519,6 +14582,129 @@
       };
     }
 
+    function getDeterministicCapturePrompt(result = {}){
+      return result && ["follow_up", "pending_confirmation"].includes(String(result.status || ""))
+        ? result.prompt || ""
+        : "";
+    }
+
+    function composeCharacterChatReply(coachResult = {}, processResult = {}, deterministicCaptureResult = {}){
+      const jsonish = /^\s*(?:```|\{|\[)/.test(String(coachResult.rawModelOutput || ""));
+      const protocolReasoningLeak = looksLikeRecordProtocolReasoningLeak(coachResult.rawModelOutput || coachResult.reply || "");
+      let reply = coachResult.ok
+        ? coachResult.reply
+        : ((jsonish || protocolReasoningLeak) ? buildRecordProtocolParseFailureReply(processResult, deterministicCaptureResult) : coachResult.reply);
+      if(looksLikeRecordProtocolReasoningLeak(reply)){
+        reply = buildRecordProtocolParseFailureReply(processResult, deterministicCaptureResult);
+      }
+      [processResult.assistantFollowUp, getDeterministicCapturePrompt(deterministicCaptureResult)].filter(Boolean).forEach((followUp) => {
+        if(followUp && !reply.includes(followUp)) reply = [reply, followUp].filter(Boolean).join("\n");
+      });
+      return reply || "（没有返回内容）";
+    }
+
+    function buildCharacterChatCaptureDebugPayload(payload = {}){
+      return {
+        rawModelOutput:payload.rawModelOutput || "",
+        reply:payload.reply || "",
+        record_candidates:Array.isArray(payload.record_candidates) ? payload.record_candidates : [],
+        protocolOutput:payload.protocolOutput || null,
+        engineResult:payload.engineResult || { decisions:[] },
+        appReconciliationResult:payload.appReconciliationResult,
+        engineDecisions:payload.engineDecisions || payload.engineResult?.decisions || [],
+        aiCandidateCount:Number(payload.aiCandidateCount || 0),
+        usedProtocolLocalFallback:!!payload.usedProtocolLocalFallback,
+        rejected_candidates:Array.isArray(payload.rejected_candidates) ? payload.rejected_candidates : [],
+        parseError:payload.parseError || "",
+        processResult:payload.processResult || { writes:[], pending:[], ignored:[] },
+        deterministicCaptureResult:payload.deterministicCaptureResult || null
+      };
+    }
+
+    function createCharacterChatCaptureOrchestrator(){
+      function runSuccess(text, coachResult = {}){
+        const protocolRun = runRecordProtocolEngineForCharacterChat(text, coachResult);
+        const processResult = mergeRecordProtocolProcessResults(
+          recordProtocolEngineResultToProcessResult(protocolRun.engineResult),
+          protocolRun.appReconciliationResult
+        );
+        const deterministicCaptureResult = maybeRunDeterministicCharacterCaptureFallback(text, processResult, {
+          sourceType:"character_chat",
+          aiCandidateCount:protocolRun.aiCandidateCount,
+          usedProtocolLocalFallback:protocolRun.usedProtocolLocalFallback
+        });
+        return {
+          reply:composeCharacterChatReply(coachResult, processResult, deterministicCaptureResult),
+          debug:buildCharacterChatCaptureDebugPayload({
+            rawModelOutput:coachResult.rawModelOutput,
+            reply:coachResult.reply,
+            record_candidates:coachResult.record_candidates,
+            protocolOutput:protocolRun.protocolOutput,
+            engineResult:protocolRun.engineResult,
+            appReconciliationResult:protocolRun.appReconciliationResult,
+            aiCandidateCount:protocolRun.aiCandidateCount,
+            usedProtocolLocalFallback:protocolRun.usedProtocolLocalFallback,
+            rejected_candidates:coachResult.rejected_candidates || [],
+            parseError:coachResult.parseError,
+            processResult,
+            deterministicCaptureResult
+          })
+        };
+      }
+
+      function runFailure(text, err){
+        let protocolFallback = null;
+        let processResult = { writes:[], pending:[], ignored:[] };
+        try{
+          protocolFallback = runRecordProtocolEngineForCharacterChat(text, {
+            reply:"",
+            rawModelOutput:"",
+            record_candidates:[],
+            rejected_candidates:[],
+            parseError:err?.message || "AI call failed"
+          });
+          processResult = mergeRecordProtocolProcessResults(
+            recordProtocolEngineResultToProcessResult(protocolFallback.engineResult),
+            protocolFallback.appReconciliationResult
+          );
+        }catch(protocolErr){
+          console.error("记录协议本地兜底失败", protocolErr);
+        }
+        let deterministicCaptureResult = maybeRunDeterministicCharacterCaptureFallback(text, processResult, {
+          sourceType:"character_chat",
+          aiCandidateCount:protocolFallback?.aiCandidateCount || 0,
+          usedProtocolLocalFallback:!!protocolFallback?.usedProtocolLocalFallback
+        });
+        if(!isDeterministicCharacterCaptureHandled(deterministicCaptureResult) && !["follow_up", "pending_correction", "pending_confirmation"].includes(String(deterministicCaptureResult?.status || ""))){
+          deterministicCaptureResult = maybeBuildLocalDateCorrectionFallback(text) || deterministicCaptureResult;
+        }
+        const reply = (processResult.writes.length || processResult.pending.length)
+          ? buildRecordProtocolParseFailureReply(processResult, deterministicCaptureResult)
+          : buildCharacterChatAiFailureReply(err, deterministicCaptureResult);
+        return {
+          reply,
+          debug:buildCharacterChatCaptureDebugPayload({
+            protocolOutput:protocolFallback?.protocolOutput,
+            engineResult:protocolFallback?.engineResult,
+            appReconciliationResult:protocolFallback?.appReconciliationResult,
+            aiCandidateCount:protocolFallback?.aiCandidateCount || 0,
+            usedProtocolLocalFallback:!!protocolFallback?.usedProtocolLocalFallback,
+            parseError:err?.message || "AI call failed",
+            processResult,
+            deterministicCaptureResult
+          })
+        };
+      }
+
+      return Object.freeze({
+        runSuccess,
+        runFailure,
+        composeReply:composeCharacterChatReply
+      });
+    }
+
+    const characterChatCaptureOrchestrator = createCharacterChatCaptureOrchestrator();
+
     async function sendCharacterChat(){
       const input = $("characterChatInput");
       const btn = $("sendCharacterChatBtn");
@@ -14563,98 +14749,16 @@
       }
       try{
         const coachResult = await callCharacterChat(text);
-        const {
-          protocolOutput,
-          engineResult,
-          appReconciliationResult,
-          aiCandidateCount,
-          usedProtocolLocalFallback
-        } = runRecordProtocolEngineForCharacterChat(text, coachResult);
-        const processResult = mergeRecordProtocolProcessResults(
-          recordProtocolEngineResultToProcessResult(engineResult),
-          appReconciliationResult
-        );
-        const deterministicCaptureResult = maybeRunDeterministicCharacterCaptureFallback(text, processResult, {
-          sourceType:"character_chat",
-          aiCandidateCount,
-          usedProtocolLocalFallback
-        });
-        setRecordProtocolLastDebug({
-          rawModelOutput:coachResult.rawModelOutput,
-          reply:coachResult.reply,
-          record_candidates:coachResult.record_candidates,
-          protocolOutput,
-          engineResult,
-          appReconciliationResult,
-          engineDecisions:engineResult.decisions,
-          aiCandidateCount,
-          usedProtocolLocalFallback,
-          rejected_candidates:coachResult.rejected_candidates || [],
-          parseError:coachResult.parseError,
-          processResult,
-          deterministicCaptureResult
-        });
-        const jsonish = /^\s*(?:```|\{|\[)/.test(String(coachResult.rawModelOutput || ""));
-        const protocolReasoningLeak = looksLikeRecordProtocolReasoningLeak(coachResult.rawModelOutput || coachResult.reply || "");
-        let reply = coachResult.ok
-          ? coachResult.reply
-          : ((jsonish || protocolReasoningLeak) ? buildRecordProtocolParseFailureReply(processResult, deterministicCaptureResult) : coachResult.reply);
-        if(looksLikeRecordProtocolReasoningLeak(reply)){
-          reply = buildRecordProtocolParseFailureReply(processResult, deterministicCaptureResult);
-        }
-        const fallbackPrompt = deterministicCaptureResult && ["follow_up", "pending_confirmation"].includes(String(deterministicCaptureResult.status || "")) ? deterministicCaptureResult.prompt : "";
-        [processResult.assistantFollowUp, fallbackPrompt].filter(Boolean).forEach((followUp) => {
-          if(followUp && !reply.includes(followUp)) reply = [reply, followUp].filter(Boolean).join("\n");
-        });
-        setCharacterChatHistory([...getCharacterChatHistory(), { role:"assistant", content:reply || "（没有返回内容）", at:new Date().toISOString() }]);
+        const capture = characterChatCaptureOrchestrator.runSuccess(text, coachResult);
+        setRecordProtocolLastDebug(capture.debug);
+        setCharacterChatHistory([...getCharacterChatHistory(), { role:"assistant", content:capture.reply || "（没有返回内容）", at:new Date().toISOString() }]);
       }catch(err){
-        let protocolFallback = null;
-        let processResult = { writes:[], pending:[], ignored:[] };
-        try{
-          protocolFallback = runRecordProtocolEngineForCharacterChat(text, {
-            reply:"",
-            rawModelOutput:"",
-            record_candidates:[],
-            rejected_candidates:[],
-            parseError:err.message || "AI call failed"
-          });
-          processResult = mergeRecordProtocolProcessResults(
-            recordProtocolEngineResultToProcessResult(protocolFallback.engineResult),
-            protocolFallback.appReconciliationResult
-          );
-        }catch(protocolErr){
-          console.error("记录协议本地兜底失败", protocolErr);
-        }
-        let deterministicCaptureResult = maybeRunDeterministicCharacterCaptureFallback(text, processResult, {
-          sourceType:"character_chat",
-          aiCandidateCount:protocolFallback?.aiCandidateCount || 0,
-          usedProtocolLocalFallback:!!protocolFallback?.usedProtocolLocalFallback
-        });
-        if(!isDeterministicCharacterCaptureHandled(deterministicCaptureResult) && !["follow_up", "pending_correction", "pending_confirmation"].includes(String(deterministicCaptureResult?.status || ""))){
-          deterministicCaptureResult = maybeBuildLocalDateCorrectionFallback(text) || deterministicCaptureResult;
-        }
-        const failText = (processResult.writes.length || processResult.pending.length)
-          ? buildRecordProtocolParseFailureReply(processResult, deterministicCaptureResult)
-          : buildCharacterChatAiFailureReply(err, deterministicCaptureResult);
-        if(/^发送失败/.test(failText)){
+        const capture = characterChatCaptureOrchestrator.runFailure(text, err);
+        if(/^发送失败/.test(capture.reply)){
           console.error(err);
         }
-        setRecordProtocolLastDebug({
-          rawModelOutput:"",
-          reply:"",
-          record_candidates:[],
-          protocolOutput:protocolFallback?.protocolOutput,
-          engineResult:protocolFallback?.engineResult,
-          appReconciliationResult:protocolFallback?.appReconciliationResult,
-          engineDecisions:protocolFallback?.engineResult?.decisions || [],
-          aiCandidateCount:protocolFallback?.aiCandidateCount || 0,
-          usedProtocolLocalFallback:!!protocolFallback?.usedProtocolLocalFallback,
-          rejected_candidates:[],
-          parseError:err.message || "AI call failed",
-          processResult,
-          deterministicCaptureResult
-        });
-        setCharacterChatHistory([...getCharacterChatHistory(), { role:"assistant", content:failText, at:new Date().toISOString() }]);
+        setRecordProtocolLastDebug(capture.debug);
+        setCharacterChatHistory([...getCharacterChatHistory(), { role:"assistant", content:capture.reply, at:new Date().toISOString() }]);
       }finally{
         if(btn) btn.disabled = false;
       }
@@ -17030,9 +17134,9 @@
       localStorage.setItem(PLAN_TEMPLATE_KEY, JSON.stringify(normalized));
       clearTempDailyPlanOverrides();
       if(clearChecks){
-        localStorage.removeItem(PLAN_CHECKS_KEY);
-        localStorage.removeItem(PLAN_CHECK_META_KEY);
-        localStorage.removeItem(AI_MILESTONE_KEY);
+        domainPersistence.remove(PLAN_CHECKS_KEY);
+        domainPersistence.remove(PLAN_CHECK_META_KEY);
+        domainPersistence.remove(AI_MILESTONE_KEY);
       }
       queueAutoSync(clearChecks ? "训练模板更新并重置打卡" : "训练模板更新");
     }
@@ -17138,7 +17242,7 @@
     }
 
     function setPlanChecks(data){
-      localStorage.setItem(PLAN_CHECKS_KEY, JSON.stringify(data || {}));
+      domainPersistence.setJson(PLAN_CHECKS_KEY, data || {});
       queueAutoSync("训练打卡更新");
     }
 
@@ -17514,6 +17618,43 @@
       indicator.style.transform = scaleX > 1.001 ? `translateX(${left}px) scaleX(${scaleX})` : `translateX(${left}px)`;
     }
 
+    function shouldResetFirstIosDayDock(input = {}){
+      return !!(
+        input.isIos &&
+        Number(input.activeIndex) === 0 &&
+        Math.abs(Number(input.scrollLeft) || 0) > 1
+      );
+    }
+
+    function hideDayDockIndicatorDuringFirstDayReset(tabsEl){
+      if(!tabsEl) return;
+      tabsEl.classList.add("first-day-resetting");
+      tabsEl.classList.remove("ready");
+      const indicator = tabsEl.querySelector(".day-tab-indicator");
+      if(indicator) indicator.style.opacity = "0";
+    }
+
+    function clearFirstDayDockResetState(tabsEl){
+      if(!tabsEl) return;
+      tabsEl.classList.remove("first-day-resetting");
+    }
+
+    function scheduleIosFirstDayDockResetRetry(){
+      if(iosFirstDayDockResetTimer) return;
+      iosFirstDayDockResetTimer = setTimeout(() => {
+        iosFirstDayDockResetTimer = 0;
+        if(!isIosDayDockMode() || activePlanDay !== 0) return;
+        const tabs = $("dayTabs");
+        if(!tabs) return;
+        forceIosDayDockLeftEdge({ updateIndicator:false });
+        if(shouldResetFirstIosDayDock({ isIos:true, activeIndex:activePlanDay, scrollLeft:tabs.scrollLeft || 0 })){
+          hideDayDockIndicatorDuringFirstDayReset(tabs);
+          return;
+        }
+        updateDayTabIndicator({ immediate:true, noForce:true });
+      }, 80);
+    }
+
     function getDayTabFallbackWidth(tabsEl, buttons){
       if(!tabsEl) return 72;
       const styles = getComputedStyle(tabsEl);
@@ -17887,8 +18028,18 @@
     }
 
     function updateDayTabIndicator(options = {}){
-      if(isIosDayDockMode() && activePlanDay === 0 && !options.noForce){
-        forceIosDayDockLeftEdge();
+      const iosMode = isIosDayDockMode();
+      const tabs = $("dayTabs");
+      if(iosMode && activePlanDay === 0){
+        if(!options.noForce || shouldResetFirstIosDayDock({ isIos:iosMode, activeIndex:activePlanDay, scrollLeft:tabs?.scrollLeft || 0 })){
+          forceIosDayDockLeftEdge({ updateIndicator:false });
+        }
+        if(shouldResetFirstIosDayDock({ isIos:iosMode, activeIndex:activePlanDay, scrollLeft:tabs?.scrollLeft || 0 })){
+          hideDayDockIndicatorDuringFirstDayReset(tabs);
+          scheduleIosFirstDayDockResetRetry();
+          return;
+        }
+        clearFirstDayDockResetState(tabs);
       }
       const metrics = getDayDockMetrics();
       if(!metrics) return;
@@ -17963,9 +18114,10 @@
       tabs.style.scrollBehavior = oldScrollBehavior;
     }
 
-    function forceIosDayDockLeftEdge(){
+    function forceIosDayDockLeftEdge(options = {}){
       const tabs = $("dayTabs");
       if(!tabs || !isIosDayDockMode()) return;
+      const updateIndicator = options.updateIndicator !== false;
 
       const oldScrollBehavior = tabs.style.scrollBehavior;
       const oldScrollSnapType = tabs.style.scrollSnapType;
@@ -17989,7 +18141,7 @@
           tabs.style.scrollBehavior = "auto";
           tabs.style.scrollSnapType = "none";
           tabs.scrollLeft = 0;
-          if(activePlanDay === 0) updateDayTabIndicator({ immediate:true, noForce:true });
+          if(activePlanDay === 0 && updateIndicator) updateDayTabIndicator({ immediate:true, noForce:true });
         }, delay);
       });
     }
@@ -18825,8 +18977,8 @@
     }
 
     function resetPlanChecks(){
-      localStorage.removeItem(PLAN_CHECKS_KEY);
-      localStorage.removeItem(PLAN_CHECK_META_KEY);
+      domainPersistence.remove(PLAN_CHECKS_KEY);
+      domainPersistence.remove(PLAN_CHECK_META_KEY);
       queueAutoSync("清空训练打卡");
       renderPlan();
       updateSummary();
@@ -20076,7 +20228,7 @@
     }
 
     function setDailyLogs(logs, options = {}){
-      localStorage.setItem(DAILY_LOGS_KEY, JSON.stringify(logs || {}));
+      domainPersistence.setJson(DAILY_LOGS_KEY, logs || {});
       renderHistory();
       queueAutoSync("日历日志更新");
       if(options.syncToCloud){
@@ -20475,9 +20627,9 @@
       const ok = confirm("确定恢复上次被覆盖前的草稿吗？当前填写内容会被替换。");
       if(!ok) return;
       setForm(backup.form || {});
-      localStorage.setItem(PLAN_CHECKS_KEY, JSON.stringify(backup.planChecks || {}));
+      domainPersistence.setJson(PLAN_CHECKS_KEY, backup.planChecks || {});
       setTempDailyPlanOverrides(backup.tempDailyPlanOverrides || {}, { sync:false });
-      localStorage.setItem(DAILY_LOGS_KEY, JSON.stringify(backup.dailyLogs || {}));
+      domainPersistence.setJson(DAILY_LOGS_KEY, backup.dailyLogs || {});
       renderPlan();
       renderHistory();
       updateSummary();
@@ -20652,6 +20804,7 @@
 
     let suppressDayClickUntil = 0;
     let suppressDayClickIndex = -1;
+    let iosFirstDayDockResetTimer = 0;
 
     const tabDrag = {
       active:false,
@@ -23305,6 +23458,63 @@
           const state = appState.clearLocalData({ reason:"测试清空" });
           applyAppStateToUi(state, { reason:"测试清空" });
           return appState.exportSnapshot();
+        },
+        clearDomainPersistenceWriteLog(){
+          domainPersistence.clearWriteLog();
+        },
+        getDomainPersistenceWriteLog(){
+          return domainPersistence.getWriteLog();
+        },
+        getArchitectureSeamStatus(){
+          return {
+            planReconciliationWriter:
+              typeof planReconciliationWriter.applyTrainingFact === "function" &&
+              typeof planReconciliationWriter.reconcile === "function",
+            characterChatCaptureOrchestrator:
+              typeof characterChatCaptureOrchestrator.runSuccess === "function" &&
+              typeof characterChatCaptureOrchestrator.runFailure === "function",
+            domainPersistence:
+              typeof domainPersistence.setJson === "function" &&
+              typeof domainPersistence.getWriteLog === "function",
+            testEntryPublicApi:true
+          };
+        },
+        runPersistenceAdapterChecks(){
+          const savedLogs = localStorage.getItem(DAILY_LOGS_KEY);
+          const savedChecks = localStorage.getItem(PLAN_CHECKS_KEY);
+          const savedChat = localStorage.getItem(CHARACTER_CHAT_HISTORY_KEY);
+          const savedSession = localStorage.getItem(TRAINING_SESSION_KEY);
+          domainPersistence.clearWriteLog();
+          try{
+            setDailyLogs({ "2026-05-12":{ date:"2026-05-12", aiCaptureRecords:[] } });
+            setPlanChecks({ "d1_i0":true });
+            setCharacterChatHistory([{ role:"user", content:"persistence check", at:"2026-05-12T00:00:00.000Z" }]);
+            setTrainingSession({ id:"session-check", status:"active", date:"2026-05-12", planDayIndex:1 });
+            const writes = domainPersistence.getWriteLog().map((entry) => entry.key);
+            const storedLogs = getDailyLogs();
+            const storedChecks = getPlanChecks();
+            const storedChat = getCharacterChatHistory();
+            const storedSession = getTrainingSession();
+            return {
+              writesOncePerDomain:writes.join("|") === [DAILY_LOGS_KEY, PLAN_CHECKS_KEY, CHARACTER_CHAT_HISTORY_KEY, TRAINING_SESSION_KEY].join("|"),
+              domainsDoNotCross:
+                storedLogs["2026-05-12"]?.date === "2026-05-12" &&
+                storedChecks["d1_i0"] === true &&
+                storedChat[0]?.content === "persistence check" &&
+                storedSession?.id === "session-check",
+              writeCount:writes.length
+            };
+          }finally{
+            if(savedLogs == null) localStorage.removeItem(DAILY_LOGS_KEY);
+            else localStorage.setItem(DAILY_LOGS_KEY, savedLogs);
+            if(savedChecks == null) localStorage.removeItem(PLAN_CHECKS_KEY);
+            else localStorage.setItem(PLAN_CHECKS_KEY, savedChecks);
+            if(savedChat == null) localStorage.removeItem(CHARACTER_CHAT_HISTORY_KEY);
+            else localStorage.setItem(CHARACTER_CHAT_HISTORY_KEY, savedChat);
+            if(savedSession == null) localStorage.removeItem(TRAINING_SESSION_KEY);
+            else localStorage.setItem(TRAINING_SESSION_KEY, savedSession);
+            domainPersistence.clearWriteLog();
+          }
         },
         countAppStatePatchNotifications(){
           let count = 0;
