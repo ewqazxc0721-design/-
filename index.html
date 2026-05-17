@@ -4279,7 +4279,394 @@
       }
     }
 
-</style>
+    /* --- Mobile card layout prototype v1: cards only, leave buttons and nav untouched --- */
+    @media (max-width:480px){
+      :root{
+        --mobile-card-radius:22px;
+        --mobile-card-pad-x:14px;
+        --mobile-card-shadow:0 14px 34px rgba(15,23,42,.075), 0 2px 8px rgba(15,23,42,.035), inset 0 1px 0 rgba(255,255,255,.72);
+      }
+
+      body{
+        background:
+          radial-gradient(circle at 18% 0%, rgba(255,255,255,.92), rgba(255,255,255,0) 28%),
+          linear-gradient(180deg,#f8fafc 0%,#eef3f8 48%,#eef2f7 100%);
+      }
+
+      .wrap{
+        max-width:430px;
+        padding:14px 10px max(118px, calc(env(safe-area-inset-bottom, 0px) + 110px));
+      }
+
+      .card{
+        border-radius:var(--mobile-card-radius);
+        padding:16px var(--mobile-card-pad-x);
+        margin-bottom:12px;
+        background:rgba(255,255,255,.90);
+        border-color:rgba(148,163,184,.16);
+        box-shadow:var(--mobile-card-shadow);
+      }
+
+      .card::before{
+        border-color:rgba(255,255,255,.34);
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.28);
+      }
+
+      .hero.card{
+        padding:18px 16px;
+      }
+
+      .hero h1{
+        font-size:25px;
+        line-height:1.08;
+      }
+
+      .topline{
+        gap:10px;
+        align-items:center;
+      }
+
+      .sub{
+        margin-top:8px;
+        font-size:13px;
+        line-height:1.55;
+      }
+
+      .stats{
+        gap:8px;
+        margin-top:14px;
+        grid-template-columns:repeat(3,minmax(0,1fr));
+      }
+
+      .stats .badge{
+        min-height:42px;
+        justify-content:center;
+        padding:7px 8px;
+        text-align:center;
+        white-space:normal;
+        line-height:1.25;
+      }
+
+      .section > .card > h2,
+      .collapsible-card-head h2{
+        margin:0 0 12px;
+        font-size:20px;
+        line-height:1.2;
+      }
+
+      .collapsible-card-head{
+        align-items:center;
+        gap:10px;
+      }
+
+      #plan > .card:first-child{
+        padding:16px 14px 18px;
+      }
+
+      #planContainer .day-panel.active{
+        display:grid;
+        gap:10px;
+        margin-top:12px;
+      }
+
+      #planContainer .day-panel h2{
+        margin:0;
+        font-size:22px;
+        line-height:1.15;
+      }
+
+      #planContainer .day-panel > .badge{
+        width:100%;
+        box-sizing:border-box;
+        justify-content:flex-start;
+        padding:8px 12px;
+        overflow-x:auto;
+        text-align:left;
+        background:rgba(241,245,249,.86);
+      }
+
+      #planContainer .day-panel > div[style*="margin-top"]{
+        display:grid;
+        gap:8px;
+        margin-top:0 !important;
+      }
+
+      .day-row{
+        display:grid;
+        grid-template-columns:minmax(0,1fr) auto;
+        align-items:center;
+        gap:10px;
+        min-height:58px;
+        padding:12px 12px 12px 14px;
+        border:1px solid rgba(148,163,184,.12);
+        border-radius:18px;
+        background:linear-gradient(180deg,rgba(248,250,252,.96),rgba(241,245,249,.88));
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.72);
+      }
+
+      .day-row.done{
+        background:linear-gradient(180deg,rgba(236,253,245,.94),rgba(220,252,231,.84));
+        border-color:rgba(16,185,129,.18);
+      }
+
+      .day-item{
+        min-width:0;
+        padding-right:2px;
+        font-size:15px;
+        line-height:1.45;
+        word-break:break-word;
+      }
+
+      .plan-progress-chip{
+        display:inline-flex;
+        width:max-content;
+        margin:6px 0 0;
+        vertical-align:middle;
+      }
+
+      .greenbox,
+      .softbox,
+      .calendar-detail-card,
+      .history-card,
+      .training-capture-card,
+      .sleep-csv-import-card{
+        border-radius:18px;
+        padding:13px;
+        line-height:1.55;
+      }
+
+      .greenbox{
+        margin-top:2px;
+        background:rgba(236,253,245,.72);
+        border:1px solid rgba(16,185,129,.14);
+      }
+
+      .grid2{
+        grid-template-columns:1fr;
+        gap:10px;
+      }
+
+      .grid7{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:8px;
+      }
+
+      input,
+      textarea,
+      select{
+        font-size:16px;
+      }
+
+      .calendar-detail-card{
+        margin-top:12px;
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.68);
+      }
+
+      .calendar-progress-list{
+        gap:8px;
+      }
+
+      .calendar-progress-item{
+        border-radius:16px;
+        padding:11px 12px;
+        background:rgba(248,250,252,.88);
+      }
+
+      .calendar-progress-name{
+        line-height:1.38;
+      }
+
+      .calendar-progress-badges{
+        gap:6px;
+      }
+
+      .training-capture-card-stack{
+        gap:8px;
+      }
+
+      .training-capture-card-message,
+      .training-capture-recent-text{
+        line-height:1.5;
+      }
+
+      .mini-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:8px;
+      }
+    }
+
+    @media (max-width:360px){
+      .card{
+        padding:14px 12px;
+      }
+
+      .hero h1{
+        font-size:23px;
+      }
+
+      .stats{
+        grid-template-columns:1fr;
+      }
+
+      #planContainer .day-panel > .badge{
+        white-space:normal;
+      }
+
+      .day-item{
+        font-size:14px;
+      }
+    }
+
+    /* --- Prototype-only 4+1 bottom dock. Preserve the original tab icons. --- */
+    :root{
+      --prototype-dock-max:720px;
+      --prototype-dock-side:16px;
+      --prototype-dock-gap:14px;
+      --prototype-ai-size:80px;
+      --prototype-ai-right-shift:-14px;
+      --prototype-dock-bottom:12px;
+    }
+
+    .tabs{
+      left:max(var(--prototype-dock-side), calc((100vw - var(--prototype-dock-max)) / 2 + var(--prototype-dock-side))) !important;
+      right:auto !important;
+      bottom:var(--prototype-dock-bottom) !important;
+      --tab-height:62px !important;
+      width:min(calc(100vw - (var(--prototype-dock-side) * 2) - var(--prototype-ai-size) - var(--prototype-dock-gap)), calc(var(--prototype-dock-max) - (var(--prototype-dock-side) * 2) - var(--prototype-ai-size) - var(--prototype-dock-gap))) !important;
+      max-width:none !important;
+      transform:none !important;
+      border-radius:999px !important;
+      background:linear-gradient(135deg, rgba(255,255,255,.40), rgba(255,246,248,.34) 52%, rgba(255,255,255,.62)) !important;
+      border:1px solid rgba(255,255,255,.58) !important;
+      box-shadow:0 22px 60px rgba(15,23,42,.16), 0 8px 22px rgba(15,23,42,.08), inset 0 1px 0 rgba(255,255,255,.72), inset 0 -1px 0 rgba(15,23,42,.06) !important;
+      backdrop-filter:blur(28px) saturate(190%) brightness(1.08) !important;
+      -webkit-backdrop-filter:blur(28px) saturate(190%) brightness(1.08) !important;
+    }
+
+    .tabs::before{
+      background:rgba(255,255,255,.08) !important;
+    }
+
+    .tabs::after{
+      background:rgba(255,255,255,.10) !important;
+      border-color:rgba(255,255,255,.38) !important;
+      box-shadow:0 16px 34px rgba(15,23,42,.12), 0 5px 14px rgba(15,23,42,.05), inset 0 1px 0 rgba(255,255,255,.72), inset 0 -1px 0 rgba(15,23,42,.055) !important;
+    }
+
+    .tab{
+      color:#334155 !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+    }
+
+    .tab-content{
+      justify-content:center !important;
+      gap:6px !important;
+      padding:0 6px !important;
+    }
+
+    .tab-icon{
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      line-height:1 !important;
+    }
+
+    .tab-label{
+      line-height:1 !important;
+    }
+
+    .tab-icon-home,
+    .tab-icon-record,
+    .tab-icon-history,
+    .tab-icon-tools{
+      color:currentColor !important;
+    }
+
+    .tab-indicator{
+      background:rgba(31,41,55,.86) !important;
+      border-color:rgba(255,255,255,.24) !important;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.28), inset 0 0 0 1px rgba(255,255,255,.08), inset 0 -1px 0 rgba(0,0,0,.22), 0 11px 24px rgba(15,23,42,.22), 0 3px 9px rgba(15,23,42,.12) !important;
+    }
+
+    .tab.active,
+    .tab.active .tab-icon,
+    .tab.active .tab-label{
+      color:#ffffff !important;
+      text-shadow:none !important;
+    }
+
+    .ai-coach-pet{
+      display:block !important;
+      right:max(2px, calc(max(var(--prototype-dock-side), calc((100vw - var(--prototype-dock-max)) / 2 + var(--prototype-dock-side))) + var(--prototype-ai-right-shift))) !important;
+      bottom:var(--prototype-dock-bottom) !important;
+      z-index:86 !important;
+    }
+
+    .ai-coach-avatar{
+      width:var(--prototype-ai-size) !important;
+      height:var(--prototype-ai-size) !important;
+      border:1px solid rgba(255,255,255,.56) !important;
+      border-radius:999px !important;
+      background:rgba(255,255,255,.36) !important;
+      color:#334155 !important;
+      box-shadow:0 18px 42px rgba(15,23,42,.14), inset 0 1px 0 rgba(255,255,255,.70) !important;
+      backdrop-filter:blur(24px) saturate(180%) brightness(1.08) !important;
+      -webkit-backdrop-filter:blur(24px) saturate(180%) brightness(1.08) !important;
+      animation:none !important;
+    }
+
+    .ai-coach-bubble{
+      right:-4px !important;
+      bottom:calc(100% + 12px) !important;
+      width:min(320px, calc(100vw - 28px)) !important;
+      max-width:min(320px, calc(100vw - 28px)) !important;
+      transform:translateY(8px) scale(.98) !important;
+    }
+
+    .ai-coach-bubble.show{
+      transform:translateY(0) scale(1) !important;
+    }
+
+    @media (max-width:480px){
+      :root{
+        --prototype-dock-side:8px;
+        --prototype-dock-gap:8px;
+        --prototype-ai-size:70px;
+        --prototype-ai-right-shift:-2px;
+        --prototype-dock-bottom:max(8px, env(safe-area-inset-bottom, 0px));
+      }
+
+      .wrap{
+        padding-bottom:max(126px, calc(env(safe-area-inset-bottom, 0px) + 118px)) !important;
+      }
+
+      .tabs{
+        left:var(--prototype-dock-side) !important;
+        width:calc(100vw - (var(--prototype-dock-side) * 2) - var(--prototype-ai-size) - var(--prototype-dock-gap)) !important;
+        --tab-height:64px !important;
+        padding:4px 7px !important;
+      }
+
+      .tab-content{
+        gap:4px !important;
+        padding:0 3px !important;
+      }
+
+      .tab-icon{
+        font-size:21px !important;
+      }
+
+      .tab-label{
+        font-size:12px !important;
+      }
+
+      .ai-coach-pet{
+        right:max(2px, calc(var(--prototype-dock-side) + var(--prototype-ai-right-shift))) !important;
+      }
+    }
+  </style>
 </head>
 <body>
   <div id="pageBgLayer" aria-hidden="true"></div>
