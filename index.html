@@ -6424,6 +6424,13 @@
             unit:/分钟|分|min|minute/i.test(match[2]) ? "minute" : "second"
           };
         };
+        const normalizeDurationUnitAlias = (value) => {
+          const raw = String(value || "").trim().toLowerCase();
+          if(!raw) return "";
+          if(["秒", "s", "sec", "secs", "second", "seconds"].includes(raw)) return "second";
+          if(["分", "分钟", "min", "mins", "minute", "minutes"].includes(raw)) return "minute";
+          return raw;
+        };
         if(!aliasedCandidate.evidenceText && candidate.rawText) aliasedCandidate.evidenceText = candidate.rawText;
         if(!aliasedCandidate.evidenceText && nestedGuard.evidenceText) aliasedCandidate.evidenceText = nestedGuard.evidenceText;
         ["evidenceSource", "riskLevel", "scope"].forEach((field) => {
@@ -6524,6 +6531,9 @@
           aliasedCandidate.duration = explicitDuration.amount;
           if(!aliasedCandidate.durationUnit && explicitDuration.unit) aliasedCandidate.durationUnit = explicitDuration.unit;
         }
+        if(aliasedCandidate.durationUnit != null){
+          aliasedCandidate.durationUnit = normalizeDurationUnitAlias(aliasedCandidate.durationUnit);
+        }
         if(aliasedCandidate.sets == null && ["plan_progress", "extra_training"].includes(candidateType)){
           const setCount = readEvidenceNumber(/(\d+(?:\.\d+)?|[零一二两三四五六七八九十]+)\s*组/);
           if(Number.isFinite(setCount) && setCount > 0) aliasedCandidate.sets = setCount;
@@ -6555,10 +6565,40 @@
           if(Number.isFinite(repsPerSet) && repsPerSet > 0) aliasedCandidate.repsPerSet = repsPerSet;
         }
         if(aliasedCandidate.confidence == null){
-          const currentEvidence = String(aliasedCandidate.evidenceSource || "").trim() === "current_user_message";
-          const lowRisk = String(aliasedCandidate.riskLevel || "").trim() === "low";
-          const singleRecord = String(aliasedCandidate.scope || "").trim() === "single_record";
-          if(currentEvidence && lowRisk && singleRecord) aliasedCandidate.confidence = 0.9;
+          const normalizedEvidenceSource = String(aliasedCandidate.evidenceSource || "").trim();
+          const normalizedRiskLevel = String(aliasedCandidate.riskLevel || "").trim();
+          const normalizedScope = String(aliasedCandidate.scope || "").trim();
+          const currentEvidence = normalizedEvidenceSource === "current_user_message";
+          const lowRisk = normalizedRiskLevel === "low";
+          const singleRecord = normalizedScope === "single_record";
+          const ref = aliasedCandidate.exerciseRef || {};
+          const hasExerciseReference = !!(ref.exerciseKey || ref.displayName);
+          const hasQuantitySignal = ["amount", "sets", "reps", "repsPerSet", "bestSetReps", "duration"]
+            .some((field) => Number.isFinite(Number(aliasedCandidate[field])) && Number(aliasedCandidate[field]) > 0);
+          const hasDateSignal = !!String(
+            aliasedCandidate.targetDateIso ||
+            aliasedCandidate.targetDateText ||
+            candidate.date ||
+            candidate.dateText ||
+            candidate.dateIso ||
+            targetDateObject.iso ||
+            targetDateObject.text ||
+            nestedRecord.date ||
+            nestedRecord.dateIso ||
+            nestedRecord.record_date ||
+            ""
+          ).trim();
+          const safeMissingGuardCandidate = ["plan_progress", "extra_training"].includes(candidateType) &&
+            !normalizedEvidenceSource &&
+            !normalizedRiskLevel &&
+            !normalizedScope &&
+            !!String(aliasedCandidate.evidenceText || "").trim() &&
+            hasExerciseReference &&
+            hasQuantitySignal &&
+            hasDateSignal &&
+            String(aliasedCandidate.writeIntent || "").trim() !== "ignore" &&
+            !aliasedCandidate.needsConfirmation;
+          if((currentEvidence && lowRisk && singleRecord) || safeMissingGuardCandidate) aliasedCandidate.confidence = 0.9;
         }
         const clean = {};
         allowedFields.forEach((field) => {
@@ -21267,6 +21307,14 @@
       };
     }
 
+    const RECORD_PROTOCOL_LIVE_TEST_REPORT_KEY = "gain-record-protocol-live-test-report";
+
+    function persistRecordProtocolLiveReport(report = {}){
+      try{
+        localStorage.setItem(RECORD_PROTOCOL_LIVE_TEST_REPORT_KEY, JSON.stringify(report));
+      }catch(err){}
+    }
+
     async function runRecordProtocolLiveScenarioTests(options = {}){
       const settings = getAiSettings();
       const ready = settings.apiMode === "proxy" ? !!settings.proxyUrl : !!settings.apiKey;
@@ -21298,8 +21346,8 @@
         },
         results:[]
       };
+      persistRecordProtocolLiveReport(report);
       if(!ready){
-        localStorage.setItem("gain-record-protocol-live-test-report", JSON.stringify(report));
         return report;
       }
 
@@ -21396,6 +21444,7 @@
         if(stepResult.pass) report.passed += 1;
         else report.failed += 1;
         report.status = "running";
+        persistRecordProtocolLiveReport(report);
         window.dispatchEvent(new CustomEvent("record-protocol-live-scenario-progress", { detail:{ ...stepResult, passed:report.passed, failed:report.failed, total:report.total } }));
         if(options.stopOnFirstFailure && !stepResult.pass) break;
         const delayMs = Number(options.delayMs || 0);
@@ -21409,7 +21458,7 @@
         captureAttempts:state.captureAttempts.slice(-10),
         lastMutationSummary:report.results.at(-1)?.mutationSummary || null
       };
-      localStorage.setItem("gain-record-protocol-live-test-report", JSON.stringify(report));
+      persistRecordProtocolLiveReport(report);
       return report;
     }
 
@@ -21417,7 +21466,7 @@
       buildScenarioPlan:buildRecordProtocolLiveScenarioPlan,
       run:runRecordProtocolLiveScenarioTests,
       getLastReport(){
-        return safeJsonParse(localStorage.getItem("gain-record-protocol-live-test-report") || "null", null);
+        return safeJsonParse(localStorage.getItem(RECORD_PROTOCOL_LIVE_TEST_REPORT_KEY) || "null", null);
       }
     });
 
