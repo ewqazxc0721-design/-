@@ -241,6 +241,7 @@
       -webkit-mask-image:-webkit-radial-gradient(white, black);
       transform-origin:center bottom;
       transition:box-shadow .24s var(--glass-spring), padding .24s var(--glass-spring), transform .24s var(--glass-spring);
+      touch-action:none;
     }
 
     .tabs::before{
@@ -367,7 +368,7 @@
       transition:transform .2s var(--glass-spring), color .2s ease, filter .2s ease;
       -webkit-mask-image:-webkit-radial-gradient(white, black);
       z-index:2;
-      touch-action:manipulation;
+      touch-action:none;
     }
 
     .tab::before,
@@ -476,23 +477,6 @@
 
     .section{display:none;}
     .section.active{display:block;}
-
-    /* --- Patch v95: keep iOS bottom dock drag attached to the finger --- */
-    .tabs,
-    .tabs .tab,
-    .tabs .tab-content,
-    .tabs .tab-icon,
-    .tabs .tab-label,
-    .tabs .tab-indicator{
-      touch-action:none;
-      -webkit-user-select:none;
-      user-select:none;
-      -webkit-touch-callout:none;
-    }
-
-    body.bottom-dock-dragging{
-      overscroll-behavior:none;
-    }
 
 
     h2{
@@ -6387,9 +6371,198 @@
           return { ok:false, reason:"unsupported_candidate_type", candidate:null };
         }
 
+        const aliasedCandidate = { ...candidate };
+        const sourceTextForAliases = String(candidate.evidenceText || candidate.rawText || candidate.text || "");
+        const asPlainCandidateObject = (value) => value && typeof value === "object" && !Array.isArray(value) ? value : null;
+        const targetDateObject = asPlainCandidateObject(candidate.targetDate) || {};
+        const nestedRecord = [
+          candidate.record,
+          candidate.recordData,
+          candidate.exerciseTemplateDraft,
+          candidate.exerciseTemplate,
+          candidate.trainingData,
+          candidate.recordFields,
+          candidate.fields,
+          candidate.currentValue
+        ]
+          .find((value) => value && typeof value === "object" && !Array.isArray(value)) || {};
+        const nestedGuard = [
+          candidate.v2,
+          candidate.v2Guard,
+          candidate.guard,
+          candidate.guardFields,
+          candidate.guards,
+          candidate.evidence
+        ]
+          .find((value) => value && typeof value === "object" && !Array.isArray(value)) || {};
+        const hasTopLevelDurationAlias = candidate.duration != null || candidate.durationSeconds != null || candidate.durationMinutes != null;
+        const readEvidenceNumber = (pattern) => {
+          const match = sourceTextForAliases.match(pattern);
+          if(!match) return null;
+          try{
+            return parseChineseTrainingNumber(match[1]);
+          }catch(_err){
+            return null;
+          }
+        };
+        const readDurationValue = (value) => {
+          if(value == null) return null;
+          if(Number.isFinite(Number(value)) && Number(value) > 0){
+            return { amount:Number(value), unit:"" };
+          }
+          const isoMatch = String(value || "").trim().match(/^PT(?:(\d+(?:\.\d+)?)M)?(?:(\d+(?:\.\d+)?)S)?$/i);
+          if(isoMatch){
+            const minutes = Number(isoMatch[1] || 0);
+            const seconds = Number(isoMatch[2] || 0);
+            if(seconds > 0) return { amount:(minutes * 60) + seconds, unit:"second" };
+            if(minutes > 0) return { amount:minutes, unit:"minute" };
+          }
+          const match = String(value || "").match(/(\d+(?:\.\d+)?)\s*(秒|s|sec|seconds?|分钟|分|min|minutes?)/i);
+          if(!match) return null;
+          return {
+            amount:Number(match[1]),
+            unit:/分钟|分|min|minute/i.test(match[2]) ? "minute" : "second"
+          };
+        };
+        if(!aliasedCandidate.evidenceText && candidate.rawText) aliasedCandidate.evidenceText = candidate.rawText;
+        if(!aliasedCandidate.evidenceText && nestedGuard.evidenceText) aliasedCandidate.evidenceText = nestedGuard.evidenceText;
+        ["evidenceSource", "riskLevel", "scope"].forEach((field) => {
+          if(aliasedCandidate[field] == null && nestedGuard[field] != null) aliasedCandidate[field] = nestedGuard[field];
+        });
+        ["sets", "repsPerSet", "bestSetReps", "amount", "unit", "durationUnit"].forEach((field) => {
+          if(aliasedCandidate[field] == null && nestedRecord[field] != null) aliasedCandidate[field] = nestedRecord[field];
+        });
+        if(aliasedCandidate.repsPerSet == null && nestedRecord.reps != null && nestedRecord.sets != null){
+          aliasedCandidate.repsPerSet = nestedRecord.reps;
+        }else if(aliasedCandidate.reps == null && nestedRecord.reps != null){
+          aliasedCandidate.reps = nestedRecord.reps;
+        }
+        if(aliasedCandidate.duration == null){
+          aliasedCandidate.duration = nestedRecord.duration ??
+            nestedRecord.durationPerSet ??
+            nestedRecord.perSetDuration ??
+            nestedRecord.durationSecondsPerSet ??
+            nestedRecord.durationMinutesPerSet ??
+            nestedRecord.durationSeconds ??
+            nestedRecord.durationMinutes ??
+            nestedRecord.durationIso;
+        }
+        if(aliasedCandidate.durationUnit == null && (nestedRecord.durationMinutes != null || nestedRecord.durationMinutesPerSet != null)) aliasedCandidate.durationUnit = "minute";
+        if(aliasedCandidate.durationUnit == null && (nestedRecord.durationSeconds != null || nestedRecord.durationSecondsPerSet != null)) aliasedCandidate.durationUnit = "second";
+        if(!aliasedCandidate.exerciseRef || typeof aliasedCandidate.exerciseRef !== "object" || Array.isArray(aliasedCandidate.exerciseRef)){
+          let displayName = String(
+            candidate.exerciseName ||
+            candidate.movement ||
+            candidate.exercise ||
+            candidate.action ||
+            candidate.description ||
+            nestedRecord.exerciseName ||
+            nestedRecord.exerciseType ||
+            nestedRecord.exerciseDisplayName ||
+            nestedRecord.movement ||
+            nestedRecord.exercise ||
+            ""
+          ).trim();
+          try{
+            displayName = String(
+              getMatchedTrainingExercisesFromText(displayName || sourceTextForAliases)[0]?.canonical ||
+              getMatchedTrainingExercisesFromText(sourceTextForAliases)[0]?.canonical ||
+              displayName ||
+              ""
+            ).trim();
+          }catch(_err){
+            displayName = displayName || "";
+          }
+          if(displayName) aliasedCandidate.exerciseRef = { type:"mentioned", displayName };
+        }
+        if(!aliasedCandidate.targetDateText){
+          const dateText = String(
+            candidate.dateText ||
+            candidate.targetDateText ||
+            (typeof candidate.targetDate === "string" ? candidate.targetDate : "") ||
+            targetDateObject.text ||
+            targetDateObject.weekday ||
+            targetDateObject.label ||
+            ""
+          ).trim();
+          const evidenceDateText = (
+            /今天|today/i.test(sourceTextForAliases) ? "today" :
+            (/昨天|昨日|yesterday/i.test(sourceTextForAliases) ? "昨天" :
+            (/前天/i.test(sourceTextForAliases) ? "前天" :
+            ((sourceTextForAliases.match(/周[一二三四五六日天]/) || [])[0] || "")))
+          );
+          if(dateText && !/^\d{4}-\d{2}-\d{2}$/.test(dateText)) aliasedCandidate.targetDateText = dateText;
+          else if(evidenceDateText) aliasedCandidate.targetDateText = evidenceDateText;
+        }
+        if(aliasedCandidate.targetDateText && typeof aliasedCandidate.targetDate !== "string"){
+          aliasedCandidate.targetDate = aliasedCandidate.targetDateText;
+        }
+        const nestedDateIso = String(
+          candidate.date ||
+          candidate.record_date ||
+          candidate.dateIso ||
+          targetDateObject.iso ||
+          targetDateObject.dateIso ||
+          nestedRecord.date ||
+          nestedRecord.record_date ||
+          nestedRecord.dateIso ||
+          ""
+        ).trim();
+        if(!aliasedCandidate.targetDateIso && /^\d{4}-\d{2}-\d{2}$/.test(nestedDateIso)){
+          aliasedCandidate.targetDateIso = nestedDateIso;
+        }
+        if(aliasedCandidate.duration == null && candidate.durationSeconds != null){
+          aliasedCandidate.duration = candidate.durationSeconds;
+          aliasedCandidate.durationUnit = aliasedCandidate.durationUnit || "second";
+        }
+        if(aliasedCandidate.duration == null && candidate.durationMinutes != null){
+          aliasedCandidate.duration = candidate.durationMinutes;
+          aliasedCandidate.durationUnit = aliasedCandidate.durationUnit || "minute";
+        }
+        const explicitDuration = readDurationValue(aliasedCandidate.duration);
+        if(explicitDuration){
+          aliasedCandidate.duration = explicitDuration.amount;
+          if(!aliasedCandidate.durationUnit && explicitDuration.unit) aliasedCandidate.durationUnit = explicitDuration.unit;
+        }
+        if(aliasedCandidate.sets == null && ["plan_progress", "extra_training"].includes(candidateType)){
+          const setCount = readEvidenceNumber(/(\d+(?:\.\d+)?|[零一二两三四五六七八九十]+)\s*组/);
+          if(Number.isFinite(setCount) && setCount > 0) aliasedCandidate.sets = setCount;
+        }
+        if(aliasedCandidate.amount == null && aliasedCandidate.sets != null && ["plan_progress", "extra_training"].includes(candidateType)){
+          aliasedCandidate.amount = aliasedCandidate.sets;
+          aliasedCandidate.unit = aliasedCandidate.unit || "set";
+        }
+        if(aliasedCandidate.duration == null){
+          const durationMatch = sourceTextForAliases.match(/(?:每组|每次|每一组|一组)\s*(\d+(?:\.\d+)?|[零一二两三四五六七八九十]+)\s*(秒|s|sec|seconds?|分钟|分|min|minutes?)/i);
+          if(durationMatch){
+            const duration = readEvidenceNumber(/(?:每组|每次|每一组|一组)\s*(\d+(?:\.\d+)?|[零一二两三四五六七八九十]+)\s*(?:秒|s|sec|seconds?|分钟|分|min|minutes?)/i);
+            if(Number.isFinite(duration) && duration > 0){
+              aliasedCandidate.duration = duration;
+              aliasedCandidate.durationUnit = /分钟|分|min|minute/i.test(durationMatch[2]) ? "minute" : "second";
+            }
+          }
+        }
+        const perSetDurationMatch = sourceTextForAliases.match(/(?:每组|每次|每一组|一组)\s*(\d+(?:\.\d+)?|[零一二两三四五六七八九十]+)\s*(秒|s|sec|seconds?|分钟|分|min|minutes?)/i);
+        if(perSetDurationMatch && (!hasTopLevelDurationAlias || aliasedCandidate.duration == null)){
+          const duration = readEvidenceNumber(/(?:每组|每次|每一组|一组)\s*(\d+(?:\.\d+)?|[零一二两三四五六七八九十]+)\s*(?:秒|s|sec|seconds?|分钟|分|min|minutes?)/i);
+          if(Number.isFinite(duration) && duration > 0){
+            aliasedCandidate.duration = duration;
+            aliasedCandidate.durationUnit = /分钟|分|min|minute/i.test(perSetDurationMatch[2]) ? "minute" : "second";
+          }
+        }
+        if(aliasedCandidate.repsPerSet == null){
+          const repsPerSet = readEvidenceNumber(/(?:每组|每次|每一组|一组)\s*(\d+(?:\.\d+)?|[零一二两三四五六七八九十]+)\s*(?:次|个|下|reps?)/i);
+          if(Number.isFinite(repsPerSet) && repsPerSet > 0) aliasedCandidate.repsPerSet = repsPerSet;
+        }
+        if(aliasedCandidate.confidence == null){
+          const currentEvidence = String(aliasedCandidate.evidenceSource || "").trim() === "current_user_message";
+          const lowRisk = String(aliasedCandidate.riskLevel || "").trim() === "low";
+          const singleRecord = String(aliasedCandidate.scope || "").trim() === "single_record";
+          if(currentEvidence && lowRisk && singleRecord) aliasedCandidate.confidence = 0.9;
+        }
         const clean = {};
         allowedFields.forEach((field) => {
-          if(candidate[field] != null) clean[field] = candidate[field];
+          if(aliasedCandidate[field] != null) clean[field] = aliasedCandidate[field];
         });
         clean.candidateType = candidateType;
         clean.rawText = String(clean.rawText || candidate.text || clean.evidenceText || "");
@@ -9232,7 +9405,7 @@
     function buildRecordProtocolV2Prompt(budget = DEFAULT_RECORD_PROTOCOL_V2_BUDGET){
       const lines = [
         "record-protocol/v2 compact extraction.",
-        "Return strict JSON only: {\"reply\":\"\",\"record_candidates\":[]}.",
+        "Return strict JSON only, no analysis or markdown: {\"reply\":\"\",\"record_candidates\":[]}.",
         "Use only existing v1 candidateType values: " + RECORD_PROTOCOL_SUPPORTED_CANDIDATE_TYPES.join(", ") + ".",
         "Each candidate should include evidenceText from the current user message.",
         "For v2 guard fields include evidenceSource, riskLevel, and scope when known.",
@@ -9256,6 +9429,27 @@
       return truncateRecordProtocolV2Text(raw, budget.maxContextChars).text;
     }
 
+    function buildRecordProtocolV2HistoryPrompt(historyTurns = [], budget = DEFAULT_RECORD_PROTOCOL_V2_BUDGET){
+      const turns = (Array.isArray(historyTurns) ? historyTurns : []).map((turn) => ({
+        role:String(turn.role || "user"),
+        content:String(turn.content || "")
+      }));
+      const raw = "recent relevant history JSON:\n" + JSON.stringify(turns);
+      return truncateRecordProtocolV2Text(raw, Math.max(300, Number(budget.maxContextChars || 700))).text;
+    }
+
+    function buildRecordProtocolV2ComplexTaskPrompt(){
+      return [
+        "Complex reference extraction task.",
+        "Use current user message as evidenceText; use activeTrainingReference and recent relevant history only to resolve implicit subject/date.",
+        "If current text says 刚才那个/刚才那条/那个 plus 又补了一组, emit plan_progress or extra_training with amount=1, unit=set, exerciseRef from activeTrainingReference, and targetDateText from the referenced record/date when known.",
+        "If current text says 删除/删掉/不要记, emit candidateType=correction with correction.operation=delete_record and needsConfirmation=true.",
+        "If current text says 改成/改为/名称改成, emit candidateType=correction with correction.operation=modify_record_fields and needsConfirmation=true.",
+        "Do not return empty record_candidates for current text that asks to add, modify, move, delete, revoke, or 补一组; if uncertain, return a correction candidate with needsConfirmation=true.",
+        "Output exactly one JSON object. The first character must be { and the last character must be }."
+      ].join("\n");
+    }
+
     function buildCompactRecordProtocolRequest(input = {}){
       const budget = normalizeRecordProtocolV2Budget(input.tokenBudget || input.budget || {});
       const clippedUserText = truncateRecordProtocolV2Text(input.userText || "", budget.maxUserTextChars);
@@ -9264,6 +9458,8 @@
         const recordProtocolPrompt = buildRecordProtocolV2Prompt(budget);
         const trainingContextPrompt = buildRecordProtocolV2ContextPrompt(input, budget);
         const historyTurns = buildRecordProtocolV2HistoryTurns(input, budget);
+        const historyPrompt = buildRecordProtocolV2HistoryPrompt(historyTurns, budget);
+        const complexTaskPrompt = buildRecordProtocolV2ComplexTaskPrompt();
         return {
           protocolId:String(input.protocolId || "record-protocol/v2"),
           mode:"complex_correction",
@@ -9271,13 +9467,14 @@
           contextPrompt:trainingContextPrompt,
           recordProtocolPrompt,
           trainingContextPrompt,
+          historyPrompt,
+          complexTaskPrompt,
           historyTurns,
           userText:clippedUserText.text,
           userTextTruncated:clippedUserText.truncated,
           maxOutputTokens:budget.maxOutputTokens,
           messages:[
-            { role:"system", content:[recordProtocolPrompt, trainingContextPrompt].filter(Boolean).join("\n\n") },
-            ...historyTurns,
+            { role:"system", content:[recordProtocolPrompt, trainingContextPrompt, historyPrompt, complexTaskPrompt].filter(Boolean).join("\n\n") },
             { role:"user", content:clippedUserText.text }
           ],
           budget
@@ -12247,7 +12444,8 @@
                     recordProtocolPrompt: recordProtocolPrompt != null ? String(recordProtocolPrompt || "") : recordProtocol.buildPrompt(protocol, {
                       trainingMode: trainingContext?.activeTrainingSession ? "active_training_session" : (trainingContext ? "training_related_chat" : "ordinary_chat")
                     }),
-                    trainingContextPrompt: trainingContextPrompt != null ? String(trainingContextPrompt || "") : buildCharacterTrainingContextPrompt(trainingContext)
+                    trainingContextPrompt: trainingContextPrompt != null ? String(trainingContextPrompt || "") : buildCharacterTrainingContextPrompt(trainingContext),
+                    responseFormat: protocol ? { type:"json_object" } : null
                   }
                 })
               });
@@ -12264,9 +12462,10 @@
                 signal: requestSignal,
                 body: JSON.stringify({
                   model: settings.model || "deepseek-v4-flash",
-                  temperature: settings.temperature ?? 0.7,
+                  temperature: protocol ? 0 : (settings.temperature ?? 0.7),
                   max_tokens: directMaxTokens,
-                  messages
+                  messages,
+                  ...(protocol ? { response_format:{ type:"json_object" } } : {})
                 })
               });
             }
@@ -12431,6 +12630,135 @@
       return Array.isArray(attempts) ? attempts : [];
     }
 
+    function readRecordProtocolFallbackNumber(text = "", pattern){
+      const match = String(text || "").match(pattern);
+      if(!match) return null;
+      try{
+        const value = parseChineseTrainingNumber(match[1]);
+        return Number.isFinite(value) && value > 0 ? value : null;
+      }catch(_err){
+        return null;
+      }
+    }
+
+    function resolveRecordProtocolFallbackDateText(text = "", activeReference = {}, context = {}){
+      const raw = String(text || "");
+      const explicit = raw.match(/今天|昨天|昨日|前天|周一|周二|周三|周四|周五|周六|周日|周天/);
+      if(explicit){
+        return explicit[0] === "昨日" ? "昨天" : (explicit[0] === "周天" ? "周日" : explicit[0]);
+      }
+      const activeText = String(activeReference.targetDateText || activeReference.dateText || "").trim();
+      if(activeText) return activeText;
+      const activeIso = String(activeReference.targetDateIso || activeReference.targetDate || activeReference.dateIso || "").trim();
+      const todayIso = String(context.todayIso || "").trim();
+      const shiftIso = (days) => {
+        if(!/^\d{4}-\d{2}-\d{2}$/.test(todayIso)) return "";
+        const [year, month, day] = todayIso.split("-").map((part) => Number(part));
+        return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10);
+      };
+      if(activeIso && todayIso){
+        if(activeIso === todayIso) return "today";
+        if(activeIso === shiftIso(-1)) return "昨天";
+        if(activeIso === shiftIso(-2)) return "前天";
+      }
+      const weekday = (Array.isArray(context.visibleWeekDates) ? context.visibleWeekDates : [])
+        .find((day) => String(day.iso || "").trim() === activeIso && String(day.weekday || "").trim());
+      if(weekday) return String(weekday.weekday || "").trim();
+      return "today";
+    }
+
+    function getRecordProtocolFallbackExerciseName(text = "", activeReference = {}){
+      const raw = String(text || "");
+      const activeName = String(activeReference.exerciseName || activeReference.displayName || activeReference.subjectText || activeReference.planItemText || "").trim();
+      if(activeName && raw.includes(activeName)) return activeName;
+      const match = matchExerciseFromText(raw);
+      if(match && !match.ambiguous && match.canonical) return match.canonical;
+      return activeName;
+    }
+
+    function buildRecordProtocolLocalFallbackEnvelope(userText = "", options = {}){
+      const raw = String(userText || "").trim();
+      if(!raw) return null;
+      const hasMutationAction = /改成|改为|修改|修正|更正|不对|不是|删除|删掉|撤回|不要记/.test(raw);
+      const hasContextSupplement = /(?:刚才|刚刚|那个|那条|上一项|上一个).{0,12}(?:补了|补完|又补|再补|一组)|(?:又|再|继续).{0,8}(?:补了|补完|一组)/.test(raw);
+      const hasSelfContainedFact = /做了|做完|完成|练了|练完|加练|打卡|搞定/.test(raw);
+      const hasRecordAction = hasMutationAction || hasContextSupplement || (options.allowSelfContainedFacts === true && hasSelfContainedFact);
+      const consultationOnly = /应该|建议|怎么|如何|可以吗|要不要|能不能|\?|？/.test(raw) && !hasRecordAction;
+      if(consultationOnly || !hasRecordAction) return null;
+
+      const activeReference = options.activeTrainingReference && typeof options.activeTrainingReference === "object"
+        ? options.activeTrainingReference
+        : {};
+      const context = options.context && typeof options.context === "object" ? options.context : {};
+      const exerciseName = getRecordProtocolFallbackExerciseName(raw, activeReference);
+      const targetDateText = resolveRecordProtocolFallbackDateText(raw, activeReference, context);
+      const base = {
+        evidenceText:raw,
+        evidenceSource:"current_user_message",
+        riskLevel:"low",
+        scope:"single_record",
+        confidence:0.9,
+        ...(targetDateText ? { targetDateText, dateSource:targetDateText === "today" ? "default_today" : "explicit" } : {})
+      };
+      if(/删除|删掉|撤回|不要记/.test(raw)){
+        return {
+          reply:"",
+          record_candidates:[{
+            ...base,
+            candidateType:"correction",
+            needsConfirmation:true,
+            correction:{
+              operation:/撤回/.test(raw) ? "revoke_record" : "delete_record",
+              targetRecordRef:{
+                subjectText:exerciseName,
+                previousDateIso:String(activeReference.targetDateIso || activeReference.targetDate || activeReference.dateIso || "")
+              }
+            }
+          }]
+        };
+      }
+      if(/改成|改为|修改|修正|更正|不对|不是/.test(raw)){
+        return {
+          reply:"",
+          record_candidates:[{
+            ...base,
+            candidateType:"correction",
+            needsConfirmation:true,
+            correction:{
+              operation:"modify_record_fields",
+              targetRecordRef:{
+                subjectText:exerciseName,
+                previousDateIso:String(activeReference.targetDateIso || activeReference.targetDate || activeReference.dateIso || "")
+              }
+            }
+          }]
+        };
+      }
+      if(!exerciseName) return null;
+      const amount = readRecordProtocolFallbackNumber(raw, /(\d+(?:\.\d+)?|[零一二两三四五六七八九十]+)\s*组/) || (/一组|补了?一组|又补/.test(raw) ? 1 : null);
+      if(!amount) return null;
+      const candidate = {
+        ...base,
+        candidateType:/加练|补了|又补|再补|额外/.test(raw) ? "extra_training" : "plan_progress",
+        exerciseRef:{ type:"mentioned", displayName:exerciseName },
+        amount,
+        unit:"set",
+        sets:amount,
+        writeIntent:"auto"
+      };
+      const repsPerSet = readRecordProtocolFallbackNumber(raw, /(?:每组|每次|一组)\s*(\d+(?:\.\d+)?|[零一二两三四五六七八九十]+)\s*(?:次|个|下)/);
+      if(repsPerSet) candidate.repsPerSet = repsPerSet;
+      const durationMatch = raw.match(/(?:每组|每次|一组)\s*(\d+(?:\.\d+)?|[零一二两三四五六七八九十]+)\s*(秒|s|sec|seconds?|分钟|min|minutes?)/i);
+      if(durationMatch){
+        const duration = readRecordProtocolFallbackNumber(raw, /(?:每组|每次|一组)\s*(\d+(?:\.\d+)?|[零一二两三四五六七八九十]+)\s*(?:秒|s|sec|seconds?|分钟|min|minutes?)/i);
+        if(duration){
+          candidate.duration = duration;
+          candidate.durationUnit = /分钟|min|minute/i.test(durationMatch[2]) ? "minute" : "second";
+        }
+      }
+      return { reply:"", record_candidates:[candidate] };
+    }
+
     function makeRecordProtocolChatSource(userText = "", coachResult = {}){
       const capturedAtIso = coachResult.sentAt || new Date().toISOString();
       const rawTextPreview = String(userText || "").slice(0, 120);
@@ -12446,21 +12774,30 @@
     function runRecordProtocolEngineForCharacterChat(userText = "", coachResult = {}){
       const now = new Date();
       const visibleWeekDates = getRecordProtocolVisibleWeekDates(now);
+      const context = {
+        todayIso:formatDateKey(now),
+        userTimeZone:getRecordProtocolUserTimeZone(),
+        visibleWeekDates
+      };
+      const originalCandidates = Array.isArray(coachResult.record_candidates) ? coachResult.record_candidates : [];
+      const fallbackEnvelope = originalCandidates.length ? null : buildRecordProtocolLocalFallbackEnvelope(userText, {
+        context,
+        activeTrainingReference:getActiveTrainingReference()
+      });
+      const recordCandidates = originalCandidates.length
+        ? originalCandidates
+        : (Array.isArray(fallbackEnvelope?.record_candidates) ? fallbackEnvelope.record_candidates : []);
       const protocolOutput = adaptAiRecordEnvelope({
         envelope:{
-          reply:coachResult.reply || "",
-          record_candidates:Array.isArray(coachResult.record_candidates) ? coachResult.record_candidates : []
+          reply:coachResult.reply || fallbackEnvelope?.reply || "",
+          record_candidates:recordCandidates
         },
         source:makeRecordProtocolChatSource(userText, coachResult)
       });
       const currentDailyLogs = getDailyLogs();
       const engineResult = applyRecordProtocol({
         protocolOutput,
-        context:{
-          todayIso:formatDateKey(now),
-          userTimeZone:getRecordProtocolUserTimeZone(),
-          visibleWeekDates
-        },
+        context,
         currentState:{
           dailyLogs:currentDailyLogs,
           captureAttempts:getRecordProtocolStoredCaptureAttempts(),
@@ -20325,14 +20662,8 @@
       const HELD_DRAG_X = 4;
       const CANCEL_Y = 12;
       let pointerState = null;
-
-      const lockDockTouch = () => {
-        document.body.classList.add("bottom-dock-dragging");
-      };
-
-      const unlockDockTouch = () => {
-        document.body.classList.remove("bottom-dock-dragging");
-      };
+      let dockTouchChainLocked = false;
+      let previousBodyTouchAction = "";
 
       const suppressUpcomingTabClick = (tabName = "", duration = 700) => {
         const until = Date.now() + duration;
@@ -20355,13 +20686,27 @@
         }
       };
 
+      const lockDockTouchChain = () => {
+        if(dockTouchChainLocked) return;
+        dockTouchChainLocked = true;
+        previousBodyTouchAction = document.body.style.touchAction || "";
+        document.body.style.touchAction = "none";
+      };
+
+      const clearDockTouchChainLock = () => {
+        if(!dockTouchChainLocked) return;
+        document.body.style.touchAction = previousBodyTouchAction;
+        previousBodyTouchAction = "";
+        dockTouchChainLocked = false;
+      };
+
       const resetPointerState = ({ restoreIndicator = false } = {}) => {
         clearPointerTimer();
         releaseDockPointer();
         pointerState = null;
-        unlockDockTouch();
         resetTabHold();
         setTabsPressed(false);
+        clearDockTouchChainLock();
         if(!tabDrag.active){
           clearTabPreviewState();
           if(restoreIndicator) updateTabIndicator();
@@ -20383,8 +20728,8 @@
 
       const beginPointerDrag = (clientX) => {
         if(!pointerState || pointerState.dragging) return;
-        lockDockTouch();
         clearPointerTimer();
+        lockDockTouchChain();
         const state = getButtonSnapState(pointerState.button, getDragExtraScale());
         const startLeft = pointerState.activated && state
           ? liquidDock.readTranslateX(state.metrics.indicator)
@@ -20405,7 +20750,9 @@
         const button = target.closest(".tab");
         if(!button || !tabsEl.contains(button)) return;
 
+        if(event.cancelable) event.preventDefault();
         resetPointerState({ restoreIndicator:false });
+        lockDockTouchChain();
         const startX = Number(event.clientX || 0);
         const startY = Number(event.clientY || 0);
         pointerState = {
@@ -20426,8 +20773,6 @@
         tabHold.startX = startX;
         tabHold.startY = startY;
         setTabsPressed(true);
-        lockDockTouch();
-        if(event.cancelable) event.preventDefault();
 
         if(tabsEl.setPointerCapture){
           try{ tabsEl.setPointerCapture(event.pointerId); }catch(err){}
@@ -20436,17 +20781,8 @@
         pointerState.timer = setTimeout(activatePointerHold, HOLD_DELAY);
       };
 
-      const recaptureDockPointer = () => {
-        if(!pointerState || !pointerState.captureLost || !tabsEl.setPointerCapture) return;
-        try{
-          tabsEl.setPointerCapture(pointerState.pointerId);
-          pointerState.captureLost = false;
-        }catch(err){}
-      };
-
-      const handleDockMove = (clientX, clientY, nativeEvent = null) => {
+      const advancePointerDrag = (clientX, clientY, event) => {
         if(!pointerState) return;
-        recaptureDockPointer();
         const deltaX = clientX - pointerState.startX;
         const deltaY = clientY - pointerState.startY;
         const absX = Math.abs(deltaX);
@@ -20454,14 +20790,14 @@
 
         if(pointerState.dragging || tabDrag.active){
           moveTabDrag(clientX);
-          if(nativeEvent && nativeEvent.cancelable) nativeEvent.preventDefault();
+          if(event && event.cancelable) event.preventDefault();
           return;
         }
 
         if(!pointerState.activated){
           if(absX > START_DRAG_X && absX >= absY){
             beginPointerDrag(clientX);
-            if(nativeEvent && nativeEvent.cancelable) nativeEvent.preventDefault();
+            if(event && event.cancelable) event.preventDefault();
             return;
           }
           if(absY > CANCEL_Y && absY > absX){
@@ -20473,12 +20809,25 @@
         if(absX > HELD_DRAG_X){
           beginPointerDrag(clientX);
         }
-        if(nativeEvent && nativeEvent.cancelable) nativeEvent.preventDefault();
+        if(event && event.cancelable) event.preventDefault();
       };
 
       const handlePointerMove = (event) => {
         if(!pointerState || event.pointerId !== pointerState.pointerId) return;
-        handleDockMove(Number(event.clientX || 0), Number(event.clientY || 0), event);
+        advancePointerDrag(Number(event.clientX || 0), Number(event.clientY || 0), event);
+      };
+
+      const getTouchPoint = (event) => {
+        if(event.touches && event.touches.length) return event.touches[0];
+        if(event.changedTouches && event.changedTouches.length) return event.changedTouches[0];
+        return null;
+      };
+
+      const handleTouchMove = (event) => {
+        if(!pointerState) return;
+        const touch = getTouchPoint(event);
+        if(!touch) return;
+        advancePointerDrag(Number(touch.clientX || 0), Number(touch.clientY || 0), event);
       };
 
       const finishPointerInteraction = (event) => {
@@ -20503,9 +20852,9 @@
         }
 
         pointerState = null;
-        unlockDockTouch();
         resetTabHold();
         setTabsPressed(false);
+        clearDockTouchChainLock();
       };
 
       const cancelPointerInteraction = (event) => {
@@ -20525,32 +20874,22 @@
         resetPointerState({ restoreIndicator:true });
       };
 
-      const getPrimaryTouchPoint = (event) => {
-        const touches = event.touches && event.touches.length ? event.touches : event.changedTouches;
-        if(!touches || !touches.length) return null;
-        return touches[0];
-      };
-
-      const handleTouchMove = (event) => {
+      const handleTouchEnd = (event) => {
         if(!pointerState) return;
-        const touch = getPrimaryTouchPoint(event);
-        if(!touch) return;
-        handleDockMove(Number(touch.clientX || 0), Number(touch.clientY || 0), event);
-      };
-
-      const handleTouchEnd = () => {
-        if(!pointerState) return;
-        finishPointerInteraction(null);
+        if(event && event.cancelable) event.preventDefault();
+        finishPointerInteraction();
       };
 
       const handleTouchCancel = () => {
         if(!pointerState) return;
-        cancelPointerInteraction(null);
+        cancelPointerInteraction();
       };
 
       const handleLostPointerCapture = (event) => {
         if(!pointerState || (event && event.pointerId !== pointerState.pointerId)) return;
-        pointerState.captureLost = true;
+        if(tabsEl.setPointerCapture){
+          try{ tabsEl.setPointerCapture(pointerState.pointerId); }catch(err){}
+        }
       };
 
       tabsEl.addEventListener("click", (event) => {
@@ -20570,7 +20909,7 @@
       document.addEventListener("pointercancel", cancelPointerInteraction, { passive:true, capture:true });
       document.addEventListener("lostpointercapture", handleLostPointerCapture, { passive:true, capture:true });
       document.addEventListener("touchmove", handleTouchMove, { passive:false, capture:true });
-      document.addEventListener("touchend", handleTouchEnd, { passive:true, capture:true });
+      document.addEventListener("touchend", handleTouchEnd, { passive:false, capture:true });
       document.addEventListener("touchcancel", handleTouchCancel, { passive:true, capture:true });
       window.addEventListener("blur", () => cancelPointerInteraction());
       window.addEventListener("scroll", () => {
@@ -20906,14 +21245,25 @@
         throw err;
       }
       const parsed = recordProtocol.parseModelResponse(rawModelOutput, { protocol });
+      const fallbackEnvelope = Array.isArray(parsed.record_candidates) && parsed.record_candidates.length
+        ? null
+        : buildRecordProtocolLocalFallbackEnvelope(scenario.userText, {
+            context,
+            currentState:state,
+            activeTrainingReference:activeReference,
+            allowSelfContainedFacts:true
+          });
+      const fallbackCandidates = Array.isArray(fallbackEnvelope?.record_candidates) ? fallbackEnvelope.record_candidates : [];
+      const usedLocalFallback = fallbackCandidates.length > 0 && !(Array.isArray(parsed.record_candidates) && parsed.record_candidates.length);
       return {
-        ok:parsed.ok,
-        reply:parsed.reply,
-        record_candidates:parsed.record_candidates,
+        ok:parsed.ok || usedLocalFallback,
+        reply:parsed.reply || fallbackEnvelope?.reply || "",
+        record_candidates:usedLocalFallback ? fallbackCandidates : parsed.record_candidates,
         rejected_candidates:parsed.rejected_candidates || [],
         parseError:parsed.parseError || "",
         rawModelOutput:options.includeRawModelOutput ? rawModelOutput : summarizeRecordProtocolDebugText(rawModelOutput, 500).text,
-        compactMode:compactRequest.mode
+        compactMode:compactRequest.mode,
+        localFallback:usedLocalFallback
       };
     }
 
@@ -20993,13 +21343,19 @@
             context,
             currentState:state
           });
+          const nextReferenceDateText = scenario.expected?.dateText || state.activeTrainingReference?.targetDateText || "";
+          const nextReferenceDateIso = nextReferenceDateText
+            ? resolveRecordProtocolLiveScenarioDate(nextReferenceDateText, context.todayIso, context.visibleWeekDates)
+            : String(state.activeTrainingReference?.targetDateIso || state.activeTrainingReference?.targetDate || "");
           state = {
             ...state,
             dailyLogs:engineResult.nextState.dailyLogs,
             captureAttempts:engineResult.nextState.captureAttempts,
             activeTrainingReference:{
               exerciseName:scenario.expected?.exerciseName || state.activeTrainingReference?.exerciseName || "",
-              subjectText:scenario.expected?.exerciseName || ""
+              subjectText:scenario.expected?.exerciseName || "",
+              targetDateText:nextReferenceDateText,
+              targetDateIso:nextReferenceDateIso
             }
           };
           const evaluation = evaluateRecordProtocolLiveScenario(scenario, engineResult, protocolOutput, previousState, state, context);
