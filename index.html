@@ -13,8 +13,8 @@
   <meta name="format-detection" content="telephone=no" />
 
   <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="icon" href="./app-icon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="./app-icon.svg" />
+  <link rel="icon" href="./icons/app-icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="./icons/app-icon.svg" />
 
   <style>
     :root{
@@ -4938,6 +4938,7 @@
     const TRAINING_CAPTURE_CARDS_KEY = "gain-training-capture-cards";
     const TRAINING_CAPTURE_RECENT_KEY = "gain-training-capture-recent-session";
     const TRAINING_CAPTURE_PENDING_KEY = "gain-training-capture-pending-context";
+    const PLAN_RECONCILIATION_PENDING_KEY = "gain-plan-reconciliation-pending";
     const TRAINING_CAPTURE_TOAST_MS = 5000;
     const AI_WEEKLY_SUMMARIES_KEY = "gain-ai-weekly-summaries";
     const PLAN_CHECK_META_KEY = "gain-plan-check-meta";
@@ -5827,6 +5828,132 @@
       return library.find((entry) => isExerciseLibraryMatch(entry, raw)) || null;
     }
 
+    function getExerciseMentionResolverSource(action = {}, matchedName = ""){
+      if(action.userCreated) return "custom";
+      if(String(matchedName || "") && String(matchedName || "") !== String(action.displayName || "")) return "alias";
+      if(action.media?.path) return "guide";
+      if(action.guide) return "guide";
+      return "exercise_library";
+    }
+
+    function getExerciseMentionResolverNames(action = {}){
+      return uniqueCleanList([action.displayName, action.aliases, action.media?.label, action.guide?.title]);
+    }
+
+    function getExerciseMentionMatches(text = "", options = {}){
+      const raw = String(text || "").trim();
+      const normalizedRaw = normalizeTrainingSearchText(raw);
+      if(!raw || !normalizedRaw) return [];
+      const library = Array.isArray(options.exerciseLibrary) ? options.exerciseLibrary : getExerciseLibrary();
+      const matches = [];
+      library.forEach((action) => {
+        if(!action || typeof action !== "object") return;
+        getExerciseMentionResolverNames(action).forEach((name) => {
+          const displayName = String(name || "").trim();
+          if(!displayName) return;
+          const normalizedName = normalizeTrainingSearchText(displayName);
+          if(!normalizedName) return;
+          const isEnglish = /^[a-z0-9 ]+$/i.test(normalizedName);
+          const source = isEnglish ? normalizedRaw : raw;
+          const needle = isEnglish ? normalizedName : displayName;
+          const exact = raw === displayName || normalizedRaw === normalizedName;
+          const index = exact ? 0 : source.indexOf(needle);
+          if(index < 0) return;
+          const hasEnoughSpecificity = exact || displayName.length >= 2 || normalizedName.length >= 3;
+          if(!hasEnoughSpecificity) return;
+          matches.push({
+            exerciseKey:String(action.exerciseKey || "").trim(),
+            displayName:String(action.displayName || displayName).trim(),
+            matchedText:displayName,
+            alias:displayName,
+            normalizedAlias:normalizedName,
+            index,
+            end:index + String(needle || "").length,
+            matchLength:String(needle || "").length,
+            source:getExerciseMentionResolverSource(action, displayName),
+            action
+          });
+        });
+      });
+      const byRangeAndKey = new Map();
+      matches.forEach((match) => {
+        const key = `${match.index}:${match.end}:${match.exerciseKey || match.displayName}`;
+        const previous = byRangeAndKey.get(key);
+        if(!previous || match.matchLength > previous.matchLength){
+          byRangeAndKey.set(key, match);
+        }
+      });
+      return Array.from(byRangeAndKey.values())
+        .sort((a, b) => a.index - b.index || b.matchLength - a.matchLength || a.displayName.localeCompare(b.displayName, "zh-CN"));
+    }
+
+    function resolveExerciseMention(text = "", options = {}){
+      const raw = String(text || "").trim();
+      const active = options.activeTrainingReference && typeof options.activeTrainingReference === "object"
+        ? options.activeTrainingReference
+        : {};
+      const preferActiveReference = options.preferActiveReference !== false;
+      const activeName = String(active.exerciseName || active.displayName || active.subjectText || active.planItemText || "").trim();
+      const activeKey = String(active.exerciseKey || "").trim();
+      const contextReferenceOnly = /(?:刚才|刚刚|那个|那条|这个|这条|上一项|上一条|又补|再补|继续)/.test(raw);
+      if(preferActiveReference && activeName && (raw.includes(activeName) || contextReferenceOnly)){
+        const action = activeKey
+          ? getExerciseLibrary().find((entry) => String(entry.exerciseKey || "") === activeKey)
+          : readExerciseLibraryAction(activeName);
+        return {
+          status:"matched",
+          exerciseKey:activeKey || String(action?.exerciseKey || "").trim(),
+          displayName:String(action?.displayName || activeName).trim(),
+          matchedText:activeName,
+          source:"active_reference",
+          candidates:[]
+        };
+      }
+
+      const matches = getExerciseMentionMatches(raw, options);
+      if(!matches.length){
+        return { status:"no_match", exerciseKey:"", displayName:"", matchedText:"", source:"unknown", candidates:[] };
+      }
+      const primary = matches[0];
+      const sameSpan = matches.filter((match) => match.index === primary.index && match.end === primary.end);
+      const distinctSameSpan = Array.from(new Map(sameSpan.map((match) => [match.displayName || match.exerciseKey, match])).values());
+      if(distinctSameSpan.length > 1){
+        const exactDisplayMatches = distinctSameSpan.filter((match) => String(match.displayName || "").trim() === String(match.matchedText || "").trim());
+        if(exactDisplayMatches.length === 1){
+          const exact = exactDisplayMatches[0];
+          return {
+            status:"matched",
+            exerciseKey:exact.exerciseKey,
+            displayName:exact.displayName,
+            matchedText:exact.matchedText,
+            source:exact.source,
+            candidates:[]
+          };
+        }
+        return {
+          status:"ambiguous",
+          exerciseKey:"",
+          displayName:"",
+          matchedText:primary.matchedText,
+          source:primary.source,
+          candidates:distinctSameSpan.map((match) => ({
+            exerciseKey:match.exerciseKey,
+            displayName:match.displayName,
+            matchedText:match.matchedText,
+            source:match.source
+          }))
+        };
+      }
+      return {
+        status:"matched",
+        exerciseKey:primary.exerciseKey,
+        displayName:primary.displayName,
+        matchedText:primary.matchedText,
+        source:primary.source,
+        candidates:[]
+      };
+    }
+
     function getExerciseActionForPlanItem(itemText){
       const name = getPlanItemExerciseName(itemText);
       return readExerciseLibraryAction(name) || readExerciseLibraryAction(itemText) || normalizeExerciseLibraryAction({
@@ -6062,6 +6189,7 @@
       "targetDateIso",
       "dateSource",
       "exerciseRef",
+      "exerciseKey",
       "amount",
       "unit",
       "duration",
@@ -6456,6 +6584,22 @@
         }
         if(aliasedCandidate.durationUnit == null && (nestedRecord.durationMinutes != null || nestedRecord.durationMinutesPerSet != null)) aliasedCandidate.durationUnit = "minute";
         if(aliasedCandidate.durationUnit == null && (nestedRecord.durationSeconds != null || nestedRecord.durationSecondsPerSet != null)) aliasedCandidate.durationUnit = "second";
+        const resolveCandidateExercise = (query, sourceText = sourceTextForAliases) => {
+          const combined = [query, sourceText].map((item) => String(item || "").trim()).filter(Boolean).join(" ");
+          try{
+            return resolveExerciseMention(combined || query || sourceText, { preferActiveReference:false });
+          }catch(_err){
+            return { status:"no_match" };
+          }
+        };
+        const shouldCanonicalizeResolvedExercise = (query, resolved) => {
+          if(!resolved || resolved.status !== "matched") return false;
+          if(resolved.source === "custom") return true;
+          const rawQuery = String(query || "").trim();
+          if(!rawQuery) return true;
+          const matchedText = String(resolved.matchedText || "").trim();
+          return !!(matchedText && rawQuery !== matchedText && rawQuery.includes(matchedText));
+        };
         if(!aliasedCandidate.exerciseRef || typeof aliasedCandidate.exerciseRef !== "object" || Array.isArray(aliasedCandidate.exerciseRef)){
           let displayName = String(
             candidate.exerciseName ||
@@ -6470,17 +6614,40 @@
             nestedRecord.exercise ||
             ""
           ).trim();
-          try{
-            displayName = String(
-              getMatchedTrainingExercisesFromText(displayName || sourceTextForAliases)[0]?.canonical ||
-              getMatchedTrainingExercisesFromText(sourceTextForAliases)[0]?.canonical ||
-              displayName ||
-              ""
-            ).trim();
-          }catch(_err){
+          const resolvedExercise = resolveCandidateExercise(displayName, sourceTextForAliases);
+          if(resolvedExercise.status === "matched"){
+            if(shouldCanonicalizeResolvedExercise(displayName, resolvedExercise)) displayName = resolvedExercise.displayName;
+            aliasedCandidate.exerciseKey = aliasedCandidate.exerciseKey || resolvedExercise.exerciseKey || "";
+          }else if(resolvedExercise.status === "ambiguous"){
+            displayName = displayName || resolvedExercise.matchedText || "";
+            aliasedCandidate.needsConfirmation = true;
+            aliasedCandidate.reason = aliasedCandidate.reason || `动作不明确：${resolvedExercise.candidates.map((item) => item.displayName).join(" / ")}`;
+          }else{
             displayName = displayName || "";
           }
-          if(displayName) aliasedCandidate.exerciseRef = { type:"mentioned", displayName };
+          if(displayName) aliasedCandidate.exerciseRef = { type:"mentioned", displayName, exerciseKey:aliasedCandidate.exerciseKey || "" };
+        }else if(String(aliasedCandidate.exerciseRef.type || "") !== "activeTrainingReference"){
+          const rawRef = aliasedCandidate.exerciseRef || {};
+          const refQuery = String(rawRef.displayName || rawRef.name || rawRef.exerciseName || rawRef.subjectText || rawRef.exerciseKey || "").trim();
+          const resolvedExercise = resolveCandidateExercise(refQuery, sourceTextForAliases);
+          if(resolvedExercise.status === "matched"){
+            aliasedCandidate.exerciseRef = {
+              ...rawRef,
+              type:String(rawRef.type || "mentioned").trim() || "mentioned",
+              displayName:shouldCanonicalizeResolvedExercise(refQuery, resolvedExercise) ? resolvedExercise.displayName : refQuery,
+              exerciseKey:resolvedExercise.exerciseKey || String(rawRef.exerciseKey || "").trim()
+            };
+            aliasedCandidate.exerciseKey = aliasedCandidate.exerciseKey || resolvedExercise.exerciseKey || "";
+          }else if(resolvedExercise.status === "ambiguous"){
+            aliasedCandidate.exerciseRef = {
+              ...rawRef,
+              type:String(rawRef.type || "mentioned").trim() || "mentioned",
+              displayName:refQuery || resolvedExercise.matchedText || "",
+              exerciseKey:""
+            };
+            aliasedCandidate.needsConfirmation = true;
+            aliasedCandidate.reason = aliasedCandidate.reason || `动作不明确：${resolvedExercise.candidates.map((item) => item.displayName).join(" / ")}`;
+          }
         }
         if(!aliasedCandidate.targetDateText){
           const dateText = String(
@@ -6564,6 +6731,14 @@
           const repsPerSet = readEvidenceNumber(/(?:每组|每次|每一组|一组)\s*(\d+(?:\.\d+)?|[零一二两三四五六七八九十]+)\s*(?:次|个|下|reps?)/i);
           if(Number.isFinite(repsPerSet) && repsPerSet > 0) aliasedCandidate.repsPerSet = repsPerSet;
         }
+        if(aliasedCandidate.amount == null && aliasedCandidate.reps == null && aliasedCandidate.repsPerSet == null){
+          const reps = readEvidenceNumber(/(\d+(?:\.\d+)?|[零一二两三四五六七八九十]+)\s*(?:次|个|下|reps?)/i);
+          if(Number.isFinite(reps) && reps > 0){
+            aliasedCandidate.reps = reps;
+            aliasedCandidate.amount = reps;
+            aliasedCandidate.unit = aliasedCandidate.unit || "rep";
+          }
+        }
         if(aliasedCandidate.confidence == null){
           const normalizedEvidenceSource = String(aliasedCandidate.evidenceSource || "").trim();
           const normalizedRiskLevel = String(aliasedCandidate.riskLevel || "").trim();
@@ -6606,7 +6781,7 @@
         });
         clean.candidateType = candidateType;
         clean.rawText = String(clean.rawText || candidate.text || clean.evidenceText || "");
-        ["evidenceText", "targetDateText", "targetDateIso", "dateSource", "writeIntent", "evidenceSource", "riskLevel", "scope"].forEach((field) => {
+        ["evidenceText", "targetDateText", "targetDateIso", "dateSource", "writeIntent", "evidenceSource", "riskLevel", "scope", "exerciseKey"].forEach((field) => {
           if(clean[field] != null) clean[field] = String(clean[field] || "").trim();
         });
         clean.intent = String(clean.intent || "");
@@ -6629,7 +6804,7 @@
           clean.exerciseRef = {
             type: String(clean.exerciseRef.type || "").trim(),
             displayName: String(clean.exerciseRef.displayName || clean.exerciseRef.name || "").trim(),
-            exerciseKey: String(clean.exerciseRef.exerciseKey || "").trim()
+            exerciseKey: String(clean.exerciseRef.exerciseKey || clean.exerciseKey || "").trim()
           };
         }else{
           clean.exerciseRef = { type:"unknown", displayName:"", exerciseKey:"" };
@@ -6638,7 +6813,7 @@
           clean.bodyState = {
             weight: clean.bodyState.weight != null ? String(clean.bodyState.weight) : "",
             sleep: clean.bodyState.sleep != null ? String(clean.bodyState.sleep) : "",
-            fatigueScore: clean.bodyState.fatigueScore != null ? String(clean.bodyState.fatigueScore) : ""
+            fatigueScore: clean.bodyState.fatigueScore != null ? clean.bodyState.fatigueScore : ""
           };
         }
         if(clean.correction && (typeof clean.correction !== "object" || Array.isArray(clean.correction))){
@@ -7709,6 +7884,10 @@
     function resolveRecordProtocolCandidateDate(candidate = {}, context = {}, currentState = {}){
       const targetDateText = String(candidate.targetDateText || "").trim();
       if(!targetDateText) return { resolved:false, attempted:false };
+      const normalizedTargetDateText = targetDateText
+        .replace(/^(?:这周|本周|这个周|这一周)/, "周")
+        .replace(/^星期/, "周")
+        .replace(/^礼拜/, "周");
       const todayIso = String(context.todayIso || "").trim();
       const shiftIsoDate = (days) => {
         if(!/^\d{4}-\d{2}-\d{2}$/.test(todayIso)) return "";
@@ -7716,7 +7895,7 @@
         const date = new Date(Date.UTC(year, month - 1, day + days));
         return date.toISOString().slice(0, 10);
       };
-      if(["today", "今天"].includes(targetDateText) && todayIso){
+      if(["today", "今天"].includes(normalizedTargetDateText) && todayIso){
         return {
           resolved:true,
           attempted:true,
@@ -7731,8 +7910,8 @@
         tomorrow:1,
         "明天":1
       };
-      if(Object.prototype.hasOwnProperty.call(relativeDateOffsets, targetDateText)){
-        const targetDateIso = shiftIsoDate(relativeDateOffsets[targetDateText]);
+      if(Object.prototype.hasOwnProperty.call(relativeDateOffsets, normalizedTargetDateText)){
+        const targetDateIso = shiftIsoDate(relativeDateOffsets[normalizedTargetDateText]);
         if(targetDateIso){
           return {
             resolved:true,
@@ -7747,7 +7926,7 @@
       ];
       const weekdayMatch = visibleWeekDates.find((day) => (
         day &&
-        String(day.weekday || "").trim() === targetDateText &&
+        String(day.weekday || "").trim() === normalizedTargetDateText &&
         String(day.iso || "").trim()
       ));
       if(weekdayMatch){
@@ -7781,12 +7960,120 @@
           if(!String(clean.dateSource || "").trim() && String(clean.targetDateText || "").trim()){
             clean.dateSource = clean.targetDateText === "today" ? "default_today" : "explicit";
           }
+          const candidateId = makeRecordProtocolCandidateId(clean, index, source);
+          const validation = recordProtocol.validateCandidate(clean);
+          const normalized = validation.ok ? validation.candidate : clean;
           return {
-            ...clean,
-            candidateId:makeRecordProtocolCandidateId(clean, index, source)
+            ...normalized,
+            candidateId
           };
         })
       };
+    }
+
+    function normalizeRecordProtocolEngineDurationUnit(unit = ""){
+      const raw = String(unit || "").trim().toLowerCase();
+      if(!raw) return "";
+      if(["second", "seconds", "sec", "secs", "s", "\u79d2"].includes(raw)) return "second";
+      if(["minute", "minutes", "min", "mins", "\u5206\u949f", "\u5206"].includes(raw)) return "minute";
+      return raw;
+    }
+
+    function normalizeRecordProtocolEngineUnit(unit = ""){
+      const raw = String(unit || "").trim().toLowerCase();
+      if(!raw) return "";
+      if(["set", "sets", "\u7ec4", "\u7ec4\u6570", "\u5957", "\u8f6e"].includes(raw)) return "set";
+      if(["rep", "reps", "\u6b21", "\u4e2a", "\u4e0b"].includes(raw)) return "rep";
+      return normalizeRecordProtocolEngineDurationUnit(raw) || raw;
+    }
+
+    function readRecordProtocolNumberAlias(source = {}, keys = []){
+      for(const key of keys){
+        if(source[key] != null && Number.isFinite(Number(source[key])) && Number(source[key]) > 0){
+          return Number(source[key]);
+        }
+      }
+      return undefined;
+    }
+
+    function normalizeRecordProtocolCorrectionFields(candidate = {}, correction = {}){
+      const fieldSources = [
+        correction.fields,
+        correction.updates,
+        correction.newFields,
+        correction.fieldsToModify,
+        correction.record,
+        correction.recordFields,
+        candidate.fields,
+        candidate.updates,
+        candidate.currentValue
+      ].filter((value) => value && typeof value === "object" && !Array.isArray(value));
+      const merged = Object.assign({}, ...fieldSources);
+      const fields = {};
+      const exerciseName = String(
+        merged.exerciseName ||
+        merged.displayName ||
+        merged.newExerciseName ||
+        merged.name ||
+        ""
+      ).trim();
+      if(exerciseName) fields.exerciseName = exerciseName;
+      const exerciseKey = String(merged.exerciseKey || "").trim();
+      if(exerciseKey) fields.exerciseKey = exerciseKey;
+
+      const sets = readRecordProtocolNumberAlias(merged, ["sets", "setCount", "groupCount", "groups"]);
+      const reps = readRecordProtocolNumberAlias(merged, ["reps", "repCount", "count", "totalReps"]);
+      const repsPerSet = readRecordProtocolNumberAlias(merged, ["repsPerSet", "perSetReps", "repPerSet", "countPerSet"]);
+      const bestSetReps = readRecordProtocolNumberAlias(merged, ["bestSetReps"]);
+      const amount = readRecordProtocolNumberAlias(merged, ["amount", "value", "quantity"]);
+      let duration = readRecordProtocolNumberAlias(merged, [
+        "duration",
+        "durationPerSet",
+        "perSetDuration",
+        "minutesPerGroup",
+        "secondsPerGroup",
+        "durationMinutes",
+        "durationSeconds",
+        "durationMinutesPerSet",
+        "durationSecondsPerSet"
+      ]);
+      let unit = normalizeRecordProtocolEngineUnit(merged.unit || "");
+      let durationUnit = normalizeRecordProtocolEngineDurationUnit(merged.durationUnit || merged.duration_unit || "");
+
+      if(!durationUnit && (merged.durationMinutes != null || merged.durationMinutesPerSet != null || merged.minutesPerGroup != null)) durationUnit = "minute";
+      if(!durationUnit && (merged.durationSeconds != null || merged.durationSecondsPerSet != null || merged.secondsPerGroup != null)) durationUnit = "second";
+      if(!duration && amount && (unit === "minute" || unit === "second")){
+        duration = amount;
+        durationUnit = durationUnit || unit;
+      }
+      if(!unit && sets) unit = "set";
+      if(!unit && reps && !repsPerSet) unit = "rep";
+      if(!unit && durationUnit) unit = durationUnit;
+
+      if(sets != null) fields.sets = sets;
+      if(reps != null) fields.reps = reps;
+      if(repsPerSet != null) fields.repsPerSet = repsPerSet;
+      if(bestSetReps != null) fields.bestSetReps = bestSetReps;
+      if(amount != null) fields.amount = amount;
+      if(unit) fields.unit = unit;
+      if(duration != null) fields.duration = duration;
+      if(durationUnit) fields.durationUnit = durationUnit;
+
+      ["sets", "reps", "repsPerSet", "bestSetReps", "amount", "duration"].forEach((field) => {
+        const topLevel = readRecordProtocolNumberAlias(candidate, [field]);
+        if(fields[field] == null && topLevel != null) fields[field] = topLevel;
+      });
+      if(!fields.unit) fields.unit = normalizeRecordProtocolEngineUnit(candidate.unit || "");
+      if(!fields.durationUnit) fields.durationUnit = normalizeRecordProtocolEngineDurationUnit(candidate.durationUnit || "");
+      if(!fields.duration && fields.amount && (fields.unit === "minute" || fields.unit === "second")){
+        fields.duration = fields.amount;
+        fields.durationUnit = fields.durationUnit || fields.unit;
+      }
+      if(fields.duration && !fields.amount && (fields.durationUnit === "minute" || fields.durationUnit === "second")){
+        fields.amount = fields.duration;
+        fields.unit = fields.unit || fields.durationUnit;
+      }
+      return Object.fromEntries(Object.entries(fields).filter(([, value]) => value !== "" && value != null));
     }
 
     function describeRecordProtocolCorrection(candidate = {}, context = {}, currentState = {}){
@@ -7796,6 +8083,14 @@
       const targetRecordRef = correction.targetRecordRef && typeof correction.targetRecordRef === "object" && !Array.isArray(correction.targetRecordRef)
         ? { ...correction.targetRecordRef }
         : {};
+      const targetSubject = String(targetRecordRef.subjectText || targetRecordRef.exerciseName || targetRecordRef.displayName || "").trim();
+      if(targetSubject){
+        const resolved = resolveExerciseMention(targetSubject, { preferActiveReference:false });
+        if(resolved.status === "matched"){
+          targetRecordRef.subjectText = resolved.displayName;
+          targetRecordRef.exerciseKey = targetRecordRef.exerciseKey || resolved.exerciseKey || "";
+        }
+      }
       const newDate = correction.newDate && typeof correction.newDate === "object" && !Array.isArray(correction.newDate)
         ? correction.newDate
         : {};
@@ -7804,6 +8099,7 @@
         operation:String(correction.operation || ""),
         targetRecordRef,
         previousDateIso:String(targetRecordRef.previousDateIso || ""),
+        fields:normalizeRecordProtocolCorrectionFields(candidate, correction),
         ...(newDate.targetDateText ? { targetDateText:String(newDate.targetDateText || "") } : {}),
         ...(newDateResolution.targetDateIso ? { targetDateIso:newDateResolution.targetDateIso } : {})
       };
@@ -7934,6 +8230,7 @@
         candidateId:String(candidate.candidateId || ""),
         targetDateIso:String(decision.targetDateIso || ""),
         exerciseName:String(candidate.exerciseRef?.displayName || candidate.exerciseName || "").trim(),
+        exerciseKey:String(candidate.exerciseRef?.exerciseKey || candidate.exerciseKey || "").trim(),
         amount:Number.isFinite(Number(candidate.amount)) ? Number(candidate.amount) : undefined,
         unit:String(candidate.unit || ""),
         sets:Number.isFinite(Number(candidate.sets)) ? Number(candidate.sets) : undefined,
@@ -8017,23 +8314,103 @@
       const previousDateIso = String(targetRecordRef.previousDateIso || "").trim();
       const originalEvidenceText = String(targetRecordRef.originalEvidenceText || "").trim();
       const subjectText = String(targetRecordRef.subjectText || "").trim();
+      const exerciseKey = String(targetRecordRef.exerciseKey || "").trim();
       const dateEntries = previousDateIso && dailyLogs[previousDateIso]
         ? [[previousDateIso, dailyLogs[previousDateIso]]]
         : Object.entries(dailyLogs);
-      for(const [dateIso, log] of dateEntries){
+      for(const [dateIso, log] of dateEntries.slice().reverse()){
         const records = Array.isArray(log?.records) ? log.records : [];
-        const recordIndex = records.findIndex((record) => {
-          if(!record) return false;
-          if(recordId && String(record.recordId || "") === recordId) return true;
-          if(originalEvidenceText && String(record.evidenceText || "") === originalEvidenceText) return true;
-          if(subjectText && String(record.exerciseName || record.subjectText || "").includes(subjectText)) return true;
-          return false;
-        });
+        let recordIndex = -1;
+        for(let index = records.length - 1; index >= 0; index -= 1){
+          const record = records[index];
+          if(!record) continue;
+          if(!recordId && record.revoked) continue;
+          if(recordId && String(record.recordId || "") === recordId){
+            recordIndex = index;
+            break;
+          }
+          if(originalEvidenceText && String(record.evidenceText || "") === originalEvidenceText){
+            recordIndex = index;
+            break;
+          }
+          if(exerciseKey && String(record.exerciseKey || "") === exerciseKey){
+            recordIndex = index;
+            break;
+          }
+          if(subjectText && String(record.exerciseName || record.subjectText || "").includes(subjectText)){
+            recordIndex = index;
+            break;
+          }
+        }
         if(recordIndex >= 0){
           return { dateIso, log, records, recordIndex, record:records[recordIndex] };
         }
       }
       return null;
+    }
+
+    function applyRecordProtocolRecordFieldUpdates(record = {}, fields = {}, candidate = {}, correction = {}){
+      const next = { ...record };
+      const previousFields = {};
+      const assign = (field, value) => {
+        if(value == null || value === "") return;
+        previousFields[field] = next[field];
+        next[field] = value;
+      };
+      const assignNumber = (field, value) => {
+        if(value == null || !Number.isFinite(Number(value)) || Number(value) <= 0) return;
+        assign(field, Number(value));
+      };
+
+      if(fields.exerciseName) assign("exerciseName", String(fields.exerciseName || "").trim());
+      if(fields.exerciseKey) assign("exerciseKey", String(fields.exerciseKey || "").trim());
+      assignNumber("amount", fields.amount);
+      if(fields.unit) assign("unit", normalizeRecordProtocolEngineUnit(fields.unit));
+      assignNumber("sets", fields.sets);
+      assignNumber("reps", fields.reps);
+      assignNumber("repsPerSet", fields.repsPerSet);
+      assignNumber("bestSetReps", fields.bestSetReps);
+      assignNumber("duration", fields.duration);
+      if(fields.durationUnit) assign("durationUnit", normalizeRecordProtocolEngineDurationUnit(fields.durationUnit));
+      if(next.duration && !next.amount && (next.durationUnit === "minute" || next.durationUnit === "second")){
+        previousFields.amount = next.amount;
+        previousFields.unit = next.unit;
+        next.amount = next.duration;
+        next.unit = next.unit || next.durationUnit;
+      }
+
+      if(next.currentValue && typeof next.currentValue === "object" && !Array.isArray(next.currentValue)){
+        const currentValue = { ...next.currentValue };
+        if(fields.exerciseName) currentValue.exercise = String(fields.exerciseName || "").trim();
+        ["sets", "reps", "repsPerSet", "bestSetReps", "duration"].forEach((field) => {
+          if(next[field] != null) currentValue[field] = next[field];
+        });
+        if(next.durationUnit) currentValue.durationUnit = next.durationUnit;
+        next.currentValue = currentValue;
+      }
+
+      const correctionEntry = {
+        candidateId:String(candidate.candidateId || ""),
+        evidenceText:String(candidate.evidenceText || ""),
+        operation:String(correction.operation || ""),
+        previousFields,
+        updatedFields:{ ...fields },
+        correctedAtIso:new Date().toISOString()
+      };
+      next.lastCorrectionCandidateId = String(candidate.candidateId || "");
+      next.lastCorrectionEvidenceText = String(candidate.evidenceText || "");
+      next.correctionHistory = [
+        ...(Array.isArray(record.correctionHistory) ? record.correctionHistory.slice(-9) : []),
+        correctionEntry
+      ];
+      if(next.aiCapture && typeof next.aiCapture === "object" && !Array.isArray(next.aiCapture)){
+        next.aiCapture = {
+          ...next.aiCapture,
+          correctedByCandidateId:String(candidate.candidateId || ""),
+          correctedEvidenceText:String(candidate.evidenceText || "")
+        };
+      }
+      return next;
     }
 
     function applyRecordProtocolConfirmedCorrections(nextDailyLogs, candidates = [], decisions = [], context = {}, currentState = {}, confirmedCandidateIds = new Set()){
@@ -8042,7 +8419,7 @@
         if(candidate.candidateType !== "correction") return;
         if(!confirmedCandidateIds.has(String(candidate.candidateId || ""))) return;
         const correction = describeRecordProtocolCorrection(candidate, context, currentState);
-        if(correction.operation !== "move_record_to_date" || !correction.targetDateIso){
+        if(!["move_record_to_date", "modify_record_fields", "delete_record"].includes(correction.operation)){
           return;
         }
         const found = findRecordProtocolReferencedRecord(nextDailyLogs, correction.targetRecordRef);
@@ -8053,6 +8430,53 @@
             reason:"target_record_not_found",
             correction
           };
+          return;
+        }
+        if(correction.operation === "modify_record_fields"){
+          const updatedRecord = applyRecordProtocolRecordFieldUpdates(found.record, correction.fields || {}, candidate, correction);
+          found.records.splice(found.recordIndex, 1, updatedRecord);
+          nextDailyLogs[found.dateIso] = {
+            ...(found.log || {}),
+            date:(found.log && found.log.date) || found.dateIso,
+            records:found.records
+          };
+          nextDecisions[index] = {
+            candidateId:String(candidate.candidateId || ""),
+            decision:"written",
+            reason:"confirmed_correction_applied",
+            correction,
+            updatedRecordId:String(updatedRecord.recordId || ""),
+            targetDateIso:found.dateIso,
+            writtenRecordId:String(updatedRecord.recordId || "")
+          };
+          return;
+        }
+        if(correction.operation === "delete_record"){
+          const deletedRecord = {
+            ...found.record,
+            revoked:true,
+            revokedByCandidateId:String(candidate.candidateId || ""),
+            revokeEvidenceText:String(candidate.evidenceText || ""),
+            revokedAtIso:new Date().toISOString()
+          };
+          found.records.splice(found.recordIndex, 1, deletedRecord);
+          nextDailyLogs[found.dateIso] = {
+            ...(found.log || {}),
+            date:(found.log && found.log.date) || found.dateIso,
+            records:found.records
+          };
+          nextDecisions[index] = {
+            candidateId:String(candidate.candidateId || ""),
+            decision:"written",
+            reason:"confirmed_correction_applied",
+            correction,
+            deletedRecordId:String(deletedRecord.recordId || ""),
+            targetDateIso:found.dateIso,
+            writtenRecordId:String(deletedRecord.recordId || "")
+          };
+          return;
+        }
+        if(correction.operation !== "move_record_to_date" || !correction.targetDateIso){
           return;
         }
         const movedRecord = {
@@ -9376,9 +9800,15 @@
       return /(?:\u505a\u4e86|\u505a\u5b8c|\u5b8c\u6210|\u7ec3\u4e86|\u7ec3\u5b8c|\u52a0\u7ec3|\u6253\u5361|finished|completed|done|trained|logged)/i.test(raw);
     }
 
+    function hasRecordProtocolV2TrainingAttributeFactSignal(text = ""){
+      const raw = String(text || "");
+      return /(?:\u6bcf\u7ec4|\u5355\u7ec4|\u4e00\u7ec4).{0,12}(?:\u65f6\u95f4|\u65f6\u957f|\u505a|hold|duration)?\s*(?:\u662f|=|:|：)?\s*(?:\d+(?:\.\d+)?|[\u4e00\u4e8c\u4e24\u4e09\u56db\u4e94\u516d\u4e03\u516b\u4e5d\u5341]+)\s*(?:\u5206\u949f|\u5206|\u79d2|minutes?|mins?|seconds?|secs?|s)/i.test(raw)
+        || /(?:\u65f6\u95f4|\u65f6\u957f|\u6bcf\u7ec4\u65f6\u95f4|\u6bcf\u7ec4\u65f6\u957f).{0,8}(?:\u662f|=|:|：)?\s*(?:\d+(?:\.\d+)?|[\u4e00\u4e8c\u4e24\u4e09\u56db\u4e94\u516d\u4e03\u516b\u4e5d\u5341]+)\s*(?:\u5206\u949f|\u5206|\u79d2|minutes?|mins?|seconds?|secs?|s)/i.test(raw);
+    }
+
     function hasRecordProtocolV2QuantitySignal(text = ""){
       const raw = String(text || "");
-      return /(?:\d+(?:\.\d+)?|[\u4e00\u4e8c\u4e24\u4e09\u56db\u4e94\u516d\u4e03\u516b\u4e5d\u5341]+)\s*(?:\u7ec4|\u6b21|\u5206\u949f|\u79d2|sets?|reps?|minutes?|mins?|seconds?|secs?)/i.test(raw);
+      return /(?:\d+(?:\.\d+)?|[\u4e00\u4e8c\u4e24\u4e09\u56db\u4e94\u516d\u4e03\u516b\u4e5d\u5341]+)\s*(?:\u7ec4|\u6b21|\u4e2a|\u4e0b|\u5206\u949f|\u79d2|sets?|reps?|minutes?|mins?|seconds?|secs?)/i.test(raw);
     }
 
     function hasRecordProtocolV2ExerciseSignal(text = "", input = {}){
@@ -9386,10 +9816,9 @@
       const active = input.activeTrainingReference && typeof input.activeTrainingReference === "object"
         ? input.activeTrainingReference
         : {};
-      const activeName = String(active.exerciseName || active.displayName || active.planItemText || "").trim();
-      if(activeName && raw.includes(activeName)) return true;
-      if(/\u6df1\u8e72|\u5e73\u677f\u652f\u6491|\u62c9\u4f38|\u4fef\u5367\u6491|\u5212\u8239|squat|plank|stretch|push-?up|row/i.test(raw)) return true;
       try{
+        const resolved = resolveExerciseMention(raw, { activeTrainingReference:active });
+        if(resolved.status === "matched" || resolved.status === "ambiguous") return true;
         return Array.isArray(getMatchedTrainingExercisesFromText(raw)) && getMatchedTrainingExercisesFromText(raw).length > 0;
       }catch(err){
         return false;
@@ -9397,7 +9826,7 @@
     }
 
     function isRecordProtocolV2SelfContainedRecordText(text = "", input = {}){
-      return hasRecordProtocolV2CompletedFactSignal(text)
+      return (hasRecordProtocolV2CompletedFactSignal(text) || hasRecordProtocolV2TrainingAttributeFactSignal(text))
         && hasRecordProtocolV2QuantitySignal(text)
         && hasRecordProtocolV2ExerciseSignal(text, input);
     }
@@ -9424,7 +9853,11 @@
       if(!content) return false;
       const activeTexts = getRecordProtocolV2ActiveReferenceText(input);
       if(activeTexts.some((text) => text && content.includes(text))) return true;
-      return /(?:\u6df1\u8e72|\u5e73\u677f\u652f\u6491|\u62c9\u4f38|\u4fef\u5367\u6491|\u5212\u8239|\u5b8c\u6210|\u505a\u4e86|\u6539\u5230|\u4fee\u6b63|\u7ea0\u6b63|squat|plank|stretch|push-?up|row|completed|finished|correct|change|move)/i.test(content);
+      try{
+        const resolved = resolveExerciseMention(content, { activeTrainingReference:input.activeTrainingReference || {} });
+        if(resolved.status === "matched" || resolved.status === "ambiguous") return true;
+      }catch(_err){}
+      return /(?:\u5b8c\u6210|\u505a\u4e86|\u6539\u5230|\u4fee\u6b63|\u7ea0\u6b63|completed|finished|correct|change|move)/i.test(content);
     }
 
     function buildRecordProtocolV2HistoryTurns(input = {}, budget = DEFAULT_RECORD_PROTOCOL_V2_BUDGET){
@@ -9607,6 +10040,18 @@
 
     function getTrainingCaptureAliasEntries(){
       const entries = [];
+      try{
+        getExerciseLibrary().forEach((action) => {
+          getExerciseMentionResolverNames(action).forEach((alias) => {
+            entries.push({
+              canonical:action.displayName,
+              exerciseKey:action.exerciseKey || "",
+              alias,
+              source:"exercise_library"
+            });
+          });
+        });
+      }catch(_err){}
       TRAINING_CAPTURE_ACTION_ALIASES.forEach((entry) => {
         (entry.aliases || []).forEach((alias) => entries.push({ canonical:entry.canonical, alias }));
       });
@@ -9667,6 +10112,23 @@
       const raw = String(text || "");
       const normalized = normalizeTrainingSearchText(raw);
       if(!normalized) return null;
+      const resolved = resolveExerciseMention(raw, options);
+      if(resolved.status === "ambiguous"){
+        return {
+          ambiguous:true,
+          canonical:resolved.matchedText || "",
+          candidates:resolved.candidates.map((item) => item.displayName),
+          exerciseCandidates:resolved.candidates
+        };
+      }
+      if(resolved.status === "matched"){
+        return {
+          canonical:resolved.displayName,
+          alias:resolved.matchedText,
+          exerciseKey:resolved.exerciseKey,
+          ambiguous:false
+        };
+      }
       const hasSpecificFly = /哑铃飞鸟|反向飞鸟|俯身反向飞鸟|dumbbell fly|reverse fly|rear delt fly/i.test(raw);
       if(/飞鸟/.test(raw) && !hasSpecificFly){
         return { ambiguous:true, canonical:"飞鸟", candidates:["哑铃飞鸟","俯身反向飞鸟"] };
@@ -9805,6 +10267,15 @@
       return dose;
     }
 
+    function parsePlanDoseNumberRange(text = ""){
+      const match = String(text || "").match(/(\d+(?:\.\d+)?)(?:\s*[–—-]\s*(\d+(?:\.\d+)?))?/);
+      if(!match) return null;
+      const min = Number(match[1]);
+      const max = Number(match[2] || match[1]);
+      if(!Number.isFinite(min) || !Number.isFinite(max)) return null;
+      return { min:Math.min(min, max), max:Math.max(min, max) };
+    }
+
     function parseCaptureQuantity(text){
       const raw = String(text || "");
       const numberToken = "(\\d+(?:\\.\\d+)?|[一二两三四五六七八九十]+)";
@@ -9858,6 +10329,44 @@
         if(quantity[key] == null || Number.isNaN(quantity[key])) delete quantity[key];
       });
       return quantity;
+    }
+
+    function isMultiTrainingFactSplitBlocked(text){
+      return /改成|改为|修改|修正|更正|不对|不是|删除|删掉|撤回|不要记/.test(String(text || ""));
+    }
+
+    function getTrainingFactSplitDatePrefix(raw, firstExerciseIndex = 0){
+      const preamble = String(raw || "").slice(0, Math.max(0, Number(firstExerciseIndex || 0)));
+      const dateTokens = [...preamble.matchAll(/今天|刚才|昨天|昨晚|前天|上周[一二三四五六日天]?|这周[一二三四五六日天]?|本周[一二三四五六日天]?|周[一二三四五六日天]/g)]
+        .map((match) => match[0])
+        .filter(Boolean);
+      return dateTokens.length ? dateTokens[dateTokens.length - 1] : "";
+    }
+
+    function splitLocalTrainingFactSegments(text, options = {}){
+      const raw = String(text || "").trim();
+      if(!raw || isMultiTrainingFactSplitBlocked(raw)) return [];
+      const matches = getMatchedTrainingExercisesFromText(raw, options)
+        .filter((match) => Number.isFinite(Number(match.index)) && Number.isFinite(Number(match.end)))
+        .sort((a, b) => Number(a.index) - Number(b.index));
+      if(matches.length < 2) return [];
+      const datePrefix = getTrainingFactSplitDatePrefix(raw, matches[0].index);
+      const segments = matches.map((match, index) => {
+        const next = matches[index + 1];
+        const end = next ? Number(next.index) : raw.length;
+        let segment = raw.slice(Number(match.index), end)
+          .replace(/^[\s，,、；;。.!！?？]+|[\s，,、；;。.!！?？]+$/g, "")
+          .trim();
+        if(datePrefix && segment && !hasExplicitTrainingCaptureDate(segment)){
+          segment = `${datePrefix}${segment}`;
+        }
+        return { text:segment, match };
+      }).filter((segment) => {
+        if(!segment.text) return false;
+        const quantity = parseCaptureQuantity(segment.text);
+        return hasTrainingCaptureQuantity(quantity);
+      });
+      return segments.length >= 2 ? segments : [];
     }
 
     function resolveTrainingCaptureDate(text, now = new Date()){
@@ -10156,6 +10665,22 @@
       };
     }
 
+    function extractLocalTrainingCaptureIntents(text, options = {}){
+      if(options.skipMultiFactSplit) return [extractLocalTrainingCaptureIntent(text, options)];
+      const pending = !options.skipPendingMerge ? getPendingTrainingCaptureContext() : null;
+      if(pending) return [extractLocalTrainingCaptureIntent(text, options)];
+      const segments = splitLocalTrainingFactSegments(text, options);
+      if(segments.length < 2) return [extractLocalTrainingCaptureIntent(text, options)];
+      const intents = segments
+        .map((segment) => extractLocalTrainingCaptureIntent(segment.text, {
+          ...options,
+          skipPendingMerge:true,
+          skipMultiFactSplit:true
+        }))
+        .filter((intent) => intent && ["write", "follow_up"].includes(String(intent.action || "")));
+      return intents.length >= 2 ? intents : [extractLocalTrainingCaptureIntent(text, options)];
+    }
+
     function normalizeTrainingCaptureToasts(cards, nowMs = Date.now()){
       return (Array.isArray(cards) ? cards : [])
         .filter((card) => card && typeof card === "object")
@@ -10356,14 +10881,25 @@
       };
     }
 
+    function isTrackablePlanProgressItemText(itemText){
+      const text = String(itemText || "").trim();
+      if(!text || !/\d/.test(text)) return false;
+      if(/记录|体重|睡眠|多吃|多睡|喝水|热量|蛋白/.test(text)) return false;
+      const name = getPlanItemExerciseName(text).replace(/^(?:可选|选做|轻度|轻)\s*[:：]?\s*/, "").trim();
+      return !!(readExerciseLibraryAction(name) || readExerciseLibraryAction(text));
+    }
+
     function buildPlanProgressItemsForDate(dateKey, day, previous = {}){
-      if(previous.dayType === "note_only") return [];
-      if(getPlanDayType(day) !== "training") return [];
       const dayIndex = getPlanDayIndexForDate(dateKey);
       const previousItems = Array.isArray(previous.planProgressItems) ? previous.planProgressItems : [];
       const checks = getPlanChecks();
-      return normalizePlanItemsList(day.items || previous.allItems || [])
-        .map((item, itemIndex) => buildPlanProgressItem(dayIndex, itemIndex, item, previousItems, checks));
+      const dayType = previous.dayType || getPlanDayType(day);
+      const sourceItems = normalizePlanItemsList((Array.isArray(previous.allItems) && previous.allItems.length) ? previous.allItems : (day.items || []));
+      const indexedItems = sourceItems.map((item, itemIndex) => ({ item, itemIndex }));
+      const progressItems = dayType === "note_only"
+        ? indexedItems.filter(({ item }) => isTrackablePlanProgressItemText(item))
+        : indexedItems;
+      return progressItems.map(({ item, itemIndex }) => buildPlanProgressItem(dayIndex, itemIndex, item, previousItems, checks));
     }
 
     function buildLegacyCompatibility(previous = {}, nextProgressItems = []){
@@ -10403,7 +10939,7 @@
       const dayIndex = getPlanDayIndexForDate(dateKey);
       const day = getPlanDays()[dayIndex] || {};
       const checks = getPlanChecks();
-      const items = normalizePlanItemsList(day.items || previous.allItems || []);
+      const items = normalizePlanItemsList((Array.isArray(previous.allItems) && previous.allItems.length) ? previous.allItems : (day.items || []));
       const completedItems = items.filter((_, itemIndex) => checks[`d${dayIndex}_i${itemIndex}`]);
       const dayType = previous.dayType || getPlanDayType(day);
       const planProgressItems = buildPlanProgressItemsForDate(dateKey, day, previous);
@@ -10434,6 +10970,7 @@
         weight: previous.weight || "",
         sleep: previous.sleep || "",
         note: previous.note || "",
+        records: Array.isArray(previous.records) ? previous.records : [],
         aiCaptureRecords: Array.isArray(previous.aiCaptureRecords) ? previous.aiCaptureRecords : [],
         aiDailySummary: previous.aiDailySummary || null,
         legacyCompatibility: buildLegacyCompatibility(previous, planProgressItems),
@@ -10612,9 +11149,136 @@
       return trainingCapture.summarizeRecord(record);
     }
 
+    function normalizeRecordProtocolFactUnit(unit = "", fallback = "项"){
+      const raw = String(unit || "").trim().toLowerCase();
+      if(["set", "sets", "组"].includes(raw)) return "组";
+      if(["rep", "reps", "次", "个", "下"].includes(raw)) return "次";
+      if(["second", "seconds", "sec", "secs", "s", "秒"].includes(raw)) return "秒";
+      if(["minute", "minutes", "min", "mins", "分钟", "分"].includes(raw)) return "分钟";
+      return String(unit || fallback || "项").trim() || "项";
+    }
+
+    function getRecordProtocolDisplayInfo(record = {}){
+      const name = String(
+        record.exerciseName ||
+        record.displayName ||
+        record.exerciseRef?.displayName ||
+        record.currentValue?.exercise ||
+        ""
+      ).trim();
+      const action = readExerciseLibraryAction(name);
+      return {
+        displayName:action?.displayName || name || "训练记录",
+        exerciseKey:action?.exerciseKey || makeExerciseKey("record-protocol", name || record.recordId || "training")
+      };
+    }
+
+    function getRecordProtocolAmountInfo(record = {}){
+      const sets = Number(record.sets || (normalizeRecordProtocolFactUnit(record.unit, "") === "组" ? record.amount : 0));
+      if(Number.isFinite(sets) && sets > 0) return { amount:sets, unit:"组" };
+      const amount = Number(record.amount);
+      if(Number.isFinite(amount) && amount > 0){
+        return { amount, unit:normalizeRecordProtocolFactUnit(record.unit, "项") };
+      }
+      const reps = Number(record.reps || record.bestSetReps || 0);
+      if(Number.isFinite(reps) && reps > 0) return { amount:reps, unit:"次" };
+      const duration = Number(record.duration || 0);
+      if(Number.isFinite(duration) && duration > 0){
+        return { amount:duration, unit:normalizeRecordProtocolFactUnit(record.durationUnit, "分钟") };
+      }
+      const repsPerSet = Number(record.repsPerSet || 0);
+      if(Number.isFinite(repsPerSet) && repsPerSet > 0) return { amount:repsPerSet, unit:"次" };
+      return null;
+    }
+
+    function recordProtocolRecordToDailyFact(record = {}, log = {}){
+      const type = String(record.type || record.candidateType || "");
+      if(!["plan_progress", "extra_training"].includes(type) || record.revoked) return null;
+      const amountInfo = getRecordProtocolAmountInfo(record);
+      if(!amountInfo) return null;
+      const info = getRecordProtocolDisplayInfo(record);
+      const base = {
+        id:record.recordId || record.candidateId || "",
+        source:"record_protocol",
+        exerciseKey:info.exerciseKey,
+        displayName:info.displayName,
+        evidenceText:record.evidenceText || record.aiCapture?.evidenceText || "",
+        countsTowardTraining:log?.dayType === "training"
+      };
+      const duration = Number(record.duration || 0);
+      const repsPerSet = Number(record.repsPerSet || 0);
+      const detail = {
+        ...base,
+        duration:Number.isFinite(duration) && duration > 0 ? duration : undefined,
+        durationUnit:record.durationUnit ? normalizeRecordProtocolFactUnit(record.durationUnit, "") : "",
+        repsPerSet:Number.isFinite(repsPerSet) && repsPerSet > 0 ? repsPerSet : undefined
+      };
+      if(type === "plan_progress"){
+        return {
+          bucket:"planProgress",
+          item:{
+            ...detail,
+            itemId:base.id,
+            completedAmount:amountInfo.amount,
+            targetAmount:amountInfo.amount,
+            unit:amountInfo.unit,
+            status:"captured"
+          }
+        };
+      }
+      return {
+        bucket:"extraTraining",
+        item:{
+          ...detail,
+          amount:amountInfo.amount,
+          unit:amountInfo.unit
+        }
+      };
+    }
+
+    function mergeRecordProtocolFacts(log = {}, facts = {}){
+      const merged = {
+        ...facts,
+        planProgress:Array.isArray(facts.planProgress) ? facts.planProgress.slice() : [],
+        extraTraining:Array.isArray(facts.extraTraining) ? facts.extraTraining.slice() : []
+      };
+      (Array.isArray(log?.records) ? log.records : [])
+        .map((record) => recordProtocolRecordToDailyFact(record, log))
+        .filter(Boolean)
+        .forEach((fact) => {
+          if(fact.bucket === "planProgress") merged.planProgress.push(fact.item);
+          if(fact.bucket === "extraTraining") merged.extraTraining.push(fact.item);
+        });
+      return merged;
+    }
+
+    function summarizeRecordProtocolDailyRecord(record = {}){
+      const info = getRecordProtocolDisplayInfo(record);
+      const pieces = [];
+      if(Number(record.sets) > 0) pieces.push(`${Number(record.sets)}组`);
+      if(Number(record.repsPerSet) > 0) pieces.push(`每组${Number(record.repsPerSet)}次`);
+      if(Number(record.reps) > 0 && !Number(record.repsPerSet)) pieces.push(`${Number(record.reps)}次`);
+      if(Number(record.duration) > 0) pieces.push(`${Number(record.duration)}${normalizeRecordProtocolFactUnit(record.durationUnit, "分钟")}`);
+      if(!pieces.length){
+        const amountInfo = getRecordProtocolAmountInfo(record);
+        if(amountInfo) pieces.push(`${amountInfo.amount}${amountInfo.unit}`);
+      }
+      return `${info.displayName}${pieces.length ? ` ${pieces.join(" ")}` : ""}`;
+    }
+
+    function buildRecordProtocolCalendarRecords(log = {}){
+      return (Array.isArray(log?.records) ? log.records : [])
+        .filter((record) => !record.revoked && ["plan_progress", "extra_training"].includes(String(record.type || record.candidateType || "")))
+        .map((record) => ({
+          id:record.recordId || record.candidateId || "",
+          summary:summarizeRecordProtocolDailyRecord(record),
+          source:"record_protocol"
+        }));
+    }
+
     function collectDailyFacts(dateOrLog){
       const log = typeof dateOrLog === "string" ? getDailyLogs()[dateOrLog] : dateOrLog;
-      return trainingCapture.collectDailyFacts(log || {});
+      return mergeRecordProtocolFacts(log || {}, trainingCapture.collectDailyFacts(log || {}));
     }
 
     function generateAiDailySummaryForLog(log){
@@ -10834,7 +11498,8 @@
       const plannedDose = parsePlanItemTrainingDose(match.item);
       if(plannedDose.plannedSets && value.sets && value.sets !== plannedDose.plannedSets) return false;
       if(plannedDose.plannedRepsPerSet && value.repsPerSet && value.repsPerSet !== plannedDose.plannedRepsPerSet) return false;
-      return !!(intent.completedExplicit || isPreciseQuantityMatch(intent, match.item));
+      if(!getTrainingValuePlanDoseAgreement(value, { snapshotItemText:match.item, plannedDurationText:plannedDose.plannedDurationText || "" }).matches) return false;
+      return !!((intent.completedExplicit && hasTrainingCaptureQuantity(value)) || isPreciseQuantityMatch(intent, match.item));
     }
 
     function checkTrainingSessionPlanItem(intent, match, options = {}){
@@ -10896,6 +11561,7 @@
       matches.forEach((match) => {
         const plannedDose = parsePlanItemTrainingDose(match.item);
         if(plannedDose.plannedSets && value.sets && value.sets < plannedDose.plannedSets) return;
+        if(!getTrainingValuePlanDoseAgreement(value, { snapshotItemText:match.item, plannedDurationText:plannedDose.plannedDurationText || "" }).matches) return;
         if(!intent.completedExplicit && !isPreciseQuantityMatch(intent, match.item)) return;
         if(checks[match.key]) return;
         checks[match.key] = true;
@@ -10949,6 +11615,10 @@
         snapshotDisplayName:progressItem?.snapshotDisplayName || intent.currentValue?.exercise || "额外训练",
         amount:Number(amountInfo.amount || 0),
         unit:amountInfo.unit || "项",
+        repsPerSet:Number(intent.currentValue?.repsPerSet || amountInfo.repsPerSet || 0) || undefined,
+        duration:Number(intent.currentValue?.duration || amountInfo.duration || 0) || undefined,
+        durationUnit:intent.currentValue?.durationUnit || amountInfo.durationUnit || "",
+        countsTowardPlan:amountInfo.countsTowardPlan !== false,
         targetDate:intent.date || formatDateKey(new Date()),
         rawText:intent.originalText || intent.currentValue?.text || "",
         revoked:false,
@@ -10957,9 +11627,385 @@
       };
     }
 
+    function getPendingPlanReconciliation(){
+      const pending = safeJsonParse(localStorage.getItem(PLAN_RECONCILIATION_PENDING_KEY) || "null", null);
+      if(!pending || typeof pending !== "object") return null;
+      const ageMs = Date.now() - Date.parse(pending.updatedAt || pending.createdAt || "");
+      if(!Number.isFinite(ageMs) || ageMs > 10 * 60 * 1000){
+        clearPendingPlanReconciliation();
+        return null;
+      }
+      return pending;
+    }
+
+    function setPendingPlanReconciliation(pending){
+      if(!pending){
+        clearPendingPlanReconciliation();
+        return null;
+      }
+      const next = {
+        id: pending.id || `pending_reconcile_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        createdAt: pending.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        ...pending
+      };
+      localStorage.setItem(PLAN_RECONCILIATION_PENDING_KEY, JSON.stringify(next));
+      return next;
+    }
+
+    function clearPendingPlanReconciliation(){
+      localStorage.removeItem(PLAN_RECONCILIATION_PENDING_KEY);
+    }
+
+    function normalizePlanDoseUnit(unit, fallback = "组"){
+      return normalizeRecordCandidateUnit(unit, fallback);
+    }
+
+    function getPlanProgressItemDose(progressItem = {}){
+      const dose = parsePlanItemTrainingDose(progressItem.snapshotItemText || "");
+      const plannedDuration = getPlannedDurationInfoForProgressItem(progressItem);
+      return {
+        targetAmount:Number(progressItem.targetAmount || dose.plannedSets || 1) || 1,
+        unit:progressItem.unit || (dose.plannedSets ? "组" : "项"),
+        repsPerSet:Number(dose.plannedRepsPerSet || progressItem.plannedRepsPerSet || 0) || 0,
+        plannedRepsText:progressItem.plannedRepsText || dose.plannedRepsText || "",
+        duration:Number(plannedDuration?.amount || 0) || 0,
+        durationMin:Number(plannedDuration?.min || plannedDuration?.amount || 0) || 0,
+        durationMax:Number(plannedDuration?.max || plannedDuration?.amount || 0) || 0,
+        durationUnit:plannedDuration?.unit || ""
+      };
+    }
+
+    function formatPlanDoseForPrompt(progressItem = {}){
+      const dose = getPlanProgressItemDose(progressItem);
+      const parts = [];
+      if(dose.unit === "组") parts.push(`${dose.targetAmount}组`);
+      else parts.push(`${dose.targetAmount}${dose.unit || "项"}`);
+      if(dose.repsPerSet) parts.push(`每组${dose.repsPerSet}次`);
+      if(dose.duration) parts.push(`每组${dose.duration}${dose.durationUnit || "分钟"}`);
+      return parts.join(" ") || progressItem.snapshotItemText || "计划剂量";
+    }
+
+    function buildPlanReconciliationFactFromValue(value = {}, source = {}, progressItem = null){
+      const amountInfo = source.amountInfo || getStructuredTrainingAmount(value, progressItem || {});
+      const sets = Number(value.sets || (amountInfo.unit === "组" ? amountInfo.amount : 0)) || 0;
+      const unit = normalizePlanDoseUnit(amountInfo.unit || source.unit || (sets ? "组" : ""), progressItem?.unit || "组");
+      return {
+        exercise:value.exercise || progressItem?.snapshotDisplayName || source.exercise || "",
+        evidenceText:source.evidenceText || source.rawText || value.text || "",
+        completedExplicit:!!source.completedExplicit,
+        explicitExtra:!!source.explicitExtra,
+        hasQuantity:!!source.hasQuantity,
+        amount:Number(amountInfo.amount || sets || value.reps || value.duration || 0) || 0,
+        unit,
+        sets,
+        reps:Number(value.reps || 0) || 0,
+        repsPerSet:Number(value.repsPerSet || 0) || 0,
+        duration:Number(value.duration || 0) || 0,
+        durationUnit:value.durationUnit ? normalizeRecordCandidateDurationUnit(value.durationUnit, value.durationUnit) : "",
+        value:{ ...value }
+      };
+    }
+
+    function reconcileTrainingFactWithPlan({ fact = {}, dateIso = "", dailyLog = {}, activeTrainingReference = null, pendingReconciliation = null } = {}){
+      const planItems = Array.isArray(dailyLog.planProgressItems) ? dailyLog.planProgressItems : [];
+      let progressItem = fact.progressItem || null;
+      if(!progressItem && fact.itemId){
+        progressItem = planItems.find((item) => item.itemId === fact.itemId) || null;
+      }
+      if(!progressItem && fact.exerciseKey){
+        progressItem = planItems.find((item) => item.exerciseKey === fact.exerciseKey) || null;
+      }
+      if(!progressItem && activeTrainingReference?.targetDate === dateIso){
+        progressItem = planItems.find((item) => item.itemId === activeTrainingReference.itemId && item.exerciseKey === activeTrainingReference.exerciseKey) || null;
+      }
+      if(!progressItem) return { decision:"no_match", reason:"no_matching_plan_item" };
+      if(fact.explicitExtra) return { decision:"actual_training_only", reason:"explicit_extra_training", progressItem };
+
+      const plannedDose = getPlanProgressItemDose(progressItem);
+      const current = Number(progressItem.completedAmount || 0);
+      const target = Number(plannedDose.targetAmount || progressItem.targetAmount || 1) || 1;
+      const remaining = Math.max(0, target - current);
+
+      if(fact.completedExplicit && !fact.hasQuantity){
+        return {
+          decision:"ask_planned_dose_confirmation",
+          reason:"completion_without_quantity",
+          progressItem,
+          plannedDose,
+          prompt:`我先确认一下：${progressItem.snapshotDisplayName || fact.exercise} 是按今天计划 ${formatPlanDoseForPrompt(progressItem)} 完成的吗？确认后我再给计划打勾。`
+        };
+      }
+
+      const factDurationUnit = fact.durationUnit ? normalizeRecordCandidateDurationUnit(fact.durationUnit, plannedDose.durationUnit || "分钟") : "";
+      if(plannedDose.repsPerSet && fact.repsPerSet && Number(fact.repsPerSet) !== Number(plannedDose.repsPerSet)){
+        return {
+          decision:"dose_revision_pending",
+          reason:"reps_per_set_mismatch",
+          progressItem,
+          plannedDose,
+          reportedDose:{ sets:fact.sets || fact.amount, repsPerSet:fact.repsPerSet },
+          prompt:`今天计划是 ${progressItem.snapshotDisplayName} ${formatPlanDoseForPrompt(progressItem)}，你记录的是${fact.sets || fact.amount || ""}组 每组${fact.repsPerSet}次。要把今天这项计划改成每组${fact.repsPerSet}次后再结算吗？`
+        };
+      }
+      const evidenceContainsPlanItem = normalizeTrainingSearchText(fact.evidenceText || "").includes(normalizeTrainingSearchText(progressItem.snapshotItemText || ""));
+      const plannedDurationMin = Number(plannedDose.durationMin || plannedDose.duration || 0);
+      const plannedDurationMax = Number(plannedDose.durationMax || plannedDose.duration || 0);
+      const durationWithinPlan = plannedDose.duration && fact.duration && factDurationUnit === plannedDose.durationUnit
+        && Number(fact.duration) >= Math.min(plannedDurationMin, plannedDurationMax)
+        && Number(fact.duration) <= Math.max(plannedDurationMin, plannedDurationMax);
+      const durationIsPerSetDose = normalizePlanDoseUnit(plannedDose.unit || "", "") === "组";
+      if(durationIsPerSetDose && plannedDose.duration && fact.duration && !evidenceContainsPlanItem && !durationWithinPlan){
+        return {
+          decision:"dose_revision_pending",
+          reason:"duration_mismatch",
+          progressItem,
+          plannedDose,
+          reportedDose:{ sets:fact.sets || fact.amount, duration:fact.duration, durationUnit:factDurationUnit },
+          prompt:`今天计划是 ${progressItem.snapshotDisplayName} ${formatPlanDoseForPrompt(progressItem)}，你记录的是${fact.sets || fact.amount || ""}组 每组${fact.duration}${factDurationUnit}。要把今天这项计划改成每组${fact.duration}${factDurationUnit}后再结算吗？`
+        };
+      }
+
+      const amount = Number(fact.sets || fact.amount || 0);
+      if(!Number.isFinite(amount) || amount <= 0) return { decision:"no_match", reason:"missing_amount", progressItem };
+      if(amount < remaining){
+        return { decision:"partial_plan_progress", reason:"below_plan_amount", progressItem, amount, plannedDose, planAmount:amount, surplusAmount:0 };
+      }
+      if(amount > remaining && remaining > 0){
+        return { decision:"plan_progress_with_extra", reason:"surplus_amount", progressItem, amount, plannedDose, planAmount:remaining, surplusAmount:amount - remaining };
+      }
+      if(remaining <= 0){
+        return { decision:"actual_training_only", reason:"plan_already_complete", progressItem, amount, plannedDose, surplusAmount:amount };
+      }
+      return { decision:"plan_progress", reason:"matches_plan", progressItem, amount, plannedDose, planAmount:amount, surplusAmount:0 };
+    }
+
+    function buildPlanReconciliationPending(decision, fact, dateKey, source = {}){
+      const item = decision.progressItem;
+      const plannedDose = decision.plannedDose || getPlanProgressItemDose(item);
+      return setPendingPlanReconciliation({
+        mode: decision.decision === "ask_planned_dose_confirmation" ? "planned_dose_confirmation" : "dose_revision",
+        targetDate:dateKey,
+        itemId:item?.itemId || "",
+        exerciseKey:item?.exerciseKey || "",
+        displayName:item?.snapshotDisplayName || fact.exercise || "",
+        planCheckKey:item?.planCheckKey || "",
+        originalPlanItemText:item?.snapshotItemText || "",
+        originalDose:plannedDose,
+        reportedDose:decision.reportedDose || {
+          sets:fact.sets || fact.amount || 0,
+          repsPerSet:fact.repsPerSet || 0,
+          duration:fact.duration || 0,
+          durationUnit:fact.durationUnit || ""
+        },
+        suggestedDose:{
+          targetAmount:plannedDose.targetAmount,
+          unit:plannedDose.unit,
+          repsPerSet:fact.repsPerSet || plannedDose.repsPerSet || 0,
+          duration:fact.duration || plannedDose.duration || 0,
+          durationUnit:fact.durationUnit || plannedDose.durationUnit || ""
+        },
+        surplusAmount:Math.max(0, Number((fact.sets || fact.amount || 0) - plannedDose.targetAmount) || 0),
+        evidenceText:fact.evidenceText || "",
+        sourceCandidateId:source.candidateId || "",
+        sourceRecordId:source.recordId || ""
+      });
+    }
+
+    function makePlanReconciliationPendingResult(decision, fact, dateKey, source = {}){
+      buildPlanReconciliationPending(decision, fact, dateKey, source);
+      return {
+        status:"pending_confirmation",
+        date:dateKey,
+        reason:decision.reason,
+        prompt:decision.prompt || "这条记录需要先确认计划剂量。"
+      };
+    }
+
+    function applyPlanProgressDecisionToLog(log, dateKey, decision, fact, recordId = "", source = "record_protocol"){
+      const progressItem = decision.progressItem;
+      if(!progressItem) return { status:"skipped", reason:"no_plan_item" };
+      const current = Number(progressItem.completedAmount || 0);
+      const target = Number(progressItem.targetAmount || decision.plannedDose?.targetAmount || 1) || 1;
+      const planAmount = Number(decision.planAmount || decision.amount || 0);
+      const nextAmount = Math.min(target, current + Math.max(0, planAmount));
+      progressItem.completedAmount = nextAmount;
+      progressItem.status = nextAmount >= target ? "completed" : "active";
+      progressItem.updatedAt = new Date().toISOString();
+      let extraEventId = "";
+      if(nextAmount >= target && progressItem.planCheckKey){
+        const checks = getPlanChecks();
+        const meta = getPlanCheckMeta();
+        checks[progressItem.planCheckKey] = true;
+        meta[progressItem.planCheckKey] = meta[progressItem.planCheckKey] || { source, recordId:recordId || "", updatedAt:new Date().toISOString() };
+        setPlanChecks(checks);
+        setPlanCheckMeta(meta);
+      }
+      const surplus = Number(decision.surplusAmount || 0);
+      if(surplus > 0){
+        const intent = {
+          id:recordId || `reconcile_${Date.now()}`,
+          date:dateKey,
+          originalText:fact.evidenceText || "",
+          currentValue:{ ...(fact.value || {}), exercise:fact.exercise || progressItem.snapshotDisplayName }
+        };
+        const event = createExtraTrainingEvent(intent, progressItem, {
+          amount:surplus,
+          unit:progressItem.unit || fact.unit || "组",
+          duration:fact.duration || 0,
+          durationUnit:fact.durationUnit || "",
+          repsPerSet:fact.repsPerSet || 0
+        }, recordId || intent.id);
+        log.extraTrainingEvents = [...(Array.isArray(log.extraTrainingEvents) ? log.extraTrainingEvents : []), event];
+        extraEventId = event.id;
+      }
+      setActiveTrainingReferenceFromProgressItem(progressItem, log);
+      return {
+        status:"plan_progress",
+        itemId:progressItem.itemId,
+        planCheckKey:progressItem.planCheckKey,
+        previousAmount:current,
+        completedAmount:nextAmount,
+        targetAmount:target,
+        amount:planAmount,
+        unit:progressItem.unit || fact.unit,
+        extraEventId
+      };
+    }
+
+    function buildRevisedPlanItemText(item, suggestedDose = {}){
+      const name = item.snapshotDisplayName || getPlanItemExerciseName(item.snapshotItemText || "") || "训练项";
+      const amount = Number(suggestedDose.targetAmount || item.targetAmount || 1) || 1;
+      const unit = suggestedDose.unit || item.unit || "组";
+      const parts = [`${name} ${amount}${unit}`];
+      if(suggestedDose.repsPerSet) parts.push(`每组${suggestedDose.repsPerSet}次`);
+      if(suggestedDose.duration) parts.push(`每组${suggestedDose.duration}${suggestedDose.durationUnit || "分钟"}`);
+      return parts.join(" ");
+    }
+
+    function applyDailySnapshotDoseRevision(log, item, suggestedDose = {}){
+      if(!log || !item) return null;
+      const revisedText = buildRevisedPlanItemText(item, suggestedDose);
+      const itemIndex = Number.isInteger(Number(item.sourcePlanItemIndex)) ? Number(item.sourcePlanItemIndex) : -1;
+      const allItems = normalizePlanItemsList(log.allItems || []);
+      if(itemIndex >= 0){
+        allItems[itemIndex] = revisedText;
+        log.allItems = allItems;
+      }
+      item.snapshotItemText = revisedText;
+      item.targetAmount = Number(suggestedDose.targetAmount || item.targetAmount || 1) || 1;
+      item.unit = suggestedDose.unit || item.unit || "组";
+      item.plannedRepsText = suggestedDose.repsPerSet ? `每组${suggestedDose.repsPerSet}次` : "";
+      item.plannedDurationText = suggestedDose.duration ? `${suggestedDose.duration}${suggestedDose.durationUnit || "分钟"}` : "";
+      log.snapshotVersion = Number(log.snapshotVersion || 1) + 1;
+      return item;
+    }
+
+    function appendActualTrainingOnlyEvent(log, dateKey, pending, options = {}){
+      const item = (Array.isArray(log.planProgressItems) ? log.planProgressItems : [])
+        .find((progress) => progress.itemId === pending.itemId || progress.exerciseKey === pending.exerciseKey) || null;
+      const reported = pending.reportedDose || {};
+      const value = {
+        exercise:pending.displayName || item?.snapshotDisplayName || "",
+        sets:Number(reported.sets || pending.surplusAmount || 0) || Number(pending.originalDose?.targetAmount || 1),
+        repsPerSet:Number(reported.repsPerSet || 0) || undefined,
+        duration:Number(reported.duration || 0) || undefined,
+        durationUnit:reported.durationUnit || "",
+        text:pending.evidenceText || ""
+      };
+      const event = createExtraTrainingEvent({
+        id:options.recordId || pending.id,
+        date:dateKey,
+        originalText:pending.evidenceText || "",
+        currentValue:value
+      }, item, {
+        amount:value.sets || 1,
+        unit:"组",
+        duration:value.duration || 0,
+        durationUnit:value.durationUnit || "",
+        repsPerSet:value.repsPerSet || 0,
+        countsTowardPlan:false
+      }, options.recordId || pending.id);
+      log.extraTrainingEvents = [...(Array.isArray(log.extraTrainingEvents) ? log.extraTrainingEvents : []), event];
+      return event;
+    }
+
+    function isPlanReconciliationConfirmText(text){
+      const raw = String(text || "").trim();
+      return /^(确认|可以|对|是|是的|没错|按这个|同意|改吧|就这样|好)$/i.test(raw) || /确认.*(?:修改|改|记录)|可以.*(?:修改|改|记录)|同意.*(?:修改|改)/.test(raw);
+    }
+
+    function isPlanReconciliationRejectText(text){
+      const raw = String(text || "").trim();
+      return /不用改|不要改|不改|别改|只记录|按实际记录|别动计划|不修改/.test(raw);
+    }
+
+    function handlePendingPlanReconciliationChatReply(text){
+      const pending = getPendingPlanReconciliation();
+      if(!pending) return null;
+      if(!isPlanReconciliationConfirmText(text) && !isPlanReconciliationRejectText(text)) return null;
+      const logs = getDailyLogs();
+      const dateKey = pending.targetDate || formatDateKey(new Date());
+      const log = buildDailyLogShell(dateKey, logs[dateKey] || {});
+      const item = (Array.isArray(log.planProgressItems) ? log.planProgressItems : [])
+        .find((progress) => progress.itemId === pending.itemId || progress.exerciseKey === pending.exerciseKey) || null;
+      if(!item){
+        clearPendingPlanReconciliation();
+        return { handled:true, reply:"我没找到刚才那条计划项，所以先没有改动记录。" };
+      }
+      if(isPlanReconciliationRejectText(text)){
+        appendActualTrainingOnlyEvent(log, dateKey, pending);
+        syncDailyLogCompletionFromPlan(log, dateKey);
+        log.aiDailySummary = generateAiDailySummaryForLog(log);
+        log.updatedAt = new Date().toLocaleString("zh-CN");
+        log.updatedAtIso = new Date().toISOString();
+        logs[dateKey] = log;
+        persistDailyLogsAfterTrainingCapture(logs, { syncToCloud:true });
+        refreshAiWeeklySummaryDraftForDate(dateKey);
+        clearPendingPlanReconciliation();
+        renderPlan();
+        return { handled:true, reply:`好，我不改计划，已把${pending.displayName || "这项训练"}按实际完成内容单独记录。` };
+      }
+
+      const suggested = pending.mode === "dose_revision" ? pending.suggestedDose : pending.originalDose;
+      const revisedItem = pending.mode === "dose_revision" ? applyDailySnapshotDoseRevision(log, item, suggested) : item;
+      const reported = pending.reportedDose || {};
+      const fact = buildPlanReconciliationFactFromValue({
+        exercise:pending.displayName || revisedItem.snapshotDisplayName,
+        sets:Number(reported.sets || suggested.targetAmount || revisedItem.targetAmount || 1) || 1,
+        repsPerSet:Number(reported.repsPerSet || suggested.repsPerSet || 0) || 0,
+        duration:Number(reported.duration || suggested.duration || 0) || 0,
+        durationUnit:reported.durationUnit || suggested.durationUnit || "",
+        text:pending.evidenceText || ""
+      }, {
+        completedExplicit:true,
+        hasQuantity:true,
+        evidenceText:pending.evidenceText || ""
+      }, revisedItem);
+      fact.progressItem = revisedItem;
+      const decision = reconcileTrainingFactWithPlan({
+        fact,
+        dateIso:dateKey,
+        dailyLog:log,
+        activeTrainingReference:getActiveTrainingReference()
+      });
+      applyPlanProgressDecisionToLog(log, dateKey, decision, fact, pending.sourceRecordId || pending.id, "plan_reconciliation_confirmed");
+      syncDailyLogCompletionFromPlan(log, dateKey);
+      log.aiDailySummary = generateAiDailySummaryForLog(log);
+      log.updatedAt = new Date().toLocaleString("zh-CN");
+      log.updatedAtIso = new Date().toISOString();
+      logs[dateKey] = log;
+      persistDailyLogsAfterTrainingCapture(logs, { syncToCloud:true });
+      refreshAiWeeklySummaryDraftForDate(dateKey);
+      clearPendingPlanReconciliation();
+      renderPlan();
+      const extraText = Number(decision.surplusAmount || 0) > 0 ? `，多出的${decision.surplusAmount}${revisedItem.unit || "组"}已记为加练` : "";
+      return { handled:true, reply:`确认了，已更新 ${dateKey} 的${revisedItem.snapshotDisplayName}计划进度${extraText}。` };
+    }
+
     function applyTrainingFactToStructuredLog(log, intent, recordId){
       if(!log || intent.recordType !== "training_fact") return { status:"skipped" };
-      if(log.dayType !== "training" || !Array.isArray(log.planProgressItems) || !log.planProgressItems.length){
+      if(!Array.isArray(log.planProgressItems) || !log.planProgressItems.length){
         return { status:"note_only", reason:"no_training_snapshot" };
       }
       const match = findPlanItemMatchForCapture(intent);
@@ -10984,27 +12030,29 @@
         log.extraTrainingEvents = [...(Array.isArray(log.extraTrainingEvents) ? log.extraTrainingEvents : []), event];
         return { status:"extra_training", itemId:progressItem.itemId, eventId:event.id, amount:amountInfo.amount, unit:amountInfo.unit };
       }
-      const nextAmount = Math.min(target, current + Number(amountInfo.amount || 0));
-      progressItem.completedAmount = nextAmount;
-      progressItem.status = nextAmount >= target ? "completed" : "active";
-      progressItem.updatedAt = new Date().toISOString();
-      if(nextAmount >= target){
-        const checks = getPlanChecks();
-        const meta = getPlanCheckMeta();
-        checks[progressItem.planCheckKey] = true;
-        if(!meta[progressItem.planCheckKey]){
-          meta[progressItem.planCheckKey] = { source:"structured_progress", recordId:recordId || "", updatedAt:new Date().toISOString() };
-        }
-        setPlanChecks(checks);
-        setPlanCheckMeta(meta);
-      }
-      setActiveTrainingReference({
-        exerciseKey:progressItem.exerciseKey,
-        itemId:progressItem.itemId,
-        targetDate:log.date,
-        snapshotVersion:log.snapshotVersion || 1
+      const fact = buildPlanReconciliationFactFromValue(value, {
+        amountInfo,
+        completedExplicit:intent.completedExplicit,
+        explicitExtra:isExtra,
+        hasQuantity:hasTrainingCaptureQuantity(value),
+        evidenceText:intent.originalText || value.text || ""
+      }, progressItem);
+      fact.progressItem = progressItem;
+      const decision = reconcileTrainingFactWithPlan({
+        fact,
+        dateIso:log.date,
+        dailyLog:log,
+        activeTrainingReference:getActiveTrainingReference()
       });
-      return { status:"plan_progress", itemId:progressItem.itemId, previousAmount:current, completedAmount:nextAmount, targetAmount:target, amount:amountInfo.amount, unit:progressItem.unit };
+      if(decision.decision === "ask_planned_dose_confirmation" || decision.decision === "dose_revision_pending"){
+        return { status:"pending_confirmation", reason:decision.reason, prompt:decision.prompt, decision, fact };
+      }
+      if(decision.decision === "actual_training_only"){
+        const event = createExtraTrainingEvent(intent, progressItem, amountInfo, recordId);
+        log.extraTrainingEvents = [...(Array.isArray(log.extraTrainingEvents) ? log.extraTrainingEvents : []), event];
+        return { status:"extra_training", itemId:progressItem.itemId, eventId:event.id, amount:amountInfo.amount, unit:amountInfo.unit, reason:decision.reason };
+      }
+      return applyPlanProgressDecisionToLog(log, log.date, decision, fact, recordId || "", "structured_progress");
     }
 
     function applyFeedbackOrBodyFactToStructuredLog(log, intent, recordId){
@@ -11141,6 +12189,81 @@
       return false;
     }
 
+    function getPlannedDurationInfoForProgressItem(progressItem = {}){
+      const dose = parsePlanItemTrainingDose(progressItem.snapshotItemText || "");
+      if(dose.plannedRepsText) return null;
+      const text = String(progressItem.plannedDurationText || dose.plannedDurationText || "").trim();
+      const match = text.match(/(\d+(?:\.\d+)?)(?:\s*[–—-]\s*\d+(?:\.\d+)?)?\s*(秒|s|sec|seconds?|分钟|分|min|minutes?)/i);
+      if(!match) return null;
+      const range = parsePlanDoseNumberRange(text) || { min:Number(match[1]), max:Number(match[1]) };
+      return {
+        amount:Number(match[1]),
+        min:range.min,
+        max:range.max,
+        unit:normalizeRecordCandidateDurationUnit(match[2], /秒|s|sec/i.test(match[2]) ? "秒" : "分钟")
+      };
+    }
+
+    function getTrainingValuePlanDoseAgreement(value = {}, progressItem = {}){
+      if(!progressItem) return { matches:false, reason:"no_plan_item" };
+      const dose = parsePlanItemTrainingDose(progressItem.snapshotItemText || "");
+      const plannedRepsPerSet = Number(dose.plannedRepsPerSet || 0);
+      if(plannedRepsPerSet && value.repsPerSet && Number(value.repsPerSet) !== plannedRepsPerSet){
+        return { matches:false, reason:"reps_per_set_mismatch" };
+      }
+      const plannedDuration = getPlannedDurationInfoForProgressItem(progressItem);
+      if(plannedDuration && Number.isFinite(plannedDuration.amount) && plannedDuration.amount > 0 && value.duration){
+        const actualUnit = normalizeRecordCandidateDurationUnit(value.durationUnit || plannedDuration.unit, plannedDuration.unit);
+        const durationWithinRange = actualUnit === plannedDuration.unit
+          && Number(value.duration) >= Number(plannedDuration.min || plannedDuration.amount)
+          && Number(value.duration) <= Number(plannedDuration.max || plannedDuration.amount);
+        const text = String(value.text || "").trim();
+        const mentionsWholePlanItem = text && normalizeTrainingSearchText(text).includes(normalizeTrainingSearchText(progressItem.snapshotItemText || ""));
+        if(!mentionsWholePlanItem && !durationWithinRange){
+          return { matches:false, reason:"duration_mismatch" };
+        }
+      }
+      return { matches:true, reason:"matched" };
+    }
+
+    function getRecordCandidatePlanDoseAgreement(candidate = {}, progressItem = {}, value = null){
+      return getTrainingValuePlanDoseAgreement(value || buildRecordCandidateCurrentValue(candidate, progressItem), progressItem);
+    }
+
+    function hasRecordCandidateExplicitExtraIntent(candidate = {}){
+      const raw = getRecordCandidateText(candidate);
+      const intent = String(candidate.intent || "").toLowerCase();
+      return isExtraTrainingCaptureText(raw) || /extra_training|explicit_extra|bonus|over_plan|beyond_plan/.test(intent);
+    }
+
+    function shouldRouteRecordCandidateThroughPlanProgress(candidate = {}, progressItem = null, value = null){
+      if(!progressItem) return false;
+      if(hasRecordCandidateCorrectionSignal(candidate) || hasRecordCandidateExplicitExtraIntent(candidate)) return false;
+      if(!hasRecordCandidateCompletionSignal(candidate) && !hasRecordCandidateQuantity(candidate)) return false;
+      return true;
+    }
+
+    function appendExtraTrainingEventForRecordCandidate(logs, log, dateKey, candidate, context = {}, progressItem = null, amountInfo = null, currentValue = null, extra = {}){
+      const value = currentValue || buildRecordCandidateCurrentValue(candidate, progressItem || {});
+      const info = amountInfo || buildRecordCandidateAmountInfo(candidate, progressItem || {});
+      const displayName = candidate.exerciseRef?.displayName || progressItem?.snapshotDisplayName || candidate.rawText || "额外训练";
+      const intent = {
+        id:`candidate_${Date.now()}`,
+        date:dateKey,
+        originalText:candidate.rawText || context.userText || "",
+        currentValue:{ ...value, exercise:value.exercise || displayName, text:value.text || candidate.rawText || context.userText || "" }
+      };
+      const event = createExtraTrainingEvent(intent, progressItem, info, intent.id);
+      log.extraTrainingEvents = [...(Array.isArray(log.extraTrainingEvents) ? log.extraTrainingEvents : []), event];
+      log.aiDailySummary = generateAiDailySummaryForLog(log);
+      log.updatedAt = new Date().toLocaleString("zh-CN");
+      log.updatedAtIso = new Date().toISOString();
+      logs[dateKey] = log;
+      persistDailyLogsAfterTrainingCapture(logs, { syncToCloud:true });
+      refreshAiWeeklySummaryDraftForDate(dateKey);
+      return { status:"extra_training", date:dateKey, eventId:event.id, ...(progressItem?.itemId ? { itemId:progressItem.itemId } : {}), ...extra };
+    }
+
     function buildRecordCandidateCurrentValue(candidate = {}, progressItem = {}){
       const existing = candidate.currentValue && typeof candidate.currentValue === "object" && !Array.isArray(candidate.currentValue)
         ? { ...candidate.currentValue }
@@ -11235,6 +12358,86 @@
       return buildRecordCandidateAmountInfo(candidate, progressItem);
     }
 
+    function findCaptureRecordForCorrection(log = {}, candidate = {}, value = {}){
+      const records = Array.isArray(log?.aiCaptureRecords) ? log.aiCaptureRecords : [];
+      const correction = candidate.correction && typeof candidate.correction === "object" && !Array.isArray(candidate.correction)
+        ? candidate.correction
+        : {};
+      const targetRecordRef = correction.targetRecordRef && typeof correction.targetRecordRef === "object" && !Array.isArray(correction.targetRecordRef)
+        ? correction.targetRecordRef
+        : {};
+      const recordId = String(targetRecordRef.recordId || candidate.recordId || candidate.targetRecordId || "").trim();
+      const originalEvidenceText = String(targetRecordRef.originalEvidenceText || "").trim();
+      const subjectText = String(
+        value.exercise ||
+        candidate.exerciseRef?.displayName ||
+        candidate.exerciseName ||
+        targetRecordRef.subjectText ||
+        targetRecordRef.exerciseName ||
+        targetRecordRef.displayName ||
+        ""
+      ).trim();
+      const normalizedSubject = normalizeTrainingSearchText(subjectText);
+      for(let index = records.length - 1; index >= 0; index -= 1){
+        const record = records[index];
+        if(!record || record.revoked) continue;
+        if(recordId && String(record.id || record.recordId || "") === recordId){
+          return { records, index, record };
+        }
+        const recordText = String(record.originalText || record.currentValue?.text || "").trim();
+        if(originalEvidenceText && (recordText === originalEvidenceText || recordText.includes(originalEvidenceText))){
+          return { records, index, record };
+        }
+        const recordExercise = String(record.currentValue?.exercise || record.exerciseName || "").trim();
+        const normalizedRecordExercise = normalizeTrainingSearchText(recordExercise);
+        if(normalizedSubject && normalizedRecordExercise && (
+          normalizedRecordExercise.includes(normalizedSubject) ||
+          normalizedSubject.includes(normalizedRecordExercise)
+        )){
+          return { records, index, record };
+        }
+      }
+      return null;
+    }
+
+    function updateCaptureRecordWithCorrection(existingRecord = {}, correctionRecord = {}, candidate = {}, context = {}){
+      const existingValue = existingRecord.currentValue && typeof existingRecord.currentValue === "object" && !Array.isArray(existingRecord.currentValue)
+        ? existingRecord.currentValue
+        : {};
+      const correctionValue = correctionRecord.currentValue && typeof correctionRecord.currentValue === "object" && !Array.isArray(correctionRecord.currentValue)
+        ? correctionRecord.currentValue
+        : {};
+      const currentValue = {
+        ...existingValue,
+        ...correctionValue
+      };
+      if(!correctionValue.exercise && existingValue.exercise) currentValue.exercise = existingValue.exercise;
+      if(!correctionValue.text && existingValue.text) currentValue.text = existingValue.text;
+      const correctionText = String(candidate.rawText || candidate.evidenceText || context.userText || correctionValue.text || "").trim();
+      const originalText = [existingRecord.originalText, correctionText].filter(Boolean).join("\n");
+      return {
+        ...existingRecord,
+        currentValue,
+        originalValue:existingRecord.originalValue || existingValue,
+        originalText,
+        confidence:correctionRecord.confidence || existingRecord.confidence || "medium",
+        userModified:true,
+        autoCompletedPlanChecks:Array.isArray(correctionRecord.autoCompletedPlanChecks) ? correctionRecord.autoCompletedPlanChecks : [],
+        structuredWrite:correctionRecord.structuredWrite || existingRecord.structuredWrite || { status:"correction" },
+        localUpdatedAt:new Date().toISOString(),
+        correctionHistory:[
+          ...(Array.isArray(existingRecord.correctionHistory) ? existingRecord.correctionHistory.slice(-9) : []),
+          {
+            candidateType:String(candidate.candidateType || "correction"),
+            evidenceText:correctionText,
+            previousValue:{ ...existingValue },
+            updatedValue:{ ...currentValue },
+            correctedAt:new Date().toISOString()
+          }
+        ]
+      };
+    }
+
     function processCorrectionCandidate(candidate, context = {}){
       const dateKey = resolveRecordCandidateDate(candidate, context);
       const logs = getDailyLogs();
@@ -11249,7 +12452,8 @@
         return { status:"ignored", reason:"no_matching_correction_target", date:dateKey };
       }
 
-      const recordId = makeTrainingCaptureRecordId();
+      const existingCapture = findCaptureRecordForCorrection(log, candidate, value);
+      const recordId = existingCapture?.record?.id || makeTrainingCaptureRecordId();
       const record = {
         id:recordId,
         date:dateKey,
@@ -11341,6 +12545,21 @@
         setActiveTrainingReferenceFromProgressItem(progressItem, log);
       }
 
+      if(existingCapture){
+        const updatedRecord = updateCaptureRecordWithCorrection(existingCapture.record, record, candidate, context);
+        existingCapture.records.splice(existingCapture.index, 1, updatedRecord);
+        log.aiCaptureRecords = existingCapture.records;
+        syncDailyLogCompletionFromPlan(log, dateKey);
+        log.aiDailySummary = generateAiDailySummaryForLog(log);
+        log.updatedAt = new Date().toLocaleString("zh-CN");
+        log.updatedAtIso = new Date().toISOString();
+        logs[dateKey] = log;
+        persistDailyLogsAfterTrainingCapture(logs, { syncToCloud:true });
+        refreshAiWeeklySummaryDraftForDate(dateKey);
+        renderPlan();
+        return { status, date:dateKey, recordId, record:updatedRecord };
+      }
+
       log.aiCaptureRecords = [...(Array.isArray(log.aiCaptureRecords) ? log.aiCaptureRecords : []), record];
       syncDailyLogCompletionFromPlan(log, dateKey);
       log.aiDailySummary = generateAiDailySummaryForLog(log);
@@ -11407,18 +12626,81 @@
       });
     }
 
+    function getPlanProgressItemTextMatchScore(text, item){
+      const raw = String(text || "").trim();
+      if(!raw || !item) return 0;
+      const normalized = normalizeTrainingSearchText(raw);
+      const itemText = String(item.snapshotItemText || "").trim();
+      const normalizedItemText = normalizeTrainingSearchText(itemText);
+      if(normalizedItemText && normalized.includes(normalizedItemText)) return 1000 + normalizedItemText.length;
+      let score = 0;
+      const displayName = String(item.snapshotDisplayName || "").trim();
+      const normalizedDisplayName = normalizeTrainingSearchText(displayName);
+      if(normalizedDisplayName && normalized.includes(normalizedDisplayName)) score += 120 + normalizedDisplayName.length;
+      (Array.isArray(item.snapshotAliases) ? item.snapshotAliases : []).forEach((alias) => {
+        const normalizedAlias = normalizeTrainingSearchText(alias);
+        if(normalizedAlias && normalized.includes(normalizedAlias)) score = Math.max(score, 90 + normalizedAlias.length);
+      });
+      if(!score) return 0;
+      const parsed = parseCaptureQuantity(raw);
+      const dose = getPlanProgressItemDose(item);
+      if(dose.unit === "组" && parsed.sets && Number(parsed.sets) === Number(dose.targetAmount)) score += 50;
+      if(dose.unit !== "组" && parsed.duration && Number(parsed.duration) === Number(dose.targetAmount)) score += 50;
+      if(dose.unit !== "组" && parsed.reps && Number(parsed.reps) === Number(dose.targetAmount)) score += 50;
+      if(dose.duration && parsed.duration){
+        const actualUnit = normalizeRecordCandidateDurationUnit(parsed.durationUnit || dose.durationUnit, dose.durationUnit);
+        const min = Number(dose.durationMin || dose.duration || 0);
+        const max = Number(dose.durationMax || dose.duration || 0);
+        if(actualUnit === dose.durationUnit && Number(parsed.duration) >= Math.min(min, max) && Number(parsed.duration) <= Math.max(min, max)){
+          score += 35;
+        }
+      }
+      if(dose.plannedRepsText && normalizeTrainingSearchText(dose.plannedRepsText) && normalized.includes(normalizeTrainingSearchText(dose.plannedRepsText))){
+        score += 25;
+      }
+      return score;
+    }
+
+    function findBestPlanProgressItemForText(log, text, options = {}){
+      const items = Array.isArray(log?.planProgressItems) ? log.planProgressItems : [];
+      const minScore = Number(options.minScore || 100);
+      const scored = items
+        .map((item) => ({ item, score:getPlanProgressItemTextMatchScore(text, item) }))
+        .filter((entry) => entry.score >= minScore)
+        .sort((a, b) => b.score - a.score || String(b.item.snapshotItemText || "").length - String(a.item.snapshotItemText || "").length);
+      if(!scored.length) return null;
+      if(scored.length > 1 && scored[0].score === scored[1].score) return null;
+      return scored[0].item;
+    }
+
     function findPlanProgressItemForRecordCandidate(log, candidate){
       if(!log || !Array.isArray(log.planProgressItems)) return null;
       const ref = candidate.exerciseRef || {};
+      const rawText = candidate.rawText || candidate.evidenceText || candidate.text || candidate.currentValue?.text || "";
+      if(candidate.itemId){
+        const byItemId = log.planProgressItems.find((item) => item.itemId === candidate.itemId);
+        if(byItemId) return byItemId;
+      }
+      const textMatch = findBestPlanProgressItemForText(log, rawText);
+      if(textMatch) return textMatch;
       if(ref.type === "activeTrainingReference"){
         return isActiveTrainingReferenceUsable(getActiveTrainingReference(), log, log.date) || null;
       }
       if(ref.type === "exerciseKey" && ref.exerciseKey){
-        return log.planProgressItems.find((item) => item.exerciseKey === ref.exerciseKey) || null;
+        const keyMatches = log.planProgressItems.filter((item) => item.exerciseKey === ref.exerciseKey);
+        if(keyMatches.length === 1) return keyMatches[0];
+        const scoredKeyMatches = keyMatches
+          .map((item) => ({ item, score:getPlanProgressItemTextMatchScore(rawText || ref.displayName || "", item) }))
+          .filter((entry) => entry.score > 0)
+          .sort((a, b) => b.score - a.score);
+        if(scoredKeyMatches.length === 1 || (scoredKeyMatches.length > 1 && scoredKeyMatches[0].score > scoredKeyMatches[1].score)){
+          return scoredKeyMatches[0].item;
+        }
+        return keyMatches[0] || null;
       }
       const displayName = ref.displayName || candidate.rawText || "";
       return log.planProgressItems.find((item) => textMatchesPlanProgressItem(displayName, item))
-        || log.planProgressItems.find((item) => textMatchesPlanProgressItem(candidate.rawText, item))
+        || log.planProgressItems.find((item) => textMatchesPlanProgressItem(rawText, item))
         || null;
     }
 
@@ -11474,42 +12756,36 @@
       }
       const current = Number(progressItem.completedAmount || 0);
       const target = Number(progressItem.targetAmount || 0) || 1;
+      const currentValue = buildRecordCandidateCurrentValue(candidate, progressItem);
       let amountInfo = buildRecordCandidateAmountInfo(candidate, progressItem);
       if(isRecordCandidateFullCompletion(candidate)){
         amountInfo = { amount:Math.max(0, target - current), unit:progressItem.unit, fullCompletion:true };
       }
+      const fact = buildPlanReconciliationFactFromValue(currentValue, {
+        amountInfo,
+        completedExplicit:hasRecordCandidateCompletionSignal(candidate) || candidate.completedExplicit,
+        explicitExtra:hasRecordCandidateExplicitExtraIntent(candidate),
+        hasQuantity:hasRecordCandidateQuantity(candidate),
+        evidenceText:candidate.rawText || context.userText || currentValue.text || "",
+        rawText:candidate.rawText || context.userText || ""
+      }, progressItem);
+      fact.progressItem = progressItem;
+      const decision = reconcileTrainingFactWithPlan({
+        fact,
+        dateIso:dateKey,
+        dailyLog:log,
+        activeTrainingReference:getActiveTrainingReference()
+      });
+      if(decision.decision === "ask_planned_dose_confirmation" || decision.decision === "dose_revision_pending"){
+        return makePlanReconciliationPendingResult(decision, fact, dateKey, { candidateId:candidate.candidateId || candidate.id || "" });
+      }
+      if(decision.decision === "actual_training_only"){
+        return appendExtraTrainingEventForRecordCandidate(logs, log, dateKey, candidate, context, progressItem, amountInfo, currentValue, { reason:decision.reason });
+      }
       if(!Number.isFinite(Number(amountInfo.amount)) || Number(amountInfo.amount) <= 0){
         return { status:"ignored", reason:amountInfo.durationOnly ? "duration_without_sets_for_set_based_item" : "invalid_amount", date:dateKey };
       }
-      if(current >= target){
-        const intent = {
-          id:`candidate_${Date.now()}`,
-          date:dateKey,
-          originalText:candidate.rawText || context.userText || "",
-          currentValue:{ ...buildRecordCandidateCurrentValue(candidate, progressItem), exercise:progressItem.snapshotDisplayName, text:candidate.rawText || context.userText || "" }
-        };
-        const event = createExtraTrainingEvent(intent, progressItem, amountInfo, intent.id);
-        log.extraTrainingEvents = [...(Array.isArray(log.extraTrainingEvents) ? log.extraTrainingEvents : []), event];
-        logs[dateKey] = log;
-        persistDailyLogsAfterTrainingCapture(logs, { syncToCloud:true });
-        refreshAiWeeklySummaryDraftForDate(dateKey);
-        return { status:"extra_training", date:dateKey, eventId:event.id, itemId:progressItem.itemId };
-      }
-      const nextAmount = Math.min(target, current + Number(amountInfo.amount || 0));
-      progressItem.completedAmount = nextAmount;
-      progressItem.status = nextAmount >= target ? "completed" : "active";
-      progressItem.updatedAt = new Date().toISOString();
-      if(nextAmount >= target && progressItem.planCheckKey){
-        const checks = getPlanChecks();
-        const meta = getPlanCheckMeta();
-        checks[progressItem.planCheckKey] = true;
-        meta[progressItem.planCheckKey] = meta[progressItem.planCheckKey] || {
-          source:"record_protocol",
-          updatedAt:new Date().toISOString()
-        };
-        setPlanChecks(checks);
-        setPlanCheckMeta(meta);
-      }
+      const structured = applyPlanProgressDecisionToLog(log, dateKey, decision, fact, candidate.recordId || candidate.candidateId || "", "record_protocol");
       syncDailyLogCompletionFromPlan(log, dateKey);
       const updatedItem = (Array.isArray(log.planProgressItems) ? log.planProgressItems : [])
         .find((item) => item.itemId === progressItem.itemId) || progressItem;
@@ -11525,8 +12801,9 @@
         status:"plan_progress",
         date:dateKey,
         itemId:updatedItem.itemId,
-        completedAmount:Number(updatedItem.completedAmount || nextAmount),
-        targetAmount:Number(updatedItem.targetAmount || target)
+        completedAmount:Number(updatedItem.completedAmount || structured.completedAmount),
+        targetAmount:Number(updatedItem.targetAmount || structured.targetAmount),
+        extraEventId:structured.extraEventId || ""
       };
     }
 
@@ -11535,24 +12812,16 @@
       const logs = getDailyLogs();
       const log = buildDailyLogShell(dateKey, logs[dateKey] || {});
       const progressItem = findPlanProgressItemForRecordCandidate(log, candidate);
-      const amountInfo = buildRecordCandidateAmountInfo(candidate, progressItem || {});
-      const displayName = candidate.exerciseRef?.displayName || progressItem?.snapshotDisplayName || candidate.rawText || "额外训练";
       const currentValue = buildRecordCandidateCurrentValue(candidate, progressItem || {});
-      const intent = {
-        id:`candidate_${Date.now()}`,
-        date:dateKey,
-        originalText:candidate.rawText || context.userText || "",
-        currentValue:{ ...currentValue, exercise:currentValue.exercise || displayName, text:currentValue.text || candidate.rawText || context.userText || "" }
-      };
-      const event = createExtraTrainingEvent(intent, progressItem, amountInfo, intent.id);
-      log.extraTrainingEvents = [...(Array.isArray(log.extraTrainingEvents) ? log.extraTrainingEvents : []), event];
-      log.aiDailySummary = generateAiDailySummaryForLog(log);
-      log.updatedAt = new Date().toLocaleString("zh-CN");
-      log.updatedAtIso = new Date().toISOString();
-      logs[dateKey] = log;
-      persistDailyLogsAfterTrainingCapture(logs, { syncToCloud:true });
-      refreshAiWeeklySummaryDraftForDate(dateKey);
-      return { status:"extra_training", date:dateKey, eventId:event.id };
+      if(shouldRouteRecordCandidateThroughPlanProgress(candidate, progressItem, currentValue)){
+        return processPlanProgressCandidate({
+          ...candidate,
+          candidateType:"plan_progress",
+          intent:isRecordCandidateFullCompletion(candidate) ? (candidate.intent || "full_completion") : candidate.intent
+        }, context);
+      }
+      const amountInfo = buildRecordCandidateAmountInfo(candidate, progressItem || {});
+      return appendExtraTrainingEventForRecordCandidate(logs, log, dateKey, candidate, context, progressItem, amountInfo, currentValue);
     }
 
     function processFeedbackCandidate(candidate, context = {}){
@@ -11815,8 +13084,26 @@
         mergedFromPending:!!intent.mergedFromPending,
         writeType:intent.writeType || "note_only"
       };
-      record.autoCompletedPlanChecks = intent.allowAutoComplete === false ? [] : maybeAutoCompletePlanItemForCapture(intent, record.id);
+      record.autoCompletedPlanChecks = [];
       record.structuredWrite = applyStructuredDailyLogWrite(log, intent, record.id);
+      if(record.structuredWrite?.status === "pending_confirmation"){
+        buildPlanReconciliationPending(record.structuredWrite.decision, record.structuredWrite.fact, dateKey, { recordId:record.id });
+        logs[dateKey] = log;
+        persistDailyLogsAfterTrainingCapture(logs, { syncToCloud:true });
+        if(options.createCard !== false){
+          pushTrainingCaptureCard({
+            kind:"warn",
+            title:"需要确认",
+            message:record.structuredWrite.prompt || "这条训练和当天计划剂量不一致，先确认后再写入。",
+            canUndo:false,
+            canModify:false
+          });
+        }
+        return { status:"pending_confirmation", date:dateKey, reason:record.structuredWrite.reason, prompt:record.structuredWrite.prompt };
+      }
+      if(intent.allowAutoComplete !== false && record.structuredWrite?.status === "plan_progress" && record.structuredWrite.planCheckKey && getPlanChecks()[record.structuredWrite.planCheckKey]){
+        record.autoCompletedPlanChecks = [record.structuredWrite.planCheckKey];
+      }
       log.aiCaptureRecords = [...(Array.isArray(log.aiCaptureRecords) ? log.aiCaptureRecords : []), record];
       if(record.autoCompletedPlanChecks.length) renderPlan();
       syncDailyLogCompletionFromPlan(log, dateKey);
@@ -12004,15 +13291,71 @@
         .sort((a, b) => Date.parse(b.capturedAt || "") - Date.parse(a.capturedAt || ""))[0] || null;
     }
 
+    function hasExplicitTrainingCaptureCorrectionSignal(text = ""){
+      const raw = String(text || "");
+      if(/不是|不对|改成|改为|改到|修改|修正|更正|记错|说错/.test(raw)) return true;
+      return /(?:刚才那条|刚才这个|该记录|这条记录|这个记录|上条记录|上一条记录).{0,10}(?:改|修|更|到|成|为)/.test(raw);
+    }
+
+    function buildTrainingCaptureCorrectionPatch(text = ""){
+      const raw = String(text || "");
+      const numberToken = "(\\d+(?:\\.\\d+)?|[一二两三四五六七八九十]+)";
+      const readNumber = (value) => {
+        try{
+          const parsed = parseChineseTrainingNumber(value);
+          return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+        }catch(_err){
+          return null;
+        }
+      };
+      const durationMatch = raw.match(new RegExp(`${numberToken}\\s*(秒|s|sec|seconds?|分钟|min|minutes?)`, "i"));
+      if(durationMatch){
+        const duration = readNumber(durationMatch[1]);
+        if(duration){
+          return {
+            currentValue:{
+              duration,
+              durationUnit:/分钟|min|minute/i.test(durationMatch[2]) ? "分钟" : "秒"
+            }
+          };
+        }
+      }
+      const repsMatch = raw.match(new RegExp(`${numberToken}\\s*(?:个|次|下|reps?)`, "i"))
+        || raw.match(new RegExp(`(?:改成|改为|改到|修改为|修正为|更正为|不是|不对|是|到)\\s*${numberToken}`, "i"));
+      if(repsMatch){
+        const reps = readNumber(repsMatch[1]);
+        if(reps) return { currentValue:{ reps } };
+      }
+      return null;
+    }
+
     function handleTrainingCaptureCorrection(text){
       const raw = String(text || "");
       const latest = findLatestRelatedTrainingCaptureRecord();
       if(!latest) return null;
       if(/另外|还有|再加|顺便/.test(raw)) return null;
-      const correction = raw.match(/(?:不是|不对|改成|是)\s*(\d+)\s*(?:个|次|下|reps?)?/i);
-      if(!correction && !/刚才那条|记错了|我说错了/.test(raw)) return null;
-      const patch = correction ? { currentValue:{ reps:Number(correction[1]) } } : { currentValue:{ text:raw } };
+      if(!hasExplicitTrainingCaptureCorrectionSignal(raw)) return null;
+      const patch = buildTrainingCaptureCorrectionPatch(raw) || { currentValue:{ text:raw } };
       return modifyTrainingCaptureRecord(latest.id, patch);
+    }
+
+    function processLocalTrainingCaptureIntent(intent, options = {}){
+      if(intent.action === "follow_up"){
+        pushTrainingCaptureCard({
+          kind:"warn",
+          title:intent.reason === "missing_training_quantity" || intent.reason === "pending_missing_quantity" ? "等待补充" : "需要确认",
+          message:intent.prompt || "这条训练信息还不够明确，我先不写入。",
+          canUndo:false,
+          canModify:false
+        });
+        return { status:"follow_up", reason:intent.reason, prompt:intent.prompt };
+      }
+      if(intent.action !== "write") return { status:"ignored", reason:intent.reason || "no_write_intent" };
+      const matchedPlanItem = findPlanItemMatchForCapture(intent);
+      if(isTrainingSessionPlanItemCompletion(intent, matchedPlanItem)){
+        return checkTrainingSessionPlanItem(intent, matchedPlanItem, options);
+      }
+      return writeTrainingCaptureIntent(intent, options);
     }
 
     function handleCharacterTrainingCapture(text, options = {}){
@@ -12036,23 +13379,22 @@
       }
       const corrected = handleTrainingCaptureCorrection(text);
       if(corrected) return corrected;
-      const intent = extractLocalTrainingCaptureIntent(text, options);
-      if(intent.action === "follow_up"){
-        pushTrainingCaptureCard({
-          kind:"warn",
-          title:intent.reason === "missing_training_quantity" || intent.reason === "pending_missing_quantity" ? "等待补充" : "需要确认",
-          message:intent.prompt || "这条训练信息还不够明确，我先不写入。",
-          canUndo:false,
-          canModify:false
-        });
-        return { status:"follow_up", reason:intent.reason, prompt:intent.prompt };
+      const intents = extractLocalTrainingCaptureIntents(text, options);
+      if(intents.length > 1){
+        const results = intents.map((intent) => processLocalTrainingCaptureIntent(intent, options));
+        const handled = results.filter((result) => ["plan_progress","extra_training","checked","recorded","modified","undone","pending_confirmation"].includes(String(result.status || "")));
+        const followUp = results.find((result) => result.status === "follow_up");
+        if(handled.length){
+          return {
+            status:"recorded",
+            results,
+            records:results.map((result) => result.record).filter(Boolean),
+            pending:results.filter((result) => result.status === "pending_confirmation")
+          };
+        }
+        return followUp || results[0] || { status:"ignored", reason:"no_write_intent" };
       }
-      if(intent.action !== "write") return { status:"ignored", reason:intent.reason || "no_write_intent" };
-      const matchedPlanItem = findPlanItemMatchForCapture(intent);
-      if(isTrainingSessionPlanItemCompletion(intent, matchedPlanItem)){
-        return checkTrainingSessionPlanItem(intent, matchedPlanItem, options);
-      }
-      return writeTrainingCaptureIntent(intent, options);
+      return processLocalTrainingCaptureIntent(intents[0] || extractLocalTrainingCaptureIntent(text, options), options);
     }
 
     function getTrainingSession(){
@@ -12586,15 +13928,24 @@
       );
     }
 
-    function shouldRunDeterministicCharacterCaptureFallback(text, processResult = {}){
+    function shouldRunDeterministicCharacterCaptureFallback(text, processResult = {}, options = {}){
       if(hasRecordProtocolWriteOrPending(processResult)) return false;
+      const aiCandidateCount = Number(options.aiCandidateCount || 0);
+      if(aiCandidateCount > 0 && options.usedProtocolLocalFallback !== true) return false;
       const classified = classifyCharacterTrainingIntent(text);
       return ["capture", "safety"].includes(classified.action);
     }
 
     function maybeRunDeterministicCharacterCaptureFallback(text, processResult = {}, options = {}){
-      if(!shouldRunDeterministicCharacterCaptureFallback(text, processResult)){
-        return { status:"skipped", reason:"not_training_or_already_handled" };
+      if(!shouldRunDeterministicCharacterCaptureFallback(text, processResult, options)){
+        const aiCandidateCount = Number(options.aiCandidateCount || 0);
+        const alreadyHandled = hasRecordProtocolWriteOrPending(processResult);
+        return {
+          status:"skipped",
+          reason:!alreadyHandled && aiCandidateCount > 0 && options.usedProtocolLocalFallback !== true
+            ? "model_candidates_already_decided"
+            : "not_training_or_already_handled"
+        };
       }
       try{
         return handleCharacterTrainingCapture(text, { ...options, sourceType:options.sourceType || "character_chat" });
@@ -12646,6 +13997,35 @@
         return `AI 暂时没有回复，${deterministicCaptureResult.prompt}`;
       }
       return `发送失败：${message}`;
+    }
+
+    function looksLikeRecordProtocolReasoningLeak(text = ""){
+      const raw = String(text || "");
+      if(!raw.trim()) return false;
+      const markers = [
+        /activeTrainingReference/i,
+        /record_candidates/i,
+        /candidateType/i,
+        /needsConfirmation/i,
+        /modify_record_fields|delete_record|move_record_to_date/i,
+        /\bemit\b/i,
+        /根据指令|根据上下文|我们分析|We need to parse/i
+      ];
+      const hits = markers.reduce((count, pattern) => count + (pattern.test(raw) ? 1 : 0), 0);
+      return hits >= 2 || /candidateType|record_candidates|activeTrainingReference/i.test(raw);
+    }
+
+    function buildRecordProtocolParseFailureReply(processResult = {}, deterministicCaptureResult = {}){
+      if(isDeterministicCharacterCaptureHandled(deterministicCaptureResult)){
+        return "我刚刚的记录格式有点乱，但这条训练已用本地规则先记录。";
+      }
+      if(processResult && Array.isArray(processResult.writes) && processResult.writes.length){
+        return "我刚刚的记录格式有点乱，但这条训练已用本地规则先记录。";
+      }
+      if(processResult && Array.isArray(processResult.pending) && processResult.pending.length){
+        return "我刚刚的记录格式有点乱，这条修改需要你确认后再处理。";
+      }
+      return "我刚刚的记录格式有点乱，已用本地规则再校验这条训练记录。";
     }
 
     function getRecordProtocolVisibleWeekDates(now = new Date()){
@@ -12708,12 +14088,54 @@
     }
 
     function getRecordProtocolFallbackExerciseName(text = "", activeReference = {}){
+      const resolved = getRecordProtocolFallbackExerciseMatch(text, activeReference);
+      return resolved && !resolved.ambiguous ? resolved.displayName : "";
+    }
+
+    function getRecordProtocolFallbackExerciseMatch(text = "", activeReference = {}){
       const raw = String(text || "");
+      const resolved = resolveExerciseMention(raw, { activeTrainingReference:activeReference || {} });
+      if(resolved.status === "matched"){
+        return {
+          displayName:resolved.displayName,
+          exerciseKey:resolved.exerciseKey,
+          matchedText:resolved.matchedText,
+          source:resolved.source,
+          ambiguous:false
+        };
+      }
+      if(resolved.status === "ambiguous"){
+        return {
+          displayName:"",
+          exerciseKey:"",
+          matchedText:resolved.matchedText,
+          source:resolved.source,
+          ambiguous:true,
+          candidates:resolved.candidates
+        };
+      }
       const activeName = String(activeReference.exerciseName || activeReference.displayName || activeReference.subjectText || activeReference.planItemText || "").trim();
-      if(activeName && raw.includes(activeName)) return activeName;
+      if(activeName && raw.includes(activeName)){
+        return { displayName:activeName, exerciseKey:String(activeReference.exerciseKey || ""), ambiguous:false };
+      }
       const match = matchExerciseFromText(raw);
-      if(match && !match.ambiguous && match.canonical) return match.canonical;
-      return activeName;
+      if(match && !match.ambiguous && match.canonical){
+        return { displayName:match.canonical, exerciseKey:String(match.exerciseKey || ""), ambiguous:false };
+      }
+      if(match && match.ambiguous){
+        return { displayName:"", exerciseKey:"", ambiguous:true, candidates:(match.exerciseCandidates || []).map((item) => ({ ...item })) };
+      }
+      return activeName ? { displayName:activeName, exerciseKey:String(activeReference.exerciseKey || ""), ambiguous:false } : null;
+    }
+
+    function findRecordProtocolFallbackPlanProgressItem(text = "", context = {}){
+      const raw = String(text || "").trim();
+      if(!raw) return null;
+      const dateKey = resolveTrainingCaptureDate(raw, context.now || new Date());
+      const logs = getDailyLogs();
+      const log = buildDailyLogShell(dateKey, logs[dateKey] || {});
+      const item = findBestPlanProgressItemForText(log, raw);
+      return item ? { dateKey, item } : null;
     }
 
     function buildRecordProtocolLocalFallbackEnvelope(userText = "", options = {}){
@@ -12722,16 +14144,43 @@
       const hasMutationAction = /改成|改为|修改|修正|更正|不对|不是|删除|删掉|撤回|不要记/.test(raw);
       const hasContextSupplement = /(?:刚才|刚刚|那个|那条|上一项|上一个).{0,12}(?:补了|补完|又补|再补|一组)|(?:又|再|继续).{0,8}(?:补了|补完|一组)/.test(raw);
       const hasSelfContainedFact = /做了|做完|完成|练了|练完|加练|打卡|搞定/.test(raw);
-      const hasRecordAction = hasMutationAction || hasContextSupplement || (options.allowSelfContainedFacts === true && hasSelfContainedFact);
+      const hasRecordAction = hasMutationAction || hasContextSupplement || options.forceRecordAction === true || (options.allowSelfContainedFacts === true && hasSelfContainedFact);
       const consultationOnly = /应该|建议|怎么|如何|可以吗|要不要|能不能|\?|？/.test(raw) && !hasRecordAction;
       if(consultationOnly || !hasRecordAction) return null;
+      if(!options.skipMultiFactSplit && !hasMutationAction && !hasContextSupplement){
+        const splitSegments = splitLocalTrainingFactSegments(raw, options);
+        if(splitSegments.length > 1){
+          const splitCandidates = splitSegments.flatMap((segment) => {
+            const envelope = buildRecordProtocolLocalFallbackEnvelope(segment.text, {
+              ...options,
+              forceRecordAction:true,
+              skipMultiFactSplit:true
+            });
+            return Array.isArray(envelope?.record_candidates) ? envelope.record_candidates : [];
+          });
+          if(splitCandidates.length > 1){
+            return { reply:"", record_candidates:splitCandidates };
+          }
+        }
+      }
 
       const activeReference = options.activeTrainingReference && typeof options.activeTrainingReference === "object"
         ? options.activeTrainingReference
         : {};
       const context = options.context && typeof options.context === "object" ? options.context : {};
-      const exerciseName = getRecordProtocolFallbackExerciseName(raw, activeReference);
       const targetDateText = resolveRecordProtocolFallbackDateText(raw, activeReference, context);
+      const planItemMatch = findRecordProtocolFallbackPlanProgressItem(raw, context);
+      let exerciseMatch = getRecordProtocolFallbackExerciseMatch(raw, activeReference);
+      if(planItemMatch?.item){
+        exerciseMatch = {
+          displayName:planItemMatch.item.snapshotDisplayName,
+          exerciseKey:String(planItemMatch.item.exerciseKey || ""),
+          matchedText:planItemMatch.item.snapshotItemText,
+          source:"plan_snapshot",
+          ambiguous:false
+        };
+      }
+      const exerciseName = exerciseMatch && !exerciseMatch.ambiguous ? exerciseMatch.displayName : "";
       const base = {
         evidenceText:raw,
         evidenceSource:"current_user_message",
@@ -12740,6 +14189,19 @@
         confidence:0.9,
         ...(targetDateText ? { targetDateText, dateSource:targetDateText === "today" ? "default_today" : "explicit" } : {})
       };
+      const fallbackCandidateType = /加练|补了|又补|再补|额外/.test(raw) ? "extra_training" : "plan_progress";
+      if(exerciseMatch?.ambiguous){
+        return {
+          reply:"",
+          record_candidates:[{
+            ...base,
+            candidateType:fallbackCandidateType,
+            needsConfirmation:true,
+            reason:`动作不明确：${(exerciseMatch.candidates || []).map((item) => item.displayName).filter(Boolean).join(" / ")}`,
+            exerciseRef:{ type:"unknown", displayName:exerciseMatch.matchedText || "", exerciseKey:"" }
+          }]
+        };
+      }
       if(/删除|删掉|撤回|不要记/.test(raw)){
         return {
           reply:"",
@@ -12775,17 +14237,34 @@
         };
       }
       if(!exerciseName) return null;
-      const amount = readRecordProtocolFallbackNumber(raw, /(\d+(?:\.\d+)?|[零一二两三四五六七八九十]+)\s*组/) || (/一组|补了?一组|又补/.test(raw) ? 1 : null);
+      const setAmount = readRecordProtocolFallbackNumber(raw, /(\d+(?:\.\d+)?|[零一二两三四五六七八九十]+)\s*组/) || (/一组|补了?一组|又补/.test(raw) ? 1 : null);
+      const repAmount = readRecordProtocolFallbackNumber(raw, /(\d+(?:\.\d+)?|[零一二两三四五六七八九十]+)\s*(?:次|个|下|reps?)/i);
+      const totalDurationMatch = raw.match(/(\d+(?:\.\d+)?|[零一二两三四五六七八九十]+)\s*(秒|s|sec|seconds?|分钟|分|min|minutes?)/i);
+      const totalDuration = totalDurationMatch
+        ? readRecordProtocolFallbackNumber(raw, /(\d+(?:\.\d+)?|[零一二两三四五六七八九十]+)\s*(?:秒|s|sec|seconds?|分钟|分|min|minutes?)/i)
+        : null;
+      const amount = setAmount || repAmount || totalDuration;
       if(!amount) return null;
+      const unit = setAmount ? "set" : (repAmount ? "rep" : (/分钟|分|min|minute/i.test(totalDurationMatch?.[2] || "") ? "minute" : "second"));
       const candidate = {
         ...base,
-        candidateType:/加练|补了|又补|再补|额外/.test(raw) ? "extra_training" : "plan_progress",
-        exerciseRef:{ type:"mentioned", displayName:exerciseName },
+        candidateType:fallbackCandidateType,
+        exerciseRef:{
+          type:planItemMatch?.item ? "exerciseKey" : "mentioned",
+          displayName:exerciseName,
+          exerciseKey:String(exerciseMatch?.exerciseKey || "")
+        },
+        ...(planItemMatch?.item?.itemId ? { itemId:planItemMatch.item.itemId } : {}),
         amount,
-        unit:"set",
-        sets:amount,
+        unit,
         writeIntent:"auto"
       };
+      if(unit === "set") candidate.sets = amount;
+      if(unit === "rep") candidate.reps = amount;
+      if(unit === "minute" || unit === "second"){
+        candidate.duration = amount;
+        candidate.durationUnit = unit;
+      }
       const repsPerSet = readRecordProtocolFallbackNumber(raw, /(?:每组|每次|一组)\s*(\d+(?:\.\d+)?|[零一二两三四五六七八九十]+)\s*(?:次|个|下)/);
       if(repsPerSet) candidate.repsPerSet = repsPerSet;
       const durationMatch = raw.match(/(?:每组|每次|一组)\s*(\d+(?:\.\d+)?|[零一二两三四五六七八九十]+)\s*(秒|s|sec|seconds?|分钟|min|minutes?)/i);
@@ -12811,19 +14290,102 @@
       };
     }
 
+    function shouldUseRecordProtocolLocalFallback(userText = "", coachResult = {}, originalCandidates = []){
+      if(Array.isArray(originalCandidates) && originalCandidates.length) return false;
+      if(coachResult?.forceProtocolLocalFallback === true) return true;
+      if(coachResult?.ok === false) return true;
+      if(String(coachResult?.parseError || "").trim()) return true;
+      return /改成|改为|修改|修正|更正|不对|不是|删除|删掉|撤回|不要记/.test(String(userText || ""));
+    }
+
+    function makeEmptyRecordProtocolProcessResult(){
+      return {
+        writes:[],
+        pending:[],
+        ignored:[],
+        assistantFollowUp:""
+      };
+    }
+
+    function mergeRecordProtocolProcessResults(base = {}, extra = {}){
+      return {
+        writes:[
+          ...(Array.isArray(base.writes) ? base.writes : []),
+          ...(Array.isArray(extra.writes) ? extra.writes : [])
+        ],
+        pending:[
+          ...(Array.isArray(base.pending) ? base.pending : []),
+          ...(Array.isArray(extra.pending) ? extra.pending : [])
+        ],
+        ignored:[
+          ...(Array.isArray(base.ignored) ? base.ignored : []),
+          ...(Array.isArray(extra.ignored) ? extra.ignored : [])
+        ],
+        assistantFollowUp:extra.assistantFollowUp || base.assistantFollowUp || ""
+      };
+    }
+
+    function getRecordProtocolDecisionForCandidate(decisions = [], candidate = {}, index = 0){
+      const candidateId = String(candidate?.candidateId || "").trim();
+      if(candidateId){
+        const byId = decisions.find((decision) => String(decision?.candidateId || "").trim() === candidateId);
+        if(byId) return byId;
+      }
+      return decisions[index] || {};
+    }
+
+    function shouldReplayProtocolCandidateThroughPlanReconciliation(candidate = {}, decision = {}, context = {}){
+      const type = String(candidate.candidateType || "");
+      if(!["plan_progress", "extra_training"].includes(type)) return false;
+      if(!["written", "pending"].includes(String(decision.decision || ""))) return false;
+      const replayCandidate = {
+        ...candidate,
+        targetDate:decision.targetDateIso || candidate.targetDateIso || candidate.targetDate || candidate.targetDateText || "today"
+      };
+      const dateKey = resolveRecordCandidateDate(replayCandidate, context);
+      const logs = getDailyLogs();
+      const log = buildDailyLogShell(dateKey, logs[dateKey] || {});
+      return !!findPlanProgressItemForRecordCandidate(log, replayCandidate);
+    }
+
+    function replayRecordProtocolCandidatesThroughPlanReconciliation(protocolOutput = {}, engineResult = {}, context = {}){
+      const candidates = Array.isArray(protocolOutput?.candidates) ? protocolOutput.candidates : [];
+      const decisions = Array.isArray(engineResult?.decisions) ? engineResult.decisions : [];
+      const replayCandidates = candidates
+        .map((candidate, index) => {
+          const decision = getRecordProtocolDecisionForCandidate(decisions, candidate, index);
+          if(!shouldReplayProtocolCandidateThroughPlanReconciliation(candidate, decision, context)) return null;
+          const evidenceText = String(candidate.evidenceText || candidate.rawText || context.userText || "").trim();
+          return {
+            ...candidate,
+            targetDate:decision.targetDateIso || candidate.targetDateIso || candidate.targetDate || candidate.targetDateText || "today",
+            rawText:candidate.rawText || evidenceText,
+            text:candidate.text || evidenceText
+          };
+        })
+        .filter(Boolean);
+      if(!replayCandidates.length) return makeEmptyRecordProtocolProcessResult();
+      return processRecordCandidates(replayCandidates, context);
+    }
+
     function runRecordProtocolEngineForCharacterChat(userText = "", coachResult = {}){
       const now = new Date();
       const visibleWeekDates = getRecordProtocolVisibleWeekDates(now);
       const context = {
         todayIso:formatDateKey(now),
         userTimeZone:getRecordProtocolUserTimeZone(),
-        visibleWeekDates
+        visibleWeekDates,
+        now
       };
       const originalCandidates = Array.isArray(coachResult.record_candidates) ? coachResult.record_candidates : [];
-      const fallbackEnvelope = originalCandidates.length ? null : buildRecordProtocolLocalFallbackEnvelope(userText, {
-        context,
-        activeTrainingReference:getActiveTrainingReference()
-      });
+      const useProtocolLocalFallback = shouldUseRecordProtocolLocalFallback(userText, coachResult, originalCandidates);
+      const fallbackEnvelope = useProtocolLocalFallback
+        ? buildRecordProtocolLocalFallbackEnvelope(userText, {
+            context,
+            activeTrainingReference:getActiveTrainingReference(),
+            allowSelfContainedFacts:true
+          })
+        : null;
       const recordCandidates = originalCandidates.length
         ? originalCandidates
         : (Array.isArray(fallbackEnvelope?.record_candidates) ? fallbackEnvelope.record_candidates : []);
@@ -12847,7 +14409,17 @@
       if(JSON.stringify(engineResult.nextState.dailyLogs || {}) !== JSON.stringify(currentDailyLogs || {})){
         setDailyLogs(engineResult.nextState.dailyLogs, { syncToCloud:true });
       }
-      return { protocolOutput, engineResult };
+      const appReconciliationResult = replayRecordProtocolCandidatesThroughPlanReconciliation(protocolOutput, engineResult, {
+        userText,
+        now
+      });
+      return {
+        protocolOutput,
+        engineResult,
+        appReconciliationResult,
+        aiCandidateCount:originalCandidates.length,
+        usedProtocolLocalFallback:useProtocolLocalFallback && !!fallbackEnvelope
+      };
     }
 
     function recordProtocolEngineResultToProcessResult(engineResult = {}){
@@ -12882,38 +14454,101 @@
       }
       if(input) input.value = "";
       if(btn) btn.disabled = true;
+      const pendingPlanReply = handlePendingPlanReconciliationChatReply(text);
+      if(pendingPlanReply?.handled){
+        setRecordProtocolLastDebug({
+          rawModelOutput:"",
+          reply:pendingPlanReply.reply,
+          record_candidates:[],
+          protocolOutput:null,
+          engineResult:{ decisions:[] },
+          engineDecisions:[],
+          aiCandidateCount:0,
+          usedProtocolLocalFallback:false,
+          rejected_candidates:[],
+          parseError:"",
+          processResult:{ writes:[], pending:[], ignored:[] },
+          deterministicCaptureResult:{ status:"plan_reconciliation_reply" }
+        });
+        setCharacterChatHistory([...getCharacterChatHistory(), { role:"assistant", content:pendingPlanReply.reply || "已处理。", at:new Date().toISOString() }]);
+        if(btn) btn.disabled = false;
+        return;
+      }
       try{
         const coachResult = await callCharacterChat(text);
-        const { protocolOutput, engineResult } = runRecordProtocolEngineForCharacterChat(text, coachResult);
-        const processResult = recordProtocolEngineResultToProcessResult(engineResult);
-        const deterministicCaptureResult = maybeRunDeterministicCharacterCaptureFallback(text, processResult, { sourceType:"character_chat" });
+        const {
+          protocolOutput,
+          engineResult,
+          appReconciliationResult,
+          aiCandidateCount,
+          usedProtocolLocalFallback
+        } = runRecordProtocolEngineForCharacterChat(text, coachResult);
+        const processResult = mergeRecordProtocolProcessResults(
+          recordProtocolEngineResultToProcessResult(engineResult),
+          appReconciliationResult
+        );
+        const deterministicCaptureResult = maybeRunDeterministicCharacterCaptureFallback(text, processResult, {
+          sourceType:"character_chat",
+          aiCandidateCount,
+          usedProtocolLocalFallback
+        });
         setRecordProtocolLastDebug({
           rawModelOutput:coachResult.rawModelOutput,
           reply:coachResult.reply,
           record_candidates:coachResult.record_candidates,
           protocolOutput,
           engineResult,
+          appReconciliationResult,
           engineDecisions:engineResult.decisions,
+          aiCandidateCount,
+          usedProtocolLocalFallback,
           rejected_candidates:coachResult.rejected_candidates || [],
           parseError:coachResult.parseError,
           processResult,
           deterministicCaptureResult
         });
         const jsonish = /^\s*(?:```|\{|\[)/.test(String(coachResult.rawModelOutput || ""));
+        const protocolReasoningLeak = looksLikeRecordProtocolReasoningLeak(coachResult.rawModelOutput || coachResult.reply || "");
         let reply = coachResult.ok
           ? coachResult.reply
-          : (jsonish ? "我刚刚的记录格式有点乱，已用本地规则再校验这条训练记录。" : coachResult.reply);
+          : ((jsonish || protocolReasoningLeak) ? buildRecordProtocolParseFailureReply(processResult, deterministicCaptureResult) : coachResult.reply);
+        if(looksLikeRecordProtocolReasoningLeak(reply)){
+          reply = buildRecordProtocolParseFailureReply(processResult, deterministicCaptureResult);
+        }
         const fallbackPrompt = deterministicCaptureResult && deterministicCaptureResult.status === "follow_up" ? deterministicCaptureResult.prompt : "";
         [processResult.assistantFollowUp, fallbackPrompt].filter(Boolean).forEach((followUp) => {
           if(followUp && !reply.includes(followUp)) reply = [reply, followUp].filter(Boolean).join("\n");
         });
         setCharacterChatHistory([...getCharacterChatHistory(), { role:"assistant", content:reply || "（没有返回内容）", at:new Date().toISOString() }]);
       }catch(err){
-        let deterministicCaptureResult = maybeRunDeterministicCharacterCaptureFallback(text, { writes:[], pending:[], ignored:[] }, { sourceType:"character_chat" });
+        let protocolFallback = null;
+        let processResult = { writes:[], pending:[], ignored:[] };
+        try{
+          protocolFallback = runRecordProtocolEngineForCharacterChat(text, {
+            reply:"",
+            rawModelOutput:"",
+            record_candidates:[],
+            rejected_candidates:[],
+            parseError:err.message || "AI call failed"
+          });
+          processResult = mergeRecordProtocolProcessResults(
+            recordProtocolEngineResultToProcessResult(protocolFallback.engineResult),
+            protocolFallback.appReconciliationResult
+          );
+        }catch(protocolErr){
+          console.error("记录协议本地兜底失败", protocolErr);
+        }
+        let deterministicCaptureResult = maybeRunDeterministicCharacterCaptureFallback(text, processResult, {
+          sourceType:"character_chat",
+          aiCandidateCount:protocolFallback?.aiCandidateCount || 0,
+          usedProtocolLocalFallback:!!protocolFallback?.usedProtocolLocalFallback
+        });
         if(!isDeterministicCharacterCaptureHandled(deterministicCaptureResult) && !["follow_up", "pending_correction"].includes(String(deterministicCaptureResult?.status || ""))){
           deterministicCaptureResult = maybeBuildLocalDateCorrectionFallback(text) || deterministicCaptureResult;
         }
-        const failText = buildCharacterChatAiFailureReply(err, deterministicCaptureResult);
+        const failText = (processResult.writes.length || processResult.pending.length)
+          ? buildRecordProtocolParseFailureReply(processResult, deterministicCaptureResult)
+          : buildCharacterChatAiFailureReply(err, deterministicCaptureResult);
         if(/^发送失败/.test(failText)){
           console.error(err);
         }
@@ -12921,9 +14556,15 @@
           rawModelOutput:"",
           reply:"",
           record_candidates:[],
+          protocolOutput:protocolFallback?.protocolOutput,
+          engineResult:protocolFallback?.engineResult,
+          appReconciliationResult:protocolFallback?.appReconciliationResult,
+          engineDecisions:protocolFallback?.engineResult?.decisions || [],
+          aiCandidateCount:protocolFallback?.aiCandidateCount || 0,
+          usedProtocolLocalFallback:!!protocolFallback?.usedProtocolLocalFallback,
           rejected_candidates:[],
           parseError:err.message || "AI call failed",
-          processResult:null,
+          processResult,
           deterministicCaptureResult
         });
         setCharacterChatHistory([...getCharacterChatHistory(), { role:"assistant", content:failText, at:new Date().toISOString() }]);
@@ -18525,6 +20166,21 @@
         .filter((record) => !record.revoked)
         .filter((record) => record.structuredWrite?.status !== "plan_progress");
       const revokedAiCaptureRecords = aiCaptureRecords.filter((record) => record.revoked);
+      const protocolCaptureRecords = buildRecordProtocolCalendarRecords(log);
+      const activeCaptureRecordItemsHtml = [
+        ...activeAiCaptureRecords.map((record) => `
+          <li>
+            ${escapeHtml(summarizeTrainingCaptureRecord(record))}
+            <div class="help">自动捕捉${record.capturedRoleName ? ` · 来源角色：${escapeHtml(record.capturedRoleName)}` : ""}${record.userModified ? " · 用户已修改" : ""}</div>
+          </li>
+        `),
+        ...protocolCaptureRecords.map((record) => `
+          <li>
+            ${escapeHtml(record.summary)}
+            <div class="help">AI 协议记录</div>
+          </li>
+        `)
+      ].join("") || "<li>暂无自动捕捉记录</li>";
       const aiDailySummary = log.aiDailySummary || generateAiDailySummaryForLog(log);
 
       box.innerHTML = `
@@ -18542,12 +20198,7 @@
 
         <div class="label">自动捕捉记录</div>
         <ul class="calendar-items">
-          ${activeAiCaptureRecords.map((record) => `
-            <li>
-              ${escapeHtml(summarizeTrainingCaptureRecord(record))}
-              <div class="help">自动捕捉${record.capturedRoleName ? ` · 来源角色：${escapeHtml(record.capturedRoleName)}` : ""}${record.userModified ? " · 用户已修改" : ""}</div>
-            </li>
-          `).join("") || "<li>暂无自动捕捉记录</li>"}
+          ${activeCaptureRecordItemsHtml}
         </ul>
         ${revokedAiCaptureRecords.length ? `<div class="help">已撤回 ${revokedAiCaptureRecords.length} 条自动捕捉记录，不进入 AI 总结。</div>` : ""}
 
