@@ -7908,6 +7908,128 @@
       return normalizeAppStateSnapshot(source);
     }
 
+    function getCloudMergeIdentity(item, index = 0){
+      if(item && typeof item === "object" && !Array.isArray(item)){
+        const keys = ["id", "recordId", "candidateId", "attemptId", "eventId", "sourceRecordId", "itemId", "planItemId"];
+        for(const key of keys){
+          if(item[key] !== undefined && item[key] !== null && String(item[key]).trim()){
+            return `${key}:${String(item[key]).trim()}`;
+          }
+        }
+      }
+      try{
+        return `json:${JSON.stringify(item)}`;
+      }catch(err){
+        return `index:${index}`;
+      }
+    }
+
+    function mergeCloudUniqueArray(preferred = [], secondary = [], identityFn = getCloudMergeIdentity){
+      const merged = [];
+      const seen = new Set();
+      [preferred, secondary].forEach((list) => {
+        asArray(list, []).forEach((item, index) => {
+          const key = identityFn(item, index);
+          if(seen.has(key)) return;
+          seen.add(key);
+          merged.push(cloneAppStateValue(item));
+        });
+      });
+      return merged;
+    }
+
+    function getCloudPlanProgressIdentity(item, index = 0){
+      if(item && typeof item === "object" && !Array.isArray(item)){
+        const key = item.itemId || item.planItemId || item.id || item.snapshotItemText || item.snapshotDisplayName;
+        if(key !== undefined && key !== null && String(key).trim()) return `plan:${String(key).trim()}`;
+      }
+      return getCloudMergeIdentity(item, index);
+    }
+
+    function getCloudPlanProgressScore(item){
+      if(!item || typeof item !== "object" || Array.isArray(item)) return 0;
+      const completed = Number(item.completedAmount ?? item.completed ?? item.amount ?? 0) || 0;
+      const target = Number(item.targetAmount ?? item.target ?? 0) || 0;
+      const checked = item.checked === true || item.completed === true || (target > 0 && completed >= target);
+      return (checked ? 1000000 : 0) + completed;
+    }
+
+    function mergeCloudPlanProgressItems(preferred = [], secondary = []){
+      const map = new Map();
+      [secondary, preferred].forEach((list) => {
+        asArray(list, []).forEach((item, index) => {
+          const key = getCloudPlanProgressIdentity(item, index);
+          const existing = map.get(key);
+          if(!existing || getCloudPlanProgressScore(item) >= getCloudPlanProgressScore(existing)){
+            map.set(key, cloneAppStateValue(item));
+          }
+        });
+      });
+      return Array.from(map.values());
+    }
+
+    function mergeCloudTruthMap(preferred = {}, secondary = {}){
+      const result = { ...asPlainObject(secondary, {}), ...asPlainObject(preferred, {}) };
+      Object.keys(asPlainObject(secondary, {})).forEach((key) => {
+        if(secondary[key] === true || preferred[key] === true) result[key] = true;
+      });
+      return result;
+    }
+
+    function mergeCloudDailyLog(preferredLog = {}, secondaryLog = {}){
+      const preferred = asPlainObject(preferredLog, {});
+      const secondary = asPlainObject(secondaryLog, {});
+      const merged = {
+        ...cloneAppStateValue(secondary),
+        ...cloneAppStateValue(preferred)
+      };
+      merged.records = mergeCloudUniqueArray(preferred.records, secondary.records);
+      merged.aiCaptureRecords = mergeCloudUniqueArray(preferred.aiCaptureRecords, secondary.aiCaptureRecords);
+      merged.captureAttempts = mergeCloudUniqueArray(preferred.captureAttempts, secondary.captureAttempts);
+      merged.extraTrainingEvents = mergeCloudUniqueArray(preferred.extraTrainingEvents, secondary.extraTrainingEvents);
+      merged.planProgressItems = mergeCloudPlanProgressItems(preferred.planProgressItems, secondary.planProgressItems);
+      merged.completedItems = mergeCloudUniqueArray(preferred.completedItems, secondary.completedItems, (item) => `completed:${String(item)}`);
+      merged.completedCount = Math.max(Number(preferred.completedCount) || 0, Number(secondary.completedCount) || 0, Number(merged.completedCount) || 0);
+      merged.totalItems = Math.max(Number(preferred.totalItems) || 0, Number(secondary.totalItems) || 0, Number(merged.totalItems) || 0);
+      return merged;
+    }
+
+    function mergeCloudDailyLogs(preferred = {}, secondary = {}){
+      const result = {};
+      const preferredLogs = asPlainObject(preferred, {});
+      const secondaryLogs = asPlainObject(secondary, {});
+      Array.from(new Set([...Object.keys(secondaryLogs), ...Object.keys(preferredLogs)])).forEach((dateIso) => {
+        result[dateIso] = mergeCloudDailyLog(preferredLogs[dateIso], secondaryLogs[dateIso]);
+        if(!result[dateIso].date) result[dateIso].date = dateIso;
+      });
+      return result;
+    }
+
+    function mergeCloudAppStateSnapshots(localSnapshot, remoteSnapshot, updatedAt){
+      const local = normalizeAppStateSnapshot(localSnapshot);
+      const remote = normalizeAppStateSnapshot(remoteSnapshot);
+      const localMs = parseTimeMs(getSnapshotUpdatedAt(local));
+      const remoteMs = parseTimeMs(getSnapshotUpdatedAt(remote));
+      const preferred = localMs >= remoteMs ? local : remote;
+      const secondary = preferred === local ? remote : local;
+      return normalizeAppStateSnapshot({
+        ...secondary,
+        ...preferred,
+        history: mergeCloudUniqueArray(preferred.history, secondary.history),
+        dailyLogs: mergeCloudDailyLogs(preferred.dailyLogs, secondary.dailyLogs),
+        planChecks: mergeCloudTruthMap(preferred.planChecks, secondary.planChecks),
+        planCheckMeta: { ...asPlainObject(secondary.planCheckMeta, {}), ...asPlainObject(preferred.planCheckMeta, {}) },
+        aiWeeklySummaries: { ...asPlainObject(secondary.aiWeeklySummaries, {}), ...asPlainObject(preferred.aiWeeklySummaries, {}) },
+        aiFeedbackHistory: mergeCloudUniqueArray(preferred.aiFeedbackHistory, secondary.aiFeedbackHistory),
+        characterChatHistory: mergeCloudUniqueArray(preferred.characterChatHistory, secondary.characterChatHistory).slice(-40),
+        trainingCaptureCards: mergeCloudUniqueArray(preferred.trainingCaptureCards, secondary.trainingCaptureCards),
+        customExerciseLibrary: mergeCloudUniqueArray(preferred.customExerciseLibrary, secondary.customExerciseLibrary),
+        exerciseTemplateDrafts: mergeCloudUniqueArray(preferred.exerciseTemplateDrafts, secondary.exerciseTemplateDrafts),
+        lastCloudSyncAt: updatedAt || preferred.lastCloudSyncAt || secondary.lastCloudSyncAt,
+        updatedAt: updatedAt || preferred.updatedAt || secondary.updatedAt
+      });
+    }
+
     function createCloudSync(options = {}){
       const appStatePort = options.appState;
       const cloudAdapter = options.cloudAdapter;
@@ -7982,9 +8104,13 @@
         try{
           const localSnapshot = normalizeAppStateSnapshot(appStatePort.exportSnapshot());
           const previous = await cloudAdapter.pullSnapshot({ userId, reason:"version-check" });
+          let remoteSnapshot = null;
 
-          if(previous && !skipVersionCheck){
-            const remoteSnapshot = readCloudAdapterSnapshot(cloudAdapter, previous);
+          if(previous){
+            remoteSnapshot = readCloudAdapterSnapshot(cloudAdapter, previous);
+          }
+
+          if(remoteSnapshot && !skipVersionCheck){
             const localMs = parseTimeMs(getSnapshotUpdatedAt(localSnapshot));
             const remoteMs = parseTimeMs(getSnapshotUpdatedAt(remoteSnapshot));
             if(remoteMs > localMs + 1000){
@@ -8006,8 +8132,11 @@
           }
 
           const uploadUpdatedAt = now().toISOString();
+          const mergedSnapshot = remoteSnapshot
+            ? mergeCloudAppStateSnapshots(localSnapshot, remoteSnapshot, uploadUpdatedAt)
+            : localSnapshot;
           const outgoingSnapshot = normalizeAppStateSnapshot({
-            ...localSnapshot,
+            ...mergedSnapshot,
             lastCloudSyncAt: uploadUpdatedAt,
             updatedAt: uploadUpdatedAt
           });
@@ -8017,6 +8146,11 @@
             snapshot: outgoingSnapshot,
             updatedAt: uploadUpdatedAt,
             previous,
+            reason
+          });
+
+          const syncedState = appStatePort.importSnapshot(outgoingSnapshot, {
+            source:"cloudSync.pushSnapshot",
             reason
           });
 
@@ -8030,7 +8164,7 @@
           return {
             ok:true,
             blocked:false,
-            snapshot:outgoingSnapshot,
+            snapshot:syncedState,
             updatedAt:uploadUpdatedAt,
             remote:previous
           };
@@ -8088,7 +8222,7 @@
             record_candidates: []
           }, null, 2),
           rules: [
-            "角色卡只影响 reply 的语气，不能改变候选字段、写入目标、确认规则或安全判断。",
+            "角色卡必须继续决定 reply 的人设、关系、称呼和说话方式；但不能改变候选字段、写入目标、确认规则或安全判断。",
             "计划内训练进度使用 candidateType=plan_progress；额外加练使用 extra_training；疼痛、动作反馈使用 feedback；备注使用 note；咨询请求使用 consultation_request 或空数组。",
             "用户明确动作名和数量时生成 mentioned 候选；用户说“又一组、再来一组、刚刚又补了一组”等省略动作名时，优先引用 activeTrainingReference。",
             "只从用户真实陈述的完成、修正、撤回、身体状态或反馈中提取候选；训练计划、今日 focus、总体目标、AI 日总结、计划进度摘要等上下文说明绝对不能生成候选。",
@@ -14309,8 +14443,8 @@
       const hasActiveTrainingSession = trainingContext && isOpenTrainingSession(trainingContext.activeTrainingSession);
       const trainingModeLines = trainingContext ? [
         ...(hasActiveTrainingSession ? [
-          "训练会话教练模式：用户已经主动开始本次训练，AI 教练职责优先于普通角色闲聊；角色卡只影响表达风格，不能削弱执行、节奏和安全提醒。",
-          "当前回复要像现场教练：直接给下一步动作/组间休息/强度提醒，优先推动用户按今日训练计划执行；无关闲聊要短，训练指令要清楚。"
+          "训练会话教练模式：用户已经主动开始本次训练；训练会话中必须继续遵循角色卡的人设、关系、称呼和说话方式，并在角色内完成教练职责。",
+          "当前回复要像现场陪练：给下一步动作、组间休息和强度提醒；可以推进计划和安全提醒，但不能变成通用教练，也不能在 reply 中展示记录协议、候选、JSON 或内部判断。"
         ] : []),
         "本轮消息触发训练意图：可以临时读取训练上下文，并用 AI 教练能力判断训练事实、训练反馈、恢复和风险。",
         "训练判断必须专业、清楚、可执行；角色语气只影响怎么说，不能改变安全、记录和计划判断。",
@@ -14543,10 +14677,18 @@
         /needsConfirmation/i,
         /modify_record_fields|delete_record|move_record_to_date/i,
         /\bemit\b/i,
+        /\bplan_progress\b|\bextra_training\b|\bbody_state\b|\bcorrection\b|\brevoke\b/i,
+        /记录候选|候选记录|记录协议|协议输出|协议推理|候选[:：]/,
+        /组数未知|次数未知|每组次数未知|每组时长未知|每组时间未知/,
+        /在\s*reply\s*中|reply\s*中问|只先记录|先记录两组|问他次数|补全/,
         /根据指令|根据上下文|我们分析|We need to parse/i
       ];
       const hits = markers.reduce((count, pattern) => count + (pattern.test(raw) ? 1 : 0), 0);
-      return hits >= 2 || /candidateType|record_candidates|activeTrainingReference/i.test(raw);
+      if(hits >= 2) return true;
+      if(/candidateType|record_candidates|activeTrainingReference/i.test(raw)) return true;
+      if(/needsConfirmation/i.test(raw) && /候选|记录|plan_progress|extra_training|reply/i.test(raw)) return true;
+      if(/\bplan_progress\b|\bextra_training\b/i.test(raw) && /记录|候选|needsConfirmation|reply/i.test(raw)) return true;
+      return false;
     }
 
     function buildRecordProtocolParseFailureReply(processResult = {}, deterministicCaptureResult = {}){
