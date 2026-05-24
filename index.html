@@ -5286,7 +5286,6 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const APP_VERSION = "v2026.05.17-record-protocol-correction-capture";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
@@ -5342,8 +5341,91 @@
     const SUPABASE_URL = "https://bzzbdchqrvwdaenydoqm.supabase.co";
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_NshT086od8vjfXFIhGvrkw_DgqzzXAL";
     const SUPABASE_TABLE = "app_state";
-    const { createClient } = window.supabase;
-    const sb = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    const SUPABASE_SCRIPT_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+    let sb = null;
+    let supabaseClientPromise = null;
+    let supabaseAuthStateSubscribed = false;
+
+    function loadExternalScript(src){
+      return new Promise((resolve, reject) => {
+        const existing = document.querySelector(`script[data-dynamic-src="${src}"]`);
+        if(existing){
+          if(existing.dataset.loaded === "1"){
+            resolve();
+          }else{
+            existing.addEventListener("load", () => resolve(), { once:true });
+            existing.addEventListener("error", () => reject(new Error(`Failed to load ${src}`)), { once:true });
+          }
+          return;
+        }
+        if(!document?.head?.appendChild){
+          reject(new Error("Document head unavailable for dynamic script loading"));
+          return;
+        }
+        const script = document.createElement("script");
+        script.src = src;
+        script.async = true;
+        script.dataset.dynamicSrc = src;
+        script.onload = () => {
+          script.dataset.loaded = "1";
+          resolve();
+        };
+        script.onerror = () => reject(new Error(`Failed to load ${src}`));
+        document.head.appendChild(script);
+      });
+    }
+
+    async function getSupabaseClient(){
+      if(sb) return sb;
+      if(!supabaseClientPromise){
+        supabaseClientPromise = loadExternalScript(SUPABASE_SCRIPT_URL)
+          .then(() => {
+            const createClient = window.supabase && window.supabase.createClient;
+            if(typeof createClient !== "function"){
+              throw new Error("Supabase client unavailable");
+            }
+            sb = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+            bindSupabaseAuthStateListener();
+            return sb;
+          })
+          .catch((err) => {
+            supabaseClientPromise = null;
+            throw err;
+          });
+      }
+      return supabaseClientPromise;
+    }
+
+    function bindSupabaseAuthStateListener(){
+      if(supabaseAuthStateSubscribed || !sb?.auth?.onAuthStateChange) return;
+      supabaseAuthStateSubscribed = true;
+      sb.auth.onAuthStateChange((event) => {
+        refreshCloudUi().catch(() => {});
+        if((event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") && isAutoSyncEnabled()){
+          resolveAutoSyncState("auth state change").catch((err) => {
+            console.error("auth state cloud check failed", err);
+          });
+        }
+      });
+    }
+
+    function runWhenIdle(callback, timeout = 2000){
+      if(typeof requestIdleCallback === "function"){
+        requestIdleCallback(callback, { timeout });
+        return;
+      }
+      setTimeout(callback, Math.min(timeout, 1200));
+    }
+
+    function scheduleCloudStartupCheck(){
+      updateAutoSyncUi();
+      if(!isAutoSyncEnabled()) return;
+      runWhenIdle(() => {
+        refreshCloudUi().catch((err) => {
+          console.error("cloud startup check failed", err);
+        });
+      }, 1500);
+    }
 
     const DEFAULT_PLAN_TEMPLATE = {
       version: 1,
@@ -17226,15 +17308,16 @@
           return fetchCloudSnapshot(userId);
         },
         async pushSnapshot({ userId, snapshot, updatedAt, previous } = {}){
+          const client = await getSupabaseClient();
           const rowAttempts = createSupabaseRowsFromAppStateSnapshot(userId, snapshot, updatedAt);
           async function writeRow(row){
             if(previous && previous.id){
-              return await sb.from(SUPABASE_TABLE).update(row).eq("id", previous.id);
+              return await client.from(SUPABASE_TABLE).update(row).eq("id", previous.id);
             }
             if(previous){
-              return await sb.from(SUPABASE_TABLE).update(row).eq("user_id", userId);
+              return await client.from(SUPABASE_TABLE).update(row).eq("user_id", userId);
             }
-            return await sb.from(SUPABASE_TABLE).insert(row);
+            return await client.from(SUPABASE_TABLE).insert(row);
           }
 
           let writeRes = null;
@@ -17253,14 +17336,15 @@
 
 
     async function fetchCloudRows(userId){
-      let res = await sb
+      const client = await getSupabaseClient();
+      let res = await client
         .from(SUPABASE_TABLE)
         .select("id,user_id,form_json,history_json,daily_logs_json,plan_checks_json,plan_template_json,updated_at")
         .eq("user_id", userId)
         .limit(20);
 
       if(res.error && isMissingColumnError(res.error)){
-        res = await sb
+        res = await client
           .from(SUPABASE_TABLE)
           .select("id,user_id,form_json,history_json,daily_logs_json,updated_at")
           .eq("user_id", userId)
@@ -17268,7 +17352,7 @@
       }
 
       if(res.error && isMissingColumnError(res.error)){
-        res = await sb
+        res = await client
           .from(SUPABASE_TABLE)
           .select("id,user_id,form_json,history_json,daily_logs_json")
           .eq("user_id", userId)
@@ -17276,7 +17360,7 @@
       }
 
       if(res.error && isMissingColumnError(res.error)){
-        res = await sb
+        res = await client
           .from(SUPABASE_TABLE)
           .select("user_id,form_json,history_json,daily_logs_json,updated_at")
           .eq("user_id", userId)
@@ -17284,7 +17368,7 @@
       }
 
       if(res.error && isMissingColumnError(res.error)){
-        res = await sb
+        res = await client
           .from(SUPABASE_TABLE)
           .select("user_id,form_json,history_json,daily_logs_json")
           .eq("user_id", userId)
@@ -17293,7 +17377,7 @@
 
       // 旧 Supabase 表可能没有 daily_logs_json 等列，继续回退到 form_json 内嵌数据。
       if(res.error && isMissingColumnError(res.error)){
-        res = await sb
+        res = await client
           .from(SUPABASE_TABLE)
           .select("user_id,form_json,history_json")
           .eq("user_id", userId)
@@ -17301,7 +17385,7 @@
       }
 
       if(res.error && isMissingColumnError(res.error)){
-        res = await sb
+        res = await client
           .from(SUPABASE_TABLE)
           .select("user_id,form_json")
           .eq("user_id", userId)
@@ -17327,6 +17411,9 @@
 
     async function syncToCloud(showAlert = true, options = {}){
       const { skipVersionCheck = false } = options || {};
+      if(!showAlert && !isAutoSyncEnabled() && !options.force){
+        return false;
+      }
       const user = await getCurrentUser();
       if(!user){
         if(showAlert) alert("请先登录云端，再同步");
@@ -17523,7 +17610,8 @@
     }
 
     async function getCurrentUser(){
-      const { data, error } = await sb.auth.getUser();
+      const client = await getSupabaseClient();
+      const { data, error } = await client.auth.getUser();
       if(error) return null;
       return data.user || null;
     }
@@ -17547,7 +17635,8 @@
     async function signInWithGitHub(){
       setCloudBusy(true);
       try{
-        const { error } = await sb.auth.signInWithOAuth({
+        const client = await getSupabaseClient();
+        const { error } = await client.auth.signInWithOAuth({
           provider: "github",
           options: {
             redirectTo: window.location.origin + window.location.pathname
@@ -17568,7 +17657,8 @@
     async function signOutCloud(){
       setCloudBusy(true);
       try{
-        const { error } = await sb.auth.signOut();
+        const client = await getSupabaseClient();
+        const { error } = await client.auth.signOut();
         if(error) throw error;
         await refreshCloudUi();
         alert("已退出云端登录");
@@ -23385,15 +23475,6 @@
     bindDefaultCollapsedCards();
     bindIosInteractionGuards();
 
-    sb.auth.onAuthStateChange((event) => {
-      refreshCloudUi().catch(() => {});
-      if((event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") && isAutoSyncEnabled()){
-        resolveAutoSyncState("登录后检查云端版本").catch((err) => {
-          console.error("登录后检查云端版本失败", err);
-        });
-      }
-    });
-
     applyPageBackground(appState.getState().pageBackground || getPageBackgroundData());
     updateAiSettingsUi();
     updateAiPetVisibility();
@@ -23422,7 +23503,7 @@
       attachLiquidGlassControls();
     });
     updateSummary();
-    refreshCloudUi().catch(() => {});
+    scheduleCloudStartupCheck();
     if($("appVersionText")){
       $("appVersionText").textContent = `当前版本：${APP_VERSION}`;
     }
