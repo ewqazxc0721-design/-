@@ -4646,7 +4646,7 @@
         left:var(--prototype-dock-side) !important;
         width:calc(100vw - (var(--prototype-dock-side) * 2) - var(--prototype-ai-size) - var(--prototype-dock-gap)) !important;
         --tab-height:64px !important;
-        --indicator-edge-gap:0px !important;
+        --indicator-edge-gap:5px !important;
         padding:4px 7px !important;
       }
 
@@ -8185,6 +8185,9 @@
         setStatus({ phase:"pushing", error:"", blocked:false });
 
         try{
+          if(typeof appStatePort.load === "function"){
+            appStatePort.load();
+          }
           const localSnapshot = normalizeAppStateSnapshot(appStatePort.exportSnapshot());
           const previous = await cloudAdapter.pullSnapshot({ userId, reason:"version-check" });
           let remoteSnapshot = null;
@@ -17108,11 +17111,17 @@
     }
 
     function setLocalStateMeta(meta){
-      localStorage.setItem(LOCAL_STATE_META_KEY, JSON.stringify(meta || {}));
+      try{
+        localStorage.setItem(LOCAL_STATE_META_KEY, JSON.stringify(meta || {}));
+        return true;
+      }catch(err){
+        console.warn("本地状态版本标记保存失败，已保留核心本地数据。", err);
+        return false;
+      }
     }
 
     function markLocalStateChanged(reason = "本机数据变化", updatedAt = new Date().toISOString()){
-      setLocalStateMeta({
+      return setLocalStateMeta({
         updated_at: updatedAt,
         reason: reason || "本机数据变化"
       });
@@ -19572,7 +19581,7 @@
       });
       persistTrainingPlanStatePatch(applied.state, applied.changedFields);
       const afterDone = !!applied.state.planChecks[key];
-      renderPlan();
+      renderPlan({ scrollDayDock:false, preserveDayDockScroll:true });
       updateSummary();
       if(!beforeDone && afterDone){
         handleAiExerciseCompleted(key).catch((err) => console.error("AI 动作反馈失败", err));
@@ -19590,7 +19599,7 @@
       });
       if(applied.result.status !== "completed_day") return;
       persistTrainingPlanStatePatch(applied.state, applied.changedFields);
-      renderPlan();
+      renderPlan({ scrollDayDock:false, preserveDayDockScroll:true });
       updateSummary();
       maybePromptTrainingSessionClose(dayIndex);
       handleAiDayComplete(dayIndex, { source:"complete_day_button" }).catch((err) => console.error("AI 完成反馈失败", err));
@@ -19624,11 +19633,14 @@
       return `<div class="plan-progress-chip">${escapeHtml(`${completed}/${target}${progress.unit || "项"}`)}</div>`;
     }
 
-    function renderPlan(){
+    function renderPlan(options = {}){
       const days = getPlanDays();
       const checks = getPlanChecks();
       const tabs = $("dayTabs");
       const container = $("planContainer");
+      const shouldScrollDayDock = options.scrollDayDock !== false;
+      const preserveDayDockScroll = options.preserveDayDockScroll === true;
+      const previousDayDockScrollLeft = tabs && preserveDayDockScroll ? tabs.scrollLeft : 0;
 
       if(!days.length){
         tabs.innerHTML = "";
@@ -19647,6 +19659,13 @@
           return `<button class="day-tab ${i === activePlanDay ? "active" : ""}" data-plan-tab="${i}" type="button" aria-label="${escapeHtml(d.day)}" ${i === activePlanDay ? 'aria-current="page"' : ""}><span class="day-tab-content"><span class="day-tab-label">${escapeHtml(d.day)}</span></span></button>`;
         }).join("")}
       `;
+      if(preserveDayDockScroll){
+        const oldScrollBehavior = tabs.style.scrollBehavior;
+        tabs.style.scrollBehavior = "auto";
+        tabs.scrollLeft = previousDayDockScrollLeft;
+        void tabs.offsetWidth;
+        tabs.style.scrollBehavior = oldScrollBehavior;
+      }
 
       container.innerHTML = days.map((d, dayIndex) => {
         const openSession = getTrainingSession();
@@ -19715,7 +19734,7 @@
         indicator.style.opacity = "0";
       }
       requestAnimationFrame(() => {
-        scheduleDayDockPostLayoutRepair({ immediate:true });
+        scheduleDayDockPostLayoutRepair({ immediate:true, scroll: shouldScrollDayDock });
       });
 
       container.querySelectorAll("[data-check]").forEach((btn) => {
@@ -19776,7 +19795,13 @@
       renderPlanGuideSearchResults();
       bindExerciseLibraryControls();
       renderExerciseLibrary();
-      requestAnimationFrame(() => scrollActiveDayTabIntoView("smooth"));
+      requestAnimationFrame(() => {
+        if(shouldScrollDayDock){
+          scrollActiveDayTabIntoView(options.dayDockScrollBehavior || "smooth");
+        }else{
+          updateDayTabIndicator({ immediate:true, noForce:true });
+        }
+      });
     }
 
     function saveCurrentPlanDay(){
@@ -21451,6 +21476,16 @@
 
     const liquidDock = createLiquidDock();
 
+    function getCenteredTabIndicatorBox(input = {}){
+      return getCenteredDayIndicatorBox({
+        center:input.center,
+        desiredWidth:input.desiredWidth,
+        minWidth:input.minWidth,
+        visibleLeft:input.visibleLeft,
+        visibleRight:input.visibleRight
+      });
+    }
+
     function getTabMetrics(extraScale = 0){
       const tabsEl = document.querySelector(".tabs");
       const indicator = tabsEl ? tabsEl.querySelector(".tab-indicator") : null;
@@ -21469,6 +21504,7 @@
         width:btn.offsetWidth,
         center:btn.offsetLeft + btn.offsetWidth / 2
       }));
+      const desiredIndicatorWidth = (buttonBoxes[activeIndex]?.width || activeTab.offsetWidth) * scale;
       const metrics = liquidDock.computeIndicatorMetrics(buttonBoxes, activeIndex, {
         containerWidth,
         contentWidth:containerWidth,
@@ -21476,7 +21512,14 @@
         edgeGap,
         visibleLeft:edgeGap,
         visibleRight:containerWidth - edgeGap,
-        fixedIndicatorWidth:true
+        fixedIndicatorWidth:true,
+        indicatorBoxForItem:(box) => getCenteredTabIndicatorBox({
+          center:box.center,
+          desiredWidth:desiredIndicatorWidth,
+          minWidth:Math.min(desiredIndicatorWidth, Math.max(1, box.width)),
+          visibleLeft:edgeGap,
+          visibleRight:containerWidth - edgeGap
+        })
       });
 
       return {
@@ -23051,15 +23094,18 @@
       const containerWidth = tabsEl.clientWidth;
       const scale = parseFloat(styles.getPropertyValue("--indicator-scale")) || 1.13;
       const edgeGap = parseFloat(styles.getPropertyValue("--indicator-edge-gap")) || 0;
-      const width = activeTab.offsetWidth * scale;
       const center = activeTab.offsetLeft + activeTab.offsetWidth / 2;
-      let left = center - width / 2;
-      const minLeft = edgeGap;
-      const maxLeft = containerWidth - width - edgeGap;
-      left = Math.max(minLeft, Math.min(left, maxLeft));
+      const desiredWidth = activeTab.offsetWidth * scale;
+      const box = getCenteredTabIndicatorBox({
+        center,
+        desiredWidth,
+        minWidth:Math.min(desiredWidth, Math.max(1, activeTab.offsetWidth)),
+        visibleLeft:edgeGap,
+        visibleRight:containerWidth - edgeGap
+      });
 
-      indicator.style.width = width + "px";
-      setTabIndicatorTransform(indicator, left);
+      indicator.style.width = box.width + "px";
+      setTabIndicatorTransform(indicator, box.left);
     }
 
     function previewIndicatorAtButton(button){
