@@ -7981,7 +7981,78 @@
 
 
     function getSnapshotUpdatedAt(snapshot){
-      return String(snapshot?.updatedAt || snapshot?.localStateMeta?.updated_at || snapshot?.localStateMeta?.updatedAt || snapshot?.lastCloudSyncAt || "");
+      return String(snapshot?.updatedAt || snapshot?.localStateMeta?.updated_at || snapshot?.localStateMeta?.updatedAt || snapshot?.lastCloudSyncAt || inferSnapshotContentUpdatedAt(snapshot) || "");
+    }
+
+    function inferSnapshotContentUpdatedAt(snapshot){
+      const source = asPlainObject(snapshot, {});
+      const candidates = [
+        source.updatedAt,
+        source.localStateMeta?.updated_at,
+        source.localStateMeta?.updatedAt,
+        source.lastCloudSyncAt
+      ];
+
+      Object.values(asPlainObject(source.planCheckMeta, {})).forEach((meta) => {
+        if(!meta || typeof meta !== "object") return;
+        candidates.push(meta.updatedAt, meta.createdAt, meta.capturedAt);
+      });
+
+      Object.values(asPlainObject(source.dailyLogs, {})).forEach((log) => {
+        if(!log || typeof log !== "object") return;
+        candidates.push(log.updatedAtIso, log.updatedAt, log.createdAtIso, log.createdAt);
+        [
+          ...asArray(log.records),
+          ...asArray(log.aiCaptureRecords),
+          ...asArray(log.extraTrainingEvents),
+          ...asArray(log.planProgressItems)
+        ].forEach((item) => {
+          if(!item || typeof item !== "object") return;
+          candidates.push(item.updatedAtIso, item.updatedAt, item.capturedAt, item.createdAt);
+        });
+      });
+
+      asArray(source.history).forEach((entry) => {
+        if(!entry || typeof entry !== "object") return;
+        candidates.push(entry.updatedAtIso, entry.updatedAt, entry.createdAtIso, entry.createdAt);
+        if(typeof entry.id === "number" && entry.id > 946684800000){
+          candidates.push(new Date(entry.id).toISOString());
+        }
+      });
+
+      const session = asPlainObject(source.trainingSession, null);
+      if(session){
+        candidates.push(session.updatedAtIso, session.updatedAt, session.startedAt, session.createdAt);
+      }
+
+      let bestMs = 0;
+      let bestValue = "";
+      candidates.forEach((value) => {
+        const ms = Date.parse(value || "");
+        if(Number.isFinite(ms) && ms > bestMs){
+          bestMs = ms;
+          bestValue = String(value);
+        }
+      });
+      return bestValue;
+    }
+
+    function withCloudOperationTimeout(task, label, timeoutMs = 20000){
+      const limit = Number(timeoutMs);
+      if(!Number.isFinite(limit) || limit <= 0){
+        return Promise.resolve().then(task);
+      }
+      let timer = 0;
+      return Promise.race([
+        Promise.resolve().then(task),
+        new Promise((_, reject) => {
+          timer = setTimeout(() => {
+            const err = new Error(`${label} timed out after ${limit}ms`);
+            err.name = "TimeoutError";
+            reject(err);
+          }, limit);
+        })
+      ]).finally(() => clearTimeout(timer));
     }
 
     function readCloudAdapterSnapshot(cloudAdapter, payload){
@@ -8088,20 +8159,27 @@
       return result;
     }
 
-    function mergeCloudAppStateSnapshots(localSnapshot, remoteSnapshot, updatedAt){
+    function mergeCloudAppStateSnapshots(localSnapshot, remoteSnapshot, updatedAt, options = {}){
       const local = normalizeAppStateSnapshot(localSnapshot);
       const remote = normalizeAppStateSnapshot(remoteSnapshot);
       const localMs = parseTimeMs(getSnapshotUpdatedAt(local));
       const remoteMs = parseTimeMs(getSnapshotUpdatedAt(remote));
       const preferred = localMs >= remoteMs ? local : remote;
       const secondary = preferred === local ? remote : local;
+      const preferLocalPlanChecks = options.preferLocalPlanChecks === true;
+      const planCheckSource = preferLocalPlanChecks ? local : preferred;
+      const planCheckSecondary = preferLocalPlanChecks ? remote : secondary;
       return normalizeAppStateSnapshot({
         ...secondary,
         ...preferred,
         history: mergeCloudUniqueArray(preferred.history, secondary.history),
         dailyLogs: mergeCloudDailyLogs(preferred.dailyLogs, secondary.dailyLogs),
-        planChecks: mergeCloudTruthMap(preferred.planChecks, secondary.planChecks),
-        planCheckMeta: { ...asPlainObject(secondary.planCheckMeta, {}), ...asPlainObject(preferred.planCheckMeta, {}) },
+        planChecks: preferLocalPlanChecks
+          ? asPlainObject(planCheckSource.planChecks, {})
+          : mergeCloudTruthMap(planCheckSource.planChecks, planCheckSecondary.planChecks),
+        planCheckMeta: preferLocalPlanChecks
+          ? asPlainObject(planCheckSource.planCheckMeta, {})
+          : { ...asPlainObject(planCheckSecondary.planCheckMeta, {}), ...asPlainObject(planCheckSource.planCheckMeta, {}) },
         aiWeeklySummaries: { ...asPlainObject(secondary.aiWeeklySummaries, {}), ...asPlainObject(preferred.aiWeeklySummaries, {}) },
         aiFeedbackHistory: mergeCloudUniqueArray(preferred.aiFeedbackHistory, secondary.aiFeedbackHistory),
         characterChatHistory: mergeCloudUniqueArray(preferred.characterChatHistory, secondary.characterChatHistory).slice(-40),
@@ -8117,6 +8195,7 @@
       const appStatePort = options.appState;
       const cloudAdapter = options.cloudAdapter;
       const now = typeof options.now === "function" ? options.now : () => new Date();
+      const operationTimeoutMs = Number.isFinite(Number(options.operationTimeoutMs)) ? Number(options.operationTimeoutMs) : 20000;
 
       if(!appStatePort || typeof appStatePort.exportSnapshot !== "function" || typeof appStatePort.importSnapshot !== "function"){
         throw new Error("createCloudSync requires an AppState snapshot interface");
@@ -8149,7 +8228,11 @@
         if(!userId) throw new Error("缺少云端用户，无法读取快照");
         setStatus({ phase:"pulling", error:"", blocked:false });
         try{
-          const remote = await cloudAdapter.pullSnapshot({ userId, reason });
+          const remote = await withCloudOperationTimeout(
+            () => cloudAdapter.pullSnapshot({ userId, reason }),
+            "Cloud pull",
+            operationTimeoutMs
+          );
           if(!remote){
             setStatus({ phase:"missing", error:"", blocked:false });
             return { ok:false, missing:true, snapshot:null, remote:null };
@@ -8178,7 +8261,8 @@
         const {
           userId,
           reason = "pushSnapshot",
-          skipVersionCheck = false
+          skipVersionCheck = false,
+          preferLocalPlanChecks = false
         } = params || {};
         if(!userId) throw new Error("缺少云端用户，无法上传快照");
 
@@ -8189,7 +8273,11 @@
             appStatePort.load();
           }
           const localSnapshot = normalizeAppStateSnapshot(appStatePort.exportSnapshot());
-          const previous = await cloudAdapter.pullSnapshot({ userId, reason:"version-check" });
+          const previous = await withCloudOperationTimeout(
+            () => cloudAdapter.pullSnapshot({ userId, reason:"version-check" }),
+            "Cloud version check",
+            operationTimeoutMs
+          );
           let remoteSnapshot = null;
 
           if(previous){
@@ -8219,7 +8307,7 @@
 
           const uploadUpdatedAt = now().toISOString();
           const mergedSnapshot = remoteSnapshot
-            ? mergeCloudAppStateSnapshots(localSnapshot, remoteSnapshot, uploadUpdatedAt)
+            ? mergeCloudAppStateSnapshots(localSnapshot, remoteSnapshot, uploadUpdatedAt, { preferLocalPlanChecks })
             : localSnapshot;
           const outgoingSnapshot = normalizeAppStateSnapshot({
             ...mergedSnapshot,
@@ -8227,13 +8315,17 @@
             updatedAt: uploadUpdatedAt
           });
 
-          await cloudAdapter.pushSnapshot({
-            userId,
-            snapshot: outgoingSnapshot,
-            updatedAt: uploadUpdatedAt,
-            previous,
-            reason
-          });
+          await withCloudOperationTimeout(
+            () => cloudAdapter.pushSnapshot({
+              userId,
+              snapshot: outgoingSnapshot,
+              updatedAt: uploadUpdatedAt,
+              previous,
+              reason
+            }),
+            "Cloud push",
+            operationTimeoutMs
+          );
 
           const syncedState = appStatePort.importSnapshot(outgoingSnapshot, {
             source:"cloudSync.pushSnapshot",
@@ -17082,6 +17174,8 @@
     let autoSyncInFlight = false;
     let tabDockPulseTimer = null;
     let suppressAutoSync = false;
+    let pendingLocalAutoSyncUpload = false;
+    let volatileLocalStateMeta = {};
 
     function parseTimeMs(value){
       const ms = Date.parse(value || "");
@@ -17090,9 +17184,12 @@
 
     function getLocalStateMeta(){
       try{
-        return JSON.parse(localStorage.getItem(LOCAL_STATE_META_KEY) || "{}");
+        const stored = JSON.parse(localStorage.getItem(LOCAL_STATE_META_KEY) || "{}");
+        return stored && (stored.updated_at || stored.updatedAt)
+          ? stored
+          : { ...volatileLocalStateMeta, ...stored };
       }catch(e){
-        return {};
+        return { ...volatileLocalStateMeta };
       }
     }
 
@@ -17107,10 +17204,11 @@
 
     function getLocalUpdatedAt(){
       const meta = getLocalStateMeta();
-      return meta.updated_at || inferLegacyLocalUpdatedAt() || "";
+      return meta.updated_at || inferLocalContentUpdatedAt() || inferLegacyLocalUpdatedAt() || "";
     }
 
     function setLocalStateMeta(meta){
+      volatileLocalStateMeta = { ...(meta || {}) };
       try{
         localStorage.setItem(LOCAL_STATE_META_KEY, JSON.stringify(meta || {}));
         return true;
@@ -17132,12 +17230,52 @@
       if(suppressAutoSync) return;
       markLocalStateChanged(autoSyncReason);
       if(!isAutoSyncEnabled()) return;
+      pendingLocalAutoSyncUpload = true;
       clearTimeout(autoSyncTimer);
       autoSyncTimer = setTimeout(() => {
         runAutoSync().catch((err) => {
           console.error("自动同步失败", err);
         });
       }, 1500);
+    }
+
+    function inferLocalContentUpdatedAt(){
+      return inferSnapshotContentUpdatedAt({
+        localStateMeta:getLocalStateMeta(),
+        history:getHistory(),
+        dailyLogs:getDailyLogs(),
+        planCheckMeta:getPlanCheckMeta(),
+        trainingSession:getTrainingSession()
+      });
+    }
+
+    function chooseAutoSyncDirection(input = {}){
+      const localMs = parseTimeMs(input.localUpdatedAt);
+      const cloudMs = parseTimeMs(input.cloudUpdatedAt);
+      if(input.preferUploadLocalChanges) return "upload";
+      if(!cloudMs) return "upload";
+      if(cloudMs > localMs + 1000 || !localMs) return "restore";
+      if(localMs > cloudMs + 1000) return "upload";
+      return "idle";
+    }
+
+    function hasLocalPlanCheckProgress(){
+      return Object.values(asPlainObject(getPlanChecks(), {})).some(Boolean)
+        || Object.keys(asPlainObject(getPlanCheckMeta(), {})).length > 0;
+    }
+
+    function shouldPreferLocalAutoSyncUpload(options = {}){
+      return options.preferUploadLocalChanges === true
+        || pendingLocalAutoSyncUpload
+        || hasLocalPlanCheckProgress();
+    }
+
+    function getAutoSyncDirectionForCurrentState(cloudUpdatedAt, options = {}){
+      return chooseAutoSyncDirection({
+        localUpdatedAt:getLocalUpdatedAt(),
+        cloudUpdatedAt,
+        preferUploadLocalChanges:shouldPreferLocalAutoSyncUpload(options)
+      });
     }
 
     function getCloudErrorMessage(err){
@@ -17433,10 +17571,12 @@
       setCloudBusy(true);
       setCloudStatus("云端状态：正在上传本机记录...");
       try{
+        const preferLocalPlanChecks = options.preferLocalPlanChecks === true;
         const result = await cloudSync.pushSnapshot({
           userId: user.id,
           reason: options.reason || "手动同步到云端",
-          skipVersionCheck
+          skipVersionCheck,
+          preferLocalPlanChecks
         });
 
         if(result.blocked){
@@ -17449,6 +17589,7 @@
         }
 
         markLocalStateChanged("已同步到云端", result.updatedAt);
+        pendingLocalAutoSyncUpload = false;
         setLastCloudSyncAt(result.updatedAt);
         setCloudStatus(`云端状态：已同步到云端（${getCloudUserLabel(user)}）`);
         setCloudHint(isAutoSyncEnabled() ? "自动同步已开启：训练日历、打卡、模板和历史记录已同步。" : "以后换设备登录同一个 GitHub 账号后，可以点“从云端恢复到本机”。");
@@ -17466,7 +17607,7 @@
       }
     }
 
-    async function resolveAutoSyncState(reason = "自动同步检查"){
+    async function resolveAutoSyncState(reason = "自动同步检查", options = {}){
       if(autoSyncInFlight) return false;
       const user = await getCurrentUser();
       if(!user){
@@ -17482,15 +17623,18 @@
           reason
         });
         const localUpdatedAt = getLocalUpdatedAt();
-        const localMs = parseTimeMs(localUpdatedAt);
-        const cloudMs = parseTimeMs(cloudResult.updatedAt);
+        const direction = getAutoSyncDirectionForCurrentState(cloudResult.updatedAt, options);
 
         if(!cloudResult.ok || cloudResult.missing){
           setCloudHint("云端还没有记录，已准备上传当前设备内容。");
-          return await syncToCloud(false, { skipVersionCheck: true, reason });
+          return await syncToCloud(false, {
+            skipVersionCheck: true,
+            reason,
+            preferLocalPlanChecks: shouldPreferLocalAutoSyncUpload(options)
+          });
         }
 
-        if(cloudMs > localMs + 1000 || !localMs){
+        if(direction === "restore"){
           suppressAutoSync = true;
           try{
             const state = cloudSync.restoreSnapshot(cloudResult.snapshot, {
@@ -17507,9 +17651,19 @@
           return true;
         }
 
-        if(localMs > cloudMs + 1000){
-          setCloudHint("当前设备版本更新，已自动上传到云端。");
-          return await syncToCloud(false, { skipVersionCheck: true, reason });
+        if(direction === "upload"){
+          const uploaded = await syncToCloud(false, {
+            skipVersionCheck: true,
+            reason,
+            preferLocalPlanChecks: shouldPreferLocalAutoSyncUpload(options)
+          });
+          if(uploaded){
+            pendingLocalAutoSyncUpload = false;
+            setCloudHint(options.preferUploadLocalChanges
+              ? "本机刚有修改，已与云端合并并上传。"
+              : "当前设备版本更新，已自动上传到云端。");
+          }
+          return uploaded;
         }
 
         setCloudStatus(`云端状态：已登录 ${getCloudUserLabel(user)}`.trim());
@@ -17527,7 +17681,12 @@
 
     async function runAutoSync(){
       if(!isAutoSyncEnabled()) return false;
-      return await resolveAutoSyncState(autoSyncReason || "本机数据变化");
+      const preferUploadLocalChanges = pendingLocalAutoSyncUpload;
+      const ok = await resolveAutoSyncState(autoSyncReason || "本机数据变化", {
+        preferUploadLocalChanges
+      });
+      if(ok) pendingLocalAutoSyncUpload = false;
+      return ok;
     }
 
     async function toggleAutoSync(){
