@@ -19,3 +19,20 @@
 说明：Wikimedia 的 Pike Push Ups 和 walking GIF 在下载时被限流，因此改用可访问的 LoadMuscle 动作素材。
 
 2026-05-06 更新：4 个 `custom_*.gif` 已替换为对应 LoadMuscle 动作素材，并转换为本地 GIF 保持网页引用不变。
+
+2026-05-29 更新：为 `2026.6.1-2026.6.7_convict_conditioning_plan_optimized.json` 中缺失的囚徒健身进阶、热身与拉伸动作补齐本地生成线稿 GIF。以下文件由本机 Pillow 脚本生成，用作动作轨迹示意，无外部素材依赖：
+
+- `custom_bodyweight_squat.gif`：标准深蹲 / 徒手深蹲
+- `custom_close_squat.gif`：窄距深蹲
+- `custom_assisted_single_leg_squat.gif`：辅助单腿半深蹲、辅助单腿深蹲到箱/椅
+- `custom_glute_bridge.gif`：臀桥 / 短桥
+- `custom_table_bridge.gif`：直桥预备 / 桌桥
+- `custom_hanging_knee_raise.gif`：悬垂屈膝举腿
+- `custom_dead_hang_grip.gif`：悬垂抓握
+- `custom_scapular_pushup.gif`：肩胛俯卧撑
+- `custom_shoulder_circles.gif`：肩绕环
+- `custom_hip_circles.gif`：髋部环绕
+- `custom_ankle_mobility.gif`：踝关节活动
+- `custom_chest_stretch.gif`：胸小肌 / 胸大肌拉伸
+- `custom_lat_stretch.gif`：背阔肌拉伸
+- `custom_hip_flexor_stretch.gif`：髋屈肌拉伸

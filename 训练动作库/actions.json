@@ -551,6 +551,216 @@
         "sourceUrl": "https://loadmuscle.com/exercises/standing-wide-knees-adductor-stretch",
         "sourceLabel": "素材来源：LoadMuscle"
       }
+    },
+    {
+      "exerciseKey": "scapular-pushup",
+      "displayName": "肩胛俯卧撑",
+      "aliases": ["肩胛俯卧撑", "肩胛撑", "肩胛支撑"],
+      "category": "push",
+      "muscleGroups": ["肩胛稳定", "前锯肌", "胸肩热身"],
+      "normalizationTags": ["pushup", "scapular", "warmup"],
+      "status": "confirmed",
+      "guide": {
+        "diagram": "起始：直臂俯卧撑支撑，身体保持一条线\n下沉：手臂不弯，让肩胛自然靠近\n推远：把地面推远，肩胛前伸，背上方微微拱起\n回位：保持核心稳定，节奏慢而可控",
+        "cautions": ["全程不要屈肘做成小俯卧撑", "腰不要塌，臀不要翘", "只做肩胛活动，幅度宁小勿乱"]
+      },
+      "media": { "path": "gifs/custom_scapular_pushup.gif", "label": "肩胛俯卧撑", "sourceLabel": "本地生成：线稿 GIF" }
+    },
+    {
+      "exerciseKey": "shoulder-circles",
+      "displayName": "肩绕环",
+      "aliases": ["肩绕环", "肩部绕环", "肩关节绕环"],
+      "category": "recovery",
+      "muscleGroups": ["肩关节活动度", "肩胛热身"],
+      "normalizationTags": ["warmup", "mobility", "shoulder"],
+      "status": "confirmed",
+      "guide": {
+        "diagram": "站姿或跪姿保持躯干稳定\n肩膀带动手臂做小到中等幅度绕环\n先向前绕，再向后绕，保持呼吸自然",
+        "cautions": ["不要用腰背大幅摆动代偿", "肩前侧夹痛时缩小幅度", "热身动作不追求速度"]
+      },
+      "media": { "path": "gifs/custom_shoulder_circles.gif", "label": "肩绕环", "sourceLabel": "本地生成：线稿 GIF" }
+    },
+    {
+      "exerciseKey": "bodyweight-squat",
+      "displayName": "标准深蹲",
+      "aliases": ["标准深蹲", "徒手深蹲", "深蹲", "全深蹲"],
+      "category": "legs",
+      "muscleGroups": ["股四头", "臀", "髋膝踝协调"],
+      "normalizationTags": ["squat", "bodyweight", "convict-conditioning"],
+      "status": "confirmed",
+      "guide": {
+        "diagram": "起始：双脚约肩宽，脚尖与膝盖方向一致\n下蹲：髋和膝同时弯曲，躯干保持稳定\n底部：在可控范围内下到足够深\n站起：全脚掌发力，膝盖继续跟脚尖同向",
+        "cautions": ["不要膝盖内扣", "不要塌腰或含胸找深度", "先保证动作干净，再增加次数"]
+      },
+      "media": { "path": "gifs/custom_bodyweight_squat.gif", "label": "标准深蹲 / 徒手深蹲", "sourceLabel": "本地生成：线稿 GIF" }
+    },
+    {
+      "exerciseKey": "close-squat",
+      "displayName": "窄距深蹲",
+      "aliases": ["窄距深蹲", "窄站距深蹲"],
+      "category": "legs",
+      "muscleGroups": ["股四头", "臀", "踝关节活动度"],
+      "normalizationTags": ["squat", "close-stance", "convict-conditioning"],
+      "status": "confirmed",
+      "guide": {
+        "diagram": "起始：双脚比标准深蹲更靠近，脚掌踩稳\n下蹲：膝盖沿脚尖方向前移，髋部向下坐\n站起：保持躯干稳定，全脚掌推地站回",
+        "cautions": ["踝活动不足时不要强行到底", "膝盖不要向内夹", "先用慢速和小幅度建立控制"]
+      },
+      "media": { "path": "gifs/custom_close_squat.gif", "label": "窄距深蹲", "sourceLabel": "本地生成：线稿 GIF" }
+    },
+    {
+      "exerciseKey": "assisted-single-leg-half-squat",
+      "displayName": "辅助单腿半深蹲",
+      "aliases": ["辅助单腿半深蹲", "单腿半深蹲", "扶墙单腿半深蹲"],
+      "category": "legs",
+      "muscleGroups": ["股四头", "臀", "单腿稳定"],
+      "normalizationTags": ["squat", "single-leg", "assisted", "convict-conditioning"],
+      "status": "confirmed",
+      "guide": {
+        "diagram": "起始：单脚站稳，手扶墙或门框保持平衡\n下降：慢慢屈膝屈髋，下到能控制的半程深度\n站起：前脚全脚掌发力，膝盖保持稳定\n换边：左右侧分别完成，不抢速度",
+        "cautions": ["不要追求极限深度", "膝盖不要左右晃或内扣", "扶手只辅助平衡，不要把自己拉起来"]
+      },
+      "media": { "path": "gifs/custom_assisted_single_leg_squat.gif", "label": "辅助单腿半深蹲", "sourceLabel": "本地生成：线稿 GIF" }
+    },
+    {
+      "exerciseKey": "assisted-single-leg-squat-box",
+      "displayName": "辅助单腿深蹲到箱/椅",
+      "aliases": ["辅助单腿深蹲到箱/椅", "辅助单腿深蹲到箱", "辅助单腿深蹲到椅", "单腿深蹲到箱", "箱式单腿深蹲"],
+      "category": "legs",
+      "muscleGroups": ["股四头", "臀", "单腿稳定"],
+      "normalizationTags": ["squat", "single-leg", "box", "assisted", "convict-conditioning"],
+      "status": "confirmed",
+      "guide": {
+        "diagram": "起始：站在箱或椅前，单脚站稳，另一腿向前轻伸\n下降：慢慢坐向箱面，只轻触不放松\n站起：站立腿发力推回，保持膝盖跟脚尖同向\n辅助：需要时扶墙或门框控制平衡",
+        "cautions": ["箱子要稳，不要滑动", "触箱后不要整个人塌坐", "膝盖疼或晃动明显时升高箱面"]
+      },
+      "media": { "path": "gifs/custom_assisted_single_leg_squat.gif", "label": "辅助单腿深蹲到箱/椅", "sourceLabel": "本地生成：线稿 GIF" }
+    },
+    {
+      "exerciseKey": "short-bridge",
+      "displayName": "臀桥 / 短桥",
+      "aliases": ["臀桥", "短桥", "臀桥或短桥"],
+      "category": "legs",
+      "muscleGroups": ["臀", "腘绳肌", "脊柱后侧链"],
+      "normalizationTags": ["bridge", "glute", "convict-conditioning"],
+      "status": "confirmed",
+      "guide": {
+        "diagram": "起始：仰卧屈膝，脚掌踩地，手臂放身体两侧\n抬起：收紧臀部，把髋部抬到肩、髋、膝接近一线\n顶端：停顿一瞬间，感受臀部发力\n下放：慢慢回到地面，不要砸下去",
+        "cautions": ["不要用腰猛拱代替伸髋", "膝盖保持稳定不要外翻内扣", "顶端肋骨不要过度外翻"]
+      },
+      "media": { "path": "gifs/custom_glute_bridge.gif", "label": "臀桥 / 短桥", "sourceLabel": "本地生成：线稿 GIF" }
+    },
+    {
+      "exerciseKey": "table-bridge",
+      "displayName": "直桥预备 / 桌桥",
+      "aliases": ["直桥预备/桌桥", "直桥预备", "桌桥", "直桥"],
+      "category": "legs",
+      "muscleGroups": ["臀", "肩伸展", "脊柱后侧链"],
+      "normalizationTags": ["bridge", "table", "convict-conditioning"],
+      "status": "confirmed",
+      "guide": {
+        "diagram": "起始：坐姿，双手撑在身后，脚掌踩稳\n抬起：手脚同时推地，髋部向上抬\n顶端：胸口打开，肩、髋、膝尽量连成稳定平台\n下放：受控回到坐姿或接近地面",
+        "cautions": ["肩前侧不适时立刻缩小幅度", "不要把头猛然后仰", "腰痛时改做臀桥"]
+      },
+      "media": { "path": "gifs/custom_table_bridge.gif", "label": "直桥预备 / 桌桥", "sourceLabel": "本地生成：线稿 GIF" }
+    },
+    {
+      "exerciseKey": "hanging-knee-raise",
+      "displayName": "悬垂屈膝举腿",
+      "aliases": ["悬垂屈膝举腿", "悬垂举膝", "屈膝举腿"],
+      "category": "core",
+      "muscleGroups": ["下腹控制", "髋屈控制", "握力"],
+      "normalizationTags": ["core", "leg-raise", "hanging", "convict-conditioning"],
+      "status": "confirmed",
+      "guide": {
+        "diagram": "起始：双手悬垂，肩胛保持主动，身体稳定\n上举：骨盆轻微后倾，屈膝把膝盖向胸口抬\n顶端：腹部收紧，避免身体大幅摆动\n下放：慢慢放回悬垂位再做下一次",
+        "cautions": ["不要甩腿借力", "握力不足时改仰卧举腿", "肩肘不适时不要硬挂"]
+      },
+      "media": { "path": "gifs/custom_hanging_knee_raise.gif", "label": "悬垂屈膝举腿", "sourceLabel": "本地生成：线稿 GIF" }
+    },
+    {
+      "exerciseKey": "dead-hang-grip",
+      "displayName": "悬垂抓握",
+      "aliases": ["悬垂抓握", "悬垂", "死悬垂", "抓握悬垂"],
+      "category": "pull",
+      "muscleGroups": ["握力", "肩胛稳定", "前臂"],
+      "normalizationTags": ["hang", "grip", "pullup"],
+      "status": "confirmed",
+      "guide": {
+        "diagram": "起始：双手握杠，脚离地或轻触地面减重\n保持：肩膀远离耳朵，身体稳定，呼吸自然\n结束：脚先落地，再松手退出",
+        "cautions": ["不要耸肩挂死", "手掌疼痛或肘肩不适时缩短时间", "不要从杠上突然跳落"]
+      },
+      "media": { "path": "gifs/custom_dead_hang_grip.gif", "label": "悬垂抓握", "sourceLabel": "本地生成：线稿 GIF" }
+    },
+    {
+      "exerciseKey": "hip-circles",
+      "displayName": "髋部环绕",
+      "aliases": ["髋部环绕", "髋关节环绕", "髋绕环"],
+      "category": "recovery",
+      "muscleGroups": ["髋关节活动度", "热身"],
+      "normalizationTags": ["warmup", "mobility", "hip"],
+      "status": "confirmed",
+      "guide": {
+        "diagram": "站姿双脚踩稳，双手可扶髋\n骨盆带动髋部做小幅环绕\n左右方向都做，逐渐找到顺畅范围",
+        "cautions": ["不要用腰椎大幅扭转代偿", "动作保持慢而均匀", "有髋部夹痛时缩小幅度"]
+      },
+      "media": { "path": "gifs/custom_hip_circles.gif", "label": "髋部环绕", "sourceLabel": "本地生成：线稿 GIF" }
+    },
+    {
+      "exerciseKey": "ankle-mobility",
+      "displayName": "踝关节活动",
+      "aliases": ["踝关节活动", "踝活动", "踝关节活动度"],
+      "category": "recovery",
+      "muscleGroups": ["踝关节活动度", "小腿", "深蹲准备"],
+      "normalizationTags": ["warmup", "mobility", "ankle"],
+      "status": "confirmed",
+      "guide": {
+        "diagram": "进入半跪或弓步位，前脚全脚掌踩稳\n膝盖沿脚尖方向缓慢向前移动\n回到起始位，重复几次后换边",
+        "cautions": ["脚跟不要离地", "膝盖不要向内扣", "只做活动度，不要压到疼痛"]
+      },
+      "media": { "path": "gifs/custom_ankle_mobility.gif", "label": "踝关节活动", "sourceLabel": "本地生成：线稿 GIF" }
+    },
+    {
+      "exerciseKey": "chest-stretch",
+      "displayName": "胸小肌/胸大肌拉伸",
+      "aliases": ["胸小肌/胸大肌拉伸", "胸小肌拉伸", "胸大肌拉伸", "胸部拉伸"],
+      "category": "recovery",
+      "muscleGroups": ["胸大肌", "胸小肌", "肩前侧放松"],
+      "normalizationTags": ["stretch", "chest"],
+      "status": "confirmed",
+      "guide": {
+        "diagram": "前臂或手掌扶在墙边，肩膀放松\n身体慢慢向外转开，找到胸前侧拉伸感\n保持稳定呼吸，再缓慢退出换边",
+        "cautions": ["不要把肩顶到疼痛位置", "只要拉伸感，不追求越痛越好", "肩前侧不适时降低手臂高度"]
+      },
+      "media": { "path": "gifs/custom_chest_stretch.gif", "label": "胸小肌 / 胸大肌拉伸", "sourceLabel": "本地生成：线稿 GIF" }
+    },
+    {
+      "exerciseKey": "lat-stretch",
+      "displayName": "背阔肌拉伸",
+      "aliases": ["背阔肌拉伸", "背阔拉伸"],
+      "category": "recovery",
+      "muscleGroups": ["背阔肌", "肩背活动度"],
+      "normalizationTags": ["stretch", "lat"],
+      "status": "confirmed",
+      "guide": {
+        "diagram": "双手扶墙、桌沿或固定支撑\n髋部向后坐，胸口慢慢向下沉\n在腋下到背侧找到拉伸感，保持呼吸",
+        "cautions": ["不要压到肩关节刺痛", "腰不要塌得太夸张", "两侧分别做时注意左右差异"]
+      },
+      "media": { "path": "gifs/custom_lat_stretch.gif", "label": "背阔肌拉伸", "sourceLabel": "本地生成：线稿 GIF" }
+    },
+    {
+      "exerciseKey": "hip-flexor-stretch",
+      "displayName": "髋屈肌拉伸",
+      "aliases": ["髋屈肌拉伸", "髋屈肌放松", "髂腰肌拉伸"],
+      "category": "recovery",
+      "muscleGroups": ["髋屈肌", "髂腰肌", "股直肌"],
+      "normalizationTags": ["stretch", "hip-flexor"],
+      "status": "confirmed",
+      "guide": {
+        "diagram": "半跪姿，前脚踩稳，后膝垫软物\n骨盆轻微后倾，身体整体向前移动一点\n在后侧髋前方找到拉伸感，保持呼吸后换边",
+        "cautions": ["不要用塌腰换幅度", "膝盖不舒服时垫厚一点", "只保持拉伸感，不要弹震"]
+      },
+      "media": { "path": "gifs/custom_hip_flexor_stretch.gif", "label": "髋屈肌拉伸", "sourceLabel": "本地生成：线稿 GIF" }
     }
   ]
 }

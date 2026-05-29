@@ -1,59 +1,15 @@
-const CACHE_NAME = "gain-tracker-pwa-v6-cache-first-gifs";
+const CACHE_NAME = "gain-tracker-pwa-v23-convict-actions";
 const CORE_ASSETS = [
-  "./",
   "./index.html",
+  "./训练动作库/actions.json",
   "./manifest.webmanifest",
   "./icons/app-icon.svg"
-];
-
-const MEDIA_ASSETS = [
-  "./gifs/0259.gif",
-  "./gifs/0274.gif",
-  "./gifs/0276.gif",
-  "./gifs/0279.gif",
-  "./gifs/0289.gif",
-  "./gifs/0293.gif",
-  "./gifs/0308.gif",
-  "./gifs/0310.gif",
-  "./gifs/0313.gif",
-  "./gifs/0334.gif",
-  "./gifs/0383.gif",
-  "./gifs/0405.gif",
-  "./gifs/0430.gif",
-  "./gifs/0620.gif",
-  "./gifs/0652.gif",
-  "./gifs/0662.gif",
-  "./gifs/0687.gif",
-  "./gifs/0705.gif",
-  "./gifs/0872.gif",
-  "./gifs/0983.gif",
-  "./gifs/0988.gif",
-  "./gifs/1022.gif",
-  "./gifs/1311.gif",
-  "./gifs/1330.gif",
-  "./gifs/1459.gif",
-  "./gifs/1677.gif",
-  "./gifs/1760.gif",
-  "./gifs/2135.gif",
-  "./gifs/3211.gif",
-  "./gifs/adductor_stretch.webp",
-  "./gifs/bird_dog.gif",
-  "./gifs/custom_band_straight_arm_pulldown.gif",
-  "./gifs/custom_bulgarian_split_squat.gif",
-  "./gifs/custom_dumbbell_calf_raise.gif",
-  "./gifs/custom_scapular_pull.gif",
-  "./gifs/marching_on_spot.webp",
-  "./gifs/pike_push_up.webp",
-  "./gifs/standing_back_rotation_stretch.webp"
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(async (cache) => {
-        await cache.addAll(CORE_ASSETS);
-        await Promise.allSettled(MEDIA_ASSETS.map((asset) => cache.add(asset)));
-      })
+      .then((cache) => cache.addAll(CORE_ASSETS))
       .then(() => self.skipWaiting())
   );
 });
