@@ -5294,6 +5294,76 @@
     const DAILY_LOGS_KEY = "gain-daily-logs";
     const DAILY_LOG_SCHEMA_VERSION = 2;
     const EXERCISE_LIBRARY_FILE = "训练动作库/actions.json";
+    const OFFICIAL_EXERCISE_LIBRARY_KEYS = new Set([
+      "decline-pushup",
+      "wide-pushup",
+      "deep-pushup",
+      "decline-deep-pushup",
+      "standard-pushup",
+      "close-grip-pushup",
+      "mechanical-drop-pushup",
+      "pike-pushup",
+      "crow-stand",
+      "db-floor-press",
+      "db-fly",
+      "db-shoulder-press",
+      "lateral-raise",
+      "single-arm-lateral-raise",
+      "band-lateral-raise",
+      "front-raise",
+      "pullup",
+      "horizontal-pullup",
+      "eccentric-pullup",
+      "pull-up-hold",
+      "scapular-pull",
+      "pullup-or-band-pulldown",
+      "single-arm-db-row",
+      "bent-over-db-row",
+      "band-row",
+      "lat-pulldown-band",
+      "band-straight-arm-pulldown",
+      "band-face-pull",
+      "reverse-fly",
+      "db-curl",
+      "hammer-curl",
+      "triceps-overhead",
+      "goblet-squat",
+      "rdl",
+      "bulgarian-split-squat",
+      "db-calf-raise",
+      "leg-raise",
+      "reverse-crunch",
+      "short-plank",
+      "plank",
+      "side-plank",
+      "dead-bug",
+      "crunch",
+      "russian-twist",
+      "bird-dog",
+      "brisk-walk",
+      "walk",
+      "upper-body-stretch",
+      "full-body-stretch",
+      "general-stretch",
+      "adductor-stretch",
+      "scapular-pushup",
+      "shoulder-circles",
+      "bodyweight-squat",
+      "close-squat",
+      "offset-squat",
+      "assisted-single-leg-half-squat",
+      "assisted-single-leg-squat-box",
+      "short-bridge",
+      "table-bridge",
+      "high-low-bridge",
+      "hanging-knee-raise",
+      "dead-hang-grip",
+      "hip-circles",
+      "ankle-mobility",
+      "chest-stretch",
+      "lat-stretch",
+      "hip-flexor-stretch"
+    ]);
     const CUSTOM_EXERCISE_LIBRARY_KEY = "gain-exercise-library-custom";
     const EXERCISE_TEMPLATE_DRAFTS_KEY = "gain-exercise-template-drafts";
     const ACTIVE_TRAINING_REFERENCE_KEY = "gain-active-training-reference";
@@ -5568,10 +5638,26 @@
       {
         id:"wide-pushup",
         title:"宽距俯卧撑",
-        keywords:["宽距俯卧撑","宽距"],
+        keywords:["宽距俯卧撑","宽距","宽距标准俯卧撑"],
         focus:["胸大肌外侧感受","前三角","肱三头辅助"],
-        diagram:"起始：手距略宽于肩\n下降：胸主动找地面，肩胛自然回收\n推起：手掌均匀发力，把身体整体推起",
-        cautions:["不要耸肩","下放时别只点头，胸和髋一起下","肩不舒服时不要过度加宽手距"]
+        diagram:"起始：手距比标准俯卧撑宽，本周控制在肩宽1.3-1.5倍\n支撑：身体仍保持一条线\n下放：底部让胸部主动发力，不耸肩\n推起：顶端不要完全放松休息，保持胸部张力",
+        cautions:["不要做极宽版本","手距过宽容易增加肩前侧压力","这是胸部补充刺激，不是主要进阶动作"]
+      },
+      {
+        id:"deep-pushup",
+        title:"标准深幅俯卧撑",
+        keywords:["标准深幅俯卧撑","深幅俯卧撑","拉伸俯卧撑","标准俯卧撑深幅版"],
+        focus:["胸","前三角","肱三头","底部控制"],
+        diagram:"起始：双手垫高，让胸部能比普通地面俯卧撑下降更深\n下放：肩胛保持稳定，底部胸部有拉伸感\n底部：停0.5-1秒，不借反弹\n推起：维持身体一条线，受控回到顶端",
+        cautions:["肩前侧不适时立即缩小幅度或改标准俯卧撑","不要在底部松垮肩胛","这是低量胸部补强，不做到力竭"]
+      },
+      {
+        id:"decline-deep-pushup",
+        title:"下斜深幅俯卧撑",
+        keywords:["下斜深幅俯卧撑","下斜深幅","脚抬高深幅俯卧撑","下斜俯卧撑深幅版"],
+        focus:["上胸","胸","前三角","肱三头"],
+        diagram:"起始：双脚抬高20-40cm，双手放在俯卧撑架、稳定书本或其他稳固支撑上\n下放：肘部约45度，身体保持一条线，胸部下到明显拉伸\n底部：停0.5-1秒，确认肩前侧没有顶痛\n推起：胸部和手臂发力回到顶端",
+        cautions:["支撑物必须稳固，不要使用会滑动或边缘不安全的物体","肩前侧不适时优先改标准深幅俯卧撑或普通标准俯卧撑","它是胸部主刺激变式，不是六艺正式升级路线"]
       },
       {
         id:"standard-pushup",
@@ -5604,6 +5690,14 @@
         focus:["肩前束","肩中束","肱三头","核心稳定"],
         diagram:"起始：双手撑地，髋部抬高，身体呈倒 V\n下降：屈肘让头部朝两手之间下放\n底部：肩部保持主动，不塌肩\n推起：手掌推地回到倒 V 姿势",
         cautions:["动作慢，不要用头去点地","肩不舒服就缩短幅度","核心收紧，避免腰椎塌下去"]
+      },
+      {
+        id:"crow-stand",
+        title:"乌鸦式",
+        keywords:["乌鸦式","Crow Stand","倒立撑第二式乌鸦式","乌鸦式平衡"],
+        focus:["手腕","肩部","肱三头","核心平衡"],
+        diagram:"起始：蹲姿，双手撑在身体前方，约肩宽\n前倾：双臂略弯，身体向前倾，双膝贴靠或夹在两肘外侧\n离地：逐步把重心转移到手掌，让双脚离地\n保持：稳定呼吸，用手指压力微调平衡，再控制回落",
+        cautions:["不追疲劳，只练平衡和手腕适应","手腕不适时取消","先找平衡点，不要直接向前栽"]
       },
       {
         id:"db-floor-press",
@@ -5728,10 +5822,18 @@
       {
         id:"pullup",
         title:"引体向上",
-        keywords:["引体向上","引体","正手引体"],
+        keywords:["引体向上","标准引体向上","引体","正手引体"],
         focus:["背阔肌","圆肌","肱二头"],
-        diagram:"起始：肩胛下沉，身体稳定\n上拉：胸口主动找杠，肘向身体两侧下压\n顶端：下巴过杠或接近杠\n下放：受控回到悬垂，不要突然掉下去",
-        cautions:["先做肩胛下沉，不要耸肩硬拉","避免大幅摆腿","下放阶段保持控制"]
+        diagram:"起始：正握横杆，手距约肩宽或略宽，双脚离地\n准备：身体绷紧，肩部收紧，从几乎伸直但不完全放松的手臂开始\n拉起：拉到下巴过杆，顶部短暂停顿\n下放：平稳下降，不摆动，不用惯性",
+        cautions:["不要用摆动或惯性补次数","训练组优先动作质量，不按最大次数硬冲","升级仍以严格标准引体次数为准"]
+      },
+      {
+        id:"horizontal-pullup",
+        title:"水平引体向上",
+        keywords:["水平引体向上","水平引体","高低桌水平引体","高低桌水平引体或水平引体向上"],
+        focus:["上背","背阔肌","肱二头","肩胛控制"],
+        diagram:"起始：找到稳固桌沿、低杠或类似可抓握物，身体在下方绷紧，脚跟触地\n拉起：让身体整体上移，胸部靠近支撑物\n顶部：停顿并夹背\n下放：有控制地回到起始位",
+        cautions:["支撑物必须稳，不要抓会移动的桌沿","不要塌腰或耸肩拉","本周用于补背部训练量，不做到力竭"]
       },
       {
         id:"eccentric-pullup",
@@ -5907,16 +6009,24 @@
         title:"标准深蹲",
         keywords:["标准深蹲","徒手深蹲","深蹲","全深蹲"],
         focus:["股四头","臀","髋膝踝协调"],
-        diagram:"起始：双脚约肩宽，脚尖与膝盖方向一致\n下蹲：髋和膝同时弯曲，躯干保持稳定\n底部：在可控范围内下到足够深\n站起：全脚掌发力，膝盖继续跟脚尖同向",
-        cautions:["不要膝盖内扣","不要塌腰或含胸找深度","先保证动作干净，再增加次数"]
+        diagram:"起始：双脚约肩宽或略宽，脚尖略微外转\n下蹲：背部保持挺直，髋和膝同时弯曲\n底部：有控制地下到足够深，大腿后侧接近小腿\n站起：只靠腿部力量站起，不用摇晃反弹",
+        cautions:["膝盖不要内扣","脚跟不要抬起","窄距深蹲不稳时用它作为安全回退"]
       },
       {
         id:"close-squat",
         title:"窄距深蹲",
-        keywords:["窄距深蹲","窄站距深蹲"],
+        keywords:["窄距深蹲","窄站距深蹲","窄距深蹲测试"],
         focus:["股四头","臀","踝关节活动度"],
-        diagram:"起始：双脚比标准深蹲更靠近，脚掌踩稳\n下蹲：膝盖沿脚尖方向前移，髋部向下坐\n站起：保持躯干稳定，全脚掌推地站回",
-        cautions:["踝活动不足时不要强行到底","膝盖不要向内夹","先用慢速和小幅度建立控制"]
+        diagram:"起始：双脚脚跟相碰或非常接近，脚尖微微外转，双臂前伸帮助平衡\n下蹲：胸部逐渐接近大腿，脚跟保持贴地\n底部：膝盖不内扣，身体不后倒\n站起：从底部稳定站回",
+        cautions:["脚跟抬起、膝盖内扣或身体后倒时退回标准深蹲","先用慢速和小幅度建立控制","不要为了到底而牺牲膝踝稳定"]
+      },
+      {
+        id:"offset-squat",
+        title:"偏重深蹲",
+        keywords:["偏重深蹲","偏重深蹲预备","第七式偏重深蹲"],
+        focus:["股四头","臀","单腿稳定","平衡协调"],
+        diagram:"起始：一只脚踩地，另一只脚的脚跟放在前方支撑物上\n下蹲：主力腿承担大部分负荷，辅助腿只帮助平衡\n底部：短暂停顿，保持脚跟贴地和身体控制\n站起：主力腿发力回到起始位",
+        cautions:["支撑物从稳定低物开始，不必一开始就用球","前方支撑腿不能承担主要发力","本周只做预备探索，平衡明显差时取消"]
       },
       {
         id:"assisted-single-leg-half-squat",
@@ -5944,19 +6054,27 @@
       },
       {
         id:"table-bridge",
-        title:"直桥预备 / 桌桥",
+        title:"直桥",
         keywords:["直桥预备/桌桥","直桥预备","桌桥","直桥"],
-        focus:["臀","肩伸展","脊柱后侧链"],
-        diagram:"起始：坐姿，双手撑在身后，脚掌踩稳\n抬起：手脚同时推地，髋部向上抬\n顶端：胸口打开，肩、髋、膝尽量连成稳定平台\n下放：受控回到坐姿或接近地面",
-        cautions:["肩前侧不适时立刻缩小幅度","不要把头猛然后仰","腰痛时改做臀桥"]
+        focus:["脊柱后侧链","肩伸展","臀","手臂支撑"],
+        diagram:"起始：坐姿，双腿伸直，双手撑在髋部两侧\n抬起：手掌下压，手臂绷紧，把髋部向上推到双腿和躯干成一条线\n顶部：看向上方，身体由手掌和脚跟支撑\n下放：受控回到起始位",
+        cautions:["肩腕无不适再增加次数","标准版本困难时先缩短力臂或弯腿","腰部不适时退回短桥"]
+      },
+      {
+        id:"high-low-bridge",
+        title:"高低桥",
+        keywords:["高低桥","桥第三式高低桥"],
+        focus:["脊柱后侧链","肩胸活动度","手腕支撑","桥进阶"],
+        diagram:"起始：找一个约膝盖高度或略高的稳固支撑物，身体向后躺在支撑物上，双脚踩地\n手位：双手放在头部两侧，手指朝脚\n推起：用手和腿推起髋部，让背部形成弧形\n完成：不要求手臂完全伸直，先以控制和舒适为主",
+        cautions:["支撑物越高越容易，先从更容易的高度开始","腰部不适时退回直桥","不要强行压到手腕或肩部疼痛位置"]
       },
       {
         id:"hanging-knee-raise",
         title:"悬垂屈膝举腿",
-        keywords:["悬垂屈膝举腿","悬垂举膝","屈膝举腿"],
+        keywords:["悬垂屈膝举腿","悬垂举膝","屈膝举腿","悬垂屈膝"],
         focus:["下腹控制","髋屈控制","握力"],
-        diagram:"起始：双手悬垂，肩胛保持主动，身体稳定\n上举：骨盆轻微后倾，屈膝把膝盖向胸口抬\n顶端：腹部收紧，避免身体大幅摆动\n下放：慢慢放回悬垂位再做下一次",
-        cautions:["不要甩腿借力","握力不足时改仰卧举腿","肩肘不适时不要硬挂"]
+        diagram:"起始：双手抓住高过头顶的横杆，身体自然悬垂，肩部保持收紧\n上举：平稳抬膝到骨盆高度，大腿约与地面平行\n顶部：腹部收紧并短暂停顿\n下放：控制下降到身体伸展",
+        cautions:["不要完全挂在关节上","不摆动，不甩腿","握力不足或动作变形时改仰卧举腿"]
       },
       {
         id:"dead-hang-grip",
@@ -6075,6 +6193,7 @@
       "鸟狗": { gif:"bird_dog.gif", label:"鸟狗", note:"现成动作 GIF，用于参考对侧手脚伸展和骨盆稳定。", sourceUrl:"https://tenor.com/view/bird-dog-gif-27559649", sourceLabel:"素材来源：Tenor" },
       "下犬式俯卧撑": { gif:"pike_push_up.webp", label:"下犬式俯卧撑 / Pike Push-up", note:"现成动作图，用于参考倒 V 姿势下的肩推动作轨迹。", sourceUrl:"https://loadmuscle.com/exercises/pike-push-up", sourceLabel:"素材来源：LoadMuscle" },
       "Pike Push-up": { gif:"pike_push_up.webp", label:"下犬式俯卧撑 / Pike Push-up", note:"现成动作图，用于参考倒 V 姿势下的肩推动作轨迹。", sourceUrl:"https://loadmuscle.com/exercises/pike-push-up", sourceLabel:"素材来源：LoadMuscle" },
+      "乌鸦式": { path:"每周训练json/2026.6.15-2026.6.21_六艺动作图解_assets/image00693.jpeg", label:"乌鸦式准备", note:"平衡图见动作图解 md 中 image00694.jpeg。", sourceLabel:"本地图解：2026.6.15-2026.6.21 六艺动作图解" },
       "大腿内侧放松拉伸": { gif:"adductor_stretch.webp", label:"大腿内侧拉伸", note:"现成动作图，用于参考内收肌拉伸姿势。", sourceUrl:"https://loadmuscle.com/exercises/standing-wide-knees-adductor-stretch", sourceLabel:"素材来源：LoadMuscle" },
       "大腿内侧拉伸": { gif:"adductor_stretch.webp", label:"大腿内侧拉伸", note:"现成动作图，用于参考内收肌拉伸姿势。", sourceUrl:"https://loadmuscle.com/exercises/standing-wide-knees-adductor-stretch", sourceLabel:"素材来源：LoadMuscle" },
       "大腿内侧轻度放松": { gif:"adductor_stretch.webp", label:"大腿内侧拉伸", note:"现成动作图，用于参考内收肌拉伸姿势。", sourceUrl:"https://loadmuscle.com/exercises/standing-wide-knees-adductor-stretch", sourceLabel:"素材来源：LoadMuscle" },
@@ -6090,9 +6209,12 @@
       "肩胛俯卧撑": { gif:"custom_scapular_pushup.gif", label:"肩胛俯卧撑", note:"真实动作 GIF，用于参考直臂支撑时肩胛前伸和回收。", sourceUrl:"https://loadmuscle.com/exercises/scapula-push-up", sourceLabel:"素材来源：LoadMuscle" },
       "肩绕环": { gif:"custom_shoulder_circles.gif", label:"肩绕环", note:"真实动作 GIF，用于参考热身时肩关节绕环节奏。", sourceUrl:"https://loadmuscle.com/exercises/shoulder-circle", sourceLabel:"素材来源：LoadMuscle" },
       "肩部绕环": { gif:"custom_shoulder_circles.gif", label:"肩绕环", note:"真实动作 GIF，用于参考热身时肩关节绕环节奏。", sourceUrl:"https://loadmuscle.com/exercises/shoulder-circle", sourceLabel:"素材来源：LoadMuscle" },
+      "标准深幅俯卧撑": { gif:"0662.gif", label:"标准俯卧撑轨迹参考", note:"深幅版本无独立配图；沿用标准俯卧撑轨迹，差异靠文字说明体现双手垫高和更深下放。" },
+      "下斜深幅俯卧撑": { path:"每周训练json/2026.6.15-2026.6.21_六艺动作图解_assets/image00548.jpeg", label:"俯卧撑动作幅度控制参考", note:"原图解没有专属下斜深幅配图；复用动作幅度控制图，文字说明区分脚抬高和深幅执行。", sourceLabel:"本地图解：2026.6.15-2026.6.21 六艺动作图解" },
       "徒手深蹲": { gif:"custom_bodyweight_squat.gif", label:"标准深蹲 / 徒手深蹲", note:"真实动作 GIF，用于参考标准深蹲的下蹲和站起轨迹。", sourceUrl:"https://loadmuscle.com/exercises/air-squat", sourceLabel:"素材来源：LoadMuscle" },
       "标准深蹲": { gif:"custom_bodyweight_squat.gif", label:"标准深蹲 / 徒手深蹲", note:"真实动作 GIF，用于参考标准深蹲的下蹲和站起轨迹。", sourceUrl:"https://loadmuscle.com/exercises/air-squat", sourceLabel:"素材来源：LoadMuscle" },
       "窄距深蹲": { gif:"custom_close_squat.gif", label:"窄距深蹲", note:"真实动作 GIF，演示窄站距深蹲轨迹；计划中按徒手版本执行。", sourceUrl:"https://oss.exercisedb.dev/api/v1/exercises/search?search=narrow%20squat", sourceLabel:"素材来源：ExerciseDB" },
+      "偏重深蹲": { path:"每周训练json/2026.6.15-2026.6.21_六艺动作图解_assets/image00589.jpeg", label:"偏重深蹲起始", note:"底部图见动作图解 md 中 image00590.jpeg。", sourceLabel:"本地图解：2026.6.15-2026.6.21 六艺动作图解" },
       "辅助单腿半深蹲": { gif:"custom_assisted_single_leg_squat.gif", label:"辅助单腿半深蹲", note:"真实动作 GIF，用于参考辅助单腿下蹲轨迹和单腿稳定。", sourceUrl:"https://loadmuscle.com/exercises/suspender-single-leg-squat", sourceLabel:"素材来源：LoadMuscle" },
       "辅助单腿深蹲到箱/椅": { gif:"custom_assisted_single_leg_squat.gif", label:"辅助单腿深蹲到箱/椅", note:"真实动作 GIF，用于参考辅助单腿下蹲轨迹；箱/椅高度按计划文字控制。", sourceUrl:"https://loadmuscle.com/exercises/suspender-single-leg-squat", sourceLabel:"素材来源：LoadMuscle" },
       "辅助单腿深蹲到箱": { gif:"custom_assisted_single_leg_squat.gif", label:"辅助单腿深蹲到箱/椅", note:"真实动作 GIF，用于参考辅助单腿下蹲轨迹；箱/椅高度按计划文字控制。", sourceUrl:"https://loadmuscle.com/exercises/suspender-single-leg-squat", sourceLabel:"素材来源：LoadMuscle" },
@@ -6102,6 +6224,9 @@
       "直桥预备/桌桥": { gif:"custom_table_bridge.gif", label:"直桥预备 / 桌桥", note:"真实动作 GIF，用于参考桥系列里手脚推地、髋部上抬的轨迹。", sourceUrl:"https://loadmuscle.com/exercises/table-top-bridge", sourceLabel:"素材来源：LoadMuscle" },
       "直桥预备": { gif:"custom_table_bridge.gif", label:"直桥预备 / 桌桥", note:"真实动作 GIF，用于参考桥系列里手脚推地、髋部上抬的轨迹。", sourceUrl:"https://loadmuscle.com/exercises/table-top-bridge", sourceLabel:"素材来源：LoadMuscle" },
       "桌桥": { gif:"custom_table_bridge.gif", label:"直桥预备 / 桌桥", note:"真实动作 GIF，用于参考桥系列里手脚推地、髋部上抬的轨迹。", sourceUrl:"https://loadmuscle.com/exercises/table-top-bridge", sourceLabel:"素材来源：LoadMuscle" },
+      "直桥": { path:"每周训练json/2026.6.15-2026.6.21_六艺动作图解_assets/image00661.jpeg", label:"直桥起始", note:"顶部图见动作图解 md 中 image00662.jpeg。", sourceLabel:"本地图解：2026.6.15-2026.6.21 六艺动作图解" },
+      "高低桥": { path:"每周训练json/2026.6.15-2026.6.21_六艺动作图解_assets/image00663.jpeg", label:"高低桥起始", note:"顶部图见动作图解 md 中 image00664.jpeg。", sourceLabel:"本地图解：2026.6.15-2026.6.21 六艺动作图解" },
+      "水平引体向上": { path:"每周训练json/2026.6.15-2026.6.21_六艺动作图解_assets/image00608.jpeg", label:"水平引体向上起始", note:"顶部图见动作图解 md 中 image00609.jpeg。", sourceLabel:"本地图解：2026.6.15-2026.6.21 六艺动作图解" },
       "悬垂屈膝举腿": { gif:"custom_hanging_knee_raise.gif", label:"悬垂屈膝举腿", note:"真实动作 GIF，用于参考屈膝举腿时骨盆控制和下放节奏。", sourceUrl:"https://loadmuscle.com/exercises/assisted-hanging-knee-raise", sourceLabel:"素材来源：LoadMuscle" },
       "悬垂举膝": { gif:"custom_hanging_knee_raise.gif", label:"悬垂屈膝举腿", note:"真实动作 GIF，用于参考屈膝举腿时骨盆控制和下放节奏。", sourceUrl:"https://loadmuscle.com/exercises/assisted-hanging-knee-raise", sourceLabel:"素材来源：LoadMuscle" },
       "悬垂抓握": { gif:"custom_dead_hang_grip.gif", label:"悬垂抓握", note:"真实动作 GIF，用于参考主动悬垂和握力保持姿势。", sourceUrl:"https://loadmuscle.com/exercises/dead-hang-stretch", sourceLabel:"素材来源：LoadMuscle" },
@@ -6393,6 +6518,7 @@
         const guide = findExerciseGuideForName(name) || findExerciseGuideForName(media?.label);
         const exerciseKey = guide?.id || makeExerciseKey("gif", media?.label || name);
         const displayName = guide ? getExerciseGuideDisplayName(guide) : (media?.label || name);
+        const mediaPath = media?.path || (media?.gif ? `gifs/${media.gif}` : "");
         addExerciseLibraryAction(map, {
           exerciseKey,
           displayName,
@@ -6403,13 +6529,13 @@
             diagram:guide?.diagram || "",
             cautions:guide?.cautions || []
           },
-          media:{
-            path:`gifs/${media.gif}`,
+          media: mediaPath ? {
+            path:mediaPath,
             label:media.label || displayName,
             note:media.note || "",
             sourceUrl:media.sourceUrl || "",
             sourceLabel:media.sourceLabel || ""
-          },
+          } : null,
           sourceUrl:media.sourceUrl || "",
           sourceLabel:media.sourceLabel || "",
           status:"confirmed"
@@ -6435,7 +6561,9 @@
       [...externalExerciseLibraryActions, ...getCustomExerciseLibraryActions()].forEach((action) => {
         addExerciseLibraryAction(map, action);
       });
-      return Array.from(map.values()).sort((a, b) => a.displayName.localeCompare(b.displayName, "zh-CN"));
+      return Array.from(map.values())
+        .filter((action) => OFFICIAL_EXERCISE_LIBRARY_KEYS.has(action.exerciseKey) || action.userCreated)
+        .sort((a, b) => a.displayName.localeCompare(b.displayName, "zh-CN"));
     }
 
     function getExerciseLibrary(options = {}){

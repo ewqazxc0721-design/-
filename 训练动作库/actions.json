@@ -1,64 +1,252 @@
 {
   "schemaVersion": 1,
-  "source": "角色聊天与训练记录优化：按每周训练 JSON 与联网核验扩充的动作库",
+  "source": "角色聊天与训练记录优化：按每周训练 JSON 与联网核验扩充的动作库；2026.6.15-2026.6.21 六艺动作图解补充",
   "actions": [
     {
       "exerciseKey": "decline-pushup",
       "displayName": "下斜俯卧撑",
-      "aliases": ["下斜俯卧撑", "脚抬高俯卧撑"],
+      "aliases": [
+        "下斜俯卧撑",
+        "脚抬高俯卧撑"
+      ],
       "category": "push",
-      "muscleGroups": ["上胸", "前三角", "肱三头"],
-      "normalizationTags": ["pushup", "incline-feet"],
+      "muscleGroups": [
+        "上胸",
+        "前三角",
+        "肱三头"
+      ],
+      "normalizationTags": [
+        "pushup",
+        "incline-feet"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/0279.gif", "label": "下斜俯卧撑" }
+      "media": {
+        "path": "gifs/0279.gif",
+        "label": "下斜俯卧撑"
+      },
+      "guide": {
+        "diagram": "起始：双脚抬高，双手约肩宽支撑，身体保持一条线\n下放：肘部稳定打开，胸部朝地面方向下降\n底部：保持肩胛稳定，不塌腰\n推起：受控推回顶端",
+        "cautions": [
+          "脚下支撑要稳，不要滑动",
+          "肩前侧不适时降低脚部高度或改标准俯卧撑",
+          "普通下斜俯卧撑不等同于本周的下斜深幅俯卧撑"
+        ]
+      }
     },
     {
       "exerciseKey": "wide-pushup",
       "displayName": "宽距俯卧撑",
-      "aliases": ["宽距俯卧撑", "宽距"],
+      "aliases": [
+        "宽距俯卧撑",
+        "宽距",
+        "宽距标准俯卧撑"
+      ],
       "category": "push",
-      "muscleGroups": ["胸大肌外侧", "前三角", "肱三头"],
-      "normalizationTags": ["pushup", "wide"],
+      "muscleGroups": [
+        "胸大肌外侧",
+        "前三角",
+        "肱三头"
+      ],
+      "normalizationTags": [
+        "pushup",
+        "wide"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/1311.gif", "label": "宽距俯卧撑" }
+      "media": {
+        "path": "gifs/1311.gif",
+        "label": "宽距俯卧撑",
+        "note": "沿用宽距俯卧撑 GIF；本周文字说明限定为肩宽1.3-1.5倍的宽距标准俯卧撑。"
+      },
+      "guide": {
+        "diagram": "起始：手距比标准俯卧撑宽，本周控制在肩宽1.3-1.5倍\n支撑：身体仍保持一条线\n下放：底部让胸部主动发力，不耸肩\n推起：顶端不要完全放松休息，保持胸部张力",
+        "cautions": [
+          "不要做极宽版本",
+          "手距过宽容易增加肩前侧压力",
+          "这是胸部补充刺激，不是主要进阶动作"
+        ]
+      }
+    },
+    {
+      "exerciseKey": "deep-pushup",
+      "displayName": "标准深幅俯卧撑",
+      "aliases": [
+        "标准深幅俯卧撑",
+        "深幅俯卧撑",
+        "拉伸俯卧撑",
+        "标准俯卧撑深幅版"
+      ],
+      "category": "push",
+      "muscleGroups": [
+        "胸",
+        "前三角",
+        "肱三头",
+        "底部控制"
+      ],
+      "normalizationTags": [
+        "pushup",
+        "deep-range",
+        "convict-conditioning"
+      ],
+      "status": "confirmed",
+      "guide": {
+        "diagram": "起始：双手垫高，让胸部能比普通地面俯卧撑下降更深\n下放：肩胛保持稳定，底部胸部有拉伸感\n底部：停0.5-1秒，不借反弹\n推起：维持身体一条线，受控回到顶端",
+        "cautions": [
+          "肩前侧不适时立即缩小幅度或改标准俯卧撑",
+          "不要在底部松垮肩胛",
+          "这是低量胸部补强，不做到力竭"
+        ]
+      },
+      "media": {
+        "path": "gifs/0662.gif",
+        "label": "标准俯卧撑轨迹参考",
+        "note": "深幅版本无独立配图；沿用标准俯卧撑轨迹，差异靠文字说明体现双手垫高和更深下放。"
+      }
+    },
+    {
+      "exerciseKey": "decline-deep-pushup",
+      "displayName": "下斜深幅俯卧撑",
+      "aliases": [
+        "下斜深幅俯卧撑",
+        "下斜深幅",
+        "脚抬高深幅俯卧撑",
+        "下斜俯卧撑深幅版"
+      ],
+      "category": "push",
+      "muscleGroups": [
+        "上胸",
+        "胸",
+        "前三角",
+        "肱三头"
+      ],
+      "normalizationTags": [
+        "pushup",
+        "decline",
+        "deep-range",
+        "convict-conditioning"
+      ],
+      "status": "confirmed",
+      "guide": {
+        "diagram": "起始：双脚抬高20-40cm，双手放在俯卧撑架、稳定书本或其他稳固支撑上\n下放：肘部约45度，身体保持一条线，胸部下到明显拉伸\n底部：停0.5-1秒，确认肩前侧没有顶痛\n推起：胸部和手臂发力回到顶端",
+        "cautions": [
+          "支撑物必须稳固，不要使用会滑动或边缘不安全的物体",
+          "肩前侧不适时优先改标准深幅俯卧撑或普通标准俯卧撑",
+          "它是胸部主刺激变式，不是六艺正式升级路线"
+        ]
+      },
+      "media": {
+        "path": "每周训练json/2026.6.15-2026.6.21_六艺动作图解_assets/image00548.jpeg",
+        "label": "俯卧撑动作幅度控制参考",
+        "note": "原图解没有专属下斜深幅配图；复用动作幅度控制图，文字说明区分脚抬高和深幅执行。",
+        "sourceLabel": "本地图解：2026.6.15-2026.6.21 六艺动作图解"
+      }
     },
     {
       "exerciseKey": "standard-pushup",
       "displayName": "俯卧撑",
-      "aliases": ["俯卧撑", "标准俯卧撑", "徒手俯卧撑", "push up", "push-up"],
+      "aliases": [
+        "俯卧撑",
+        "标准俯卧撑",
+        "徒手俯卧撑",
+        "push up",
+        "push-up"
+      ],
       "category": "push",
-      "muscleGroups": ["胸", "肱三头", "核心稳定"],
-      "normalizationTags": ["pushup", "bodyweight"],
+      "muscleGroups": [
+        "胸",
+        "肱三头",
+        "核心稳定"
+      ],
+      "normalizationTags": [
+        "pushup",
+        "bodyweight"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/0662.gif", "label": "标准俯卧撑" }
+      "media": {
+        "path": "gifs/0662.gif",
+        "label": "标准俯卧撑"
+      },
+      "guide": {
+        "diagram": "起始：双手约肩宽，位置在上胸部下方\n支撑：身体从头、躯干、髋到腿保持一条线\n下放：胸部接近地面或轻触控制物，再停顿\n推起：平稳推回，不用弹震和塌腰",
+        "cautions": [
+          "不要塌腰或用弹震借力",
+          "底部保持控制，不要砸到地面",
+          "当前计划主要把它作为深幅俯卧撑的基础动作参考"
+        ]
+      }
     },
     {
       "exerciseKey": "close-grip-pushup",
       "displayName": "窄距俯卧撑",
-      "aliases": ["窄距俯卧撑", "窄距"],
+      "aliases": [
+        "窄距俯卧撑",
+        "窄距"
+      ],
       "category": "push",
-      "muscleGroups": ["肱三头", "胸", "核心稳定"],
-      "normalizationTags": ["pushup", "close-grip"],
+      "muscleGroups": [
+        "肱三头",
+        "胸",
+        "核心稳定"
+      ],
+      "normalizationTags": [
+        "pushup",
+        "close-grip"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/0259.gif", "label": "窄距俯卧撑" }
+      "media": {
+        "path": "gifs/0259.gif",
+        "label": "窄距俯卧撑"
+      },
+      "guide": {
+        "diagram": "起始：姿势接近标准俯卧撑，双手向身体中线靠近\n手位：不必强行钻石手型，两个食指指尖接近或相触即可\n下放：胸部朝手背方向靠近，底部停顿\n推起：保持身体一条线，稳定推回",
+        "cautions": [
+          "不要耸肩、塌腰或肘部乱甩",
+          "双手相触困难时先从略窄于肩宽开始",
+          "本周只做六艺进阶维护，不作为胸部主刺激"
+        ]
+      }
     },
     {
       "exerciseKey": "mechanical-drop-pushup",
       "displayName": "机械递减俯卧撑",
-      "aliases": ["机械递减俯卧撑", "跪姿俯卧撑递减"],
+      "aliases": [
+        "机械递减俯卧撑",
+        "跪姿俯卧撑递减"
+      ],
       "category": "push",
-      "muscleGroups": ["胸", "肱三头", "核心稳定"],
-      "normalizationTags": ["pushup", "drop-set"],
+      "muscleGroups": [
+        "胸",
+        "肱三头",
+        "核心稳定"
+      ],
+      "normalizationTags": [
+        "pushup",
+        "drop-set"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/3211.gif", "label": "机械递减参考：跪姿俯卧撑" }
+      "media": {
+        "path": "gifs/3211.gif",
+        "label": "机械递减参考：跪姿俯卧撑"
+      }
     },
     {
       "exerciseKey": "pike-pushup",
       "displayName": "下犬式俯卧撑",
-      "aliases": ["下犬式俯卧撑", "Pike Push-up", "Pike Pushup", "派克俯卧撑"],
+      "aliases": [
+        "下犬式俯卧撑",
+        "Pike Push-up",
+        "Pike Pushup",
+        "派克俯卧撑"
+      ],
       "category": "shoulder",
-      "muscleGroups": ["肩前束", "肩中束", "肱三头"],
-      "normalizationTags": ["shoulder", "pushup"],
+      "muscleGroups": [
+        "肩前束",
+        "肩中束",
+        "肱三头"
+      ],
+      "normalizationTags": [
+        "shoulder",
+        "pushup"
+      ],
       "status": "confirmed",
       "media": {
         "path": "gifs/pike_push_up.webp",
@@ -68,12 +256,60 @@
       }
     },
     {
+      "exerciseKey": "crow-stand",
+      "displayName": "乌鸦式",
+      "aliases": [
+        "乌鸦式",
+        "Crow Stand",
+        "倒立撑第二式乌鸦式",
+        "乌鸦式平衡"
+      ],
+      "category": "shoulder",
+      "muscleGroups": [
+        "手腕",
+        "肩部",
+        "肱三头",
+        "核心平衡"
+      ],
+      "normalizationTags": [
+        "handstand-pushup",
+        "crow-stand",
+        "balance",
+        "convict-conditioning"
+      ],
+      "status": "confirmed",
+      "guide": {
+        "diagram": "起始：蹲姿，双手撑在身体前方，约肩宽\n前倾：双臂略弯，身体向前倾，双膝贴靠或夹在两肘外侧\n离地：逐步把重心转移到手掌，让双脚离地\n保持：稳定呼吸，用手指压力微调平衡，再控制回落",
+        "cautions": [
+          "不追疲劳，只练平衡和手腕适应",
+          "手腕不适时取消",
+          "先找平衡点，不要直接向前栽"
+        ]
+      },
+      "media": {
+        "path": "每周训练json/2026.6.15-2026.6.21_六艺动作图解_assets/image00693.jpeg",
+        "label": "乌鸦式准备",
+        "note": "平衡图见动作图解 md 中 image00694.jpeg。",
+        "sourceLabel": "本地图解：2026.6.15-2026.6.21 六艺动作图解"
+      }
+    },
+    {
       "exerciseKey": "db-floor-press",
       "displayName": "哑铃地板卧推",
-      "aliases": ["哑铃地板卧推", "地板卧推"],
+      "aliases": [
+        "哑铃地板卧推",
+        "地板卧推"
+      ],
       "category": "push",
-      "muscleGroups": ["胸", "前三角", "肱三头"],
-      "normalizationTags": ["press", "floor"],
+      "muscleGroups": [
+        "胸",
+        "前三角",
+        "肱三头"
+      ],
+      "normalizationTags": [
+        "press",
+        "floor"
+      ],
       "status": "confirmed",
       "media": {
         "path": "gifs/custom_dumbbell_floor_press.webp",
@@ -85,40 +321,85 @@
     {
       "exerciseKey": "db-fly",
       "displayName": "哑铃飞鸟",
-      "aliases": ["哑铃飞鸟"],
+      "aliases": [
+        "哑铃飞鸟"
+      ],
       "category": "push",
-      "muscleGroups": ["胸"],
-      "normalizationTags": ["fly", "dumbbell"],
+      "muscleGroups": [
+        "胸"
+      ],
+      "normalizationTags": [
+        "fly",
+        "dumbbell"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/0308.gif", "label": "哑铃飞鸟" }
+      "media": {
+        "path": "gifs/0308.gif",
+        "label": "哑铃飞鸟"
+      }
     },
     {
       "exerciseKey": "db-shoulder-press",
       "displayName": "哑铃肩推",
-      "aliases": ["哑铃肩推", "肩推"],
+      "aliases": [
+        "哑铃肩推",
+        "肩推"
+      ],
       "category": "shoulder",
-      "muscleGroups": ["肩前束", "肩中束", "肱三头"],
-      "normalizationTags": ["shoulder", "press"],
+      "muscleGroups": [
+        "肩前束",
+        "肩中束",
+        "肱三头"
+      ],
+      "normalizationTags": [
+        "shoulder",
+        "press"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/0405.gif", "label": "哑铃肩推" }
+      "media": {
+        "path": "gifs/0405.gif",
+        "label": "哑铃肩推"
+      }
     },
     {
       "exerciseKey": "lateral-raise",
       "displayName": "侧平举",
-      "aliases": ["侧平举", "侧平", "lateral raise"],
+      "aliases": [
+        "侧平举",
+        "侧平",
+        "lateral raise"
+      ],
       "category": "shoulder",
-      "muscleGroups": ["肩中束"],
-      "normalizationTags": ["shoulder", "raise"],
+      "muscleGroups": [
+        "肩中束"
+      ],
+      "normalizationTags": [
+        "shoulder",
+        "raise"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/0334.gif", "label": "侧平举" }
+      "media": {
+        "path": "gifs/0334.gif",
+        "label": "侧平举"
+      }
     },
     {
       "exerciseKey": "single-arm-lateral-raise",
       "displayName": "单臂侧平举",
-      "aliases": ["单臂侧平举", "单侧侧平举"],
+      "aliases": [
+        "单臂侧平举",
+        "单侧侧平举"
+      ],
       "category": "shoulder",
-      "muscleGroups": ["肩中束", "左右侧控制"],
-      "normalizationTags": ["shoulder", "raise", "unilateral"],
+      "muscleGroups": [
+        "肩中束",
+        "左右侧控制"
+      ],
+      "normalizationTags": [
+        "shoulder",
+        "raise",
+        "unilateral"
+      ],
       "status": "confirmed",
       "media": {
         "path": "gifs/custom_single_arm_lateral_raise.webp",
@@ -130,10 +411,20 @@
     {
       "exerciseKey": "band-lateral-raise",
       "displayName": "弹力绳侧平举",
-      "aliases": ["弹力绳侧平举", "弹力带侧平举", "阻力带侧平举"],
+      "aliases": [
+        "弹力绳侧平举",
+        "弹力带侧平举",
+        "阻力带侧平举"
+      ],
       "category": "shoulder",
-      "muscleGroups": ["肩中束"],
-      "normalizationTags": ["shoulder", "raise", "band"],
+      "muscleGroups": [
+        "肩中束"
+      ],
+      "normalizationTags": [
+        "shoulder",
+        "raise",
+        "band"
+      ],
       "status": "confirmed",
       "media": {
         "path": "gifs/custom_band_lateral_raise.webp",
@@ -145,40 +436,146 @@
     {
       "exerciseKey": "front-raise",
       "displayName": "前平举",
-      "aliases": ["前平举"],
+      "aliases": [
+        "前平举"
+      ],
       "category": "shoulder",
-      "muscleGroups": ["肩前束"],
-      "normalizationTags": ["shoulder", "raise"],
+      "muscleGroups": [
+        "肩前束"
+      ],
+      "normalizationTags": [
+        "shoulder",
+        "raise"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/0310.gif", "label": "前平举" }
+      "media": {
+        "path": "gifs/0310.gif",
+        "label": "前平举"
+      }
     },
     {
       "exerciseKey": "pullup",
       "displayName": "引体向上",
-      "aliases": ["引体向上", "引体", "正手引体", "pull up", "pull-up", "pullup"],
+      "aliases": [
+        "引体向上",
+        "引体",
+        "正手引体",
+        "pull up",
+        "pull-up",
+        "pullup",
+        "标准引体向上"
+      ],
       "category": "pull",
-      "muscleGroups": ["背阔肌", "圆肌", "肱二头"],
-      "normalizationTags": ["pullup"],
+      "muscleGroups": [
+        "背阔肌",
+        "圆肌",
+        "肱二头"
+      ],
+      "normalizationTags": [
+        "pullup"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/0652.gif", "label": "引体向上" }
+      "media": {
+        "path": "gifs/0652.gif",
+        "label": "引体向上"
+      },
+      "guide": {
+        "diagram": "起始：正握横杆，手距约肩宽或略宽，双脚离地\n准备：身体绷紧，肩部收紧，从几乎伸直但不完全放松的手臂开始\n拉起：拉到下巴过杆，顶部短暂停顿\n下放：平稳下降，不摆动，不用惯性",
+        "cautions": [
+          "不要用摆动或惯性补次数",
+          "训练组优先动作质量，不按最大次数硬冲",
+          "升级仍以严格标准引体次数为准"
+        ]
+      }
+    },
+    {
+      "exerciseKey": "horizontal-pullup",
+      "displayName": "水平引体向上",
+      "aliases": [
+        "水平引体向上",
+        "水平引体",
+        "高低桌水平引体",
+        "高低桌水平引体或水平引体向上"
+      ],
+      "category": "pull",
+      "muscleGroups": [
+        "上背",
+        "背阔肌",
+        "肱二头",
+        "肩胛控制"
+      ],
+      "normalizationTags": [
+        "pullup",
+        "horizontal",
+        "bodyweight",
+        "convict-conditioning"
+      ],
+      "status": "confirmed",
+      "guide": {
+        "diagram": "起始：找到稳固桌沿、低杠或类似可抓握物，身体在下方绷紧，脚跟触地\n拉起：让身体整体上移，胸部靠近支撑物\n顶部：停顿并夹背\n下放：有控制地回到起始位",
+        "cautions": [
+          "支撑物必须稳，不要抓会移动的桌沿",
+          "不要塌腰或耸肩拉",
+          "本周用于补背部训练量，不做到力竭"
+        ]
+      },
+      "media": {
+        "path": "每周训练json/2026.6.15-2026.6.21_六艺动作图解_assets/image00608.jpeg",
+        "label": "水平引体向上起始",
+        "note": "顶部图见动作图解 md 中 image00609.jpeg。",
+        "sourceLabel": "本地图解：2026.6.15-2026.6.21 六艺动作图解"
+      }
     },
     {
       "exerciseKey": "eccentric-pullup",
       "displayName": "离心引体向上",
-      "aliases": ["离心引体向上", "引体离心"],
+      "aliases": [
+        "离心引体向上",
+        "引体离心"
+      ],
       "category": "pull",
-      "muscleGroups": ["背阔肌", "肱二头", "离心控制"],
-      "normalizationTags": ["pullup", "eccentric"],
+      "muscleGroups": [
+        "背阔肌",
+        "肱二头",
+        "离心控制"
+      ],
+      "normalizationTags": [
+        "pullup",
+        "eccentric"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/0652.gif", "label": "离心引体向上说明" }
+      "media": {
+        "path": "gifs/0652.gif",
+        "label": "离心引体向上说明",
+        "note": "复用标准引体向上轨迹，重点看顶部起点和受控下降。"
+      },
+      "guide": {
+        "diagram": "起始：借助跳起或垫脚到达顶部，让下巴过杆\n下降：从顶部开始，肩背保持收紧\n节奏：用4-5秒缓慢下降到接近起始位\n结束：每次都保持控制，不要突然掉下",
+        "cautions": [
+          "离心疲劳和肘部压力较高，本周只少量补强",
+          "肘肩不舒服时直接取消",
+          "它不计入第5式升级标准"
+        ]
+      }
     },
     {
       "exerciseKey": "pull-up-hold",
       "displayName": "引体向上顶峰停留",
-      "aliases": ["引体向上顶峰停留", "顶峰停留引体", "引体顶峰停留"],
+      "aliases": [
+        "引体向上顶峰停留",
+        "顶峰停留引体",
+        "引体顶峰停留"
+      ],
       "category": "pull",
-      "muscleGroups": ["背阔肌", "肩胛下沉", "顶端控制"],
-      "normalizationTags": ["pullup", "isometric"],
+      "muscleGroups": [
+        "背阔肌",
+        "肩胛下沉",
+        "顶端控制"
+      ],
+      "normalizationTags": [
+        "pullup",
+        "isometric"
+      ],
       "status": "confirmed",
       "media": {
         "path": "gifs/custom_pull_up_hold.webp",
@@ -190,10 +587,21 @@
     {
       "exerciseKey": "scapular-pull",
       "displayName": "肩胛引体",
-      "aliases": ["肩胛引体/沉肩悬垂", "肩胛引体", "沉肩悬垂"],
+      "aliases": [
+        "肩胛引体/沉肩悬垂",
+        "肩胛引体",
+        "沉肩悬垂"
+      ],
       "category": "pull",
-      "muscleGroups": ["肩胛下沉", "背阔肌启动", "下斜方肌"],
-      "normalizationTags": ["pullup", "scapular"],
+      "muscleGroups": [
+        "肩胛下沉",
+        "背阔肌启动",
+        "下斜方肌"
+      ],
+      "normalizationTags": [
+        "pullup",
+        "scapular"
+      ],
       "status": "confirmed",
       "media": {
         "path": "gifs/custom_scapular_pull.gif",
@@ -205,10 +613,21 @@
     {
       "exerciseKey": "pullup-or-band-pulldown",
       "displayName": "引体向上或弹力绳高位下拉",
-      "aliases": ["引体向上或弹力绳高位下拉", "引体向上/弹力绳高位下拉", "引体向上/弹力绳下拉"],
+      "aliases": [
+        "引体向上或弹力绳高位下拉",
+        "引体向上/弹力绳高位下拉",
+        "引体向上/弹力绳下拉"
+      ],
       "category": "pull",
-      "muscleGroups": ["背阔肌", "肩胛下沉"],
-      "normalizationTags": ["pullup", "band", "choice"],
+      "muscleGroups": [
+        "背阔肌",
+        "肩胛下沉"
+      ],
+      "normalizationTags": [
+        "pullup",
+        "band",
+        "choice"
+      ],
       "status": "confirmed",
       "media": {
         "path": "gifs/0652.gif",
@@ -219,50 +638,117 @@
     {
       "exerciseKey": "single-arm-db-row",
       "displayName": "单臂哑铃划船",
-      "aliases": ["单臂哑铃划船", "单臂划船"],
+      "aliases": [
+        "单臂哑铃划船",
+        "单臂划船"
+      ],
       "category": "pull",
-      "muscleGroups": ["背阔肌", "中下斜方肌", "菱形肌"],
-      "normalizationTags": ["row", "dumbbell", "unilateral"],
+      "muscleGroups": [
+        "背阔肌",
+        "中下斜方肌",
+        "菱形肌"
+      ],
+      "normalizationTags": [
+        "row",
+        "dumbbell",
+        "unilateral"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/1330.gif", "label": "近似替代图示：单臂哑铃划船" }
+      "media": {
+        "path": "gifs/1330.gif",
+        "label": "近似替代图示：单臂哑铃划船"
+      }
     },
     {
       "exerciseKey": "bent-over-db-row",
       "displayName": "俯身双哑铃划船",
-      "aliases": ["俯身双哑铃划船", "双哑铃划船"],
+      "aliases": [
+        "俯身双哑铃划船",
+        "双哑铃划船"
+      ],
       "category": "pull",
-      "muscleGroups": ["背阔肌", "中下斜方肌", "下背等长稳定"],
-      "normalizationTags": ["row", "dumbbell", "bilateral"],
+      "muscleGroups": [
+        "背阔肌",
+        "中下斜方肌",
+        "下背等长稳定"
+      ],
+      "normalizationTags": [
+        "row",
+        "dumbbell",
+        "bilateral"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/0293.gif", "label": "俯身双哑铃划船" }
+      "media": {
+        "path": "gifs/0293.gif",
+        "label": "俯身双哑铃划船"
+      }
     },
     {
       "exerciseKey": "band-row",
       "displayName": "弹力绳划船",
-      "aliases": ["弹力绳划船", "弹力带划船", "阻力带划船"],
+      "aliases": [
+        "弹力绳划船",
+        "弹力带划船",
+        "阻力带划船"
+      ],
       "category": "pull",
-      "muscleGroups": ["背阔肌", "菱形肌", "肩胛后缩"],
-      "normalizationTags": ["row", "band"],
+      "muscleGroups": [
+        "背阔肌",
+        "菱形肌",
+        "肩胛后缩"
+      ],
+      "normalizationTags": [
+        "row",
+        "band"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/0988.gif", "label": "弹力绳划船" }
+      "media": {
+        "path": "gifs/0988.gif",
+        "label": "弹力绳划船"
+      }
     },
     {
       "exerciseKey": "lat-pulldown-band",
       "displayName": "弹力绳高位下拉",
-      "aliases": ["弹力绳高位下拉", "弹力绳下拉", "弹力带高位下拉", "阻力带高位下拉"],
+      "aliases": [
+        "弹力绳高位下拉",
+        "弹力绳下拉",
+        "弹力带高位下拉",
+        "阻力带高位下拉"
+      ],
       "category": "pull",
-      "muscleGroups": ["背阔肌", "肩胛下沉"],
-      "normalizationTags": ["pulldown", "band"],
+      "muscleGroups": [
+        "背阔肌",
+        "肩胛下沉"
+      ],
+      "normalizationTags": [
+        "pulldown",
+        "band"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/0983.gif", "label": "弹力绳高位下拉" }
+      "media": {
+        "path": "gifs/0983.gif",
+        "label": "弹力绳高位下拉"
+      }
     },
     {
       "exerciseKey": "band-straight-arm-pulldown",
       "displayName": "弹力绳直臂下拉",
-      "aliases": ["弹力绳直臂下拉", "直臂下拉"],
+      "aliases": [
+        "弹力绳直臂下拉",
+        "直臂下拉"
+      ],
       "category": "pull",
-      "muscleGroups": ["背阔肌", "肩胛下沉", "核心稳定"],
-      "normalizationTags": ["pulldown", "band", "straight-arm"],
+      "muscleGroups": [
+        "背阔肌",
+        "肩胛下沉",
+        "核心稳定"
+      ],
+      "normalizationTags": [
+        "pulldown",
+        "band",
+        "straight-arm"
+      ],
       "status": "confirmed",
       "media": {
         "path": "gifs/custom_band_straight_arm_pulldown.gif",
@@ -274,80 +760,177 @@
     {
       "exerciseKey": "band-face-pull",
       "displayName": "弹力绳面拉",
-      "aliases": ["弹力绳面拉", "面拉", "弹力带面拉"],
+      "aliases": [
+        "弹力绳面拉",
+        "面拉",
+        "弹力带面拉"
+      ],
       "category": "pull",
-      "muscleGroups": ["后束", "中下斜方肌", "肩胛稳定"],
-      "normalizationTags": ["face-pull", "band"],
+      "muscleGroups": [
+        "后束",
+        "中下斜方肌",
+        "肩胛稳定"
+      ],
+      "normalizationTags": [
+        "face-pull",
+        "band"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/1022.gif", "label": "近似替代图示：弹力绳面拉" }
+      "media": {
+        "path": "gifs/1022.gif",
+        "label": "近似替代图示：弹力绳面拉"
+      }
     },
     {
       "exerciseKey": "reverse-fly",
       "displayName": "俯身反向飞鸟",
-      "aliases": ["俯身反向飞鸟", "反向飞鸟", "后束飞鸟"],
+      "aliases": [
+        "俯身反向飞鸟",
+        "反向飞鸟",
+        "后束飞鸟"
+      ],
       "category": "shoulder",
-      "muscleGroups": ["后束", "菱形肌", "肩胛稳定"],
-      "normalizationTags": ["rear-delt", "fly"],
+      "muscleGroups": [
+        "后束",
+        "菱形肌",
+        "肩胛稳定"
+      ],
+      "normalizationTags": [
+        "rear-delt",
+        "fly"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/0383.gif", "label": "俯身反向飞鸟" }
+      "media": {
+        "path": "gifs/0383.gif",
+        "label": "俯身反向飞鸟"
+      }
     },
     {
       "exerciseKey": "db-curl",
       "displayName": "哑铃弯举",
-      "aliases": ["哑铃弯举"],
+      "aliases": [
+        "哑铃弯举"
+      ],
       "category": "arms",
-      "muscleGroups": ["肱二头"],
-      "normalizationTags": ["curl", "dumbbell"],
+      "muscleGroups": [
+        "肱二头"
+      ],
+      "normalizationTags": [
+        "curl",
+        "dumbbell"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/1677.gif", "label": "近似替代图示：哑铃弯举" }
+      "media": {
+        "path": "gifs/1677.gif",
+        "label": "近似替代图示：哑铃弯举"
+      }
     },
     {
       "exerciseKey": "hammer-curl",
       "displayName": "锤式弯举",
-      "aliases": ["锤式弯举"],
+      "aliases": [
+        "锤式弯举"
+      ],
       "category": "arms",
-      "muscleGroups": ["肱肌", "肱桡肌", "肱二头辅助"],
-      "normalizationTags": ["curl", "hammer"],
+      "muscleGroups": [
+        "肱肌",
+        "肱桡肌",
+        "肱二头辅助"
+      ],
+      "normalizationTags": [
+        "curl",
+        "hammer"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/0313.gif", "label": "锤式弯举" }
+      "media": {
+        "path": "gifs/0313.gif",
+        "label": "锤式弯举"
+      }
     },
     {
       "exerciseKey": "triceps-overhead",
       "displayName": "过顶哑铃臂屈伸",
-      "aliases": ["过顶哑铃臂屈伸", "臂屈伸"],
+      "aliases": [
+        "过顶哑铃臂屈伸",
+        "臂屈伸"
+      ],
       "category": "arms",
-      "muscleGroups": ["肱三头长头"],
-      "normalizationTags": ["triceps", "dumbbell"],
+      "muscleGroups": [
+        "肱三头长头"
+      ],
+      "normalizationTags": [
+        "triceps",
+        "dumbbell"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/0430.gif", "label": "过顶哑铃臂屈伸" }
+      "media": {
+        "path": "gifs/0430.gif",
+        "label": "过顶哑铃臂屈伸"
+      }
     },
     {
       "exerciseKey": "goblet-squat",
       "displayName": "哑铃杯式深蹲",
-      "aliases": ["哑铃杯式深蹲", "杯式深蹲"],
+      "aliases": [
+        "哑铃杯式深蹲",
+        "杯式深蹲"
+      ],
       "category": "legs",
-      "muscleGroups": ["股四头", "臀", "核心"],
-      "normalizationTags": ["squat", "dumbbell"],
+      "muscleGroups": [
+        "股四头",
+        "臀",
+        "核心"
+      ],
+      "normalizationTags": [
+        "squat",
+        "dumbbell"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/1760.gif", "label": "哑铃杯式深蹲" }
+      "media": {
+        "path": "gifs/1760.gif",
+        "label": "哑铃杯式深蹲"
+      }
     },
     {
       "exerciseKey": "rdl",
       "displayName": "哑铃罗马尼亚硬拉",
-      "aliases": ["哑铃罗马尼亚硬拉", "罗马尼亚硬拉"],
+      "aliases": [
+        "哑铃罗马尼亚硬拉",
+        "罗马尼亚硬拉"
+      ],
       "category": "legs",
-      "muscleGroups": ["腘绳肌", "臀", "下背等长稳定"],
-      "normalizationTags": ["hinge", "dumbbell"],
+      "muscleGroups": [
+        "腘绳肌",
+        "臀",
+        "下背等长稳定"
+      ],
+      "normalizationTags": [
+        "hinge",
+        "dumbbell"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/1459.gif", "label": "哑铃罗马尼亚硬拉" }
+      "media": {
+        "path": "gifs/1459.gif",
+        "label": "哑铃罗马尼亚硬拉"
+      }
     },
     {
       "exerciseKey": "bulgarian-split-squat",
       "displayName": "保加利亚分腿蹲",
-      "aliases": ["保加利亚分腿蹲", "分腿蹲"],
+      "aliases": [
+        "保加利亚分腿蹲",
+        "分腿蹲"
+      ],
       "category": "legs",
-      "muscleGroups": ["股四头", "臀", "单腿稳定"],
-      "normalizationTags": ["legs", "single-leg"],
+      "muscleGroups": [
+        "股四头",
+        "臀",
+        "单腿稳定"
+      ],
+      "normalizationTags": [
+        "legs",
+        "single-leg"
+      ],
       "status": "confirmed",
       "media": {
         "path": "gifs/custom_bulgarian_split_squat.gif",
@@ -359,105 +942,228 @@
     {
       "exerciseKey": "db-calf-raise",
       "displayName": "哑铃提踵",
-      "aliases": ["哑铃提踵", "提踵"],
+      "aliases": [
+        "哑铃提踵",
+        "提踵",
+        "小腿提踵"
+      ],
       "category": "legs",
-      "muscleGroups": ["腓肠肌", "比目鱼肌", "脚踝稳定"],
-      "normalizationTags": ["calf", "dumbbell"],
+      "muscleGroups": [
+        "腓肠肌",
+        "比目鱼肌",
+        "脚踝稳定"
+      ],
+      "normalizationTags": [
+        "calf",
+        "dumbbell"
+      ],
       "status": "confirmed",
       "media": {
         "path": "gifs/custom_dumbbell_calf_raise.gif",
         "label": "哑铃提踵",
         "sourceUrl": "https://loadmuscle.com/exercises/dumbbell-standing-calf-raise",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "guide": {
+        "diagram": "起始：站稳，脚掌踩实，必要时扶墙保持平衡\n上抬：脚跟向上抬到最高点\n顶端：小腿收紧，停1秒\n下放：控制脚跟回落，不要快速弹跳",
+        "cautions": [
+          "顶峰停顿比追重量更重要",
+          "不要弹跳借力",
+          "可按计划徒手或持哑铃执行"
+        ]
       }
     },
     {
       "exerciseKey": "leg-raise",
       "displayName": "仰卧举腿",
-      "aliases": ["仰卧举腿"],
+      "aliases": [
+        "仰卧举腿"
+      ],
       "category": "core",
-      "muscleGroups": ["下腹控制", "髋屈控制"],
-      "normalizationTags": ["core", "leg-raise"],
+      "muscleGroups": [
+        "下腹控制",
+        "髋屈控制"
+      ],
+      "normalizationTags": [
+        "core",
+        "leg-raise"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/0620.gif", "label": "仰卧举腿" }
+      "media": {
+        "path": "gifs/0620.gif",
+        "label": "仰卧举腿"
+      }
     },
     {
       "exerciseKey": "reverse-crunch",
       "displayName": "反向卷腹",
-      "aliases": ["反向卷腹"],
+      "aliases": [
+        "反向卷腹"
+      ],
       "category": "core",
-      "muscleGroups": ["下腹卷动", "骨盆后倾"],
-      "normalizationTags": ["core", "crunch"],
+      "muscleGroups": [
+        "下腹卷动",
+        "骨盆后倾"
+      ],
+      "normalizationTags": [
+        "core",
+        "crunch"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/0872.gif", "label": "反向卷腹" }
+      "media": {
+        "path": "gifs/0872.gif",
+        "label": "反向卷腹"
+      }
     },
     {
       "exerciseKey": "short-plank",
       "displayName": "短平板支撑",
-      "aliases": ["短平板支撑"],
+      "aliases": [
+        "短平板支撑"
+      ],
       "category": "core",
-      "muscleGroups": ["核心稳定", "抗伸展"],
-      "normalizationTags": ["core", "plank", "short"],
+      "muscleGroups": [
+        "核心稳定",
+        "抗伸展"
+      ],
+      "normalizationTags": [
+        "core",
+        "plank",
+        "short"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/2135.gif", "label": "近似替代图示：短平板支撑" }
+      "media": {
+        "path": "gifs/2135.gif",
+        "label": "近似替代图示：短平板支撑"
+      }
     },
     {
       "exerciseKey": "plank",
       "displayName": "平板支撑",
-      "aliases": ["平板支撑"],
+      "aliases": [
+        "平板支撑"
+      ],
       "category": "core",
-      "muscleGroups": ["核心稳定", "抗伸展"],
-      "normalizationTags": ["core", "plank"],
+      "muscleGroups": [
+        "核心稳定",
+        "抗伸展"
+      ],
+      "normalizationTags": [
+        "core",
+        "plank"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/2135.gif", "label": "近似替代图示：平板支撑" }
+      "media": {
+        "path": "gifs/2135.gif",
+        "label": "近似替代图示：平板支撑"
+      }
     },
     {
       "exerciseKey": "side-plank",
       "displayName": "侧桥",
-      "aliases": ["侧桥", "侧平板", "侧向平板支撑"],
+      "aliases": [
+        "侧桥",
+        "侧平板",
+        "侧向平板支撑"
+      ],
       "category": "core",
-      "muscleGroups": ["侧腹", "抗侧屈", "肩胛稳定"],
-      "normalizationTags": ["core", "side-plank"],
+      "muscleGroups": [
+        "侧腹",
+        "抗侧屈",
+        "肩胛稳定"
+      ],
+      "normalizationTags": [
+        "core",
+        "side-plank"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/0705.gif", "label": "侧桥" }
+      "media": {
+        "path": "gifs/0705.gif",
+        "label": "侧桥"
+      }
     },
     {
       "exerciseKey": "dead-bug",
       "displayName": "死虫",
-      "aliases": ["死虫", "Dead Bug"],
+      "aliases": [
+        "死虫",
+        "Dead Bug"
+      ],
       "category": "core",
-      "muscleGroups": ["核心稳定", "抗伸展"],
-      "normalizationTags": ["core", "dead-bug"],
+      "muscleGroups": [
+        "核心稳定",
+        "抗伸展"
+      ],
+      "normalizationTags": [
+        "core",
+        "dead-bug"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/0276.gif", "label": "死虫" }
+      "media": {
+        "path": "gifs/0276.gif",
+        "label": "死虫"
+      }
     },
     {
       "exerciseKey": "crunch",
       "displayName": "卷腹",
-      "aliases": ["卷腹", "Crunch"],
+      "aliases": [
+        "卷腹",
+        "Crunch"
+      ],
       "category": "core",
-      "muscleGroups": ["腹直肌", "上腹卷动"],
-      "normalizationTags": ["core", "crunch"],
+      "muscleGroups": [
+        "腹直肌",
+        "上腹卷动"
+      ],
+      "normalizationTags": [
+        "core",
+        "crunch"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/0274.gif", "label": "卷腹" }
+      "media": {
+        "path": "gifs/0274.gif",
+        "label": "卷腹"
+      }
     },
     {
       "exerciseKey": "russian-twist",
       "displayName": "俄罗斯转体",
-      "aliases": ["俄罗斯转体"],
+      "aliases": [
+        "俄罗斯转体"
+      ],
       "category": "core",
-      "muscleGroups": ["腹斜肌", "抗旋转控制"],
-      "normalizationTags": ["core", "rotation"],
+      "muscleGroups": [
+        "腹斜肌",
+        "抗旋转控制"
+      ],
+      "normalizationTags": [
+        "core",
+        "rotation"
+      ],
       "status": "confirmed",
-      "media": { "path": "gifs/0687.gif", "label": "俄罗斯转体" }
+      "media": {
+        "path": "gifs/0687.gif",
+        "label": "俄罗斯转体"
+      }
     },
     {
       "exerciseKey": "bird-dog",
       "displayName": "鸟狗",
-      "aliases": ["鸟狗", "Bird Dog"],
+      "aliases": [
+        "鸟狗",
+        "Bird Dog"
+      ],
       "category": "core",
-      "muscleGroups": ["核心稳定", "臀", "肩胛稳定"],
-      "normalizationTags": ["core", "bird-dog"],
+      "muscleGroups": [
+        "核心稳定",
+        "臀",
+        "肩胛稳定"
+      ],
+      "normalizationTags": [
+        "core",
+        "bird-dog"
+      ],
       "status": "confirmed",
       "media": {
         "path": "gifs/bird_dog.gif",
@@ -469,10 +1175,19 @@
     {
       "exerciseKey": "brisk-walk",
       "displayName": "快走",
-      "aliases": ["快走"],
+      "aliases": [
+        "快走"
+      ],
       "category": "recovery",
-      "muscleGroups": ["恢复", "循环", "低强度有氧"],
-      "normalizationTags": ["walk", "recovery"],
+      "muscleGroups": [
+        "恢复",
+        "循环",
+        "低强度有氧"
+      ],
+      "normalizationTags": [
+        "walk",
+        "recovery"
+      ],
       "status": "confirmed",
       "media": {
         "path": "gifs/marching_on_spot.webp",
@@ -484,10 +1199,19 @@
     {
       "exerciseKey": "walk",
       "displayName": "散步",
-      "aliases": ["散步"],
+      "aliases": [
+        "散步"
+      ],
       "category": "recovery",
-      "muscleGroups": ["恢复", "循环", "放松"],
-      "normalizationTags": ["walk", "recovery"],
+      "muscleGroups": [
+        "恢复",
+        "循环",
+        "放松"
+      ],
+      "normalizationTags": [
+        "walk",
+        "recovery"
+      ],
       "status": "confirmed",
       "media": {
         "path": "gifs/marching_on_spot.webp",
@@ -499,10 +1223,23 @@
     {
       "exerciseKey": "upper-body-stretch",
       "displayName": "胸、背、肩拉伸",
-      "aliases": ["胸、背、肩拉伸", "胸、背、髋部拉伸", "肩背拉伸", "肩部轻拉伸"],
+      "aliases": [
+        "胸、背、肩拉伸",
+        "胸、背、髋部拉伸",
+        "肩背拉伸",
+        "肩部轻拉伸",
+        "胸、背阔、髋屈肌拉伸",
+        "胸背阔髋屈肌拉伸"
+      ],
       "category": "recovery",
-      "muscleGroups": ["胸背肩活动度", "恢复"],
-      "normalizationTags": ["stretch", "upper-body"],
+      "muscleGroups": [
+        "胸背肩活动度",
+        "恢复"
+      ],
+      "normalizationTags": [
+        "stretch",
+        "upper-body"
+      ],
       "status": "confirmed",
       "media": {
         "path": "gifs/standing_back_rotation_stretch.webp",
@@ -514,10 +1251,19 @@
     {
       "exerciseKey": "full-body-stretch",
       "displayName": "全身拉伸",
-      "aliases": ["全身拉伸", "全身轻拉伸"],
+      "aliases": [
+        "全身拉伸",
+        "全身轻拉伸"
+      ],
       "category": "recovery",
-      "muscleGroups": ["全身恢复", "活动度"],
-      "normalizationTags": ["stretch", "full-body"],
+      "muscleGroups": [
+        "全身恢复",
+        "活动度"
+      ],
+      "normalizationTags": [
+        "stretch",
+        "full-body"
+      ],
       "status": "confirmed",
       "media": {
         "path": "gifs/standing_back_rotation_stretch.webp",
@@ -529,10 +1275,20 @@
     {
       "exerciseKey": "general-stretch",
       "displayName": "拉伸",
-      "aliases": ["拉伸", "通用拉伸"],
+      "aliases": [
+        "拉伸",
+        "通用拉伸",
+        "轻拉伸"
+      ],
       "category": "recovery",
-      "muscleGroups": ["恢复", "活动度"],
-      "normalizationTags": ["stretch", "general"],
+      "muscleGroups": [
+        "恢复",
+        "活动度"
+      ],
+      "normalizationTags": [
+        "stretch",
+        "general"
+      ],
       "status": "confirmed",
       "media": {
         "path": "gifs/standing_back_rotation_stretch.webp",
@@ -544,10 +1300,21 @@
     {
       "exerciseKey": "adductor-stretch",
       "displayName": "大腿内侧拉伸",
-      "aliases": ["大腿内侧拉伸", "大腿内侧放松拉伸", "大腿内侧轻度放松"],
+      "aliases": [
+        "大腿内侧拉伸",
+        "大腿内侧放松拉伸",
+        "大腿内侧轻度放松"
+      ],
       "category": "recovery",
-      "muscleGroups": ["内收肌", "髋部活动度", "恢复"],
-      "normalizationTags": ["stretch", "adductor"],
+      "muscleGroups": [
+        "内收肌",
+        "髋部活动度",
+        "恢复"
+      ],
+      "normalizationTags": [
+        "stretch",
+        "adductor"
+      ],
       "status": "confirmed",
       "media": {
         "path": "gifs/adductor_stretch.webp",
@@ -559,212 +1326,609 @@
     {
       "exerciseKey": "scapular-pushup",
       "displayName": "肩胛俯卧撑",
-      "aliases": ["肩胛俯卧撑", "肩胛撑", "肩胛支撑"],
+      "aliases": [
+        "肩胛俯卧撑",
+        "肩胛撑",
+        "肩胛支撑"
+      ],
       "category": "push",
-      "muscleGroups": ["肩胛稳定", "前锯肌", "胸肩热身"],
-      "normalizationTags": ["pushup", "scapular", "warmup"],
+      "muscleGroups": [
+        "肩胛稳定",
+        "前锯肌",
+        "胸肩热身"
+      ],
+      "normalizationTags": [
+        "pushup",
+        "scapular",
+        "warmup"
+      ],
       "status": "confirmed",
       "guide": {
         "diagram": "起始：直臂俯卧撑支撑，身体保持一条线\n下沉：手臂不弯，让肩胛自然靠近\n推远：把地面推远，肩胛前伸，背上方微微拱起\n回位：保持核心稳定，节奏慢而可控",
-        "cautions": ["全程不要屈肘做成小俯卧撑", "腰不要塌，臀不要翘", "只做肩胛活动，幅度宁小勿乱"]
+        "cautions": [
+          "全程不要屈肘做成小俯卧撑",
+          "腰不要塌，臀不要翘",
+          "只做肩胛活动，幅度宁小勿乱"
+        ]
       },
-      "media": { "path": "gifs/custom_scapular_pushup.gif", "label": "肩胛俯卧撑", "sourceUrl": "https://loadmuscle.com/exercises/scapula-push-up", "sourceLabel": "素材来源：LoadMuscle" }
+      "media": {
+        "path": "gifs/custom_scapular_pushup.gif",
+        "label": "肩胛俯卧撑",
+        "sourceUrl": "https://loadmuscle.com/exercises/scapula-push-up",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
     },
     {
       "exerciseKey": "shoulder-circles",
       "displayName": "肩绕环",
-      "aliases": ["肩绕环", "肩部绕环", "肩关节绕环"],
+      "aliases": [
+        "肩绕环",
+        "肩部绕环",
+        "肩关节绕环"
+      ],
       "category": "recovery",
-      "muscleGroups": ["肩关节活动度", "肩胛热身"],
-      "normalizationTags": ["warmup", "mobility", "shoulder"],
+      "muscleGroups": [
+        "肩关节活动度",
+        "肩胛热身"
+      ],
+      "normalizationTags": [
+        "warmup",
+        "mobility",
+        "shoulder"
+      ],
       "status": "confirmed",
       "guide": {
         "diagram": "站姿或跪姿保持躯干稳定\n肩膀带动手臂做小到中等幅度绕环\n先向前绕，再向后绕，保持呼吸自然",
-        "cautions": ["不要用腰背大幅摆动代偿", "肩前侧夹痛时缩小幅度", "热身动作不追求速度"]
+        "cautions": [
+          "不要用腰背大幅摆动代偿",
+          "肩前侧夹痛时缩小幅度",
+          "热身动作不追求速度"
+        ]
       },
-      "media": { "path": "gifs/custom_shoulder_circles.gif", "label": "肩绕环", "sourceUrl": "https://loadmuscle.com/exercises/shoulder-circle", "sourceLabel": "素材来源：LoadMuscle" }
+      "media": {
+        "path": "gifs/custom_shoulder_circles.gif",
+        "label": "肩绕环",
+        "sourceUrl": "https://loadmuscle.com/exercises/shoulder-circle",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
     },
     {
       "exerciseKey": "bodyweight-squat",
       "displayName": "标准深蹲",
-      "aliases": ["标准深蹲", "徒手深蹲", "深蹲", "全深蹲"],
+      "aliases": [
+        "标准深蹲",
+        "徒手深蹲",
+        "深蹲",
+        "全深蹲"
+      ],
       "category": "legs",
-      "muscleGroups": ["股四头", "臀", "髋膝踝协调"],
-      "normalizationTags": ["squat", "bodyweight", "convict-conditioning"],
+      "muscleGroups": [
+        "股四头",
+        "臀",
+        "髋膝踝协调"
+      ],
+      "normalizationTags": [
+        "squat",
+        "bodyweight",
+        "convict-conditioning"
+      ],
       "status": "confirmed",
       "guide": {
-        "diagram": "起始：双脚约肩宽，脚尖与膝盖方向一致\n下蹲：髋和膝同时弯曲，躯干保持稳定\n底部：在可控范围内下到足够深\n站起：全脚掌发力，膝盖继续跟脚尖同向",
-        "cautions": ["不要膝盖内扣", "不要塌腰或含胸找深度", "先保证动作干净，再增加次数"]
+        "diagram": "起始：双脚约肩宽或略宽，脚尖略微外转\n下蹲：背部保持挺直，髋和膝同时弯曲\n底部：有控制地下到足够深，大腿后侧接近小腿\n站起：只靠腿部力量站起，不用摇晃反弹",
+        "cautions": [
+          "膝盖不要内扣",
+          "脚跟不要抬起",
+          "窄距深蹲不稳时用它作为安全回退"
+        ]
       },
-      "media": { "path": "gifs/custom_bodyweight_squat.gif", "label": "标准深蹲 / 徒手深蹲", "sourceUrl": "https://loadmuscle.com/exercises/air-squat", "sourceLabel": "素材来源：LoadMuscle" }
+      "media": {
+        "path": "gifs/custom_bodyweight_squat.gif",
+        "label": "标准深蹲 / 徒手深蹲",
+        "sourceUrl": "https://loadmuscle.com/exercises/air-squat",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
     },
     {
       "exerciseKey": "close-squat",
       "displayName": "窄距深蹲",
-      "aliases": ["窄距深蹲", "窄站距深蹲"],
+      "aliases": [
+        "窄距深蹲",
+        "窄站距深蹲",
+        "窄距深蹲测试"
+      ],
       "category": "legs",
-      "muscleGroups": ["股四头", "臀", "踝关节活动度"],
-      "normalizationTags": ["squat", "close-stance", "convict-conditioning"],
+      "muscleGroups": [
+        "股四头",
+        "臀",
+        "踝关节活动度"
+      ],
+      "normalizationTags": [
+        "squat",
+        "close-stance",
+        "convict-conditioning"
+      ],
       "status": "confirmed",
       "guide": {
-        "diagram": "起始：双脚比标准深蹲更靠近，脚掌踩稳\n下蹲：膝盖沿脚尖方向前移，髋部向下坐\n站起：保持躯干稳定，全脚掌推地站回",
-        "cautions": ["踝活动不足时不要强行到底", "膝盖不要向内夹", "先用慢速和小幅度建立控制"]
+        "diagram": "起始：双脚脚跟相碰或非常接近，脚尖微微外转，双臂前伸帮助平衡\n下蹲：胸部逐渐接近大腿，脚跟保持贴地\n底部：膝盖不内扣，身体不后倒\n站起：从底部稳定站回",
+        "cautions": [
+          "脚跟抬起、膝盖内扣或身体后倒时退回标准深蹲",
+          "先用慢速和小幅度建立控制",
+          "不要为了到底而牺牲膝踝稳定"
+        ]
       },
-      "media": { "path": "gifs/custom_close_squat.gif", "label": "窄距深蹲", "note": "真实动作 GIF，演示窄站距深蹲轨迹；计划中按徒手版本执行。", "sourceUrl": "https://oss.exercisedb.dev/api/v1/exercises/search?search=narrow%20squat", "sourceLabel": "素材来源：ExerciseDB" }
+      "media": {
+        "path": "gifs/custom_close_squat.gif",
+        "label": "窄距深蹲",
+        "note": "真实动作 GIF，演示窄站距深蹲轨迹；计划中按徒手版本执行。",
+        "sourceUrl": "https://oss.exercisedb.dev/api/v1/exercises/search?search=narrow%20squat",
+        "sourceLabel": "素材来源：ExerciseDB"
+      }
+    },
+    {
+      "exerciseKey": "offset-squat",
+      "displayName": "偏重深蹲",
+      "aliases": [
+        "偏重深蹲",
+        "偏重深蹲预备",
+        "第七式偏重深蹲"
+      ],
+      "category": "legs",
+      "muscleGroups": [
+        "股四头",
+        "臀",
+        "单腿稳定",
+        "平衡协调"
+      ],
+      "normalizationTags": [
+        "squat",
+        "offset",
+        "single-leg-progression",
+        "convict-conditioning"
+      ],
+      "status": "confirmed",
+      "guide": {
+        "diagram": "起始：一只脚踩地，另一只脚的脚跟放在前方支撑物上\n下蹲：主力腿承担大部分负荷，辅助腿只帮助平衡\n底部：短暂停顿，保持脚跟贴地和身体控制\n站起：主力腿发力回到起始位",
+        "cautions": [
+          "支撑物从稳定低物开始，不必一开始就用球",
+          "前方支撑腿不能承担主要发力",
+          "本周只做预备探索，平衡明显差时取消"
+        ]
+      },
+      "media": {
+        "path": "每周训练json/2026.6.15-2026.6.21_六艺动作图解_assets/image00589.jpeg",
+        "label": "偏重深蹲起始",
+        "note": "底部图见动作图解 md 中 image00590.jpeg。",
+        "sourceLabel": "本地图解：2026.6.15-2026.6.21 六艺动作图解"
+      }
     },
     {
       "exerciseKey": "assisted-single-leg-half-squat",
       "displayName": "辅助单腿半深蹲",
-      "aliases": ["辅助单腿半深蹲", "单腿半深蹲", "扶墙单腿半深蹲"],
+      "aliases": [
+        "辅助单腿半深蹲",
+        "单腿半深蹲",
+        "扶墙单腿半深蹲"
+      ],
       "category": "legs",
-      "muscleGroups": ["股四头", "臀", "单腿稳定"],
-      "normalizationTags": ["squat", "single-leg", "assisted", "convict-conditioning"],
+      "muscleGroups": [
+        "股四头",
+        "臀",
+        "单腿稳定"
+      ],
+      "normalizationTags": [
+        "squat",
+        "single-leg",
+        "assisted",
+        "convict-conditioning"
+      ],
       "status": "confirmed",
       "guide": {
         "diagram": "起始：单脚站稳，手扶墙或门框保持平衡\n下降：慢慢屈膝屈髋，下到能控制的半程深度\n站起：前脚全脚掌发力，膝盖保持稳定\n换边：左右侧分别完成，不抢速度",
-        "cautions": ["不要追求极限深度", "膝盖不要左右晃或内扣", "扶手只辅助平衡，不要把自己拉起来"]
+        "cautions": [
+          "不要追求极限深度",
+          "膝盖不要左右晃或内扣",
+          "扶手只辅助平衡，不要把自己拉起来"
+        ]
       },
-      "media": { "path": "gifs/custom_assisted_single_leg_squat.gif", "label": "辅助单腿半深蹲", "sourceUrl": "https://loadmuscle.com/exercises/suspender-single-leg-squat", "sourceLabel": "素材来源：LoadMuscle" }
+      "media": {
+        "path": "gifs/custom_assisted_single_leg_squat.gif",
+        "label": "辅助单腿半深蹲",
+        "sourceUrl": "https://loadmuscle.com/exercises/suspender-single-leg-squat",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
     },
     {
       "exerciseKey": "assisted-single-leg-squat-box",
       "displayName": "辅助单腿深蹲到箱/椅",
-      "aliases": ["辅助单腿深蹲到箱/椅", "辅助单腿深蹲到箱", "辅助单腿深蹲到椅", "单腿深蹲到箱", "箱式单腿深蹲"],
+      "aliases": [
+        "辅助单腿深蹲到箱/椅",
+        "辅助单腿深蹲到箱",
+        "辅助单腿深蹲到椅",
+        "单腿深蹲到箱",
+        "箱式单腿深蹲"
+      ],
       "category": "legs",
-      "muscleGroups": ["股四头", "臀", "单腿稳定"],
-      "normalizationTags": ["squat", "single-leg", "box", "assisted", "convict-conditioning"],
+      "muscleGroups": [
+        "股四头",
+        "臀",
+        "单腿稳定"
+      ],
+      "normalizationTags": [
+        "squat",
+        "single-leg",
+        "box",
+        "assisted",
+        "convict-conditioning"
+      ],
       "status": "confirmed",
       "guide": {
         "diagram": "起始：站在箱或椅前，单脚站稳，另一腿向前轻伸\n下降：慢慢坐向箱面，只轻触不放松\n站起：站立腿发力推回，保持膝盖跟脚尖同向\n辅助：需要时扶墙或门框控制平衡",
-        "cautions": ["箱子要稳，不要滑动", "触箱后不要整个人塌坐", "膝盖疼或晃动明显时升高箱面"]
+        "cautions": [
+          "箱子要稳，不要滑动",
+          "触箱后不要整个人塌坐",
+          "膝盖疼或晃动明显时升高箱面"
+        ]
       },
-      "media": { "path": "gifs/custom_assisted_single_leg_squat.gif", "label": "辅助单腿深蹲到箱/椅", "note": "真实动作 GIF，用于参考辅助单腿下蹲轨迹；箱/椅高度按计划文字控制。", "sourceUrl": "https://loadmuscle.com/exercises/suspender-single-leg-squat", "sourceLabel": "素材来源：LoadMuscle" }
+      "media": {
+        "path": "gifs/custom_assisted_single_leg_squat.gif",
+        "label": "辅助单腿深蹲到箱/椅",
+        "note": "真实动作 GIF，用于参考辅助单腿下蹲轨迹；箱/椅高度按计划文字控制。",
+        "sourceUrl": "https://loadmuscle.com/exercises/suspender-single-leg-squat",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
     },
     {
       "exerciseKey": "short-bridge",
       "displayName": "臀桥 / 短桥",
-      "aliases": ["臀桥", "短桥", "臀桥或短桥"],
+      "aliases": [
+        "臀桥",
+        "短桥",
+        "臀桥或短桥",
+        "臀桥热身"
+      ],
       "category": "legs",
-      "muscleGroups": ["臀", "腘绳肌", "脊柱后侧链"],
-      "normalizationTags": ["bridge", "glute", "convict-conditioning"],
+      "muscleGroups": [
+        "臀",
+        "腘绳肌",
+        "脊柱后侧链"
+      ],
+      "normalizationTags": [
+        "bridge",
+        "glute",
+        "convict-conditioning"
+      ],
       "status": "confirmed",
       "guide": {
-        "diagram": "起始：仰卧屈膝，脚掌踩地，手臂放身体两侧\n抬起：收紧臀部，把髋部抬到肩、髋、膝接近一线\n顶端：停顿一瞬间，感受臀部发力\n下放：慢慢回到地面，不要砸下去",
-        "cautions": ["不要用腰猛拱代替伸髋", "膝盖保持稳定不要外翻内扣", "顶端肋骨不要过度外翻"]
+        "diagram": "起始：仰卧屈膝，脚掌踩地，双脚约肩宽或略窄\n抬起：双脚发力把髋部和背部抬起\n顶部：大腿和躯干接近一条线，髋部不下沉\n下放：控制回到地面",
+        "cautions": [
+          "不要用腰猛拱代替伸髋",
+          "膝盖保持稳定，不要外翻或内扣",
+          "适合作为恢复、激活和桥系列基础"
+        ]
       },
-      "media": { "path": "gifs/custom_glute_bridge.gif", "label": "臀桥 / 短桥", "sourceUrl": "https://loadmuscle.com/exercises/glute-bridge-two-legs-on-floor", "sourceLabel": "素材来源：LoadMuscle" }
+      "media": {
+        "path": "gifs/custom_glute_bridge.gif",
+        "label": "臀桥 / 短桥",
+        "sourceUrl": "https://loadmuscle.com/exercises/glute-bridge-two-legs-on-floor",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
     },
     {
       "exerciseKey": "table-bridge",
-      "displayName": "直桥预备 / 桌桥",
-      "aliases": ["直桥预备/桌桥", "直桥预备", "桌桥", "直桥"],
+      "displayName": "直桥",
+      "aliases": [
+        "直桥预备/桌桥",
+        "直桥预备",
+        "桌桥",
+        "直桥"
+      ],
       "category": "legs",
-      "muscleGroups": ["臀", "肩伸展", "脊柱后侧链"],
-      "normalizationTags": ["bridge", "table", "convict-conditioning"],
+      "muscleGroups": [
+        "脊柱后侧链",
+        "肩伸展",
+        "臀",
+        "手臂支撑"
+      ],
+      "normalizationTags": [
+        "bridge",
+        "table",
+        "convict-conditioning",
+        "straight-bridge"
+      ],
       "status": "confirmed",
       "guide": {
-        "diagram": "起始：坐姿，双手撑在身后，脚掌踩稳\n抬起：手脚同时推地，髋部向上抬\n顶端：胸口打开，肩、髋、膝尽量连成稳定平台\n下放：受控回到坐姿或接近地面",
-        "cautions": ["肩前侧不适时立刻缩小幅度", "不要把头猛然后仰", "腰痛时改做臀桥"]
+        "diagram": "起始：坐姿，双腿伸直，双手撑在髋部两侧\n抬起：手掌下压，手臂绷紧，把髋部向上推到双腿和躯干成一条线\n顶部：看向上方，身体由手掌和脚跟支撑\n下放：受控回到起始位",
+        "cautions": [
+          "肩腕无不适再增加次数",
+          "标准版本困难时先缩短力臂或弯腿",
+          "腰部不适时退回短桥"
+        ]
       },
-      "media": { "path": "gifs/custom_table_bridge.gif", "label": "直桥预备 / 桌桥", "sourceUrl": "https://loadmuscle.com/exercises/table-top-bridge", "sourceLabel": "素材来源：LoadMuscle" }
+      "media": {
+        "path": "每周训练json/2026.6.15-2026.6.21_六艺动作图解_assets/image00661.jpeg",
+        "label": "直桥起始",
+        "sourceUrl": "",
+        "sourceLabel": "本地图解：2026.6.15-2026.6.21 六艺动作图解",
+        "note": "顶部图见动作图解 md 中 image00662.jpeg。"
+      }
+    },
+    {
+      "exerciseKey": "high-low-bridge",
+      "displayName": "高低桥",
+      "aliases": [
+        "高低桥",
+        "桥第三式高低桥"
+      ],
+      "category": "legs",
+      "muscleGroups": [
+        "脊柱后侧链",
+        "肩胸活动度",
+        "手腕支撑",
+        "桥进阶"
+      ],
+      "normalizationTags": [
+        "bridge",
+        "high-low",
+        "convict-conditioning"
+      ],
+      "status": "confirmed",
+      "guide": {
+        "diagram": "起始：找一个约膝盖高度或略高的稳固支撑物，身体向后躺在支撑物上，双脚踩地\n手位：双手放在头部两侧，手指朝脚\n推起：用手和腿推起髋部，让背部形成弧形\n完成：不要求手臂完全伸直，先以控制和舒适为主",
+        "cautions": [
+          "支撑物越高越容易，先从更容易的高度开始",
+          "腰部不适时退回直桥",
+          "不要强行压到手腕或肩部疼痛位置"
+        ]
+      },
+      "media": {
+        "path": "每周训练json/2026.6.15-2026.6.21_六艺动作图解_assets/image00663.jpeg",
+        "label": "高低桥起始",
+        "note": "顶部图见动作图解 md 中 image00664.jpeg。",
+        "sourceLabel": "本地图解：2026.6.15-2026.6.21 六艺动作图解"
+      }
     },
     {
       "exerciseKey": "hanging-knee-raise",
       "displayName": "悬垂屈膝举腿",
-      "aliases": ["悬垂屈膝举腿", "悬垂举膝", "屈膝举腿"],
+      "aliases": [
+        "悬垂屈膝举腿",
+        "悬垂举膝",
+        "屈膝举腿",
+        "悬垂屈膝"
+      ],
       "category": "core",
-      "muscleGroups": ["下腹控制", "髋屈控制", "握力"],
-      "normalizationTags": ["core", "leg-raise", "hanging", "convict-conditioning"],
+      "muscleGroups": [
+        "下腹控制",
+        "髋屈控制",
+        "握力"
+      ],
+      "normalizationTags": [
+        "core",
+        "leg-raise",
+        "hanging",
+        "convict-conditioning"
+      ],
       "status": "confirmed",
       "guide": {
-        "diagram": "起始：双手悬垂，肩胛保持主动，身体稳定\n上举：骨盆轻微后倾，屈膝把膝盖向胸口抬\n顶端：腹部收紧，避免身体大幅摆动\n下放：慢慢放回悬垂位再做下一次",
-        "cautions": ["不要甩腿借力", "握力不足时改仰卧举腿", "肩肘不适时不要硬挂"]
+        "diagram": "起始：双手抓住高过头顶的横杆，身体自然悬垂，肩部保持收紧\n上举：平稳抬膝到骨盆高度，大腿约与地面平行\n顶部：腹部收紧并短暂停顿\n下放：控制下降到身体伸展",
+        "cautions": [
+          "不要完全挂在关节上",
+          "不摆动，不甩腿",
+          "握力不足或动作变形时改仰卧举腿"
+        ]
       },
-      "media": { "path": "gifs/custom_hanging_knee_raise.gif", "label": "悬垂屈膝举腿", "sourceUrl": "https://loadmuscle.com/exercises/assisted-hanging-knee-raise", "sourceLabel": "素材来源：LoadMuscle" }
+      "media": {
+        "path": "gifs/custom_hanging_knee_raise.gif",
+        "label": "悬垂屈膝举腿",
+        "sourceUrl": "https://loadmuscle.com/exercises/assisted-hanging-knee-raise",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
     },
     {
       "exerciseKey": "dead-hang-grip",
       "displayName": "悬垂抓握",
-      "aliases": ["悬垂抓握", "悬垂", "死悬垂", "抓握悬垂"],
+      "aliases": [
+        "悬垂抓握",
+        "悬垂",
+        "死悬垂",
+        "抓握悬垂"
+      ],
       "category": "pull",
-      "muscleGroups": ["握力", "肩胛稳定", "前臂"],
-      "normalizationTags": ["hang", "grip", "pullup"],
+      "muscleGroups": [
+        "握力",
+        "肩胛稳定",
+        "前臂"
+      ],
+      "normalizationTags": [
+        "hang",
+        "grip",
+        "pullup"
+      ],
       "status": "confirmed",
       "guide": {
         "diagram": "起始：双手握杠，脚离地或轻触地面减重\n保持：肩膀远离耳朵，身体稳定，呼吸自然\n结束：脚先落地，再松手退出",
-        "cautions": ["不要耸肩挂死", "手掌疼痛或肘肩不适时缩短时间", "不要从杠上突然跳落"]
+        "cautions": [
+          "不要耸肩挂死",
+          "手掌疼痛或肘肩不适时缩短时间",
+          "不要从杠上突然跳落"
+        ]
       },
-      "media": { "path": "gifs/custom_dead_hang_grip.gif", "label": "悬垂抓握", "sourceUrl": "https://loadmuscle.com/exercises/dead-hang-stretch", "sourceLabel": "素材来源：LoadMuscle" }
+      "media": {
+        "path": "gifs/custom_dead_hang_grip.gif",
+        "label": "悬垂抓握",
+        "sourceUrl": "https://loadmuscle.com/exercises/dead-hang-stretch",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
     },
     {
       "exerciseKey": "hip-circles",
       "displayName": "髋部环绕",
-      "aliases": ["髋部环绕", "髋关节环绕", "髋绕环"],
+      "aliases": [
+        "髋部环绕",
+        "髋关节环绕",
+        "髋绕环"
+      ],
       "category": "recovery",
-      "muscleGroups": ["髋关节活动度", "热身"],
-      "normalizationTags": ["warmup", "mobility", "hip"],
+      "muscleGroups": [
+        "髋关节活动度",
+        "热身"
+      ],
+      "normalizationTags": [
+        "warmup",
+        "mobility",
+        "hip"
+      ],
       "status": "confirmed",
       "guide": {
         "diagram": "站姿双脚踩稳，双手可扶髋\n骨盆带动髋部做小幅环绕\n左右方向都做，逐渐找到顺畅范围",
-        "cautions": ["不要用腰椎大幅扭转代偿", "动作保持慢而均匀", "有髋部夹痛时缩小幅度"]
+        "cautions": [
+          "不要用腰椎大幅扭转代偿",
+          "动作保持慢而均匀",
+          "有髋部夹痛时缩小幅度"
+        ]
       },
-      "media": { "path": "gifs/custom_hip_circles.gif", "label": "髋部环绕", "sourceUrl": "https://loadmuscle.com/exercises/standing-hip-circle", "sourceLabel": "素材来源：LoadMuscle" }
+      "media": {
+        "path": "gifs/custom_hip_circles.gif",
+        "label": "髋部环绕",
+        "sourceUrl": "https://loadmuscle.com/exercises/standing-hip-circle",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
     },
     {
       "exerciseKey": "ankle-mobility",
       "displayName": "踝关节活动",
-      "aliases": ["踝关节活动", "踝活动", "踝关节活动度"],
+      "aliases": [
+        "踝关节活动",
+        "踝活动",
+        "踝关节活动度"
+      ],
       "category": "recovery",
-      "muscleGroups": ["踝关节活动度", "小腿", "深蹲准备"],
-      "normalizationTags": ["warmup", "mobility", "ankle"],
+      "muscleGroups": [
+        "踝关节活动度",
+        "小腿",
+        "深蹲准备"
+      ],
+      "normalizationTags": [
+        "warmup",
+        "mobility",
+        "ankle"
+      ],
       "status": "confirmed",
       "guide": {
         "diagram": "进入半跪或弓步位，前脚全脚掌踩稳\n膝盖沿脚尖方向缓慢向前移动\n回到起始位，重复几次后换边",
-        "cautions": ["脚跟不要离地", "膝盖不要向内扣", "只做活动度，不要压到疼痛"]
+        "cautions": [
+          "脚跟不要离地",
+          "膝盖不要向内扣",
+          "只做活动度，不要压到疼痛"
+        ]
       },
-      "media": { "path": "gifs/custom_ankle_mobility.gif", "label": "踝关节活动", "sourceUrl": "https://loadmuscle.com/exercises/ankle-dorsal-flexion", "sourceLabel": "素材来源：LoadMuscle" }
+      "media": {
+        "path": "gifs/custom_ankle_mobility.gif",
+        "label": "踝关节活动",
+        "sourceUrl": "https://loadmuscle.com/exercises/ankle-dorsal-flexion",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
     },
     {
       "exerciseKey": "chest-stretch",
       "displayName": "胸小肌/胸大肌拉伸",
-      "aliases": ["胸小肌/胸大肌拉伸", "胸小肌拉伸", "胸大肌拉伸", "胸部拉伸"],
+      "aliases": [
+        "胸小肌/胸大肌拉伸",
+        "胸小肌拉伸",
+        "胸大肌拉伸",
+        "胸部拉伸"
+      ],
       "category": "recovery",
-      "muscleGroups": ["胸大肌", "胸小肌", "肩前侧放松"],
-      "normalizationTags": ["stretch", "chest"],
+      "muscleGroups": [
+        "胸大肌",
+        "胸小肌",
+        "肩前侧放松"
+      ],
+      "normalizationTags": [
+        "stretch",
+        "chest"
+      ],
       "status": "confirmed",
       "guide": {
         "diagram": "前臂或手掌扶在墙边，肩膀放松\n身体慢慢向外转开，找到胸前侧拉伸感\n保持稳定呼吸，再缓慢退出换边",
-        "cautions": ["不要把肩顶到疼痛位置", "只要拉伸感，不追求越痛越好", "肩前侧不适时降低手臂高度"]
+        "cautions": [
+          "不要把肩顶到疼痛位置",
+          "只要拉伸感，不追求越痛越好",
+          "肩前侧不适时降低手臂高度"
+        ]
       },
-      "media": { "path": "gifs/custom_chest_stretch.gif", "label": "胸小肌 / 胸大肌拉伸", "sourceUrl": "https://loadmuscle.com/exercises/doorway-chest-stretch", "sourceLabel": "素材来源：LoadMuscle" }
+      "media": {
+        "path": "gifs/custom_chest_stretch.gif",
+        "label": "胸小肌 / 胸大肌拉伸",
+        "sourceUrl": "https://loadmuscle.com/exercises/doorway-chest-stretch",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
     },
     {
       "exerciseKey": "lat-stretch",
       "displayName": "背阔肌拉伸",
-      "aliases": ["背阔肌拉伸", "背阔拉伸"],
+      "aliases": [
+        "背阔肌拉伸",
+        "背阔拉伸"
+      ],
       "category": "recovery",
-      "muscleGroups": ["背阔肌", "肩背活动度"],
-      "normalizationTags": ["stretch", "lat"],
+      "muscleGroups": [
+        "背阔肌",
+        "肩背活动度"
+      ],
+      "normalizationTags": [
+        "stretch",
+        "lat"
+      ],
       "status": "confirmed",
       "guide": {
         "diagram": "双手扶墙、桌沿或固定支撑\n髋部向后坐，胸口慢慢向下沉\n在腋下到背侧找到拉伸感，保持呼吸",
-        "cautions": ["不要压到肩关节刺痛", "腰不要塌得太夸张", "两侧分别做时注意左右差异"]
+        "cautions": [
+          "不要压到肩关节刺痛",
+          "腰不要塌得太夸张",
+          "两侧分别做时注意左右差异"
+        ]
       },
-      "media": { "path": "gifs/custom_lat_stretch.gif", "label": "背阔肌拉伸", "sourceUrl": "https://loadmuscle.com/exercises/kneeling-lat-stretch", "sourceLabel": "素材来源：LoadMuscle" }
+      "media": {
+        "path": "gifs/custom_lat_stretch.gif",
+        "label": "背阔肌拉伸",
+        "sourceUrl": "https://loadmuscle.com/exercises/kneeling-lat-stretch",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
     },
     {
       "exerciseKey": "hip-flexor-stretch",
       "displayName": "髋屈肌拉伸",
-      "aliases": ["髋屈肌拉伸", "髋屈肌放松", "髂腰肌拉伸"],
+      "aliases": [
+        "髋屈肌拉伸",
+        "髋屈肌放松",
+        "髂腰肌拉伸"
+      ],
       "category": "recovery",
-      "muscleGroups": ["髋屈肌", "髂腰肌", "股直肌"],
-      "normalizationTags": ["stretch", "hip-flexor"],
+      "muscleGroups": [
+        "髋屈肌",
+        "髂腰肌",
+        "股直肌"
+      ],
+      "normalizationTags": [
+        "stretch",
+        "hip-flexor"
+      ],
       "status": "confirmed",
       "guide": {
         "diagram": "半跪姿，前脚踩稳，后膝垫软物\n骨盆轻微后倾，身体整体向前移动一点\n在后侧髋前方找到拉伸感，保持呼吸后换边",
-        "cautions": ["不要用塌腰换幅度", "膝盖不舒服时垫厚一点", "只保持拉伸感，不要弹震"]
+        "cautions": [
+          "不要用塌腰换幅度",
+          "膝盖不舒服时垫厚一点",
+          "只保持拉伸感，不要弹震"
+        ]
       },
-      "media": { "path": "gifs/custom_hip_flexor_stretch.gif", "label": "髋屈肌拉伸", "sourceUrl": "https://loadmuscle.com/exercises/intermediate-hip-flexor-and-quad-stretch", "sourceLabel": "素材来源：LoadMuscle" }
+      "media": {
+        "path": "gifs/custom_hip_flexor_stretch.gif",
+        "label": "髋屈肌拉伸",
+        "sourceUrl": "https://loadmuscle.com/exercises/intermediate-hip-flexor-and-quad-stretch",
+        "sourceLabel": "素材来源：LoadMuscle"
+      }
     }
   ]
 }

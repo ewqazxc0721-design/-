@@ -1,4 +1,4 @@
-const CACHE_NAME = "gain-tracker-pwa-v23-convict-actions";
+const CACHE_NAME = "gain-tracker-pwa-v26-exercise-library-20260615";
 const CORE_ASSETS = [
   "./index.html",
   "./训练动作库/actions.json",
