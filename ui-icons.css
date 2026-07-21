@@ -1,0 +1,48 @@
+.tab-icon{
+  width:32px;
+  height:32px;
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size:contain;
+  margin-inline:auto;
+  filter:none;
+}
+
+.tab-icon-home{ background-image:url("./icons/ui/plan.png"); }
+.tab-icon-record{ background-image:url("./icons/ui/record.png"); }
+.tab-icon-history{ background-image:url("./icons/ui/history.png"); }
+.tab-icon-tools{ background-image:url("./icons/ui/tools.png"); }
+
+.tab.active .tab-icon,
+.tabs.dragging .tab.drag-active .tab-icon{
+  filter:none;
+}
+
+.tabs.dragging .tab.active:not(.drag-active) .tab-icon{
+  filter:none;
+}
+
+.check-btn.done{
+  font-size:0;
+}
+
+.check-btn.done::after{
+  content:"";
+  position:absolute;
+  z-index:1;
+  width:30px;
+  height:30px;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  background-image:url("./icons/ui/complete.png");
+  background-repeat:no-repeat;
+  background-size:contain;
+  background-position:center;
+  filter:none;
+  pointer-events:none;
+}
+
+@media (max-width:480px){
+  .tab-icon{ width:29px;height:29px; }
+}

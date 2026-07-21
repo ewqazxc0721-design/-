@@ -1,7 +1,7 @@
 {
   "name": "一周训练记录",
   "short_name": "训练记录",
-  "description": "训练计划、打卡、周反馈、历史记录工具",
+  "description": "模块化周训练计划、语音陪练、打卡、周反馈和历史记录工具",
   "lang": "zh-CN",
   "start_url": "./",
   "scope": "./",
@@ -10,9 +10,15 @@
   "theme_color": "#0f172a",
   "icons": [
     {
-      "src": "./icons/app-icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "./icons/app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]

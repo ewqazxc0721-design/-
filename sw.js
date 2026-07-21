@@ -1,9 +1,29 @@
-const CACHE_NAME = "gain-tracker-pwa-v26-exercise-library-20260615";
+const CACHE_NAME = "gain-tracker-pwa-v33-individual-centered-icons-20260721";
 const CORE_ASSETS = [
   "./index.html",
+  "./ai-companion.css",
+  "./ai-companion.js",
+  "./plan-modules.css",
+  "./ui-icons.css",
+  "./icons/module/push.png",
+  "./icons/module/pull.png",
+  "./icons/module/shoulders.png",
+  "./icons/module/legs_core.png",
+  "./icons/module/hiit.png",
+  "./icons/module/arms_grip.png",
+  "./icons/module/mobility.png",
+  "./icons/module/rest.png",
+  "./icons/module/drag.png",
+  "./icons/module/link.png",
+  "./icons/ui/plan.png",
+  "./icons/ui/record.png",
+  "./icons/ui/history.png",
+  "./icons/ui/tools.png",
+  "./icons/ui/complete.png",
+  "./icons/app-icon-192.png",
+  "./icons/app-icon-512.png",
   "./训练动作库/actions.json",
-  "./manifest.webmanifest",
-  "./icons/app-icon.svg"
+  "./manifest.webmanifest"
 ];
 
 self.addEventListener("install", (event) => {
