@@ -3448,7 +3448,7 @@
           <button class="btn-outline collapsible-toggle-btn" id="weeklyScheduleCollapseBtn" type="button" aria-expanded="false" aria-controls="weeklyScheduleBody">展开</button>
         </div>
         <div id="weeklyScheduleBody" class="collapsible-card-body collapsed">
-          <div class="softbox" id="weeklyScheduleSummary">每周默认 5 个训练日和 2 个休息日。按住左侧切图手柄拖动排序；全身高强度与次日恢复强制绑定并一起移动。</div>
+          <div class="softbox" id="weeklyScheduleSummary">每周默认 6 个训练日和 1 个休息日。按住左侧切图手柄拖动排序，也可以更换当天训练模块。</div>
           <div id="weeklyScheduleList" class="weekly-schedule-list"></div>
           <div class="btns">
             <button class="btn-outline" id="resetWeekScheduleBtn" type="button">恢复本周默认顺序</button>
@@ -3787,7 +3787,7 @@
   </div>
 
   <script>
-    const APP_VERSION = "v2026.07.21-individual-centered-icons";
+    const APP_VERSION = "v2026.07.28-training-template-cloud-sync";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const TEMP_DAILY_PLAN_OVERRIDES_KEY = "gain-temp-daily-plan-overrides";
     const DAILY_LOGS_KEY = "gain-daily-logs";
@@ -3963,7 +3963,14 @@
             if(typeof createClient !== "function"){
               throw new Error("Supabase client unavailable");
             }
-            sb = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+            sb = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+              auth: {
+                persistSession: true,
+                autoRefreshToken: true,
+                detectSessionInUrl: true,
+                flowType: "pkce"
+              }
+            });
             bindSupabaseAuthStateListener();
             return sb;
           })
@@ -3998,12 +4005,13 @@
 
     function scheduleCloudStartupCheck(){
       updateAutoSyncUi();
-      if(!isAutoSyncEnabled()) return;
-      runWhenIdle(() => {
+      window.setTimeout(() => {
         refreshCloudUi().catch((err) => {
           console.error("cloud startup check failed", err);
+          setCloudStatus("云端状态：初始化失败");
+          setCloudHint(getCloudLoginErrorMessage(err));
         });
-      }, 1500);
+      }, 300);
     }
 
     const LEGACY_DEFAULT_PLAN_TEMPLATE = {
@@ -4124,133 +4132,129 @@
       ]
     };
 
-    const MODULE_PLAN_SCHEMA_VERSION = 3;
-    const DEFAULT_WEEK_MODULE_ORDER = ["hiit", "rest", "pull", "shoulders", "legs_core", "push", "rest"];
+    const MODULE_PLAN_SCHEMA_VERSION = 4;
+    const DEFAULT_WEEK_MODULE_ORDER = ["chest_strength", "back_strength", "posture_recovery", "legs_core", "shoulder_focus", "arms_core", "full_rest"];
     const DEFAULT_TRAINING_MODULES = [
       {
-        id:"push",
-        name:"胸部 + 三头",
+        id:"chest_strength",
+        name:"胸部主练 + 三头",
         type:"training",
-        focus:"胸部推力、肱三头和动作控制",
+        focus:"胸部厚度、上胸刺激、肱三头力量和俯卧撑动作质量",
         items:[
           "热身：肩绕环1分钟 + 肩胛俯卧撑2组 x 12次",
-          "标准俯卧撑或窄距俯卧撑4组 x 8-15次",
-          "下斜俯卧撑3组 x 8-12次",
-          "哑铃地板卧推3组 x 10-15次",
-          "过顶哑铃臂屈伸3组 x 12-15次",
-          "胸部与肱三头拉伸5分钟"
+          "宽距俯卧撑3组 x 12-15次｜下降2秒，底部停1秒｜休息90秒",
+          "下斜俯卧撑3组 x 8-12次｜双脚垫高20-30cm｜休息120秒",
+          "窄距俯卧撑3组 x 10-15次｜保留1-2次余力｜休息90秒",
+          "哑铃地板卧推3组 x 15-20次｜5kg/手，下降3秒",
+          "哑铃侧平举3组 x 15-20次｜2.5kg/手，顶端停1秒",
+          "胸部与肱三头轻拉伸5分钟",
+          "腹部补充：死虫式2组 x 每侧10次｜慢速控制，腰部贴地"
         ],
-        protein:"训练后补充1份蛋白质，并保证正餐主食。"
+        protein:"训练后补充1份蛋白粉，并在正餐中保证主食和肉蛋奶。"
       },
       {
-        id:"pull",
-        name:"背部 + 二头",
+        id:"back_strength",
+        name:"背部主练 + 二头",
         type:"training",
-        focus:"背阔宽度、肩胛控制和肘屈力量",
+        focus:"引体向上能力、背阔肌宽度、肩胛后缩和肱二头刺激",
         items:[
-          "热身：肩胛引体2组 x 6-8次 + 弹力绳面拉1组 x 20次",
-          "引体向上5组，保留1-2次余力",
-          "弹力绳高位下拉3组 x 15-20次",
-          "单臂哑铃划船3组 x 每侧12-18次",
-          "俯身反向飞鸟3组 x 15-20次",
-          "哑铃弯举3组 x 10-15次"
+          "热身：肩胛引体2组 x 6-8次 + 弹力绳拉开1组 x 20次",
+          "引体向上5组 x 6-7次｜目标总次数30-33次｜休息150-180秒",
+          "弹力绳坐姿划船4组 x 15-20次｜先后缩肩胛，再拉动手臂",
+          "单臂哑铃划船3组 x 每侧15-20次｜5kg，顶端停2秒",
+          "弹力绳面拉3组 x 18-20次｜避免耸肩",
+          "哑铃弯举3组 x 15-20次｜5kg/手，下降2-3秒",
+          "主动悬垂2组 x 25-35秒｜双臂伸直，肩胛轻微下沉",
+          "腹部补充：悬垂屈膝举腿2组 x 8-10次｜不摆动身体"
         ],
-        protein:"训练后补充1份蛋白质，晚饭保证肉蛋奶。"
+        protein:"训练后补充1份蛋白粉，晚饭保证肉类、鸡蛋或牛奶。"
       },
       {
-        id:"shoulders",
-        name:"肩部 + 肩胛稳定",
+        id:"posture_recovery",
+        name:"恢复 + 肩胛姿态修正",
         type:"training",
-        focus:"肩中束、肩后束和肩胛稳定",
+        focus:"缓解含胸和肩部前倾，恢复肩袖、肩胛与核心控制",
         items:[
-          "热身：肩绕环1分钟 + 弹力绳拉伸2组",
-          "哑铃肩推4组 x 8-12次",
-          "侧平举4组 x 15-25次",
-          "俯身反向飞鸟3组 x 15-20次",
-          "弹力绳面拉3组 x 15-20次",
-          "肩袖外旋2组 x 每侧15次"
+          "轻松散步15-25分钟",
+          "墙面滑手3组 x 10-12次｜腰背贴墙，肋骨不要外翻",
+          "弹力绳肩外旋3组 x 每侧15次｜使用轻阻力",
+          "肩胛俯卧撑3组 x 12-15次｜手肘保持伸直",
+          "死虫式3组 x 每侧10-12次｜腰部贴紧瑜伽垫",
+          "胸小肌拉伸2组 x 每侧30-40秒",
+          "背阔肌拉伸2组 x 每侧30-40秒",
+          "腹部补充：鸟狗2组 x 每侧10次｜保持骨盆稳定"
         ],
-        protein:"训练后正常补充蛋白质，避免空腹完成训练。"
+        protein:"低强度恢复日不强制蛋白粉，保证正常三餐和充足饮水。"
       },
       {
         id:"legs_core",
-        name:"腿部 + 腹部/Core",
+        name:"腿部 + 核心",
         type:"training",
-        focus:"下肢力量、髋稳定和躯干控制",
+        focus:"下肢肌肉、髋部后链、单腿稳定和腹部控制",
         items:[
           "热身：徒手深蹲2组 x 15次 + 髋踝活动2分钟",
-          "深蹲主进阶4组 x 12-20次",
-          "保加利亚分腿蹲3组 x 每侧8-12次",
-          "哑铃罗马尼亚硬拉3组 x 12-15次",
-          "臀桥3组 x 15-25次",
-          "悬垂屈膝举腿或仰卧举腿3组 x 8-15次",
-          "死虫或平板支撑3组"
+          "双哑铃杯式深蹲4组 x 15-20次｜总负重10kg｜休息90-120秒",
+          "保加利亚分腿蹲3组 x 每侧10-12次｜先徒手，稳定后持哑铃",
+          "双哑铃罗马尼亚硬拉4组 x 15-20次｜5kg/手，髋部向后移动",
+          "单腿臀桥3组 x 每侧12-15次｜顶端停2秒",
+          "腹部主训练：悬垂屈膝举腿3组 x 8-12次 + 侧平板支撑3组 x 每侧30-45秒"
         ],
-        protein:"腿部训练后补充蛋白质和足量碳水。"
+        protein:"腿部训练后补充1份蛋白粉，并保证足量米饭、面食或其他碳水。"
       },
       {
-        id:"hiit",
-        name:"全身高强度",
-        type:"high_intensity",
-        focus:"全身循环、心肺刺激和动作质量",
-        items:[
-          "动态热身5分钟，确认身体状态适合高强度训练",
-          "俯卧撑10-15次",
-          "徒手深蹲15-25次",
-          "登山跑每侧15-20次",
-          "波比跳或原地高抬腿20-30秒",
-          "以上动作循环3-5轮，每轮休息90-120秒",
-          "低强度走动与拉伸5-8分钟"
-        ],
-        protein:"训练后及时补水、补充蛋白质和碳水；次日强制恢复。"
-      },
-      {
-        id:"arms_grip",
-        name:"手臂 + 握力",
+        id:"shoulder_focus",
+        name:"肩部强化 + 上背稳定",
         type:"training",
-        focus:"肱二头、肱三头、前臂和悬垂能力",
+        focus:"肩中束、肩后束、肩部推力和肩胸连接处的视觉改善",
         items:[
-          "哑铃弯举3组 x 10-15次",
-          "锤式弯举3组 x 10-15次",
-          "过顶哑铃臂屈伸3组 x 12-15次",
-          "窄距俯卧撑3组 x 8-15次",
-          "悬垂抓握3组 x 20-45秒",
-          "腕屈伸2组 x 15-20次"
+          "热身：肩绕环1分钟 + 弹力绳肩外旋2组 x 每侧12次",
+          "折刀俯卧撑3组 x 8-12次｜髋部抬高，肩部主导｜休息120秒",
+          "哑铃肩推3组 x 12-15次｜5kg/手，不要过度后仰",
+          "哑铃侧平举4组 x 15-25次｜2.5kg/手，手肘略高于手腕",
+          "俯身反向飞鸟3组 x 15-20次｜2.5kg/手",
+          "弹力绳面拉3组 x 18-20次｜顶端停1秒",
+          "弹力绳拉开2组 x 20-25次｜作为收尾，不做到力竭",
+          "腹部补充：平板支撑2组 x 30-45秒｜收紧臀部与腹部"
         ],
-        protein:"作为辅助训练日，保持正常饮食和蛋白质摄入。"
+        protein:"训练后正常补充蛋白质，避免空腹训练。"
       },
       {
-        id:"mobility",
-        name:"灵活性 + 弱项补强",
+        id:"arms_core",
+        name:"手臂 + 腹部补强",
         type:"training",
-        focus:"肩髋活动度、动作修正和低强度弱项练习",
+        focus:"肱二头、肱三头、前臂和腹部训练量补充",
         items:[
-          "轻松散步10-20分钟",
-          "胸部与背阔肌拉伸各2组 x 30秒",
-          "髋屈肌与踝关节活动各2组",
-          "鸟狗3组 x 每侧10次",
-          "肩胛俯卧撑2组 x 12次",
-          "选择一个本周弱项轻量练习2组，不做到力竭"
+          "热身：手腕活动1分钟 + 轻阻力弹力绳弯举1组 x 20次",
+          "哑铃交替弯举3组 x 每侧15-18次｜5kg，身体不要借力",
+          "哑铃锤式弯举3组 x 15-18次｜5kg/手",
+          "双手哑铃过顶臂屈伸3组 x 15-20次｜使用一只5kg哑铃",
+          "双杠辅助臂屈伸3组 x 6-10次｜脚尖轻触地面辅助，肩部无痛才做",
+          "腹部主训练：卷腹3组 x 20次 + 反向卷腹3组 x 12-15次"
         ],
-        protein:"低强度日不强制额外补充，保证正常三餐。"
+        protein:"作为辅助训练日，训练后按正常习惯补充蛋白质即可。"
       },
       {
-        id:"rest",
-        name:"休息恢复",
+        id:"full_rest",
+        name:"完全休息",
         type:"rest",
-        focus:"睡眠、饮食和轻活动恢复",
+        focus:"降低累积疲劳，恢复肌肉、关节和训练表现",
         items:[
-          "完全休息或轻松散步15-25分钟",
-          "胸、背、肩、髋轻拉伸5-10分钟",
-          "记录疲劳、疼痛和睡眠状态",
-          "保证正常饮食与充足睡眠"
+          "不进行俯卧撑、引体向上或力竭训练",
+          "可轻松散步15-25分钟",
+          "胸、背、肩、髋轻度拉伸5-8分钟",
+          "记录肩、肘、腕和膝关节是否出现疼痛",
+          "保证充足睡眠；前一晚睡眠不足6小时，下一训练日总组数减少约三分之一",
+          "轻核心恢复：腹式呼吸配合腹部收紧2组 x 5次深呼吸｜不做到疲劳"
         ],
-        protein:"不强制蛋白粉，正常饮食和固定加餐不要省。"
+        protein:"不强制蛋白粉，正常三餐和固定加餐不要省。"
       }
     ];
     const DEFAULT_PLAN_TEMPLATE = {
       version:MODULE_PLAN_SCHEMA_VERSION,
-      meta:{ goal:"模块化训练与恢复" },
+      meta:{
+        goal:"58kg居家增肌进阶：胸背肩优先，改善肩部前倾，兼顾腿部，并采用每日低剂量腹部训练",
+        coreRule:"每天安排少量核心刺激；普通训练日仅2组，腿部日和手臂日为腹部主训练，休息日只做低疲劳呼吸与收紧练习。腹部出现持续酸痛时，当天核心减半或取消。"
+      },
       modules:DEFAULT_TRAINING_MODULES,
       schedule:{ weekStart:"", moduleOrder:DEFAULT_WEEK_MODULE_ORDER }
     };
@@ -7157,7 +7161,14 @@
         .filter(Boolean)
         .map((x) => String(x).trim())
         .filter(Boolean);
-      return parts.length ? parts.join(" · ") : String(err);
+      const message = parts.length ? parts.join(" · ") : String(err);
+      if(/42501|row.level security|permission denied|violates row-level security policy/i.test(message)){
+        return "Supabase 表权限未配置：请执行项目中的 supabase-cloud-sync.sql，启用 app_state 的登录用户读写策略";
+      }
+      if(/42p01|pgrst205|relation .* does not exist|table .* not found/i.test(message)){
+        return "Supabase 缺少 app_state 表：请执行项目中的 supabase-cloud-sync.sql";
+      }
+      return message;
     }
 
     function isMissingColumnError(err){
@@ -7600,8 +7611,11 @@
 
     async function getCurrentUser(){
       const client = await getSupabaseClient();
+      const { data:sessionData, error:sessionError } = await client.auth.getSession();
+      if(sessionError) throw sessionError;
+      if(!sessionData?.session?.user) return null;
       const { data, error } = await client.auth.getUser();
-      if(error) return null;
+      if(error) throw error;
       return data.user || null;
     }
 
@@ -7727,6 +7741,24 @@
       return DEFAULT_TRAINING_MODULES.map((fallback, index) => normalizeTrainingModule(sourceById.get(fallback.id), fallback, index));
     }
 
+    function getModuleById(modules, moduleId){
+      return (Array.isArray(modules) ? modules : []).find((module) => module.id === moduleId) || null;
+    }
+
+    function getHighIntensityLink(order, modules){
+      const highModule = (Array.isArray(modules) ? modules : []).find((module) => module.type === "high_intensity") || null;
+      const restModule = (Array.isArray(modules) ? modules : []).find((module) => module.type === "rest") || null;
+      const highIndex = highModule ? order.indexOf(highModule.id) : -1;
+      const linked = !!(highModule && restModule && highIndex >= 0 && highIndex < 6 && order[highIndex + 1] === restModule.id);
+      return {
+        highModule,
+        restModule,
+        highIndex,
+        recoveryIndex:linked ? highIndex + 1 : -1,
+        linked
+      };
+    }
+
     function normalizeWeeklyModuleOrder(rawOrder, modules){
       const validIds = new Set(modules.map((module) => module.id));
       let order = Array.isArray(rawOrder) ? rawOrder.map((id) => String(id)) : [];
@@ -7734,27 +7766,26 @@
         order = [...DEFAULT_WEEK_MODULE_ORDER];
       }
 
-      const highIndexes = order.map((id, index) => id === "hiit" ? index : -1).filter((index) => index >= 0);
-      if(highIndexes.length !== 1 || highIndexes[0] >= 6){
-        order = [...DEFAULT_WEEK_MODULE_ORDER];
+      const highModule = modules.find((module) => module.type === "high_intensity") || null;
+      const restModule = modules.find((module) => module.type === "rest") || null;
+      if(highModule && restModule){
+        const highIndexes = order.map((id, index) => id === highModule.id ? index : -1).filter((index) => index >= 0);
+        if(highIndexes.length !== 1 || highIndexes[0] >= 6){
+          order = [...DEFAULT_WEEK_MODULE_ORDER];
+        }
+        const highIndex = order.indexOf(highModule.id);
+        if(highIndex >= 0 && highIndex < 6) order[highIndex + 1] = restModule.id;
       }
 
-      const highIndex = order.indexOf("hiit");
-      order[highIndex + 1] = "rest";
-
-      let restCount = 0;
-      order = order.map((id, index) => {
-        if(id !== "rest") return id;
-        restCount += 1;
-        if(restCount <= 2 || index === highIndex + 1) return id;
-        return "mobility";
-      });
-      if(order.filter((id) => id === "rest").length > 2){
-        let keptFreeRest = false;
+      if(restModule){
+        const linkedInfo = getHighIntensityLink(order, modules);
+        const replacement = modules.find((module) => module.type === "training") || modules[0];
+        let restCount = 0;
         order = order.map((id, index) => {
-          if(id !== "rest" || index === highIndex + 1) return id;
-          if(!keptFreeRest){ keptFreeRest = true; return id; }
-          return "mobility";
+          if(id !== restModule.id) return id;
+          restCount += 1;
+          if(restCount <= 2 || index === linkedInfo.recoveryIndex) return id;
+          return replacement.id;
         });
       }
       return order;
@@ -7763,7 +7794,7 @@
     function buildPlanDaysFromModules(modules, moduleOrder, range){
       const byId = new Map(modules.map((module) => [module.id, module]));
       const start = new Date(`${range.start}T12:00:00`);
-      const highIndex = moduleOrder.indexOf("hiit");
+      const linkedInfo = getHighIntensityLink(moduleOrder, modules);
       return moduleOrder.map((moduleId, index) => {
         const module = byId.get(moduleId) || modules[0];
         const date = new Date(start);
@@ -7775,8 +7806,8 @@
           moduleId:module.id,
           moduleName:module.name,
           moduleType:module.type,
-          isHighIntensity:module.id === "hiit",
-          isLinkedRecovery:index === highIndex + 1,
+          isHighIntensity:module.type === "high_intensity",
+          isLinkedRecovery:linkedInfo.linked && index === linkedInfo.recoveryIndex,
           focus:module.focus,
           items:[...module.items],
           protein:module.protein
@@ -7786,7 +7817,10 @@
 
     function normalizePlanTemplate(raw){
       const range = getCurrentWeekRange();
-      const isCurrentSchema = Number(raw?.version) === MODULE_PLAN_SCHEMA_VERSION;
+      const rawModuleIds = new Set((Array.isArray(raw?.modules) ? raw.modules : []).map((module) => String(module?.id || "")));
+      const isCurrentModuleSet = DEFAULT_TRAINING_MODULES.every((module) => rawModuleIds.has(module.id));
+      const isCurrentSchema = Number(raw?.version) === MODULE_PLAN_SCHEMA_VERSION ||
+        (Number(raw?.version) === 3 && isCurrentModuleSet);
       const modules = normalizeTrainingModules(isCurrentSchema ? raw.modules : DEFAULT_TRAINING_MODULES);
       const isCurrentWeek = isCurrentSchema && raw?.schedule?.weekStart === range.start;
       const moduleOrder = normalizeWeeklyModuleOrder(isCurrentWeek ? raw.schedule.moduleOrder : DEFAULT_WEEK_MODULE_ORDER, modules);
@@ -7796,7 +7830,8 @@
           weekLabel:`${range.start} 至 ${range.end}`,
           weekStart:range.start,
           weekEnd:range.end,
-          goal:String(raw?.meta?.goal || "模块化训练与恢复")
+          goal:String(raw?.meta?.goal || DEFAULT_PLAN_TEMPLATE.meta.goal),
+          coreRule:String(raw?.meta?.coreRule || DEFAULT_PLAN_TEMPLATE.meta.coreRule || "")
         },
         modules,
         schedule:{ weekStart:range.start, weekEnd:range.end, moduleOrder },
@@ -9232,21 +9267,23 @@
     function changeScheduledModule(dayIndex, moduleId){
       const template = getPlanTemplate();
       const order = [...template.schedule.moduleOrder];
-      const highIndex = order.indexOf("hiit");
-      if(dayIndex === highIndex || dayIndex === highIndex + 1){
+      const modules = template.modules || [];
+      const linkedInfo = getHighIntensityLink(order, modules);
+      if(linkedInfo.linked && (dayIndex === linkedInfo.highIndex || dayIndex === linkedInfo.recoveryIndex)){
         alert("全身高强度和次日恢复已绑定，只能作为组合移动。");
         renderWeeklySchedule();
         return false;
       }
-      if(moduleId === "hiit"){
+      const nextModule = getModuleById(modules, moduleId);
+      const currentModule = getModuleById(modules, order[dayIndex]);
+      if(nextModule?.type === "high_intensity"){
         alert("高强度模块每周固定一次，请拖动高强度日左侧手柄调整日期。");
         renderWeeklySchedule();
         return false;
       }
-      const current = order[dayIndex];
-      const restCount = order.filter((id) => id === "rest").length;
-      if(moduleId === "rest" && current !== "rest" && restCount >= 2){
-        alert("本周最多安排两个休息日，其中一个已与高强度训练绑定。");
+      const restCount = order.filter((id) => getModuleById(modules, id)?.type === "rest").length;
+      if(nextModule?.type === "rest" && currentModule?.type !== "rest" && restCount >= 2){
+        alert("本周最多安排两个休息日。");
         renderWeeklySchedule();
         return false;
       }
@@ -9261,11 +9298,12 @@
       return true;
     }
 
-    function getWeeklyScheduleGroups(order){
+    function getWeeklyScheduleGroups(order, modules){
       const groups = [];
+      const linkedInfo = getHighIntensityLink(order, modules);
       for(let index = 0; index < order.length; index += 1){
-        if(order[index] === "hiit" && order[index + 1] === "rest"){
-          groups.push({ moduleIds:["hiit","rest"], dayIndexes:[index,index + 1] });
+        if(linkedInfo.linked && index === linkedInfo.highIndex){
+          groups.push({ moduleIds:[order[index],order[index + 1]], dayIndexes:[index,index + 1] });
           index += 1;
         }else{
           groups.push({ moduleIds:[order[index]], dayIndexes:[index] });
@@ -9274,9 +9312,9 @@
       return groups;
     }
 
-    function buildReorderedWeeklyModuleOrder(order, sourceDayIndex, targetDayIndex, insertAfter){
+    function buildReorderedWeeklyModuleOrder(order, modules, sourceDayIndex, targetDayIndex, insertAfter){
       const original = [...order];
-      const groups = getWeeklyScheduleGroups(original);
+      const groups = getWeeklyScheduleGroups(original, modules);
       const sourceGroup = groups.find((group) => group.dayIndexes.includes(sourceDayIndex));
       const targetGroup = groups.find((group) => group.dayIndexes.includes(targetDayIndex));
       if(!sourceGroup || !targetGroup || sourceGroup === targetGroup) return original;
@@ -9292,7 +9330,7 @@
     function reorderWeeklyScheduleGroup(sourceDayIndex, targetDayIndex, insertAfter){
       const template = getPlanTemplate();
       const currentOrder = [...template.schedule.moduleOrder];
-      const nextOrder = buildReorderedWeeklyModuleOrder(currentOrder, sourceDayIndex, targetDayIndex, insertAfter);
+      const nextOrder = buildReorderedWeeklyModuleOrder(currentOrder, template.modules || [], sourceDayIndex, targetDayIndex, insertAfter);
       if(nextOrder.every((moduleId, index) => moduleId === currentOrder[index])) return false;
 
       template.schedule.moduleOrder = nextOrder;
@@ -9334,7 +9372,7 @@
       if(!Number.isInteger(dayIndex)) return;
 
       const template = getPlanTemplate();
-      const groups = getWeeklyScheduleGroups(template.schedule.moduleOrder || []);
+      const groups = getWeeklyScheduleGroups(template.schedule.moduleOrder || [], template.modules || []);
       const sourceGroup = groups.find((group) => group.dayIndexes.includes(drag.sourceDayIndex));
       const targetGroup = groups.find((group) => group.dayIndexes.includes(dayIndex));
       if(!sourceGroup || !targetGroup || sourceGroup === targetGroup){
@@ -9396,7 +9434,7 @@
       const list = $("weeklyScheduleList");
       if(!list) return;
       const template = getPlanTemplate();
-      const group = getWeeklyScheduleGroups(template.schedule.moduleOrder || [])
+      const group = getWeeklyScheduleGroups(template.schedule.moduleOrder || [], template.modules || [])
         .find((entry) => entry.dayIndexes.includes(sourceDayIndex));
       if(!group) return;
 
@@ -9443,17 +9481,18 @@
       const template = getPlanTemplate();
       const modules = template.modules || [];
       const order = template.schedule.moduleOrder || [];
-      const highIndex = order.indexOf("hiit");
+      const linkedInfo = getHighIntensityLink(order, modules);
       const todayIndex = getTodayPlanDayIndex(template.days);
-      const restCount = order.filter((id) => id === "rest").length;
+      const restCount = order.filter((id) => getModuleById(modules, id)?.type === "rest").length;
       if($("weeklyScheduleSummary")){
-        $("weeklyScheduleSummary").textContent = `${template.meta.weekLabel} · ${7 - restCount} 个训练日 · ${restCount} 个休息日。按住左侧手柄拖动；高强度和次日恢复会整组移动。`;
+        const bindingHint = linkedInfo.linked ? "；高强度和次日恢复会整组移动" : "";
+        $("weeklyScheduleSummary").textContent = `${template.meta.weekLabel} · ${7 - restCount} 个训练日 · ${restCount} 个休息日。按住左侧手柄拖动${bindingHint}。`;
       }
       list.innerHTML = template.days.map((day, index) => {
-        const linked = index === highIndex || index === highIndex + 1;
-        const isHigh = index === highIndex;
+        const linked = linkedInfo.linked && (index === linkedInfo.highIndex || index === linkedInfo.recoveryIndex);
+        const isHigh = linkedInfo.linked && index === linkedInfo.highIndex;
         const options = modules
-          .filter((module) => module.id !== "hiit" || isHigh)
+          .filter((module) => module.type !== "high_intensity" || isHigh)
           .map((module) => `<option value="${escapeHtml(module.id)}" ${module.id === day.moduleId ? "selected" : ""}>${escapeHtml(module.name)}</option>`)
           .join("");
         return `
@@ -9650,14 +9689,14 @@
                   <div class="softbox" style="margin-top:12px;">
                     <label class="label" for="todayModuleQuickSelect">今天选择训练模块</label>
                     <select id="todayModuleQuickSelect" data-today-module-select="${dayIndex}">
-                      ${modules.filter((module) => module.id !== "hiit").map((module) => `<option value="${escapeHtml(module.id)}" ${module.id === d.moduleId ? "selected" : ""}>${escapeHtml(module.name)}</option>`).join("")}
+                      ${modules.filter((module) => module.type !== "high_intensity").map((module) => `<option value="${escapeHtml(module.id)}" ${module.id === d.moduleId ? "selected" : ""}>${escapeHtml(module.name)}</option>`).join("")}
                     </select>
                   </div>
                 `)
           : "";
         return `
           <div class="day-panel ${dayIndex === activePlanDay ? "active" : ""}">
-            <h2 class="plan-module-title"><span class="module-icon module-icon-${escapeHtml(d.moduleId || "push")}" aria-hidden="true"></span><span>${escapeHtml(`${d.day} · ${d.moduleName || "训练模块"}`)}</span>${d.isHighIntensity ? `<span class="module-type-chip high">高强度</span>` : (d.moduleType === "rest" ? `<span class="module-type-chip rest">恢复</span>` : "")}</h2>
+            <h2 class="plan-module-title"><span class="module-icon module-icon-${escapeHtml(d.moduleId || "chest_strength")}" aria-hidden="true"></span><span>${escapeHtml(`${d.day} · ${d.moduleName || "训练模块"}`)}</span>${d.isHighIntensity ? `<span class="module-type-chip high">高强度</span>` : (d.moduleType === "rest" ? `<span class="module-type-chip rest">恢复</span>` : "")}</h2>
             <div class="badge">${escapeHtml(d.focus)}</div>
             ${todayModuleControl}
             ${tempNotice}
@@ -9813,7 +9852,8 @@
       reader.onload = (e) => {
         try{
           const payload = JSON.parse(e.target.result);
-          if(Number(payload?.version) !== MODULE_PLAN_SCHEMA_VERSION || !Array.isArray(payload?.modules) || !Array.isArray(payload?.schedule?.moduleOrder)){
+          const supportedVersion = Number(payload?.version) === MODULE_PLAN_SCHEMA_VERSION || Number(payload?.version) === 3;
+          if(!supportedVersion || !Array.isArray(payload?.modules) || !Array.isArray(payload?.schedule?.moduleOrder)){
             throw new Error("unsupported_schema");
           }
           setPlanTemplate(payload, true);
@@ -10221,6 +10261,11 @@
 
     const trainingPlan = createTrainingPlan();
     const appState = createAppState({ storage: localStorage });
+    const cloudSync = createCloudSync({
+      appState,
+      cloudAdapter: createSupabaseCloudAdapter(),
+      now: () => new Date()
+    });
 
     function getDateForPlanDayInCurrentWeek(planDayName, dayIndex = 0, baseDate = new Date()){
       const days = getPlanDays();
@@ -12852,6 +12897,10 @@
             domainPersistence:
               typeof domainPersistence.setJson === "function" &&
               typeof domainPersistence.getWriteLog === "function",
+            cloudSync:
+              typeof cloudSync?.pushSnapshot === "function" &&
+              typeof cloudSync?.pullSnapshot === "function" &&
+              typeof cloudSync?.restoreSnapshot === "function",
             testEntryPublicApi:true
           };
         },

@@ -4,7 +4,7 @@
 
 现在包含可选的“AI 陪练”实时语音模式：可以读取今日训练、语音打卡、控制休息计时、在计时结束时鼓励，并记录 1–10 分主观难度。
 
-训练计划采用模块化编排：内置胸部与三头、背部与二头、肩部稳定、腿部与腹部/Core、全身高强度、手臂与握力、灵活性补强和休息恢复模块。每周七天可以拖动切图手柄调整模块顺序或更换当天模块，默认安排两个休息日；全身高强度和次日恢复强制绑定并作为整体移动。模块、拖动、绑定、导航和完成状态图标均使用深色与白色的极简线性位图切图。
+训练计划采用模块化编排：当前模板为胸部主练、背部主练、肩胛姿态恢复、腿部与核心、肩部强化、手臂与腹部补强、完全休息。每周七天可以拖动切图手柄调整顺序或更换当天模块，默认安排六个训练/恢复模块和一个完全休息日。模块、拖动、导航和完成状态图标均使用深色与白色的极简线性位图切图。
 
 新版不会迁移旧的固定七天计划和旧打卡。首次打开后会初始化新版模块，本周打卡从零开始；以后进入新的一周时会自动生成干净的默认编排，同时保留用户编辑过的模块内容。
 
@@ -20,6 +20,18 @@
 - `ai-companion.js` / `ai-companion.css`：AI 陪练前端
 - `plan-modules.css`：每周模块编排和模块编辑样式
 - `netlify/functions/realtime-session.mjs`：创建 OpenAI Realtime WebRTC 会话的安全服务端代理
+- `supabase-cloud-sync.sql`：云同步数据表、索引与 RLS 权限配置
+
+## 云同步配置
+
+1. 打开 Supabase Dashboard → SQL Editor，完整执行 `supabase-cloud-sync.sql`。
+2. 在 Authentication → URL Configuration 中设置：
+   - Site URL：`https://ewqazxc0721-design.github.io/-/`
+   - Redirect URLs：添加 `https://ewqazxc0721-design.github.io/-/` 和 `https://ewqazxc0721-design.github.io/-/**`
+3. 在 Authentication → Providers → GitHub 中启用 GitHub，并把 GitHub OAuth App 的回调地址设为：
+   - `https://bzzbdchqrvwdaenydoqm.supabase.co/auth/v1/callback`
+
+网页会在每次启动时恢复 Supabase 登录会话；GitHub OAuth 回跳后不需要预先开启自动同步。
 
 ## AI 陪练部署配置
 

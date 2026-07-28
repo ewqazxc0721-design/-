@@ -44,6 +44,12 @@
 .module-icon-arms_grip{ background-image:url("./icons/module/arms_grip.png"); }
 .module-icon-mobility{ background-image:url("./icons/module/mobility.png"); }
 .module-icon-rest{ background-image:url("./icons/module/rest.png"); }
+.module-icon-chest_strength{ background-image:url("./icons/module/push.png"); }
+.module-icon-back_strength{ background-image:url("./icons/module/pull.png"); }
+.module-icon-posture_recovery{ background-image:url("./icons/module/mobility.png"); }
+.module-icon-shoulder_focus{ background-image:url("./icons/module/shoulders.png"); }
+.module-icon-arms_core{ background-image:url("./icons/module/arms_grip.png"); }
+.module-icon-full_rest{ background-image:url("./icons/module/rest.png"); }
 .module-icon-drag{ background-image:url("./icons/module/drag.png"); }
 .module-icon-link{ background-image:url("./icons/module/link.png"); }
 

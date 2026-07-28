@@ -1,4 +1,4 @@
-const CACHE_NAME = "gain-tracker-pwa-v33-individual-centered-icons-20260721";
+const CACHE_NAME = "gain-tracker-pwa-v34-training-template-cloud-sync-20260728";
 const CORE_ASSETS = [
   "./index.html",
   "./ai-companion.css",
