@@ -331,3 +331,11 @@ If that test fails, update the feature map or add the missing regression coverag
 - `persistVisualPlanDay`: reconcile positional check keys and stable exercise identity, preserve actual set facts, update the dated plan snapshot and retain previous versions.
 - Weekly template updates preserve date-scoped single-day overrides. Cloud merge reconciles overrides per day and chooses explicit plan revisions independently of unrelated snapshot changes.
 - `.agents/tests/plan-editor.test.js` and `.agents/scripts/verify-plan-editor-browser.js`; details in `docs/plan-editor-validation.md`.
+
+### weekly-modules-and-bound-recording
+
+- Template normalization retains historical modules and schedule metadata. `materializeModuleDays`, `getWeeklyTrainingModules`, `applyWeeklyDayOrder`, and `changeScheduledTrainingModule` restore module selection and whole-day scheduling while retaining dated training facts.
+- `plan-editor-ui.js`: independent weekday selector, body-part module dropdowns, pointer drag and accessible up/down reorder controls.
+- `training-ui.js`: plan block recording resolves only actions belonging to the clicked block; muscle selection preserves the button and places highlights behind text.
+- `plan-editor.css`: responsive training rows, module controls, muscle labels, dialogs and editor fields; obsolete daily AI adjustment entry removed from the source HTML.
+- `.agents/tests/weekly-plan-ui.test.js`, browser flow and native touch scripts; see `docs/weekly-ui-validation.md`.

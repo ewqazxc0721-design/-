@@ -443,6 +443,26 @@
       "manualChecks": [
         "真实 JSON 文件导入；手机编辑动作、组数和顺序；切换日期及刷新后核对。"
       ]
+    },
+    {
+      "id": "weekly-modules-and-bound-recording",
+      "name": "按部位周编排恢复、星期选择、绑定动作记录及手机布局",
+      "status": "covered",
+      "changeRisk": "模块元数据丢失或整日换序可能覆盖计划，绑定动作错误可能记成其他动作，手机高亮和按钮可能遮字。",
+      "coverage": [
+        {
+          "testFile": ".agents/tests/weekly-plan-ui.test.js",
+          "tests": [
+            "module-based plans retain the module library and the chosen weekly order",
+            "whole-day moves preserve edited content while performed facts stay at their real date",
+            "choosing a body-part module changes only the selected weekday",
+            "invalid weekly orders do not overwrite plans"
+          ]
+        }
+      ],
+      "manualChecks": [
+        "组合训练框仅记录本框动作；肌肉选择文字可见；星期下拉切换；本周模块触摸拖动并刷新；320至430px布局。"
+      ]
     }
   ]
 }

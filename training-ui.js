@@ -5,7 +5,7 @@
   const $=id=>document.getElementById(id),esc=escapeHtml;
   let selectedMuscle='chest',back=false,planActual=false,rangeKind='week',customFrom='',customTo='',trendKey='',trendMetric='reps',editor=null,previousFocus=null;
   const equipmentNames={bodyweight:'徒手',dumbbell:'哑铃',barbell:'杠铃',band:'弹力带',bench:'训练凳',support:'稳固支撑','pull-up-bar':'单杠','parallel-bars':'双杠','parallel-pull-up-bar':'对握单杠',cable:'拉力器',machine:'器械',other:'其他'};
-  let muscleFilter='',equipmentFilter='',typeFilter='',pickerContext=null;
+  let muscleFilter='',equipmentFilter='',typeFilter='',pickerContext=null,blockContext=null;
   const lib=()=>getExerciseLibrary();
   const actionFor=key=>lib().find(a=>a.exerciseKey===key);
   const notify=message=>{if($('te-status'))$('te-status').textContent=message;else alert(message);};
@@ -25,6 +25,13 @@
     queueAutoSync('逐组记录更新');renderHistory();renderPlan();refresh();
   }
   function refresh(){renderPlanMap();renderStats();renderSessionCard();renderSavedEntries();}
+  function selectMuscle(key){
+    selectedMuscle=key;
+    document.querySelectorAll('.te-muscle-list button').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.muscle===key)));
+    const root=$('te-plan-map');
+    if(root?._teMap){const old=root.querySelector('.te-trace');if(old)old.outerHTML=traceHTML(root._teMap.data,root._teMap.planned);}
+    const stats=$('te-statistics');if(stats&&!stats.hidden)renderStats();
+  }
   const colors=['#e7eaee','#cee8dc','#8bc7ad','#137b62'];
   function color(n){return colors[n>=8?3:n>=4?2:n>0?1:0];}
   function bodySVG(muscles,planned=false){
@@ -71,10 +78,10 @@
       const entries=C.list(day?.items).map((text,i)=>{const a=getExerciseActionForPlanItem(text);return {id:'planned_'+i,exerciseKey:a.exerciseKey,displayNameSnapshot:a.displayName,sets:[{id:'planned_set_'+i,status:'completed',phase:'work'}]};});
       data=C.stats({[date]:{exerciseEntries:entries}},lib(),null);
     }
+    root._teMap={data,planned:!planActual};
     root.innerHTML=`<div class="te-kicker">TRAINING BALANCE</div><div class="te-head"><h2>肌肉分布</h2><span class="te-note">${esc(date)}</span></div><div class="te-toolbar te-segment"><button data-te="plan-mode" data-value="plan" aria-pressed="${!planActual}">计划涉及</button><button data-te="plan-mode" data-value="actual" aria-pressed="${planActual}">实际完成</button></div>${mapHTML(data,!planActual)}`;
     document.querySelectorAll('#planContainer .day-row').forEach(row=>{
       if(row.querySelector('.te-record-open'))return;
-      const matched=getExerciseActionForPlanItem(row.dataset.guideItem||'');if(!actionFor(matched?.exerciseKey))return;
       const b=document.createElement('button');b.type='button';b.className='te-record-open';b.textContent='记录组数';b.dataset.te='open-plan';b.dataset.day=row.dataset.guideOpen;b.dataset.text=row.dataset.guideItem;
       row.insertBefore(b,row.querySelector('.check-btn'));
     });
@@ -111,20 +118,28 @@
     session.setEntries=C.list(session.setEntries);return session;
   }
   function openPlan(dayIndex,text){
-    const day=getPlanDays()[dayIndex],date=getDateForPlanDayInCurrentWeek(day.day,dayIndex),a=getExerciseActionForPlanItem(text),action=actionFor(a.exerciseKey)||a;
-    if(action.exerciseType==='choice'||/或|[+＋]/.test(text)){
-      try{backup();const log=ensureDailyLogSnapshot(date),p=C.list(log.planProgressItems).find(x=>x.snapshotItemText===text);openPicker(date,dayIndex,{date,planText:text,planItemId:/[+＋]/.test(text)?null:p?.itemId,legacyChoice:p?.completedAmount>0?'pending':'additional'});}catch(e){alert(e.message);}return;
+    const segments=String(text).split(/[+＋]|或|\/(?!\d)/).filter(Boolean),actions=[];
+    for(const segment of segments){
+      const matches=lib().filter(a=>a.exerciseType!=='choice').flatMap(a=>[a.displayName,...C.list(a.aliases)].filter(Boolean).map(name=>({a,name}))).filter(x=>segment.includes(x.name)).sort((a,b)=>b.name.length-a.name.length);
+      const resolved=matches[0]?.a || getExerciseActionForPlanItem(segment);
+      if(!actions.some(a=>a.exerciseKey===resolved.exerciseKey))actions.push(resolved);
     }
+    if(!actions.length)actions.push(getExerciseActionForPlanItem(text));
+    blockContext={dayIndex,text,actions};openBoundPlanAction(actions[0]);
+  }
+  function openBoundPlanAction(action){
+    const {dayIndex,text}=blockContext,day=getPlanDays()[dayIndex],date=getDateForPlanDayInCurrentWeek(day.day,dayIndex);
     try{
       backup();
       const session=ensureSession(dayIndex,date),log=ensureDailyLogSnapshot(date),p=C.list(log?.planProgressItems).find(x=>x.snapshotItemText===text);
-      let entry=session.setEntries.find(e=>e.planItemId&&e.planItemId===p?.itemId);
-      if(!entry){entry=makeEntry(action,date);entry.planItemId=p?.itemId||null;entry.planCheckKey=p?.planCheckKey||null;entry.planText=text;entry.defaultPhase=/热身/.test(text)?'warmup':'work';entry.legacyChoice=(p?.completedAmount>0)?'pending':'additional';session.setEntries.push(entry);}
+      let entry=session.setEntries.find(e=>e.planText===text&&e.exerciseKey===action.exerciseKey);
+      if(!entry){entry=makeEntry(action,date);entry.planItemId=/[+＋]/.test(text)?null:p?.itemId||null;entry.planCheckKey=p?.planCheckKey||null;entry.planText=text;entry.planBlockDayIndex=dayIndex;entry.defaultPhase=/热身/.test(text)?'warmup':'work';entry.legacyChoice=(p?.completedAmount>0)?'pending':'additional';session.setEntries.push(entry);}
       setTrainingSession(session);openEditor(entry,date,false);
     }catch(e){alert(e.message);}
   }
   function makeEntry(a,date){return {id:C.uid('entry'),exerciseKey:a.exerciseKey,displayNameSnapshot:a.displayName,exerciseRevision:'2026-11-07',date,mode:a.recordingMode||'reps',laterality:a.laterality||'bilateral',source:'manual',linkedFactIds:[],sets:[],reconciliationState:'pending',createdAt:new Date().toISOString()};}
   function openPicker(date=C.dayKey(new Date()),dayIndex=activePlanDay,context=null){
+    blockContext=null;
     pickerContext=context;
     openSheet(`<h2>添加训练动作</h2>`,`<label class="te-field">训练日期<input type="date" id="te-picker-date" value="${esc(date)}"></label><label class="te-field" style="margin-top:12px">搜索动作<input id="te-picker-search" placeholder="中文或英文名称"></label><label class="te-field" style="margin-top:12px">选择动作<select id="te-picker-action">${pickerOptions('')}</select></label><p class="te-note">添加到当前训练会话；可以记录计划外训练。保存前仍是草稿。</p><div id="te-status" class="te-status" role="status"></div>`,`<button class="btn-outline" data-te="close">返回</button><button class="btn" data-te="picker-add" data-day="${dayIndex}">开始逐组记录</button>`);
   }
@@ -135,8 +150,8 @@
     const active=C.activeSets(e),all=C.list(e.sets),conflicts=all.filter(s=>s.conflictVersions);
     const planned=getDailyLogs()[editor.date]?.planProgressItems?.find(p=>p.itemId===e.planItemId);
     openSheet(`<div class="te-head"><h2>${esc(e.displayNameSnapshot)}</h2><button class="te-close" data-te="close" aria-label="关闭">×</button></div><div class="te-note">${esc(editor.date)} · ${editor.saved?'已保存记录，修改后需保存':'会话草稿，结束保存后进入统计'}</div>`,
-      `${e.planText?`<div class="te-note">计划：${esc(e.planText)}</div>`:''}${planned&&e.legacyChoice==='pending'?'<div class="te-warning">当天已有该计划的完成记录。本次是补齐已有记录，还是另外新做的训练？<br><button class="btn-outline" data-te="legacy-choice" data-value="replace">补齐已有记录</button><button class="btn-outline" data-te="legacy-choice" data-value="additional">另外新做的训练</button></div>':''}<div class="te-toolbar"><button class="btn-outline" data-te="toggle-load">${e.showLoad?'隐藏':'填写'}外加重量</button><button class="btn-outline" data-te="guide" data-key="${esc(e.exerciseKey)}">动作说明</button></div>${all.filter(s=>!s.deletedAt&&!s.conflictVersions).map((s,i)=>setHTML(s,i,e)).join('')||'<div class="te-empty">还没有组记录。添加一组，填写实际完成量。</div>'}${all.some(s=>s.deletedAt&&!s.conflictVersions)?'<button class="btn-outline" data-te="undo-delete">撤销最近一次删除</button>':''}${conflicts.map(s=>`<div class="te-warning">这组有不同设备的修改，选择要保留的版本：${s.conflictVersions.map((v,i)=>`<button class="btn-outline" data-te="resolve" data-id="${esc(s.id)}" data-version="${i}">${v.deletedAt?'删除此组':`${v.reps??v.durationSeconds??'—'}${e.mode==='time'?'秒':'次'} · ${v.externalLoadKg??'未填'}kg`}<br>${esc(v.updatedAt||'')}</button>`).join('')}</div>`).join('')}<button class="btn-outline full" data-te="add-set">＋ 添加一组</button><div class="te-toolbar"><label class="te-note"><input type="checkbox" id="te-rest-auto" ${localStorage.getItem('gain-set-rest-auto')==='1'?'checked':''}> 完成一组后启动现有休息计时器</label></div><div class="softbox">本次预览：正式 ${x.groups} 组 · ${x.reps} 次 · ${x.seconds} 秒${active.some(s=>s.phase==='warmup')?'；热身另计':''}</div>${e.planItemId?'<div class="te-note">剂量不符时保留真实训练，计划待核对，不自动修改周模板。</div>':''}<div id="te-status" class="te-status" role="status"></div>`,
-      `<button class="btn-outline" data-te="close">返回训练</button><button class="btn" data-te="${editor.saved?'save-edit':'finish'}">${editor.saved?'保存修改':'结束并保存会话'}</button>`);
+      `${e.planText?`<div class="te-note">计划：${esc(e.planText)}</div>`:''}${blockContext?.text===e.planText&&blockContext.actions.length>1?`<div class="te-block-actions"><span class="te-note">本框内的动作</span>${blockContext.actions.map(a=>`<button class="btn-outline" data-te="bound-action" data-key="${esc(a.exerciseKey)}" aria-pressed="${a.exerciseKey===e.exerciseKey}">${esc(a.displayName)}</button>`).join('')}</div><p class="te-note">逐个记录本框动作；组合项目记录保留原框关联，不把一个动作当作整框完成。</p>`:''}${planned&&e.legacyChoice==='pending'?'<div class="te-warning">当天已有该计划的完成记录。本次是补齐已有记录，还是另外新做的训练？<br><button class="btn-outline" data-te="legacy-choice" data-value="replace">补齐已有记录</button><button class="btn-outline" data-te="legacy-choice" data-value="additional">另外新做的训练</button></div>':''}<div class="te-toolbar"><button class="btn-outline" data-te="toggle-load">${e.showLoad?'隐藏':'填写'}外加重量</button><button class="btn-outline" data-te="guide" data-key="${esc(e.exerciseKey)}">动作说明</button></div>${all.filter(s=>!s.deletedAt&&!s.conflictVersions).map((s,i)=>setHTML(s,i,e)).join('')||'<div class="te-empty">还没有组记录。添加一组，填写实际完成量。</div>'}${all.some(s=>s.deletedAt&&!s.conflictVersions)?'<button class="btn-outline" data-te="undo-delete">撤销最近一次删除</button>':''}${conflicts.map(s=>`<div class="te-warning">这组有不同设备的修改，选择要保留的版本：${s.conflictVersions.map((v,i)=>`<button class="btn-outline" data-te="resolve" data-id="${esc(s.id)}" data-version="${i}">${v.deletedAt?'删除此组':`${v.reps??v.durationSeconds??'—'}${e.mode==='time'?'秒':'次'} · ${v.externalLoadKg??'未填'}kg`}<br>${esc(v.updatedAt||'')}</button>`).join('')}</div>`).join('')}<button class="btn-outline full" data-te="add-set">＋ 添加一组</button><div class="te-toolbar"><label class="te-note"><input type="checkbox" id="te-rest-auto" ${localStorage.getItem('gain-set-rest-auto')==='1'?'checked':''}> 完成一组后启动现有休息计时器</label></div><div class="softbox">本次预览：正式 ${x.groups} 组 · ${x.reps} 次 · ${x.seconds} 秒${active.some(s=>s.phase==='warmup')?'；热身另计':''}</div>${e.planItemId?'<div class="te-note">剂量不符时保留真实训练，计划待核对，不自动修改周模板。</div>':''}<div id="te-status" class="te-status" role="status"></div>`,
+      `<button class="btn-outline" data-te="close">返回训练</button><button class="btn" data-te="${editor.saved?'save-edit':'finish'}">${editor.saved?'保存修改':'保存本次训练'}</button>`);
   }
   function setHTML(s,i,e){
     const input=(field,label,type='number',extra='')=>`<label>${label}<input data-field="${field}" type="${type}" inputmode="decimal" min="0" value="${s[field]??''}" ${extra}></label>`;
@@ -300,13 +315,14 @@
     if(event.key==='Tab'){const nodes=Array.from($('te-overlay').querySelectorAll('button,input,select,summary,a')).filter(x=>!x.disabled&&x.getClientRects().length);const first=nodes[0],last=nodes[nodes.length-1];if(event.shiftKey&&document.activeElement===first){last?.focus();event.preventDefault();}else if(!event.shiftKey&&document.activeElement===last){first?.focus();event.preventDefault();}}
   });
   document.addEventListener('click',event=>{
-    const muscle=event.target.closest('[data-muscle]');if(muscle){selectedMuscle=muscle.dataset.muscle;refresh();return;}
+    const muscle=event.target.closest('[data-muscle]');if(muscle){event.preventDefault();selectMuscle(muscle.dataset.muscle);return;}
     const b=event.target.closest('[data-te]');if(!b)return;event.preventDefault();event.stopPropagation();
     try{
       const cmd=b.dataset.te;
       if(cmd==='flip'){back=!back;refresh();}if(cmd==='plan-mode'){planActual=b.dataset.value==='actual';renderPlanMap();}
       if(cmd==='history-mode'){const on=b.dataset.value==='stats';$('te-statistics').hidden=!on;const parent=b.closest('.te-segment');parent.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));for(const child of $('history').children)if(child!==parent.closest('.card')&&child.id!=='te-statistics'&&child.id!=='te-saved-entries')child.hidden=on;}
       if(cmd==='open-plan')openPlan(Number(b.dataset.day),b.dataset.text);
+      if(cmd==='bound-action'){storeEditorDraft();const action=blockContext?.actions.find(a=>a.exerciseKey===b.dataset.key);if(action)openBoundPlanAction(action);}
       if(cmd==='add-exercise')openPicker(getTrainingSession()?.date||C.dayKey(new Date()));
       if(cmd==='day-add')openPicker(b.dataset.date);
       if(cmd==='picker-add'){
@@ -349,6 +365,6 @@
       }
     }catch(e){notify(e.message);}
   },true);
-  document.addEventListener('keydown',event=>{const m=event.target.closest('[data-muscle]');if(m&&(event.key==='Enter'||event.key===' ')){event.preventDefault();selectedMuscle=m.dataset.muscle;refresh();}});
+  document.addEventListener('keydown',event=>{const m=event.target.closest('[data-muscle]');if(m&&(event.key==='Enter'||event.key===' ')){event.preventDefault();selectMuscle(m.dataset.muscle);}});
   mount();
 })();

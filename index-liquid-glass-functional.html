@@ -4821,43 +4821,7 @@
 
       <div class="card">
         <div class="collapsible-card-head">
-          <h2>今天状态不一样？</h2>
-          <button class="btn-outline collapsible-toggle-btn" id="dailyAdjustCollapseBtn" type="button" aria-expanded="false" aria-controls="dailyAdjustBody">展开</button>
-        </div>
-        <div id="dailyAdjustBody" class="collapsible-card-body collapsed">
-          <div class="softbox">睡眠、酸痛或器材临时变化时，可以让 AI 按当前计划给今天做一个轻量调整，不会覆盖周计划模板。</div>
-          <div class="grid2">
-            <div>
-              <label class="label">昨晚睡眠</label>
-              <select id="aiDailySleep"><option>好</option><option selected>一般</option><option>差</option></select>
-            </div>
-            <div>
-              <label class="label">身体酸痛</label>
-              <select id="aiDailySoreness"><option selected>无</option><option>轻微</option><option>明显</option></select>
-            </div>
-          </div>
-          <div class="grid2">
-            <div>
-              <label class="label">今天时间</label>
-              <select id="aiDailyTime"><option>20分钟</option><option selected>40分钟</option><option>60分钟</option></select>
-            </div>
-            <div>
-              <label class="label">器材</label>
-              <select id="aiDailyGear"><option selected>完整</option><option>只有哑铃</option><option>只有弹力绳</option><option>无器械</option></select>
-            </div>
-          </div>
-          <label class="label">精神状态</label>
-          <select id="aiDailyEnergy"><option>好</option><option selected>一般</option><option>累</option></select>
-          <label class="label">备注</label>
-          <textarea id="aiDailyNotes" placeholder="例如：肩前侧有点紧，今天时间比较赶"></textarea>
-          <button class="btn-outline full" id="aiDailyAdjustBtn" type="button">让 AI 调整今天训练</button>
-          <div id="aiDailyAdjustResult" class="softbox" style="display:none;"></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="collapsible-card-head">
-          <h2>训练计划模板管理</h2>
+          <h2>训练计划管理</h2>
           <button class="btn-outline collapsible-toggle-btn" id="planTemplateCollapseBtn" type="button" aria-expanded="false" aria-controls="planTemplateBody">展开</button>
         </div>
         <div id="planTemplateBody" class="collapsible-card-body collapsed">
@@ -4868,8 +4832,9 @@
 
           <div class="softbox">当前编辑：<b id="editorDayLabel">周一</b></div>
 
-          <label class="label">当天名称</label>
-          <input id="planDayNameEdit" placeholder="例如：周一" />
+          <label class="label" for="planEditDaySelect">选择要编辑的星期</label>
+          <select id="planEditDaySelect" aria-label="选择要编辑的星期"></select>
+          <input id="planDayNameEdit" hidden aria-hidden="true" style="display:none" />
 
           <label class="label">训练重点</label>
           <input id="planFocusEdit" placeholder="例如：胸部主练 + 肩前中束 + 三头 + 腹" />
@@ -4882,7 +4847,7 @@
           <textarea id="planProteinEdit" placeholder="例如：训练后 1 份蛋白粉"></textarea>
 
           <div class="btns">
-            <button class="btn" id="savePlanDayBtn">保存当前天设置</button>
+            <button class="btn" id="savePlanDayBtn">保存所选星期计划</button>
             <button class="btn-outline" id="resetPlanTemplateBtn">恢复默认模板</button>
           </div>
 
@@ -5326,7 +5291,7 @@
   </div>
 
   <script>
-    const APP_VERSION = "v2026.11.08-plan-editor";
+    const APP_VERSION = "v2026.11.08-weekly-modules-fix";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const TEMP_DAILY_PLAN_OVERRIDES_KEY = "gain-temp-daily-plan-overrides";
     const DAILY_LOGS_KEY = "gain-daily-logs";
@@ -15991,7 +15956,7 @@
 
     function bindDefaultCollapsedCards(){
       bindDefaultCollapsedCard("exerciseLibraryCollapseBtn", "exerciseLibraryBody");
-      bindDefaultCollapsedCard("dailyAdjustCollapseBtn", "dailyAdjustBody");
+
       bindDefaultCollapsedCard("planTemplateCollapseBtn", "planTemplateBody");
       bindDefaultCollapsedCard("cloudSyncCollapseBtn", "cloudSyncBody");
     }
@@ -18343,9 +18308,177 @@
       }
     }
 
+    const DEFAULT_TRAINING_MODULES = [
+      {
+        id:"chest_strength",
+        name:"胸部主练 + 三头",
+        type:"training",
+        focus:"胸部厚度、上胸刺激、肱三头力量和俯卧撑动作质量",
+        items:[
+          "热身：肩绕环1分钟 + 肩胛俯卧撑2组 x 12次",
+          "宽距俯卧撑3组 x 12-15次｜下降2秒，底部停1秒｜休息90秒",
+          "下斜俯卧撑3组 x 8-12次｜双脚垫高20-30cm｜休息120秒",
+          "窄距俯卧撑3组 x 10-15次｜保留1-2次余力｜休息90秒",
+          "哑铃地板卧推3组 x 15-20次｜5kg/手，下降3秒",
+          "哑铃侧平举3组 x 15-20次｜2.5kg/手，顶端停1秒",
+          "胸部与肱三头轻拉伸5分钟",
+          "腹部补充：死虫式2组 x 每侧10次｜慢速控制，腰部贴地"
+        ],
+        protein:"训练后补充1份蛋白粉，并在正餐中保证主食和肉蛋奶。"
+      },
+      {
+        id:"back_strength",
+        name:"背部主练 + 二头",
+        type:"training",
+        focus:"引体向上能力、背阔肌宽度、肩胛后缩和肱二头刺激",
+        items:[
+          "热身：肩胛引体2组 x 6-8次 + 弹力绳拉开1组 x 20次",
+          "引体向上5组 x 6-7次｜目标总次数30-33次｜休息150-180秒",
+          "弹力绳坐姿划船4组 x 15-20次｜先后缩肩胛，再拉动手臂",
+          "单臂哑铃划船3组 x 每侧15-20次｜5kg，顶端停2秒",
+          "弹力绳面拉3组 x 18-20次｜避免耸肩",
+          "哑铃弯举3组 x 15-20次｜5kg/手，下降2-3秒",
+          "主动悬垂2组 x 25-35秒｜双臂伸直，肩胛轻微下沉",
+          "腹部补充：悬垂屈膝举腿2组 x 8-10次｜不摆动身体"
+        ],
+        protein:"训练后补充1份蛋白粉，晚饭保证肉类、鸡蛋或牛奶。"
+      },
+      {
+        id:"posture_recovery",
+        name:"恢复 + 肩胛姿态修正",
+        type:"training",
+        focus:"缓解含胸和肩部前倾，恢复肩袖、肩胛与核心控制",
+        items:[
+          "轻松散步15-25分钟",
+          "墙面滑手3组 x 10-12次｜腰背贴墙，肋骨不要外翻",
+          "弹力绳肩外旋3组 x 每侧15次｜使用轻阻力",
+          "肩胛俯卧撑3组 x 12-15次｜手肘保持伸直",
+          "死虫式3组 x 每侧10-12次｜腰部贴紧瑜伽垫",
+          "胸小肌拉伸2组 x 每侧30-40秒",
+          "背阔肌拉伸2组 x 每侧30-40秒",
+          "腹部补充：鸟狗2组 x 每侧10次｜保持骨盆稳定"
+        ],
+        protein:"低强度恢复日不强制蛋白粉，保证正常三餐和充足饮水。"
+      },
+      {
+        id:"legs_core",
+        name:"腿部 + 核心",
+        type:"training",
+        focus:"下肢肌肉、髋部后链、单腿稳定和腹部控制",
+        items:[
+          "热身：徒手深蹲2组 x 15次 + 髋踝活动2分钟",
+          "双哑铃杯式深蹲4组 x 15-20次｜总负重10kg｜休息90-120秒",
+          "保加利亚分腿蹲3组 x 每侧10-12次｜先徒手，稳定后持哑铃",
+          "双哑铃罗马尼亚硬拉4组 x 15-20次｜5kg/手，髋部向后移动",
+          "单腿臀桥3组 x 每侧12-15次｜顶端停2秒",
+          "腹部主训练：悬垂屈膝举腿3组 x 8-12次 + 侧平板支撑3组 x 每侧30-45秒"
+        ],
+        protein:"腿部训练后补充1份蛋白粉，并保证足量米饭、面食或其他碳水。"
+      },
+      {
+        id:"shoulder_focus",
+        name:"肩部强化 + 上背稳定",
+        type:"training",
+        focus:"肩中束、肩后束、肩部推力和肩胸连接处的视觉改善",
+        items:[
+          "热身：肩绕环1分钟 + 弹力绳肩外旋2组 x 每侧12次",
+          "折刀俯卧撑3组 x 8-12次｜髋部抬高，肩部主导｜休息120秒",
+          "哑铃肩推3组 x 12-15次｜5kg/手，不要过度后仰",
+          "哑铃侧平举4组 x 15-25次｜2.5kg/手，手肘略高于手腕",
+          "俯身反向飞鸟3组 x 15-20次｜2.5kg/手",
+          "弹力绳面拉3组 x 18-20次｜顶端停1秒",
+          "弹力绳拉开2组 x 20-25次｜作为收尾，不做到力竭",
+          "腹部补充：平板支撑2组 x 30-45秒｜收紧臀部与腹部"
+        ],
+        protein:"训练后正常补充蛋白质，避免空腹训练。"
+      },
+      {
+        id:"arms_core",
+        name:"手臂 + 腹部补强",
+        type:"training",
+        focus:"肱二头、肱三头、前臂和腹部训练量补充",
+        items:[
+          "热身：手腕活动1分钟 + 轻阻力弹力绳弯举1组 x 20次",
+          "哑铃交替弯举3组 x 每侧15-18次｜5kg，身体不要借力",
+          "哑铃锤式弯举3组 x 15-18次｜5kg/手",
+          "双手哑铃过顶臂屈伸3组 x 15-20次｜使用一只5kg哑铃",
+          "双杠辅助臂屈伸3组 x 6-10次｜脚尖轻触地面辅助，肩部无痛才做",
+          "腹部主训练：卷腹3组 x 20次 + 反向卷腹3组 x 12-15次"
+        ],
+        protein:"作为辅助训练日，训练后按正常习惯补充蛋白质即可。"
+      },
+      {
+        id:"full_rest",
+        name:"完全休息",
+        type:"rest",
+        focus:"降低累积疲劳，恢复肌肉、关节和训练表现",
+        items:[
+          "不进行俯卧撑、引体向上或力竭训练",
+          "可轻松散步15-25分钟",
+          "胸、背、肩、髋轻度拉伸5-8分钟",
+          "记录肩、肘、腕和膝关节是否出现疼痛",
+          "保证充足睡眠；前一晚睡眠不足6小时，下一训练日总组数减少约三分之一",
+          "轻核心恢复：腹式呼吸配合腹部收紧2组 x 5次深呼吸｜不做到疲劳"
+        ],
+        protein:"不强制蛋白粉，正常三餐和固定加餐不要省。"
+      }
+    ];
+
+    function materializeModuleDays(template){
+      const modules=Array.isArray(template?.modules)?template.modules:[];
+      const order=Array.isArray(template?.schedule?.moduleOrder)?template.schedule.moduleOrder:modules.map(m=>m.id);
+      const names=['周一','周二','周三','周四','周五','周六','周日'];
+      return order.slice(0,7).map((id,i)=>{
+        const module=modules.find(m=>m.id===id)||modules[0]||{};
+        return {day:names[i],weekday:i+1,moduleId:module.id,moduleName:module.name,moduleType:module.type,focus:module.focus||module.name||'',items:module.items||[],protein:module.protein||''};
+      });
+    }
+
+    function getWeeklyTrainingModules(){
+      const template=getPlanTemplate();
+      const modules=new Map(DEFAULT_TRAINING_MODULES.map(m=>[m.id,{...m,items:m.items.slice()}]));
+      for(const module of (template.modules||[]))if(module?.id&&Array.isArray(module.items))modules.set(module.id,{...module,items:module.items.slice()});
+      return Array.from(modules.values());
+    }
+
+    // Replace plans at fixed dates; performed training stays on the date it happened.
+    function applyWeeklyDayOrder(order){
+      const before=getPlanDays();
+      if(!Array.isArray(order)||order.length!==before.length||new Set(order).size!==before.length||order.some(i=>!Number.isInteger(i)||i<0||i>=before.length))throw new Error('无效的星期顺序');
+      return applyWeeklyDayContents(order.map(i=>({...before[i],items:before[i].items.slice()})));
+    }
+
+    function applyWeeklyDayContents(contents){
+      const before=getPlanDays();
+      if(contents.length!==before.length)throw new Error('星期数量不匹配');
+      const keys=[PLAN_TEMPLATE_KEY,TEMP_DAILY_PLAN_OVERRIDES_KEY,PLAN_CHECKS_KEY,PLAN_CHECK_META_KEY,DAILY_LOGS_KEY];
+      const saved=Object.fromEntries(keys.map(k=>[k,localStorage.getItem(k)]));
+      try{
+        contents.forEach((source,i)=>{
+          const target=before[i],next={...source,day:target.day,weekday:target.weekday};
+          if(JSON.stringify([target.focus,target.items,target.moduleId])===JSON.stringify([next.focus,next.items,next.moduleId]))return;
+          persistVisualPlanDay(i,next,'week',next.items.map(text=>target.items.indexOf(text)),target);
+        });
+        const template=getPlanTemplate();
+        template.modules=getWeeklyTrainingModules();
+        template.schedule={weekStart:getCurrentWeekRange().start,moduleOrder:contents.map((d,i)=>d.moduleId||`day-${i}`),updatedAt:new Date().toISOString()};
+        localStorage.setItem(PLAN_TEMPLATE_KEY,JSON.stringify(template));appState.load();queueAutoSync('本周训练模块顺序调整');
+      }catch(error){Object.entries(saved).forEach(([k,v])=>v===null?localStorage.removeItem(k):localStorage.setItem(k,v));appState.load();throw error;}
+      return getPlanDays();
+    }
+
+    function changeScheduledTrainingModule(dayIndex,moduleId){
+      const module=getWeeklyTrainingModules().find(m=>m.id===moduleId);
+      if(!module)throw new Error('未找到训练模块');
+      const days=getPlanDays();
+      days[dayIndex]={...days[dayIndex],moduleId:module.id,moduleName:module.name,moduleType:module.type,focus:module.focus||module.name,items:module.items.slice(),protein:module.protein||''};
+      return applyWeeklyDayContents(days);
+    }
+
     function normalizePlanTemplate(raw){
-      const source = raw && Array.isArray(raw.days) ? raw : DEFAULT_PLAN_TEMPLATE;
+      const source = raw && Array.isArray(raw.days) ? raw : raw && Array.isArray(raw.modules) ? {...raw,days:materializeModuleDays(raw)} : DEFAULT_PLAN_TEMPLATE;
       const days = source.days.map((day, index) => ({
+        ...day,
         day: String(day?.day || `周${index + 1}`),
         weekday: inferPlanWeekday(day, index),
         focus: String(day?.focus || ""),
@@ -18354,8 +18487,10 @@
       }));
       const range = getCurrentWeekRange();
       return {
+        ...source,
         version: Number(source.version) || 1,
         meta: {
+          ...(source.meta || {}),
           weekLabel: source.meta?.weekLabel || "",
           weekStart: source.meta?.weekStart || range.start,
           weekEnd: source.meta?.weekEnd || range.end,
@@ -18426,7 +18561,8 @@
 
     function parseTrainingPlanImport(text){
       const parsed=JSON.parse(String(text).replace(/^\uFEFF/, ""));
-      const data=parsed?.plan && !parsed.days ? parsed.plan : parsed;
+      let data=parsed?.plan && !parsed.days ? parsed.plan : parsed;
+      if(data && !data.days && Array.isArray(data.modules))data={...data,days:materializeModuleDays(data)};
       if(!data || !Array.isArray(data.days) || !data.days.length || data.days.length>7) throw new Error("days 必须包含 1–7 天训练计划");
       const weekdays=new Set();
       data.days.forEach((day,i)=>{
@@ -18477,8 +18613,11 @@
           if(oldMeta[oldKey])meta[newKey]=oldMeta[oldKey];
         }
       });
-      const clean={day:day.day,weekday:original.weekday,focus:day.focus,items:day.items.slice(),protein:day.protein};
-      if(scope==='template' || scope==='base') template.days[dayIndex]=clean;
+      const clean={day:day.day,weekday:original.weekday,focus:day.focus,items:day.items.slice(),protein:day.protein, moduleId:day.moduleId||original.moduleId||"",moduleName:day.moduleName||original.moduleName||"",moduleType:day.moduleType||original.moduleType||""};
+      if(scope==='template' || scope==='base'){
+        template.days[dayIndex]=clean;
+        if(scope==='template' && clean.moduleId && Array.isArray(template.modules)){const module=template.modules.find(m=>m.id===clean.moduleId);if(module)Object.assign(module,{focus:clean.focus,items:clean.items.slice(),protein:clean.protein});}
+      }
       if(scope!=='base')overrides[String(dayIndex)]={...clean,source:'visual_plan_editor',message:'网页内编辑',createdAt:overrides[String(dayIndex)]?.createdAt||now,updatedAt:now,weekStart};
       if(prior){
         const idMap=new Map(),oldProgress=prior.planProgressItems||[];
@@ -18527,6 +18666,7 @@
         const items = normalizePlanItemsList(value.items || value.adjustedItems);
         if(!Array.isArray(value.items) && !Array.isArray(value.adjustedItems) && !value.deletedAt) return;
         normalized[String(dayIndex)] = {
+          moduleId:String(value.moduleId||""),moduleName:String(value.moduleName||""),moduleType:String(value.moduleType||""),
           day: String(value.day || value.dayName || "").trim(),
           weekday: Number(value.weekday) || dayIndex + 1,
           focus: String(value.focus || "").trim(),
@@ -23683,7 +23823,6 @@
         if(file) importAutoSleepCsv(file);
         event.target.value = "";
       };
-      if($("aiDailyAdjustBtn")) $("aiDailyAdjustBtn").onclick = () => generateDailyAdjust().catch((err) => alert("AI 调整失败：" + (err.message || "未知错误")));
       if($("aiTrendBtn")) $("aiTrendBtn").onclick = () => generateTrendAnalysis().catch((err) => alert("趋势分析失败：" + (err.message || "未知错误")));
       if($("restoreDraftBackupBtn")) $("restoreDraftBackupBtn").onclick = restoreDraftBackup;
     }

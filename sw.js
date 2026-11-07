@@ -1,4 +1,4 @@
-const CACHE_NAME = "gain-tracker-pwa-v28-plan-editor-20261108";
+const CACHE_NAME = "gain-tracker-pwa-v29-weekly-modules-fix-20261108";
 const CORE_ASSETS = [
   "./index.html",
   "./training-core.js",

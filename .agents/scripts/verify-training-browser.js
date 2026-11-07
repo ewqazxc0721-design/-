@@ -5,6 +5,7 @@
   const results=[];const check=(name,condition,details)=>{results.push({name,passed:!!condition,...(!condition?{details}: {})});if(!condition)throw new Error(name+': '+JSON.stringify(details));};
   window.__preTrainingBrowserCheck=appState.exportSnapshot();
   localStorage.setItem('supabase-auto-sync-enabled','0');
+  localStorage.removeItem(TEMP_DAILY_PLAN_OVERRIDES_KEY);appState.load();
   const date=TrainingCore.dayKey(new Date()),index=(new Date().getDay()+6)%7;
   const template=getPlanTemplate();template.days[index].items=['俯卧撑 3组 x 每组12次','平板支撑 2组 x 每组45秒'];template.days[index].focus='力量训练测试';
   setPlanTemplate(template,true);domainPersistence.setJson('gain-daily-logs',{});setTrainingSession(null);setActivePlanDay(index);ensureDailyLogSnapshot(date);
