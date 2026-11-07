@@ -1,29 +1,15 @@
-const CACHE_NAME = "gain-tracker-pwa-v34-training-template-cloud-sync-20260728";
+const CACHE_NAME = "gain-tracker-pwa-v28-plan-editor-20261108";
 const CORE_ASSETS = [
   "./index.html",
-  "./ai-companion.css",
-  "./ai-companion.js",
-  "./plan-modules.css",
-  "./ui-icons.css",
-  "./icons/module/push.png",
-  "./icons/module/pull.png",
-  "./icons/module/shoulders.png",
-  "./icons/module/legs_core.png",
-  "./icons/module/hiit.png",
-  "./icons/module/arms_grip.png",
-  "./icons/module/mobility.png",
-  "./icons/module/rest.png",
-  "./icons/module/drag.png",
-  "./icons/module/link.png",
-  "./icons/ui/plan.png",
-  "./icons/ui/record.png",
-  "./icons/ui/history.png",
-  "./icons/ui/tools.png",
-  "./icons/ui/complete.png",
-  "./icons/app-icon-192.png",
-  "./icons/app-icon-512.png",
+  "./training-core.js",
+  "./training-ui.js",
+  "./plan-editor-ui.js",
+  "./plan-editor.css",
+  "./training-enhancements.css",
+  "./训练动作库/muscle-regions.json",
   "./训练动作库/actions.json",
-  "./manifest.webmanifest"
+  "./manifest.webmanifest",
+  "./icons/app-icon.svg"
 ];
 
 self.addEventListener("install", (event) => {

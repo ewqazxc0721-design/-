@@ -12,6 +12,11 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="format-detection" content="telephone=no" />
 
+  <link rel="stylesheet" href="./training-enhancements.css" />
+  <script src="./training-core.js"></script>
+  <script src="./training-ui.js" defer></script>
+  <script src="./plan-editor-ui.js" defer></script>
+  <link rel="stylesheet" href="./plan-editor.css" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icons/app-icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="./icons/app-icon.svg" />
@@ -4826,7 +4831,7 @@
         <div id="planTemplateBody" class="collapsible-card-body collapsed">
           <div class="softbox">
             支持导入 / 导出每周训练计划 JSON，也可以直接修改当前选中这一天的训练项目。
-            为了避免训练项目顺序变化后打卡错位，保存模板时会自动清空旧打卡。
+            可按肌群筛选动作、增删项目、修改组数与顺序。默认仅调整本周当天，已记录的训练事实会保留。
           </div>
 
           <div class="softbox">当前编辑：<b id="editorDayLabel">周一</b></div>
@@ -4837,8 +4842,9 @@
           <label class="label">训练重点</label>
           <input id="planFocusEdit" placeholder="例如：胸部主练 + 肩前中束 + 三头 + 腹" />
 
-          <label class="label">训练项目（每行一项）</label>
-          <textarea id="planItemsEdit" placeholder="每行一个训练项目"></textarea>
+          <label class="label">训练项目</label>
+          <textarea id="planItemsEdit" hidden aria-hidden="true" style="display:none"></textarea>
+          <div id="visualPlanEditor"></div>
 
           <label class="label">蛋白安排</label>
           <textarea id="planProteinEdit" placeholder="例如：训练后 1 份蛋白粉"></textarea>
@@ -4852,7 +4858,7 @@
           <button class="btn-outline full" id="importPlanTemplateBtn">导入训练计划模板（JSON）</button>
           <input type="file" id="planTemplateFile" accept="application/json" style="display:none" />
 
-          <div class="help">模板结构：days 为数组；每一天包含 day、focus、items、protein 四个字段。</div>
+          <div class="help">JSON 导入会更新周模板，并保留本周已保存的单日调整；导出包含当前生效的顺序。恢复某天的周模板可使用编辑器中的“恢复当天周模板”。</div>
         </div>
       </div>
 
@@ -5288,7 +5294,7 @@
   </div>
 
   <script>
-    const APP_VERSION = "v2026.05.17-record-protocol-correction-capture";
+    const APP_VERSION = "v2026.11.08-plan-editor";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const TEMP_DAILY_PLAN_OVERRIDES_KEY = "gain-temp-daily-plan-overrides";
     const DAILY_LOGS_KEY = "gain-daily-logs";
@@ -6323,7 +6329,7 @@
         displayName,
         action?.aliases,
         action?.keywords,
-        fallback.aliases
+        action?.replaceAliases ? [] : fallback.aliases
       ]);
       const sourceName = displayName || aliases[0] || fallback.displayName || fallback.exerciseKey || "自定义动作";
       const exerciseKey = String(action?.exerciseKey || action?.id || fallback.exerciseKey || makeExerciseKey("ex", sourceName)).trim();
@@ -6333,6 +6339,19 @@
       const focus = uniqueCleanList([action?.muscleGroups, action?.focus, fallback.muscleGroups]);
       const normalized = {
         exerciseKey,
+        replaceAliases:!!action?.replaceAliases,
+        englishName:action?.englishName || fallback.englishName || "",
+        primaryMuscles:uniqueCleanList(action?.primaryMuscles || fallback.primaryMuscles || []),
+        secondaryMuscles:uniqueCleanList(action?.secondaryMuscles || fallback.secondaryMuscles || []),
+        movementTags:uniqueCleanList(action?.movementTags || fallback.movementTags || []),
+        equipment:uniqueCleanList(action?.equipment || fallback.equipment || []),
+        exerciseType:action?.exerciseType || fallback.exerciseType || "strength",
+        recordingMode:action?.recordingMode || fallback.recordingMode || "reps",
+        laterality:action?.laterality || fallback.laterality || "bilateral",
+        description:action?.description || fallback.description || "",
+        provenance:action?.provenance || fallback.provenance || null,
+        instructions:uniqueCleanList(action?.instructions || fallback.instructions || []),
+        mediaMatch:action?.mediaMatch || fallback.mediaMatch || "reference",
         displayName: sourceName,
         aliases,
         category: action?.category || fallback.category || inferExerciseCategory(sourceName, focus),
@@ -6372,7 +6391,7 @@
       const next = normalizeExerciseLibraryAction({
         ...base,
         ...patch,
-        aliases: uniqueCleanList([base?.aliases, patch?.aliases]),
+        aliases: patch?.replaceAliases ? uniqueCleanList([patch.displayName, patch.aliases]) : uniqueCleanList([base?.aliases, patch?.aliases]),
         muscleGroups: uniqueCleanList([base?.muscleGroups, patch?.muscleGroups]),
         normalizationTags: uniqueCleanList([base?.normalizationTags, patch?.normalizationTags]),
         auditLog: [...(Array.isArray(base?.auditLog) ? base.auditLog : []), ...(Array.isArray(patch?.auditLog) ? patch.auditLog : [])],
@@ -6743,6 +6762,7 @@
         if(!response || !response.ok) return { status:"fallback", actions:getExerciseLibrary() };
         const data = await response.json();
         externalExerciseLibraryActions = Array.isArray(data?.actions) ? data.actions : (Array.isArray(data) ? data : []);
+        externalExerciseLibraryActions.forEach(action => { if(action.exerciseKey) OFFICIAL_EXERCISE_LIBRARY_KEYS.add(action.exerciseKey); });
         exerciseLibraryCache = null;
         return { status:"loaded", actions:getExerciseLibrary({ refresh:true }) };
       }catch(err){
@@ -6756,8 +6776,9 @@
     function getFilteredExerciseLibrary(){
       const query = String(exerciseLibraryQuery || "").trim();
       const library = getExerciseLibrary();
-      if(!query) return library.slice(0, 80);
-      return library.filter((entry) => isExerciseLibraryMatch(entry, query)).slice(0, 80);
+      const filtered = window.TrainingEnhancements ? window.TrainingEnhancements.filterLibrary(library) : library;
+      if(!query) return filtered;
+      return filtered.filter((entry) => isExerciseLibraryMatch(entry, query) || String(entry.englishName || "").toLowerCase().includes(query.toLowerCase()));
     }
 
     function formatExerciseLibraryMeta(action){
@@ -6779,6 +6800,7 @@
     }
 
     function renderExerciseLibraryGuideModal(action){
+      if(window.TrainingEnhancements && action) return window.TrainingEnhancements.showGuide(action);
       const content = $("planGuideModalContent");
       if(!content) return;
       if(!action){
@@ -8437,14 +8459,39 @@
         ...cloneAppStateValue(secondary),
         ...cloneAppStateValue(preferred)
       };
+      if(window.TrainingCore){
+        merged.exerciseEntries = window.TrainingCore.mergeEntries(preferred.exerciseEntries, secondary.exerciseEntries);
+        if(merged.exerciseEntries.length) merged.schemaVersion = Math.max(3, Number(merged.schemaVersion) || 0);
+      }
       merged.records = mergeCloudUniqueArray(preferred.records, secondary.records);
       merged.aiCaptureRecords = mergeCloudUniqueArray(preferred.aiCaptureRecords, secondary.aiCaptureRecords);
       merged.captureAttempts = mergeCloudUniqueArray(preferred.captureAttempts, secondary.captureAttempts);
       merged.extraTrainingEvents = mergeCloudUniqueArray(preferred.extraTrainingEvents, secondary.extraTrainingEvents);
       merged.planProgressItems = mergeCloudPlanProgressItems(preferred.planProgressItems, secondary.planProgressItems);
+
+      const planWinner=String(preferred.planEditedAt||"")>=String(secondary.planEditedAt||"")?preferred:secondary;
+      if(planWinner.planEditedAt){
+        const other=planWinner===preferred?secondary:preferred;
+        for(const key of ["allItems","planDay","focus","planEditedAt","planRevisions","snapshotVersion","isTemporaryPlan"]) if(planWinner[key]!==undefined)merged[key]=cloneAppStateValue(planWinner[key]);
+        merged.planProgressItems=(planWinner.planProgressItems||[]).map(p=>{
+          const old=(other.planProgressItems||[]).find(q=>q.snapshotItemText===p.snapshotItemText && q.exerciseKey===p.exerciseKey);
+          return old?{...p,completedAmount:Math.max(Number(p.completedAmount)||0,Number(old.completedAmount)||0)}:p;
+        });
+        const valid=new Set(merged.planProgressItems.map(p=>p.itemId));
+        merged.exerciseEntries=(merged.exerciseEntries||[]).map(e=>{
+          const winnerEntry=(planWinner.exerciseEntries||[]).find(x=>x.id===e.id);
+          if(winnerEntry)return {...e,planItemId:winnerEntry.planItemId,reconciliationState:winnerEntry.reconciliationState,previousPlanItemId:winnerEntry.previousPlanItemId};
+          if(!e.planItemId || valid.has(e.planItemId))return e;
+          const old=(other.planProgressItems||[]).find(p=>p.itemId===e.planItemId);
+          const next=old && merged.planProgressItems.find(p=>p.snapshotItemText===old.snapshotItemText && p.exerciseKey===old.exerciseKey);
+          return {...e,planItemId:next?.itemId||null,previousPlanItemId:e.planItemId};
+        });
+      }
+      if(window.TrainingCore) window.TrainingCore.rebuildSetProgress(merged);
       merged.completedItems = mergeCloudUniqueArray(preferred.completedItems, secondary.completedItems, (item) => `completed:${String(item)}`);
       merged.completedCount = Math.max(Number(preferred.completedCount) || 0, Number(secondary.completedCount) || 0, Number(merged.completedCount) || 0);
       merged.totalItems = Math.max(Number(preferred.totalItems) || 0, Number(secondary.totalItems) || 0, Number(merged.totalItems) || 0);
+      if(planWinner.planEditedAt){ merged.completedItems=(merged.planProgressItems||[]).filter(p=>p.status==="completed").map(p=>p.snapshotItemText);merged.completedCount=merged.completedItems.length;merged.totalItems=(merged.allItems||[]).length; }
       return merged;
     }
 
@@ -8469,9 +8516,10 @@
       const preferLocalPlanChecks = options.preferLocalPlanChecks === true;
       const planCheckSource = preferLocalPlanChecks ? local : preferred;
       const planCheckSecondary = preferLocalPlanChecks ? remote : secondary;
-      return normalizeAppStateSnapshot({
+      const mergedSnapshot = normalizeAppStateSnapshot({
         ...secondary,
         ...preferred,
+        tempDailyPlanOverrides: mergeDailyPlanOverrides(local.tempDailyPlanOverrides, remote.tempDailyPlanOverrides),
         history: mergeCloudUniqueArray(preferred.history, secondary.history),
         dailyLogs: mergeCloudDailyLogs(preferred.dailyLogs, secondary.dailyLogs),
         planChecks: preferLocalPlanChecks
@@ -8483,12 +8531,32 @@
         aiWeeklySummaries: { ...asPlainObject(secondary.aiWeeklySummaries, {}), ...asPlainObject(preferred.aiWeeklySummaries, {}) },
         aiFeedbackHistory: mergeCloudUniqueArray(preferred.aiFeedbackHistory, secondary.aiFeedbackHistory),
         characterChatHistory: mergeCloudUniqueArray(preferred.characterChatHistory, secondary.characterChatHistory).slice(-40),
+        trainingSession: window.TrainingCore && preferred.trainingSession?.id && preferred.trainingSession.id === secondary.trainingSession?.id
+          ? {...preferred.trainingSession, setEntries:window.TrainingCore.mergeEntries(preferred.trainingSession.setEntries, secondary.trainingSession.setEntries)}
+          : preferred.trainingSession,
         trainingCaptureCards: mergeCloudUniqueArray(preferred.trainingCaptureCards, secondary.trainingCaptureCards),
         customExerciseLibrary: mergeCloudUniqueArray(preferred.customExerciseLibrary, secondary.customExerciseLibrary),
         exerciseTemplateDrafts: mergeCloudUniqueArray(preferred.exerciseTemplateDrafts, secondary.exerciseTemplateDrafts),
         lastCloudSyncAt: updatedAt || preferred.lastCloudSyncAt || secondary.lastCloudSyncAt,
         updatedAt: updatedAt || preferred.updatedAt || secondary.updatedAt
       });
+      if(window.TrainingCore){
+        const weekDates = getPlanDays().map((day, index) => getDateForPlanDayInCurrentWeek(day.day, index));
+        for(const log of Object.values(mergedSnapshot.dailyLogs || {})){
+          if(!weekDates.includes(log.date)) continue;
+          if(log.planEditedAt){
+            const dayIndex=getPlanDays().findIndex((day,i)=>getDateForPlanDayInCurrentWeek(day.day,i)===log.date);
+            Object.keys(mergedSnapshot.planChecks).filter(key=>key.startsWith(`d${dayIndex}_i`)).forEach(key=>delete mergedSnapshot.planChecks[key]);
+            for(const item of (log.planProgressItems||[]))if(item.status==='completed')mergedSnapshot.planChecks[item.planCheckKey]=true;
+          }
+          for(const item of (log.planProgressItems || [])){
+            if(!item.setRecordManaged || !item.planCheckKey) continue;
+            if(item.status === "completed") mergedSnapshot.planChecks[item.planCheckKey] = true;
+            else delete mergedSnapshot.planChecks[item.planCheckKey];
+          }
+        }
+      }
+      return mergedSnapshot;
     }
 
     function createCloudSync(options = {}){
@@ -9326,6 +9394,17 @@
           !decision.targetDateIso
         ) return;
 
+        if(window.TrainingEnhancements && ["plan_progress","extra_training"].includes(candidate.candidateType)){
+          const detailGuard = window.TrainingEnhancements.guardIntent({
+            action:"write", recordType:"training_fact", date:decision.targetDateIso,
+            currentValue:{exerciseKey:candidate.exerciseRef?.exerciseKey || candidate.exerciseKey, exercise:candidate.exerciseName || candidate.exerciseRef?.displayName || candidate.subjectText, sets:candidate.sets || (candidate.unit === "set" ? candidate.amount : null), reps:candidate.reps},
+            originalText:candidate.evidenceText || candidate.rawText || ""
+          });
+          if(detailGuard){
+            nextDecisions[index] = {...decision, decision:detailGuard.status === "duplicate" ? "ignored" : "pending", reason:"existing_set_details", prompt:detailGuard.prompt};
+            return;
+          }
+        }
         const writtenRecordId = makeRecordProtocolWrittenRecordId(candidate);
         const targetDateIso = decision.targetDateIso;
         const previousLog = nextDailyLogs[targetDateIso] && typeof nextDailyLogs[targetDateIso] === "object" && !Array.isArray(nextDailyLogs[targetDateIso])
@@ -11918,10 +11997,11 @@
         || null;
       const checkKey = `d${dayIndex}_i${itemIndex}`;
       const checked = !!checks[checkKey];
-      const completedAmount = checked
+      const completedAmount = previous?.setRecordManaged ? Number(previous.completedAmount || 0) : checked
         ? dose.targetAmount
         : Math.min(Number(previous?.completedAmount || 0), dose.targetAmount);
       return {
+        ...(previous || {}),
         itemId,
         planCheckKey:checkKey,
         sourcePlanItemIndex:itemIndex,
@@ -12003,10 +12083,13 @@
       const dayType = previous.dayType || getPlanDayType(day);
       const planProgressItems = buildPlanProgressItemsForDate(dateKey, day, previous);
       return {
-        schemaVersion: DAILY_LOG_SCHEMA_VERSION,
+        schemaVersion: Math.max(DAILY_LOG_SCHEMA_VERSION, Number(previous.schemaVersion) || 0),
+        exerciseEntries:Array.isArray(previous.exerciseEntries) ? previous.exerciseEntries : [],
         date: dateKey,
         dayType,
         snapshotVersion:Number(previous.snapshotVersion || 0) || 1,
+        planEditedAt:previous.planEditedAt || "",
+        planRevisions:previous.planRevisions || [],
         planDay: previous.planDay || day.day || "",
         focus: previous.focus || day.focus || "",
         allItems: previous.allItems || items,
@@ -12048,7 +12131,7 @@
       log.totalItems = items.length;
       log.completedItems = items.filter((_, itemIndex) => checks[`d${dayIndex}_i${itemIndex}`]);
       log.completedCount = log.completedItems.length;
-      log.schemaVersion = DAILY_LOG_SCHEMA_VERSION;
+      log.schemaVersion = Math.max(DAILY_LOG_SCHEMA_VERSION, Number(log.schemaVersion) || 0);
       log.dayType = log.dayType || getPlanDayType(day);
       log.planProgressItems = buildPlanProgressItemsForDate(dateKey, day, log);
       log.legacyCompatibility = buildLegacyCompatibility(log, log.planProgressItems);
@@ -14176,6 +14259,10 @@
     }
 
     function writeTrainingCaptureIntent(intent, options = {}){
+      if(window.TrainingEnhancements){
+        const duplicateDetail = window.TrainingEnhancements.guardIntent(intent);
+        if(duplicateDetail) return duplicateDetail;
+      }
       const normalized = normalizeTrainingRecordIntent(intent, options);
       if(!normalized.ok){
         if(options.createCard !== false && normalized.prompt){
@@ -18230,7 +18317,7 @@
         day: String(day?.day || `周${index + 1}`),
         weekday: inferPlanWeekday(day, index),
         focus: String(day?.focus || ""),
-        items: Array.isArray(day?.items) ? day.items.map((x) => String(x)).filter(Boolean) : [],
+        items: Array.isArray(day?.items) ? day.items.map(normalizePlanItemText).filter(Boolean) : [],
         protein: String(day?.protein || "")
       }));
       const range = getCurrentWeekRange();
@@ -18258,14 +18345,24 @@
 
     function setPlanTemplate(template, clearChecks = false){
       const normalized = normalizePlanTemplate(template);
-      localStorage.setItem(PLAN_TEMPLATE_KEY, JSON.stringify(normalized));
-      clearTempDailyPlanOverrides();
-      if(clearChecks){
-        domainPersistence.remove(PLAN_CHECKS_KEY);
-        domainPersistence.remove(PLAN_CHECK_META_KEY);
-        domainPersistence.remove(AI_MILESTONE_KEY);
+      const previousDays=getPlanDays();
+      const keys=[PLAN_TEMPLATE_KEY,TEMP_DAILY_PLAN_OVERRIDES_KEY,PLAN_CHECKS_KEY,PLAN_CHECK_META_KEY,DAILY_LOGS_KEY];
+      const before=Object.fromEntries(keys.map(key=>[key,localStorage.getItem(key)]));
+      if(window.TrainingCore)window.TrainingCore.persistBackup(localStorage,keys,'gain-plan-editor-v1-backup');
+      try{
+        localStorage.setItem(PLAN_TEMPLATE_KEY, JSON.stringify(normalized));
+        // Single-day adjustments are independent of the reusable weekly template.
+        normalized.days.forEach((day,i)=>{
+          if(previousDays[i] && !isActivePlanOverride(getTempDailyPlanOverrides()[String(i)]) && JSON.stringify(previousDays[i])!==JSON.stringify(day)){
+            persistVisualPlanDay(i,day,'base',day.items.map(text=>previousDays[i].items.indexOf(text)),previousDays[i]);
+          }
+        });
+        appState.load();
+      }catch(error){
+        Object.entries(before).forEach(([key,value])=>value===null?localStorage.removeItem(key):localStorage.setItem(key,value));
+        appState.load();throw error;
       }
-      queueAutoSync(clearChecks ? "训练模板更新并重置打卡" : "训练模板更新");
+      queueAutoSync(clearChecks ? "导入或重置训练模板" : "训练模板更新");
     }
 
     function normalizePlanItemText(item){
@@ -18275,7 +18372,7 @@
       const name = String(item.name || item.title || item.exercise || item.item || item.text || "").trim();
       const detailKeys = ["sets", "reps", "duration", "weight", "intensity", "note"];
       const details = detailKeys
-        .map((key) => String(item[key] || "").trim())
+        .map((key) => { const v=String(item[key] ?? "").trim(); return v && /^\d+(?:\.\d+)?$/.test(v) ? v + ({sets:"组",reps:"次",duration:"秒",weight:"kg"}[key] || "") : v; })
         .filter(Boolean);
       if(name) return [name, details.join(" · ")].filter(Boolean).join(" ");
       return Object.values(item).map((value) => String(value || "").trim()).filter(Boolean).join(" ").trim();
@@ -18294,6 +18391,101 @@
         });
     }
 
+
+    function parseTrainingPlanImport(text){
+      const parsed=JSON.parse(String(text).replace(/^\uFEFF/, ""));
+      const data=parsed?.plan && !parsed.days ? parsed.plan : parsed;
+      if(!data || !Array.isArray(data.days) || !data.days.length || data.days.length>7) throw new Error("days 必须包含 1–7 天训练计划");
+      const weekdays=new Set();
+      data.days.forEach((day,i)=>{
+        if(!day || !Array.isArray(day.items) || day.items.some(x=>typeof x!=="string" && !(x && typeof x==='object' && (x.name||x.title||x.exercise||x.item||x.text)))) throw new Error(`第 ${i+1} 天的 items 必须是动作数组`);
+        if(day.items.some(x=>!normalizePlanItemText(x))) throw new Error(`第 ${i+1} 天有空动作`);
+        const weekday=inferPlanWeekday(day,i);
+        if(weekdays.has(weekday)) throw new Error("训练日期重复，请每个星期只设置一天");
+        weekdays.add(weekday);
+      });
+      return normalizePlanTemplate(data);
+    }
+
+    function isActivePlanOverride(value){
+      return !!value && !value.deletedAt && (!value.weekStart || value.weekStart===getCurrentWeekRange().start);
+    }
+
+    function mergeDailyPlanOverrides(local={},remote={}){
+      const result={};
+      for(const key of new Set([...Object.keys(local||{}),...Object.keys(remote||{})])){
+        const a=local?.[key],b=remote?.[key];
+        const rank=v=>`${v?.weekStart||""}|${v?.updatedAt||v?.createdAt||""}|${v?.deletedAt||""}|${JSON.stringify(v||{})}`;
+        result[key]=!a?b:!b?a:rank(a)>=rank(b)?a:b;
+      }
+      return result;
+    }
+
+    // Reconcile rows by their prior position, never by the new positional checkbox key.
+    function persistVisualPlanDay(dayIndex,day,scope="week",rowOrigins=[],previousDay=null){
+      const original=previousDay || getPlanDays()[dayIndex];
+      if(!original || !Array.isArray(day.items) || day.items.some(x=>!String(x).trim())) throw new Error("训练项目不能为空");
+      const template=getPlanTemplate(),overrides=getTempDailyPlanOverrides();
+      const checks=getPlanChecks(),meta=getPlanCheckMeta(),oldChecks={...checks},oldMeta={...meta};
+      const now=new Date().toISOString(),weekStart=getCurrentWeekRange().start;
+      const date=getDateForPlanDayInCurrentWeek(original.day,dayIndex),logs=getDailyLogs(),prior=logs[date];
+      const used=new Set();
+      const origins=day.items.map((text,i)=>{
+        const explicit=rowOrigins.length ? rowOrigins[i] : original.items.indexOf(text);
+        if(!Number.isInteger(explicit)||explicit<0||explicit>=original.items.length||used.has(explicit))return -1;
+        used.add(explicit);return explicit;
+      });
+      Object.keys(checks).filter(k=>k.startsWith(`d${dayIndex}_i`)).forEach(k=>delete checks[k]);
+      Object.keys(meta).filter(k=>k.startsWith(`d${dayIndex}_i`)).forEach(k=>delete meta[k]);
+      day.items.forEach((text,i)=>{
+        const origin=origins[i],oldKey=`d${dayIndex}_i${origin}`,newKey=`d${dayIndex}_i${i}`;
+        // A changed dose needs a new completion decision; training facts remain intact.
+        if(origin>=0 && JSON.stringify(getPlanItemTargetDose(original.items[origin]))===JSON.stringify(getPlanItemTargetDose(text)) && getExerciseActionForPlanItem(original.items[origin]).exerciseKey===getExerciseActionForPlanItem(text).exerciseKey){
+          if(oldChecks[oldKey])checks[newKey]=true;
+          if(oldMeta[oldKey])meta[newKey]=oldMeta[oldKey];
+        }
+      });
+      const clean={day:day.day,weekday:original.weekday,focus:day.focus,items:day.items.slice(),protein:day.protein};
+      if(scope==='template' || scope==='base') template.days[dayIndex]=clean;
+      if(scope!=='base')overrides[String(dayIndex)]={...clean,source:'visual_plan_editor',message:'网页内编辑',createdAt:overrides[String(dayIndex)]?.createdAt||now,updatedAt:now,weekStart};
+      if(prior){
+        const idMap=new Map(),oldProgress=prior.planProgressItems||[];
+        const progress=day.items.map((text,i)=>{
+          const candidate=oldProgress.find(p=>p.sourcePlanItemIndex===origins[i] || p.planCheckKey===`d${dayIndex}_i${origins[i]}`);
+          const old=candidate?.exerciseKey===getExerciseActionForPlanItem(text).exerciseKey?candidate:null;
+          const next=buildPlanProgressItem(dayIndex,i,text,old?[old]:[],checks);
+          if(old && JSON.stringify(getPlanItemTargetDose(old.snapshotItemText))!==JSON.stringify(getPlanItemTargetDose(text))){
+            next.completedAmount=0;next.status='active';next.setRecordBaseAmount=0;
+          }
+          if(old)idMap.set(old.itemId,next.itemId);
+          return next;
+        });
+        const entries=(prior.exerciseEntries||[]).map(e=>{
+          if(!e.planItemId)return e;
+          if(!idMap.has(e.planItemId))return {...e,previousPlanItemId:e.planItemId,planItemId:null,reconciliationState:'unlinked'};
+          const nextId=idMap.get(e.planItemId),old=oldProgress.find(p=>p.itemId===e.planItemId),next=progress.find(p=>p.itemId===nextId);
+          const changedDose=JSON.stringify(getPlanItemTargetDose(old.snapshotItemText))!==JSON.stringify(getPlanItemTargetDose(next.snapshotItemText));
+          return {...e,planItemId:nextId,...(changedDose?{reconciliationState:'needs_confirmation'}:{})};
+        });
+        logs[date]={...prior,planDay:clean.day,focus:clean.focus,allItems:clean.items,planProgressItems:progress,exerciseEntries:entries,
+          planEditedAt:now,updatedAtIso:now,snapshotVersion:Number(prior.snapshotVersion||1)+1,
+          planRevisions:[...(prior.planRevisions||[]),{at:now,allItems:prior.allItems||original.items,planProgressItems:oldProgress}],
+          completedItems:clean.items.filter((_,i)=>checks[`d${dayIndex}_i${i}`]),totalItems:clean.items.length,isTemporaryPlan:true};
+        logs[date].completedCount=logs[date].completedItems.length;
+        if(window.TrainingCore)window.TrainingCore.rebuildSetProgress(logs[date]);
+        for(const item of progress)if(item.setRecordManaged){if(item.status==='completed')checks[item.planCheckKey]=true;else delete checks[item.planCheckKey];}
+        logs[date].completedItems=clean.items.filter((_,i)=>checks[`d${dayIndex}_i${i}`]);
+        logs[date].completedCount=logs[date].completedItems.length;
+      }
+      const writes={ [PLAN_TEMPLATE_KEY]:template,[TEMP_DAILY_PLAN_OVERRIDES_KEY]:overrides,[PLAN_CHECKS_KEY]:checks,[PLAN_CHECK_META_KEY]:meta,[DAILY_LOGS_KEY]:logs };
+      if(window.TrainingCore){
+        window.TrainingCore.persistBackup(localStorage,[PLAN_TEMPLATE_KEY,TEMP_DAILY_PLAN_OVERRIDES_KEY,PLAN_CHECKS_KEY,PLAN_CHECK_META_KEY,DAILY_LOGS_KEY],'gain-plan-editor-v1-backup');
+        window.TrainingCore.persistTransaction(localStorage,writes);
+      }else Object.entries(writes).forEach(([key,value])=>localStorage.setItem(key,JSON.stringify(value)));
+      appState.load();queueAutoSync("可视化训练计划编辑");
+      return getPlanDays()[dayIndex];
+    }
+
     function normalizeTempDailyPlanOverrides(raw = {}){
       const source = raw && typeof raw === "object" ? raw : {};
       const normalized = {};
@@ -18301,7 +18493,7 @@
         const dayIndex = Number(key);
         if(!Number.isInteger(dayIndex) || dayIndex < 0 || dayIndex > 6 || !value || typeof value !== "object") return;
         const items = normalizePlanItemsList(value.items || value.adjustedItems);
-        if(!items.length) return;
+        if(!Array.isArray(value.items) && !Array.isArray(value.adjustedItems) && !value.deletedAt) return;
         normalized[String(dayIndex)] = {
           day: String(value.day || value.dayName || "").trim(),
           weekday: Number(value.weekday) || dayIndex + 1,
@@ -18310,7 +18502,10 @@
           protein: String(value.protein || "").trim(),
           source: String(value.source || "ai_daily_adjust"),
           message: String(value.message || "").trim(),
-          createdAt: value.createdAt || new Date().toISOString()
+          createdAt: value.createdAt || new Date().toISOString(),
+          updatedAt: value.updatedAt || value.createdAt || "",
+          weekStart: value.weekStart || (value.createdAt ? getCurrentWeekRange(new Date(value.createdAt)).start : getCurrentWeekRange().start),
+          deletedAt: value.deletedAt || ""
         };
       });
       return normalized;
@@ -18323,6 +18518,15 @@
 
     function setTempDailyPlanOverrides(overrides, options = {}){
       const normalized = normalizeTempDailyPlanOverrides(overrides);
+      const before=getPlanDays();
+      Object.entries(normalized).forEach(([key,value])=>{
+        const i=Number(key),old=before[i];
+        if(!old)return;
+        const next=isActivePlanOverride(value)?value:getPlanTemplate().days[i];
+        if(next && JSON.stringify(old.items)!==JSON.stringify(next.items)){
+          persistVisualPlanDay(i,{...old,...next},"week",next.items.map(text=>old.items.indexOf(text)));
+        }
+      });
       localStorage.setItem(TEMP_DAILY_PLAN_OVERRIDES_KEY, JSON.stringify(normalized));
       if(options.sync !== false) queueAutoSync("AI 临时训练计划更新");
       return normalized;
@@ -18335,7 +18539,7 @@
 
     function clearTempDailyPlanOverride(dayIndex, options = {}){
       const overrides = getTempDailyPlanOverrides();
-      delete overrides[String(dayIndex)];
+      overrides[String(dayIndex)] = { ...(overrides[String(dayIndex)] || {}), items:[], deletedAt:new Date().toISOString(), updatedAt:new Date().toISOString(), weekStart:getCurrentWeekRange().start };
       setTempDailyPlanOverrides(overrides, options);
     }
 
@@ -18344,7 +18548,7 @@
       const overrides = getTempDailyPlanOverrides();
       return template.days.map((day, index) => {
         const override = overrides[String(index)];
-        if(!override) return day;
+        if(!isActivePlanOverride(override)) return day;
         return {
           ...day,
           ...override,
@@ -18483,6 +18687,18 @@
         return;
       }
 
+      if(window.TrainingEnhancements){
+        const action = getExerciseActionForPlanItem(activeGuideItemText);
+        const canonical = getExerciseLibrary().find(entry => entry.exerciseKey === action?.exerciseKey);
+        if(canonical){
+          window.TrainingEnhancements.showGuide(canonical);
+          const note = document.createElement("div");
+          note.className = "softbox";
+          note.textContent = `当天计划：${activeGuideItemText}`;
+          content.prepend(note);
+          return;
+        }
+      }
       const guide = findGuideByItem(activeGuideItemText);
       const gifInfo = findGifByItem(activeGuideItemText);
       const focus = guide?.focus?.length ? guide.focus.join("、") : "按计划动作执行";
@@ -19609,6 +19825,7 @@
     }
 
     function fillPlanEditorFromActiveDay(){
+      if(window.PlanEditor?.preserveDraft(activePlanDay)) return;
       const days = getPlanDays();
       const day = days[activePlanDay] || days[0];
       if(!day) return;
@@ -20196,7 +20413,7 @@
         }).join("");
         const tempNotice = d.isTemporary ? `
           <div class="softbox" style="margin-top:12px;">
-            正在使用 AI 临时调整计划：${escapeHtml(d.temporaryMessage || "本次调整会参与今天打卡、日历日志和本周记录，不覆盖周计划模板。")}
+            ${d.source==='visual_plan_editor'?'正在使用本周单日调整':'正在使用 AI 临时调整计划'}：${escapeHtml(d.temporaryMessage || "本次调整会参与今天打卡、日历日志和本周记录，不覆盖周计划模板。")}
           </div>
         ` : "";
         const restoreTempButton = d.isTemporary
@@ -20315,6 +20532,7 @@
     }
 
     function saveCurrentPlanDay(){
+      if(window.PlanEditor) return window.PlanEditor.save();
       const template = getPlanTemplate();
       const days = template.days;
       if(!days[activePlanDay]) return;
@@ -20347,7 +20565,13 @@
     function resetPlanTemplate(){
       const ok = confirm("确定恢复默认训练计划模板吗？这会清空现有训练打卡。");
       if(!ok) return;
+      const now=new Date().toISOString();
+      const removed=Object.fromEntries(Object.entries(getTempDailyPlanOverrides()).map(([key,value])=>[key,{...value,items:[],updatedAt:now,deletedAt:now}]));
+      setTempDailyPlanOverrides(removed,{sync:false});
       setPlanTemplate(DEFAULT_PLAN_TEMPLATE, true);
+      domainPersistence.remove(PLAN_CHECKS_KEY);
+      domainPersistence.remove(PLAN_CHECK_META_KEY);
+      domainPersistence.remove(AI_MILESTONE_KEY);
       activePlanDay = 0;
       localStorage.setItem(ACTIVE_PLAN_DAY_KEY, "0");
       renderPlan();
@@ -20357,14 +20581,14 @@
     }
 
     function exportPlanTemplate(){
-      downloadJson("训练计划模板.json", getPlanTemplate());
+      downloadJson("训练计划模板.json", {...getPlanTemplate(), days:getPlanDays().map(({baseItems,baseFocus,isTemporary,temporaryMessage,...day})=>day)});
     }
 
     function importPlanTemplate(file){
       const reader = new FileReader();
       reader.onload = (e) => {
         try{
-          const payload = JSON.parse(e.target.result);
+          const payload = parseTrainingPlanImport(e.target.result);
           setPlanTemplate(payload, true);
           ensureWeekLabelAfterPlanImport(payload);
           activePlanDay = 0;
@@ -20374,9 +20598,10 @@
           alert("训练计划模板导入成功");
           syncToCloud(false).catch(() => {});
         }catch(err){
-          alert("导入失败，文件格式不对");
+          alert("导入失败：" + (err.message || "文件格式不对"));
         }
       };
+      reader.onerror = () => alert("导入失败：无法读取文件，请重新选择。");
       reader.readAsText(file);
     }
 
@@ -20566,7 +20791,8 @@
         const overrides = asPlainObject(state?.tempDailyPlanOverrides, {});
         return baseDays.map((day, index) => {
           const base = asPlainObject(day, {});
-          const override = asPlainObject(overrides[String(index)], null);
+          const candidate = asPlainObject(overrides[String(index)], null);
+          const override = isActivePlanOverride(candidate) ? candidate : null;
           const source = override || base;
           const items = normalizeItems(source.items || base.items);
           return {
@@ -20750,7 +20976,7 @@
             protein: action.protein || baseDay.protein || "",
             source: action.source || "ai_daily_adjust",
             message: action.message || action.coach_message || "AI 临时调整",
-            createdAt:now
+            createdAt:now, updatedAt:now, weekStart:getCurrentWeekRange(new Date(now)).start
           };
           next = clearChecksForDay(next, dayIndex);
           next.activePlanDay = dayIndex;
@@ -20759,7 +20985,7 @@
 
         if(action.type === "clearTemporaryAdjustment"){
           const dayIndex = Number(action.dayIndex);
-          delete next.tempDailyPlanOverrides[String(dayIndex)];
+          next.tempDailyPlanOverrides[String(dayIndex)] = { ...(next.tempDailyPlanOverrides[String(dayIndex)] || {}), items:[], deletedAt:now, updatedAt:now, weekStart:getCurrentWeekRange(new Date(now)).start };
           next = clearChecksForDay(next, dayIndex);
           return { state:next, changedFields:["tempDailyPlanOverrides","planChecks","planCheckMeta"], result:{ status:"temporary_adjustment_cleared", dayIndex } };
         }
@@ -21004,7 +21230,7 @@
       function syncLogCompletionFromChecks(state, log){
         const progressItems = asArray(log.planProgressItems).map((item) => {
           const checked = !!state.planChecks[item.planCheckKey];
-          const completedAmount = checked ? Number(item.targetAmount || item.completedAmount || 1) : Number(item.completedAmount || 0);
+          const completedAmount = item.setRecordManaged ? Number(item.completedAmount || 0) : checked ? Number(item.targetAmount || item.completedAmount || 1) : Number(item.completedAmount || 0);
           return {
             ...item,
             completedAmount,
@@ -21030,6 +21256,10 @@
           };
         }
         const date = candidate.date || meta.date || (typeof formatDateKey === "function" ? formatDateKey(new Date()) : now.slice(0, 10));
+        if(window.TrainingEnhancements && ["plan_progress","extra_training","training_fact"].includes(candidate.candidateType)){
+          const detailDuplicate = window.TrainingEnhancements.guardIntent({action:"write", recordType:"training_fact", date, currentValue:candidate.currentValue, originalText:candidate.rawText, completedExplicit:candidate.completedExplicit});
+          if(detailDuplicate) return {...detailDuplicate, state:normalizeState(state), changedFields:[]};
+        }
         let { state:next, log } = ensureLog(state, date, candidate);
         const duplicate = findDuplicate(log, candidate);
         if(duplicate){
@@ -21580,7 +21810,7 @@
       box.innerHTML = `
         <div style="font-weight:800;font-size:18px;">${escapeHtml(selectedCalendarDate)} · ${escapeHtml(log.planDay || "")}</div>
         <div class="help" style="margin-top:6px;">训练重点：${escapeHtml(log.focus || "-")}</div>
-        ${log.isTemporaryPlan ? `<div class="softbox" style="margin-top:10px;">这一天记录的是 AI 临时调整计划。${escapeHtml(log.aiAdjustMessage || "")}</div>` : ""}
+        ${log.isTemporaryPlan ? `<div class="softbox" style="margin-top:10px;">这一天记录的是单日调整计划。${escapeHtml(log.aiAdjustMessage || "")}</div>` : ""}
         <div class="mini-grid" style="margin-top:12px;">
           <div class="mini">完成项：${escapeHtml(String(progressSummary.completedItems))}/${escapeHtml(String(progressSummary.totalItems || log.totalItems || 0))}</div>
           <div class="mini">完成量：${escapeHtml(progressSummary.amountText || "-")}</div>
@@ -22557,7 +22787,7 @@
           syncToCloud(false).catch(() => {});
         }catch(err){
           console.error("导入失败", err);
-          alert("导入失败，文件格式不对");
+          alert("导入失败：" + (err.message || "文件格式不对"));
         }
       };
       reader.readAsText(file);

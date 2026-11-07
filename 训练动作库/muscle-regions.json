@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "regions": {
+    "chest": "胸大肌",
+    "deltoids": "三角肌",
+    "upper-back": "背阔与上背肌群",
+    "trapezius": "斜方肌",
+    "serratus": "前锯肌",
+    "biceps": "肱二头肌",
+    "triceps": "肱三头肌",
+    "forearm": "前臂肌群",
+    "abs": "腹直肌",
+    "obliques": "腹斜肌",
+    "lower-back": "下背肌群",
+    "gluteal": "臀肌群",
+    "quadriceps": "股四头肌",
+    "hamstring": "腘绳肌",
+    "adductors": "内收肌群",
+    "hip-flexors": "髋屈肌群",
+    "calves": "小腿肌群",
+    "tibialis": "胫前肌"
+  }
+}

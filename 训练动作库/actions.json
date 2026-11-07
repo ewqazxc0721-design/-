@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 1,
-  "source": "角色聊天与训练记录优化：按每周训练 JSON 与联网核验扩充的动作库；2026.6.15-2026.6.21 六艺动作图解补充",
+  "schemaVersion": 2,
+  "source": "本地68条审校 + openGym固定提交文本参考；新增42条，无上游媒体导入",
   "actions": [
     {
       "exerciseKey": "decline-pushup",
@@ -11,9 +11,7 @@
       ],
       "category": "push",
       "muscleGroups": [
-        "上胸",
-        "前三角",
-        "肱三头"
+        "胸大肌"
       ],
       "normalizationTags": [
         "pushup",
@@ -28,9 +26,45 @@
         "diagram": "起始：双脚抬高，双手约肩宽支撑，身体保持一条线\n下放：肘部稳定打开，胸部朝地面方向下降\n底部：保持肩胛稳定，不塌腰\n推起：受控推回顶端",
         "cautions": [
           "脚下支撑要稳，不要滑动",
-          "肩前侧不适时降低脚部高度或改标准俯卧撑",
-          "普通下斜俯卧撑不等同于本周的下斜深幅俯卧撑"
+          "肩前侧不适时降低脚部高度或改标准俯卧撑"
         ]
+      },
+      "description": "下斜俯卧撑，主要涉及胸大肌。双脚抬高，双手约肩宽支撑，身体保持一条线。具体用量按当天计划记录。",
+      "instructions": [
+        "双脚抬高，双手约肩宽支撑，身体保持一条线",
+        "肘部稳定打开，胸部朝地面方向下降",
+        "保持肩胛稳定，不塌腰",
+        "受控推回顶端"
+      ],
+      "primaryMuscles": [
+        "chest"
+      ],
+      "secondaryMuscles": [
+        "triceps",
+        "deltoids"
+      ],
+      "movementTags": [
+        "上胸",
+        "前三角",
+        "肱三头"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "decline push-up",
+      "replaceAliases": true,
+      "mediaMatch": "exact",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": "0279",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0279.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。与上游元数据对照；媒体授权独立。"
       }
     },
     {
@@ -38,14 +72,11 @@
       "displayName": "宽距俯卧撑",
       "aliases": [
         "宽距俯卧撑",
-        "宽距",
         "宽距标准俯卧撑"
       ],
       "category": "push",
       "muscleGroups": [
-        "胸大肌外侧",
-        "前三角",
-        "肱三头"
+        "胸大肌"
       ],
       "normalizationTags": [
         "pushup",
@@ -58,12 +89,49 @@
         "note": "沿用宽距俯卧撑 GIF；本周文字说明限定为肩宽1.3-1.5倍的宽距标准俯卧撑。"
       },
       "guide": {
-        "diagram": "起始：手距比标准俯卧撑宽，本周控制在肩宽1.3-1.5倍\n支撑：身体仍保持一条线\n下放：底部让胸部主动发力，不耸肩\n推起：顶端不要完全放松休息，保持胸部张力",
+        "diagram": "双手比肩稍宽支地，身体保持整体稳定。\n屈肘受控下放，手距和肘角以肩部能控制为准。\n在不塌腰、不过度耸肩的前提下推回。\n避免极宽手距和突然下坠。",
         "cautions": [
           "不要做极宽版本",
           "手距过宽容易增加肩前侧压力",
           "这是胸部补充刺激，不是主要进阶动作"
         ]
+      },
+      "description": "双手比肩稍宽的俯卧撑，主要训练胸大肌，肩前侧和肱三头肌辅助；不能把它理解为孤立训练“外侧胸”。",
+      "instructions": [
+        "双手比肩稍宽支地，身体保持整体稳定。",
+        "屈肘受控下放，手距和肘角以肩部能控制为准。",
+        "在不塌腰、不过度耸肩的前提下推回。",
+        "避免极宽手距和突然下坠。"
+      ],
+      "primaryMuscles": [
+        "chest"
+      ],
+      "secondaryMuscles": [
+        "triceps",
+        "deltoids"
+      ],
+      "movementTags": [
+        "胸大肌外侧",
+        "前三角",
+        "肱三头"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "wide hand push up",
+      "replaceAliases": true,
+      "mediaMatch": "exact",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": "1311",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/1311.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。与上游元数据对照；媒体授权独立。"
       }
     },
     {
@@ -77,10 +145,7 @@
       ],
       "category": "push",
       "muscleGroups": [
-        "胸",
-        "前三角",
-        "肱三头",
-        "底部控制"
+        "胸大肌"
       ],
       "normalizationTags": [
         "pushup",
@@ -100,6 +165,44 @@
         "path": "gifs/0662.gif",
         "label": "标准俯卧撑轨迹参考",
         "note": "深幅版本无独立配图；沿用标准俯卧撑轨迹，差异靠文字说明体现双手垫高和更深下放。"
+      },
+      "description": "标准深幅俯卧撑，主要涉及胸大肌。双手垫高，让胸部能比普通地面俯卧撑下降更深。具体用量按当天计划记录。",
+      "instructions": [
+        "双手垫高，让胸部能比普通地面俯卧撑下降更深",
+        "肩胛保持稳定，底部胸部有拉伸感",
+        "停0.5-1秒，不借反弹",
+        "维持身体一条线，受控回到顶端"
+      ],
+      "primaryMuscles": [
+        "chest"
+      ],
+      "secondaryMuscles": [
+        "triceps",
+        "deltoids"
+      ],
+      "movementTags": [
+        "胸",
+        "前三角",
+        "肱三头",
+        "底部控制"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0662.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -113,10 +216,7 @@
       ],
       "category": "push",
       "muscleGroups": [
-        "上胸",
-        "胸",
-        "前三角",
-        "肱三头"
+        "胸大肌"
       ],
       "normalizationTags": [
         "pushup",
@@ -138,6 +238,44 @@
         "label": "俯卧撑动作幅度控制参考",
         "note": "原图解没有专属下斜深幅配图；复用动作幅度控制图，文字说明区分脚抬高和深幅执行。",
         "sourceLabel": "本地图解：2026.6.15-2026.6.21 六艺动作图解"
+      },
+      "description": "下斜深幅俯卧撑，主要涉及胸大肌。双脚抬高20-40cm，双手放在俯卧撑架、稳定书本或其他稳固支撑上。具体用量按当天计划记录。",
+      "instructions": [
+        "双脚抬高20-40cm，双手放在俯卧撑架、稳定书本或其他稳固支撑上",
+        "肘部约45度，身体保持一条线，胸部下到明显拉伸",
+        "停0.5-1秒，确认肩前侧没有顶痛",
+        "胸部和手臂发力回到顶端"
+      ],
+      "primaryMuscles": [
+        "chest"
+      ],
+      "secondaryMuscles": [
+        "triceps",
+        "deltoids"
+      ],
+      "movementTags": [
+        "上胸",
+        "胸",
+        "前三角",
+        "肱三头"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -152,9 +290,7 @@
       ],
       "category": "push",
       "muscleGroups": [
-        "胸",
-        "肱三头",
-        "核心稳定"
+        "胸大肌"
       ],
       "normalizationTags": [
         "pushup",
@@ -172,6 +308,43 @@
           "底部保持控制，不要砸到地面",
           "当前计划主要把它作为深幅俯卧撑的基础动作参考"
         ]
+      },
+      "description": "俯卧撑，主要涉及胸大肌。双手约肩宽，位置在上胸部下方。具体用量按当天计划记录。",
+      "instructions": [
+        "双手约肩宽，位置在上胸部下方",
+        "身体从头、躯干、髋到腿保持一条线",
+        "胸部接近地面或轻触控制物，再停顿",
+        "平稳推回，不用弹震和塌腰"
+      ],
+      "primaryMuscles": [
+        "chest"
+      ],
+      "secondaryMuscles": [
+        "triceps",
+        "deltoids"
+      ],
+      "movementTags": [
+        "胸",
+        "肱三头",
+        "核心稳定"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "push-up",
+      "replaceAliases": true,
+      "mediaMatch": "exact",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": "0662",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0662.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。与上游元数据对照；媒体授权独立。"
       }
     },
     {
@@ -183,9 +356,7 @@
       ],
       "category": "push",
       "muscleGroups": [
-        "肱三头",
-        "胸",
-        "核心稳定"
+        "胸大肌"
       ],
       "normalizationTags": [
         "pushup",
@@ -200,9 +371,45 @@
         "diagram": "起始：姿势接近标准俯卧撑，双手向身体中线靠近\n手位：不必强行钻石手型，两个食指指尖接近或相触即可\n下放：胸部朝手背方向靠近，底部停顿\n推起：保持身体一条线，稳定推回",
         "cautions": [
           "不要耸肩、塌腰或肘部乱甩",
-          "双手相触困难时先从略窄于肩宽开始",
-          "本周只做六艺进阶维护，不作为胸部主刺激"
+          "双手相触困难时先从略窄于肩宽开始"
         ]
+      },
+      "description": "窄距俯卧撑，主要涉及胸大肌。姿势接近标准俯卧撑，双手向身体中线靠近。具体用量按当天计划记录。",
+      "instructions": [
+        "姿势接近标准俯卧撑，双手向身体中线靠近",
+        "手位：不必强行钻石手型，两个食指指尖接近或相触即可",
+        "胸部朝手背方向靠近，底部停顿",
+        "保持身体一条线，稳定推回"
+      ],
+      "primaryMuscles": [
+        "chest"
+      ],
+      "secondaryMuscles": [
+        "triceps",
+        "deltoids"
+      ],
+      "movementTags": [
+        "肱三头",
+        "胸",
+        "核心稳定"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "close-grip push-up",
+      "replaceAliases": true,
+      "mediaMatch": "exact",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": "0259",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0259.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。与上游元数据对照；媒体授权独立。"
       }
     },
     {
@@ -214,9 +421,7 @@
       ],
       "category": "push",
       "muscleGroups": [
-        "胸",
-        "肱三头",
-        "核心稳定"
+        "胸大肌"
       ],
       "normalizationTags": [
         "pushup",
@@ -226,6 +431,49 @@
       "media": {
         "path": "gifs/3211.gif",
         "label": "机械递减参考：跪姿俯卧撑"
+      },
+      "description": "机械递减俯卧撑，主要涉及胸大肌。先做较难版本到接近力竭，再切到更容易的俯卧撑版本继续完成训练量。具体用量按当天计划记录。",
+      "instructions": [
+        "先做较难版本到接近力竭，再切到更容易的俯卧撑版本继续完成训练量",
+        "常见顺序：标准俯卧撑 -> 跪姿俯卧撑，或下斜/标准 -> 标准/跪姿"
+      ],
+      "guide": {
+        "diagram": "先做较难版本到接近力竭，再切到更容易的俯卧撑版本继续完成训练量\n常见顺序：标准俯卧撑 -> 跪姿俯卧撑，或下斜/标准 -> 标准/跪姿",
+        "cautions": [
+          "递减后仍要保持动作形态",
+          "不要用塌腰或耸肩换次数",
+          "肩肘不适时提前停止"
+        ]
+      },
+      "primaryMuscles": [
+        "chest"
+      ],
+      "secondaryMuscles": [
+        "triceps",
+        "deltoids"
+      ],
+      "movementTags": [
+        "胸",
+        "肱三头",
+        "核心稳定"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/3211.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -239,9 +487,7 @@
       ],
       "category": "shoulder",
       "muscleGroups": [
-        "肩前束",
-        "肩中束",
-        "肱三头"
+        "三角肌"
       ],
       "normalizationTags": [
         "shoulder",
@@ -253,6 +499,50 @@
         "label": "下犬式俯卧撑 / Pike Push-up",
         "sourceUrl": "https://loadmuscle.com/exercises/pike-push-up",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "屈髋呈倒V形的俯卧撑，偏重肩部和肱三头肌；基础版本不要求双脚抬高。",
+      "instructions": [
+        "双手撑地，臀部抬高，身体呈倒V形。",
+        "保持躯干受控，屈肘让头部向双手之间略前方下降。",
+        "在肩颈可控范围内停住，不用头部承重。",
+        "伸肘推回，避免突然塌肩或强压颈部。"
+      ],
+      "guide": {
+        "diagram": "双手撑地，臀部抬高，身体呈倒V形。\n保持躯干受控，屈肘让头部向双手之间略前方下降。\n在肩颈可控范围内停住，不用头部承重。\n伸肘推回，避免突然塌肩或强压颈部。",
+        "cautions": [
+          "动作慢，不要用头去点地",
+          "肩不舒服就缩短幅度",
+          "核心收紧，避免腰椎塌下去"
+        ]
+      },
+      "primaryMuscles": [
+        "deltoids"
+      ],
+      "secondaryMuscles": [
+        "triceps"
+      ],
+      "movementTags": [
+        "肩前束",
+        "肩中束",
+        "肱三头"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -266,10 +556,7 @@
       ],
       "category": "shoulder",
       "muscleGroups": [
-        "手腕",
-        "肩部",
-        "肱三头",
-        "核心平衡"
+        "三角肌"
       ],
       "normalizationTags": [
         "handstand-pushup",
@@ -291,6 +578,43 @@
         "label": "乌鸦式准备",
         "note": "平衡图见动作图解 md 中 image00694.jpeg。",
         "sourceLabel": "本地图解：2026.6.15-2026.6.21 六艺动作图解"
+      },
+      "description": "乌鸦式，主要涉及三角肌。蹲姿，双手撑在身体前方，约肩宽。具体用量按当天计划记录。",
+      "instructions": [
+        "蹲姿，双手撑在身体前方，约肩宽",
+        "前倾：双臂略弯，身体向前倾，双膝贴靠或夹在两肘外侧",
+        "离地：逐步把重心转移到手掌，让双脚离地",
+        "保持：稳定呼吸，用手指压力微调平衡，再控制回落"
+      ],
+      "primaryMuscles": [
+        "deltoids"
+      ],
+      "secondaryMuscles": [
+        "triceps"
+      ],
+      "movementTags": [
+        "手腕",
+        "肩部",
+        "肱三头",
+        "核心平衡"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -302,9 +626,7 @@
       ],
       "category": "push",
       "muscleGroups": [
-        "胸",
-        "前三角",
-        "肱三头"
+        "胸大肌"
       ],
       "normalizationTags": [
         "press",
@@ -316,6 +638,50 @@
         "label": "哑铃地板卧推",
         "sourceUrl": "https://loadmuscle.com/exercises/dumbbell-alternating-floor-press",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "哑铃地板卧推，主要涉及胸大肌。仰卧屈膝，哑铃在胸两侧。具体用量按当天计划记录。",
+      "instructions": [
+        "仰卧屈膝，哑铃在胸两侧",
+        "向上推到手臂接近伸直",
+        "控制下放，直到大臂轻触地面再推起"
+      ],
+      "guide": {
+        "diagram": "起始：仰卧屈膝，哑铃在胸两侧\n推起：向上推到手臂接近伸直\n下降：控制下放，直到大臂轻触地面再推起",
+        "cautions": [
+          "下背自然即可，不要硬拱桥",
+          "手腕保持中立",
+          "触地后别弹起借力"
+        ]
+      },
+      "primaryMuscles": [
+        "chest"
+      ],
+      "secondaryMuscles": [
+        "triceps",
+        "deltoids"
+      ],
+      "movementTags": [
+        "胸",
+        "前三角",
+        "肱三头"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "dumbbell"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -326,7 +692,7 @@
       ],
       "category": "push",
       "muscleGroups": [
-        "胸"
+        "胸大肌"
       ],
       "normalizationTags": [
         "fly",
@@ -336,20 +702,62 @@
       "media": {
         "path": "gifs/0308.gif",
         "label": "哑铃飞鸟"
+      },
+      "description": "哑铃飞鸟，主要涉及胸大肌。双手在胸上方，肘微屈。具体用量按当天计划记录。",
+      "instructions": [
+        "双手在胸上方，肘微屈",
+        "展开：像抱大树一样向两侧打开",
+        "合拢：沿弧线回到胸前上方"
+      ],
+      "guide": {
+        "diagram": "起始：双手在胸上方，肘微屈\n展开：像抱大树一样向两侧打开\n合拢：沿弧线回到胸前上方",
+        "cautions": [
+          "肘角度固定，不要做成卧推",
+          "下放不用太深，肩前侧不舒服就收一点",
+          "重量宁轻勿重"
+        ]
+      },
+      "primaryMuscles": [
+        "chest"
+      ],
+      "secondaryMuscles": [
+        "triceps",
+        "deltoids"
+      ],
+      "movementTags": [
+        "胸"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "dumbbell",
+        "bench"
+      ],
+      "englishName": "dumbbell fly",
+      "replaceAliases": true,
+      "mediaMatch": "exact",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": "0308",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0308.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。与上游元数据对照；媒体授权独立。"
       }
     },
     {
       "exerciseKey": "db-shoulder-press",
-      "displayName": "哑铃肩推",
+      "displayName": "坐姿哑铃肩推",
       "aliases": [
         "哑铃肩推",
-        "肩推"
+        "肩推",
+        "坐姿哑铃肩推"
       ],
       "category": "shoulder",
       "muscleGroups": [
-        "肩前束",
-        "肩中束",
-        "肱三头"
+        "三角肌"
       ],
       "normalizationTags": [
         "shoulder",
@@ -359,6 +767,51 @@
       "media": {
         "path": "gifs/0405.gif",
         "label": "哑铃肩推"
+      },
+      "description": "本条按坐姿哑铃肩推描述，旧名称“哑铃肩推”保留为别名；站姿版本使用独立条目。",
+      "instructions": [
+        "坐在稳固训练凳上，双脚踩地，背部自然贴靠。",
+        "哑铃位于肩侧，手腕保持稳定。",
+        "向上推至手臂接近伸直，不借腿部弹震或顶腰。",
+        "慢慢回到可控位置，保持肩部稳定。"
+      ],
+      "guide": {
+        "diagram": "坐在稳固训练凳上，双脚踩地，背部自然贴靠。\n哑铃位于肩侧，手腕保持稳定。\n向上推至手臂接近伸直，不借腿部弹震或顶腰。\n慢慢回到可控位置，保持肩部稳定。",
+        "cautions": [
+          "腰不要过度后仰",
+          "下巴微收，避免头前伸",
+          "肩痛时缩短活动范围"
+        ]
+      },
+      "primaryMuscles": [
+        "deltoids"
+      ],
+      "secondaryMuscles": [
+        "triceps"
+      ],
+      "movementTags": [
+        "肩前束",
+        "肩中束",
+        "肱三头"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "dumbbell",
+        "bench"
+      ],
+      "englishName": "dumbbell seated shoulder press",
+      "replaceAliases": true,
+      "mediaMatch": "exact",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": "0405",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0405.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。与上游元数据对照；媒体授权独立。"
       }
     },
     {
@@ -371,7 +824,7 @@
       ],
       "category": "shoulder",
       "muscleGroups": [
-        "肩中束"
+        "三角肌"
       ],
       "normalizationTags": [
         "shoulder",
@@ -381,6 +834,47 @@
       "media": {
         "path": "gifs/0334.gif",
         "label": "侧平举"
+      },
+      "description": "侧平举，主要涉及三角肌。双手在身体两侧，肘微屈。具体用量按当天计划记录。",
+      "instructions": [
+        "双手在身体两侧，肘微屈",
+        "向身体两侧抬到接近肩高",
+        "慢慢回到起始位"
+      ],
+      "guide": {
+        "diagram": "起始：双手在身体两侧，肘微屈\n抬起：向身体两侧抬到接近肩高\n下放：慢慢回到起始位",
+        "cautions": [
+          "不要借摆动甩上去",
+          "手肘略高于手腕更容易找肩",
+          "不必刻意抬太高，肩高附近即可"
+        ]
+      },
+      "primaryMuscles": [
+        "deltoids"
+      ],
+      "secondaryMuscles": [
+        "trapezius"
+      ],
+      "movementTags": [
+        "肩中束"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "dumbbell"
+      ],
+      "englishName": "dumbbell lateral raise",
+      "replaceAliases": true,
+      "mediaMatch": "exact",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": "0334",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0334.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。与上游元数据对照；媒体授权独立。"
       }
     },
     {
@@ -392,8 +886,7 @@
       ],
       "category": "shoulder",
       "muscleGroups": [
-        "肩中束",
-        "左右侧控制"
+        "三角肌"
       ],
       "normalizationTags": [
         "shoulder",
@@ -406,6 +899,48 @@
         "label": "单臂侧平举",
         "sourceUrl": "https://loadmuscle.com/exercises/cable-single-arm-lateral-raise",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "单臂侧平举，主要涉及三角肌。单手持铃或拉力器手柄，身体保持稳定。具体用量按当天计划记录。",
+      "instructions": [
+        "单手持铃或拉力器手柄，身体保持稳定",
+        "手臂向身体侧方抬到接近肩高",
+        "控制回到起始位，避免身体侧摆借力"
+      ],
+      "guide": {
+        "diagram": "起始：单手持铃或拉力器手柄，身体保持稳定\n抬起：手臂向身体侧方抬到接近肩高\n下放：控制回到起始位，避免身体侧摆借力",
+        "cautions": [
+          "不要用躯干晃动带起重量",
+          "保持肩胛稳定，不要耸肩",
+          "两侧分别完成，弱侧优先控制动作质量"
+        ]
+      },
+      "primaryMuscles": [
+        "deltoids"
+      ],
+      "secondaryMuscles": [
+        "trapezius"
+      ],
+      "movementTags": [
+        "肩中束",
+        "左右侧控制"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "dumbbell"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -418,7 +953,7 @@
       ],
       "category": "shoulder",
       "muscleGroups": [
-        "肩中束"
+        "三角肌"
       ],
       "normalizationTags": [
         "shoulder",
@@ -431,6 +966,47 @@
         "label": "弹力绳侧平举",
         "sourceUrl": "https://loadmuscle.com/exercises/band-lateral-raise",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "弹力绳侧平举，主要涉及三角肌。踩住弹力绳，手握绳端在身体侧方。具体用量按当天计划记录。",
+      "instructions": [
+        "踩住弹力绳，手握绳端在身体侧方",
+        "沿侧方抬到接近肩高，保持肘微屈",
+        "慢慢回位，不要让弹力绳突然回弹"
+      ],
+      "guide": {
+        "diagram": "起始：踩住弹力绳，手握绳端在身体侧方\n抬起：沿侧方抬到接近肩高，保持肘微屈\n下放：慢慢回位，不要让弹力绳突然回弹",
+        "cautions": [
+          "确认弹力绳固定稳",
+          "不要借身体摆动",
+          "张力太大时缩短幅度或换轻阻力"
+        ]
+      },
+      "primaryMuscles": [
+        "deltoids"
+      ],
+      "secondaryMuscles": [
+        "trapezius"
+      ],
+      "movementTags": [
+        "肩中束"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "band"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -441,7 +1017,7 @@
       ],
       "category": "shoulder",
       "muscleGroups": [
-        "肩前束"
+        "三角肌"
       ],
       "normalizationTags": [
         "shoulder",
@@ -451,6 +1027,45 @@
       "media": {
         "path": "gifs/0310.gif",
         "label": "前平举"
+      },
+      "description": "前平举，主要涉及三角肌。哑铃在大腿前。具体用量按当天计划记录。",
+      "instructions": [
+        "哑铃在大腿前",
+        "沿身体前方举到肩高附近",
+        "控制回位"
+      ],
+      "guide": {
+        "diagram": "起始：哑铃在大腿前\n抬起：沿身体前方举到肩高附近\n下放：控制回位",
+        "cautions": [
+          "避免惯性甩重",
+          "肩前侧紧张时减重量",
+          "不要抬到头顶"
+        ]
+      },
+      "primaryMuscles": [
+        "deltoids"
+      ],
+      "secondaryMuscles": [],
+      "movementTags": [
+        "肩前束"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "dumbbell"
+      ],
+      "englishName": "dumbbell front raise",
+      "replaceAliases": true,
+      "mediaMatch": "exact",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": "0310",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0310.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。与上游元数据对照；媒体授权独立。"
       }
     },
     {
@@ -467,9 +1082,7 @@
       ],
       "category": "pull",
       "muscleGroups": [
-        "背阔肌",
-        "圆肌",
-        "肱二头"
+        "背阔与上背肌群"
       ],
       "normalizationTags": [
         "pullup"
@@ -486,6 +1099,43 @@
           "训练组优先动作质量，不按最大次数硬冲",
           "升级仍以严格标准引体次数为准"
         ]
+      },
+      "description": "引体向上，主要涉及背阔与上背肌群。正握横杆，手距约肩宽或略宽，双脚离地。具体用量按当天计划记录。",
+      "instructions": [
+        "正握横杆，手距约肩宽或略宽，双脚离地",
+        "准备：身体绷紧，肩部收紧，从几乎伸直但不完全放松的手臂开始",
+        "拉起：拉到下巴过杆，顶部短暂停顿",
+        "平稳下降，不摆动，不用惯性"
+      ],
+      "primaryMuscles": [
+        "upper-back"
+      ],
+      "secondaryMuscles": [
+        "biceps",
+        "forearm"
+      ],
+      "movementTags": [
+        "背阔肌",
+        "圆肌",
+        "肱二头"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "pull-up-bar"
+      ],
+      "englishName": "pull-up",
+      "replaceAliases": true,
+      "mediaMatch": "exact",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": "0652",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0652.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。与上游元数据对照；媒体授权独立。"
       }
     },
     {
@@ -499,10 +1149,7 @@
       ],
       "category": "pull",
       "muscleGroups": [
-        "上背",
-        "背阔肌",
-        "肱二头",
-        "肩胛控制"
+        "背阔与上背肌群"
       ],
       "normalizationTags": [
         "pullup",
@@ -515,8 +1162,7 @@
         "diagram": "起始：找到稳固桌沿、低杠或类似可抓握物，身体在下方绷紧，脚跟触地\n拉起：让身体整体上移，胸部靠近支撑物\n顶部：停顿并夹背\n下放：有控制地回到起始位",
         "cautions": [
           "支撑物必须稳，不要抓会移动的桌沿",
-          "不要塌腰或耸肩拉",
-          "本周用于补背部训练量，不做到力竭"
+          "不要塌腰或耸肩拉"
         ]
       },
       "media": {
@@ -524,6 +1170,44 @@
         "label": "水平引体向上起始",
         "note": "顶部图见动作图解 md 中 image00609.jpeg。",
         "sourceLabel": "本地图解：2026.6.15-2026.6.21 六艺动作图解"
+      },
+      "description": "水平引体向上，主要涉及背阔与上背肌群。找到稳固桌沿、低杠或类似可抓握物，身体在下方绷紧，脚跟触地。具体用量按当天计划记录。",
+      "instructions": [
+        "找到稳固桌沿、低杠或类似可抓握物，身体在下方绷紧，脚跟触地",
+        "拉起：让身体整体上移，胸部靠近支撑物",
+        "停顿并夹背",
+        "有控制地回到起始位"
+      ],
+      "primaryMuscles": [
+        "upper-back"
+      ],
+      "secondaryMuscles": [
+        "biceps",
+        "forearm"
+      ],
+      "movementTags": [
+        "上背",
+        "背阔肌",
+        "肱二头",
+        "肩胛控制"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -535,9 +1219,7 @@
       ],
       "category": "pull",
       "muscleGroups": [
-        "背阔肌",
-        "肱二头",
-        "离心控制"
+        "背阔与上背肌群"
       ],
       "normalizationTags": [
         "pullup",
@@ -552,10 +1234,46 @@
       "guide": {
         "diagram": "起始：借助跳起或垫脚到达顶部，让下巴过杆\n下降：从顶部开始，肩背保持收紧\n节奏：用4-5秒缓慢下降到接近起始位\n结束：每次都保持控制，不要突然掉下",
         "cautions": [
-          "离心疲劳和肘部压力较高，本周只少量补强",
           "肘肩不舒服时直接取消",
           "它不计入第5式升级标准"
         ]
+      },
+      "description": "离心引体向上，主要涉及背阔与上背肌群。借助跳起或垫脚到达顶部，让下巴过杆。具体用量按当天计划记录。",
+      "instructions": [
+        "借助跳起或垫脚到达顶部，让下巴过杆",
+        "从顶部开始，肩背保持收紧",
+        "节奏：用4-5秒缓慢下降到接近起始位",
+        "结束：每次都保持控制，不要突然掉下"
+      ],
+      "primaryMuscles": [
+        "upper-back"
+      ],
+      "secondaryMuscles": [
+        "biceps",
+        "forearm"
+      ],
+      "movementTags": [
+        "背阔肌",
+        "肱二头",
+        "离心控制"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "pull-up-bar"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0652.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -568,9 +1286,7 @@
       ],
       "category": "pull",
       "muscleGroups": [
-        "背阔肌",
-        "肩胛下沉",
-        "顶端控制"
+        "背阔与上背肌群"
       ],
       "normalizationTags": [
         "pullup",
@@ -582,21 +1298,62 @@
         "label": "引体向上顶峰停留",
         "sourceUrl": "https://loadmuscle.com/exercises/top-pull-up-hold",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "引体向上顶峰停留，主要涉及背阔与上背肌群。拉到引体向上顶端或借助踏台到顶端。具体用量按当天计划记录。",
+      "instructions": [
+        "拉到引体向上顶端或借助踏台到顶端",
+        "保持：下巴接近或超过杠，肩胛下沉，胸口靠近杠",
+        "结束：受控下放或脚落地重置"
+      ],
+      "guide": {
+        "diagram": "起始：拉到引体向上顶端或借助踏台到顶端\n保持：下巴接近或超过杠，肩胛下沉，胸口靠近杠\n结束：受控下放或脚落地重置",
+        "cautions": [
+          "不要耸肩硬卡在顶端",
+          "保持下巴微收，不要仰头凑杠",
+          "无法稳定停留时先缩短秒数"
+        ]
+      },
+      "primaryMuscles": [
+        "upper-back"
+      ],
+      "secondaryMuscles": [
+        "biceps",
+        "forearm"
+      ],
+      "movementTags": [
+        "背阔肌",
+        "肩胛下沉",
+        "顶端控制"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "pull-up-bar"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
       "exerciseKey": "scapular-pull",
       "displayName": "肩胛引体",
       "aliases": [
-        "肩胛引体/沉肩悬垂",
         "肩胛引体",
-        "沉肩悬垂"
+        "Scapular Pull-up"
       ],
       "category": "pull",
       "muscleGroups": [
-        "肩胛下沉",
-        "背阔肌启动",
-        "下斜方肌"
+        "斜方肌"
       ],
       "normalizationTags": [
         "pullup",
@@ -608,6 +1365,50 @@
         "label": "肩胛引体 / 沉肩悬垂",
         "sourceUrl": "https://loadmuscle.com/exercises/scapular-pull-up",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "肘部保持接近伸直，通过肩胛带小幅运动抬升、下放躯干；与静态主动悬垂不同。",
+      "instructions": [
+        "握住稳固单杠，身体悬垂，肘部保持接近伸直。",
+        "不屈肘做完整引体，通过肩胛控制让躯干小幅上移。",
+        "短暂停住后受控回到起始位置。",
+        "按动态重复记次数；单纯保持悬垂应使用计时动作。"
+      ],
+      "guide": {
+        "diagram": "握住稳固单杠，身体悬垂，肘部保持接近伸直。\n不屈肘做完整引体，通过肩胛控制让躯干小幅上移。\n短暂停住后受控回到起始位置。\n按动态重复记次数；单纯保持悬垂应使用计时动作。",
+        "cautions": [
+          "不要做成半个引体向上",
+          "全程手臂尽量伸直",
+          "先小幅度找背阔发力"
+        ]
+      },
+      "primaryMuscles": [
+        "trapezius"
+      ],
+      "secondaryMuscles": [
+        "upper-back"
+      ],
+      "movementTags": [
+        "肩胛下沉",
+        "背阔肌启动",
+        "下斜方肌"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "pull-up-bar"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -620,8 +1421,7 @@
       ],
       "category": "pull",
       "muscleGroups": [
-        "背阔肌",
-        "肩胛下沉"
+        "背阔与上背肌群"
       ],
       "normalizationTags": [
         "pullup",
@@ -633,6 +1433,48 @@
         "path": "gifs/0652.gif",
         "label": "组合项：引体向上或弹力绳高位下拉",
         "note": "组合项按当天能力在引体向上和弹力绳高位下拉之间选择；弹力绳版本请打开“弹力绳高位下拉”动作卡。"
+      },
+      "description": "引体向上或弹力绳高位下拉，主要涉及背阔与上背肌群。组合项：能做引体时优先做引体向上；需要降阶时改做弹力绳高位下拉。具体用量按当天计划记录。",
+      "instructions": [
+        "组合项：能做引体时优先做引体向上；需要降阶时改做弹力绳高位下拉",
+        "两者都先完成肩胛下沉，再让肘向下向后带"
+      ],
+      "guide": {
+        "diagram": "组合项：能做引体时优先做引体向上；需要降阶时改做弹力绳高位下拉\n两者都先完成肩胛下沉，再让肘向下向后带",
+        "cautions": [
+          "不要把两个动作都算成同一组额外加量",
+          "当天疲劳高时选择弹力绳版本",
+          "腰不要后仰借力"
+        ]
+      },
+      "primaryMuscles": [
+        "upper-back"
+      ],
+      "secondaryMuscles": [
+        "biceps",
+        "forearm"
+      ],
+      "movementTags": [
+        "背阔肌",
+        "肩胛下沉"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "choice",
+      "equipment": [
+        "band"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0652.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -644,9 +1486,7 @@
       ],
       "category": "pull",
       "muscleGroups": [
-        "背阔肌",
-        "中下斜方肌",
-        "菱形肌"
+        "背阔与上背肌群"
       ],
       "normalizationTags": [
         "row",
@@ -657,6 +1497,50 @@
       "media": {
         "path": "gifs/1330.gif",
         "label": "近似替代图示：单臂哑铃划船"
+      },
+      "description": "单臂哑铃划船，主要涉及背阔与上背肌群。一侧手膝或手扶稳定支撑，另一手持哑铃。具体用量按当天计划记录。",
+      "instructions": [
+        "一侧手膝或手扶稳定支撑，另一手持哑铃",
+        "拉起：肘向后向髋方向带，背部夹紧",
+        "肩胛前伸，受控回到底部"
+      ],
+      "guide": {
+        "diagram": "起始：一侧手膝或手扶稳定支撑，另一手持哑铃\n拉起：肘向后向髋方向带，背部夹紧\n下放：肩胛前伸，受控回到底部",
+        "cautions": [
+          "不要耸肩拉",
+          "不要把动作做成手臂弯举",
+          "躯干不要跟着大幅扭转"
+        ]
+      },
+      "primaryMuscles": [
+        "upper-back"
+      ],
+      "secondaryMuscles": [
+        "biceps",
+        "forearm"
+      ],
+      "movementTags": [
+        "背阔肌",
+        "中下斜方肌",
+        "菱形肌"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "dumbbell"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/1330.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -668,9 +1552,7 @@
       ],
       "category": "pull",
       "muscleGroups": [
-        "背阔肌",
-        "中下斜方肌",
-        "下背等长稳定"
+        "背阔与上背肌群"
       ],
       "normalizationTags": [
         "row",
@@ -681,6 +1563,50 @@
       "media": {
         "path": "gifs/0293.gif",
         "label": "俯身双哑铃划船"
+      },
+      "description": "俯身双哑铃划船，主要涉及背阔与上背肌群。髋折叠俯身，双手持哑铃，脊柱中立。具体用量按当天计划记录。",
+      "instructions": [
+        "髋折叠俯身，双手持哑铃，脊柱中立",
+        "拉起：双肘向后向髋方向带",
+        "保持背部稳定，控制哑铃回到起始位"
+      ],
+      "guide": {
+        "diagram": "起始：髋折叠俯身，双手持哑铃，脊柱中立\n拉起：双肘向后向髋方向带\n下放：保持背部稳定，控制哑铃回到起始位",
+        "cautions": [
+          "下背不稳时先减重量",
+          "不要用躯干猛甩哑铃",
+          "胸口保持打开，脖子放松"
+        ]
+      },
+      "primaryMuscles": [
+        "upper-back"
+      ],
+      "secondaryMuscles": [
+        "biceps",
+        "forearm"
+      ],
+      "movementTags": [
+        "背阔肌",
+        "中下斜方肌",
+        "下背等长稳定"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "dumbbell"
+      ],
+      "englishName": "dumbbell bent over row",
+      "replaceAliases": true,
+      "mediaMatch": "exact",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": "0293",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0293.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。与上游元数据对照；媒体授权独立。"
       }
     },
     {
@@ -693,9 +1619,7 @@
       ],
       "category": "pull",
       "muscleGroups": [
-        "背阔肌",
-        "菱形肌",
-        "肩胛后缩"
+        "背阔与上背肌群"
       ],
       "normalizationTags": [
         "row",
@@ -705,6 +1629,50 @@
       "media": {
         "path": "gifs/0988.gif",
         "label": "弹力绳划船"
+      },
+      "description": "弹力绳划船，主要涉及背阔与上背肌群。弹力绳固定在身前，双手握住绳端。具体用量按当天计划记录。",
+      "instructions": [
+        "弹力绳固定在身前，双手握住绳端",
+        "拉起：肩胛后缩，肘向后贴近身体带动",
+        "回位：控制弹力绳回弹，保持胸口打开"
+      ],
+      "guide": {
+        "diagram": "起始：弹力绳固定在身前，双手握住绳端\n拉起：肩胛后缩，肘向后贴近身体带动\n回位：控制弹力绳回弹，保持胸口打开",
+        "cautions": [
+          "确认弹力绳固定稳",
+          "不要耸肩拉",
+          "回位不要完全松掉张力"
+        ]
+      },
+      "primaryMuscles": [
+        "upper-back"
+      ],
+      "secondaryMuscles": [
+        "biceps",
+        "forearm"
+      ],
+      "movementTags": [
+        "背阔肌",
+        "菱形肌",
+        "肩胛后缩"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "band"
+      ],
+      "englishName": "band one arm standing low row",
+      "replaceAliases": true,
+      "mediaMatch": "exact",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": "0988",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0988.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。与上游元数据对照；媒体授权独立。"
       }
     },
     {
@@ -718,8 +1686,7 @@
       ],
       "category": "pull",
       "muscleGroups": [
-        "背阔肌",
-        "肩胛下沉"
+        "背阔与上背肌群"
       ],
       "normalizationTags": [
         "pulldown",
@@ -729,6 +1696,49 @@
       "media": {
         "path": "gifs/0983.gif",
         "label": "弹力绳高位下拉"
+      },
+      "description": "弹力绳高位下拉，主要涉及背阔与上背肌群。绳固定高处，双手抓绳。具体用量按当天计划记录。",
+      "instructions": [
+        "绳固定高处，双手抓绳",
+        "下拉：肘向下向后带，拉向锁骨或上胸",
+        "回位：慢慢放回"
+      ],
+      "guide": {
+        "diagram": "起始：绳固定高处，双手抓绳\n下拉：肘向下向后带，拉向锁骨或上胸\n回位：慢慢放回",
+        "cautions": [
+          "别用腰猛后仰借力",
+          "先想肩胛下沉再拉肘",
+          "回位别松掉张力"
+        ]
+      },
+      "primaryMuscles": [
+        "upper-back"
+      ],
+      "secondaryMuscles": [
+        "biceps",
+        "forearm"
+      ],
+      "movementTags": [
+        "背阔肌",
+        "肩胛下沉"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "band"
+      ],
+      "englishName": "band kneeling one arm pulldown",
+      "replaceAliases": true,
+      "mediaMatch": "exact",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": "0983",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0983.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。与上游元数据对照；媒体授权独立。"
       }
     },
     {
@@ -740,9 +1750,7 @@
       ],
       "category": "pull",
       "muscleGroups": [
-        "背阔肌",
-        "肩胛下沉",
-        "核心稳定"
+        "背阔与上背肌群"
       ],
       "normalizationTags": [
         "pulldown",
@@ -755,6 +1763,51 @@
         "label": "弹力绳直臂下拉",
         "sourceUrl": "https://loadmuscle.com/exercises/band-straight-arm-pulldown",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "弹力绳直臂下拉，主要涉及背阔与上背肌群。弹力绳固定高处，双臂伸直或微屈。具体用量按当天计划记录。",
+      "instructions": [
+        "弹力绳固定高处，双臂伸直或微屈",
+        "下拉：手臂沿弧线向大腿方向压下",
+        "背阔收紧，胸口保持打开",
+        "回位：控制弹力绳回到高处"
+      ],
+      "guide": {
+        "diagram": "起始：弹力绳固定高处，双臂伸直或微屈\n下拉：手臂沿弧线向大腿方向压下\n底部：背阔收紧，胸口保持打开\n回位：控制弹力绳回到高处",
+        "cautions": [
+          "不要弯肘做成下压",
+          "别用腰后仰借力",
+          "重量宁轻，先找背阔收缩"
+        ]
+      },
+      "primaryMuscles": [
+        "upper-back"
+      ],
+      "secondaryMuscles": [
+        "biceps",
+        "forearm"
+      ],
+      "movementTags": [
+        "背阔肌",
+        "肩胛下沉",
+        "核心稳定"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "band"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -767,9 +1820,8 @@
       ],
       "category": "pull",
       "muscleGroups": [
-        "后束",
-        "中下斜方肌",
-        "肩胛稳定"
+        "三角肌",
+        "背阔与上背肌群"
       ],
       "normalizationTags": [
         "face-pull",
@@ -779,6 +1831,50 @@
       "media": {
         "path": "gifs/1022.gif",
         "label": "近似替代图示：弹力绳面拉"
+      },
+      "description": "弹力绳面拉，主要涉及三角肌、背阔与上背肌群。弹力绳固定在脸部高度附近，双手握绳。具体用量按当天计划记录。",
+      "instructions": [
+        "弹力绳固定在脸部高度附近，双手握绳",
+        "拉起：手向脸两侧拉开，肘外展，肩胛后缩",
+        "回位：受控放回，保持张力"
+      ],
+      "guide": {
+        "diagram": "起始：弹力绳固定在脸部高度附近，双手握绳\n拉起：手向脸两侧拉开，肘外展，肩胛后缩\n回位：受控放回，保持张力",
+        "cautions": [
+          "不要耸肩",
+          "不要用下背后仰代偿",
+          "重量过大容易变成摆动"
+        ]
+      },
+      "primaryMuscles": [
+        "deltoids",
+        "upper-back"
+      ],
+      "secondaryMuscles": [
+        "trapezius"
+      ],
+      "movementTags": [
+        "后束",
+        "中下斜方肌",
+        "肩胛稳定"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "band"
+      ],
+      "englishName": "band standing rear delt row",
+      "replaceAliases": true,
+      "mediaMatch": "exact",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": "1022",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/1022.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。与上游元数据对照；媒体授权独立。"
       }
     },
     {
@@ -791,9 +1887,8 @@
       ],
       "category": "shoulder",
       "muscleGroups": [
-        "后束",
-        "菱形肌",
-        "肩胛稳定"
+        "三角肌",
+        "背阔与上背肌群"
       ],
       "normalizationTags": [
         "rear-delt",
@@ -803,6 +1898,50 @@
       "media": {
         "path": "gifs/0383.gif",
         "label": "俯身反向飞鸟"
+      },
+      "description": "俯身反向飞鸟，主要涉及三角肌、背阔与上背肌群。髋折叠俯身，双臂自然下垂，肘微屈。具体用量按当天计划记录。",
+      "instructions": [
+        "髋折叠俯身，双臂自然下垂，肘微屈",
+        "打开：双臂向身体两侧抬起，像展开翅膀",
+        "控制回到起始位"
+      ],
+      "guide": {
+        "diagram": "起始：髋折叠俯身，双臂自然下垂，肘微屈\n打开：双臂向身体两侧抬起，像展开翅膀\n下放：控制回到起始位",
+        "cautions": [
+          "不要耸肩",
+          "重量宁轻勿重",
+          "保持躯干稳定，不要靠摆动甩起"
+        ]
+      },
+      "primaryMuscles": [
+        "deltoids",
+        "upper-back"
+      ],
+      "secondaryMuscles": [
+        "trapezius"
+      ],
+      "movementTags": [
+        "后束",
+        "菱形肌",
+        "肩胛稳定"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "dumbbell"
+      ],
+      "englishName": "dumbbell reverse fly",
+      "replaceAliases": true,
+      "mediaMatch": "exact",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": "0383",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0383.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。与上游元数据对照；媒体授权独立。"
       }
     },
     {
@@ -813,7 +1952,7 @@
       ],
       "category": "arms",
       "muscleGroups": [
-        "肱二头"
+        "肱二头肌"
       ],
       "normalizationTags": [
         "curl",
@@ -823,6 +1962,47 @@
       "media": {
         "path": "gifs/1677.gif",
         "label": "近似替代图示：哑铃弯举"
+      },
+      "description": "哑铃弯举，主要涉及肱二头肌。双手持哑铃，掌心向前或自然旋转。具体用量按当天计划记录。",
+      "instructions": [
+        "双手持哑铃，掌心向前或自然旋转",
+        "弯举：上臂尽量固定，前臂向上卷起",
+        "控制回到底部，不要完全放松张力"
+      ],
+      "guide": {
+        "diagram": "起始：双手持哑铃，掌心向前或自然旋转\n弯举：上臂尽量固定，前臂向上卷起\n下放：控制回到底部，不要完全放松张力",
+        "cautions": [
+          "不要摆腰借力",
+          "手腕别后折",
+          "顶端停顿一下会更容易找到发力"
+        ]
+      },
+      "primaryMuscles": [
+        "biceps"
+      ],
+      "secondaryMuscles": [
+        "forearm"
+      ],
+      "movementTags": [
+        "肱二头"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "dumbbell"
+      ],
+      "englishName": "dumbbell seated bicep curl",
+      "replaceAliases": true,
+      "mediaMatch": "exact",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": "1677",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/1677.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。与上游元数据对照；媒体授权独立。"
       }
     },
     {
@@ -833,9 +2013,8 @@
       ],
       "category": "arms",
       "muscleGroups": [
-        "肱肌",
-        "肱桡肌",
-        "肱二头辅助"
+        "肱二头肌",
+        "前臂肌群"
       ],
       "normalizationTags": [
         "curl",
@@ -845,6 +2024,48 @@
       "media": {
         "path": "gifs/0313.gif",
         "label": "锤式弯举"
+      },
+      "description": "锤式弯举，主要涉及肱二头肌、前臂肌群。双手持哑铃，掌心相对。具体用量按当天计划记录。",
+      "instructions": [
+        "双手持哑铃，掌心相对",
+        "弯举：保持锤式握法向上卷起",
+        "控制回到底部，保持肘部位置稳定"
+      ],
+      "guide": {
+        "diagram": "起始：双手持哑铃，掌心相对\n弯举：保持锤式握法向上卷起\n下放：控制回到底部，保持肘部位置稳定",
+        "cautions": [
+          "不要摆腰借力",
+          "肘不要向前飘太多",
+          "重量过大时容易变成甩动"
+        ]
+      },
+      "primaryMuscles": [
+        "biceps",
+        "forearm"
+      ],
+      "secondaryMuscles": [],
+      "movementTags": [
+        "肱肌",
+        "肱桡肌",
+        "肱二头辅助"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "dumbbell"
+      ],
+      "englishName": "dumbbell hammer curl",
+      "replaceAliases": true,
+      "mediaMatch": "exact",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": "0313",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0313.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。与上游元数据对照；媒体授权独立。"
       }
     },
     {
@@ -856,7 +2077,7 @@
       ],
       "category": "arms",
       "muscleGroups": [
-        "肱三头长头"
+        "肱三头肌"
       ],
       "normalizationTags": [
         "triceps",
@@ -866,6 +2087,45 @@
       "media": {
         "path": "gifs/0430.gif",
         "label": "过顶哑铃臂屈伸"
+      },
+      "description": "过顶哑铃臂屈伸，主要涉及肱三头肌。哑铃举过头顶，肘朝前。具体用量按当天计划记录。",
+      "instructions": [
+        "哑铃举过头顶，肘朝前",
+        "前臂向后折叠",
+        "伸肘回到头顶"
+      ],
+      "guide": {
+        "diagram": "起始：哑铃举过头顶，肘朝前\n下放：前臂向后折叠\n推起：伸肘回到头顶",
+        "cautions": [
+          "肘尽量别外张太开",
+          "核心收紧避免下背代偿",
+          "肩不舒服时先减重"
+        ]
+      },
+      "primaryMuscles": [
+        "triceps"
+      ],
+      "secondaryMuscles": [],
+      "movementTags": [
+        "肱三头长头"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "dumbbell"
+      ],
+      "englishName": "dumbbell standing triceps extension",
+      "replaceAliases": true,
+      "mediaMatch": "exact",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": "0430",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0430.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。与上游元数据对照；媒体授权独立。"
       }
     },
     {
@@ -877,9 +2137,8 @@
       ],
       "category": "legs",
       "muscleGroups": [
-        "股四头",
-        "臀",
-        "核心"
+        "股四头肌",
+        "臀肌群"
       ],
       "normalizationTags": [
         "squat",
@@ -889,6 +2148,50 @@
       "media": {
         "path": "gifs/1760.gif",
         "label": "哑铃杯式深蹲"
+      },
+      "description": "哑铃杯式深蹲，主要涉及股四头肌、臀肌群。哑铃抱胸前，脚略宽于肩。具体用量按当天计划记录。",
+      "instructions": [
+        "哑铃抱胸前，脚略宽于肩",
+        "下蹲：臀向后下坐，膝盖跟脚尖同向",
+        "站起：全脚掌发力站回"
+      ],
+      "guide": {
+        "diagram": "起始：哑铃抱胸前，脚略宽于肩\n下蹲：臀向后下坐，膝盖跟脚尖同向\n站起：全脚掌发力站回",
+        "cautions": [
+          "不要塌腰含胸",
+          "膝盖不要内扣",
+          "蹲不深先保证稳定和中立位"
+        ]
+      },
+      "primaryMuscles": [
+        "quadriceps",
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "hamstring"
+      ],
+      "movementTags": [
+        "股四头",
+        "臀",
+        "核心"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "dumbbell"
+      ],
+      "englishName": "dumbbell goblet squat",
+      "replaceAliases": true,
+      "mediaMatch": "exact",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": "1760",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/1760.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。与上游元数据对照；媒体授权独立。"
       }
     },
     {
@@ -901,8 +2204,7 @@
       "category": "legs",
       "muscleGroups": [
         "腘绳肌",
-        "臀",
-        "下背等长稳定"
+        "臀肌群"
       ],
       "normalizationTags": [
         "hinge",
@@ -912,6 +2214,51 @@
       "media": {
         "path": "gifs/1459.gif",
         "label": "哑铃罗马尼亚硬拉"
+      },
+      "description": "哑铃罗马尼亚硬拉，主要涉及腘绳肌、臀肌群。双手持铃站立。具体用量按当天计划记录。",
+      "instructions": [
+        "双手持铃站立",
+        "髋向后折叠，哑铃贴近大腿向下",
+        "感到大腿后侧拉伸",
+        "起身：夹臀伸髋站起"
+      ],
+      "guide": {
+        "diagram": "起始：双手持铃站立\n下放：髋向后折叠，哑铃贴近大腿向下\n底部：感到大腿后侧拉伸\n起身：夹臀伸髋站起",
+        "cautions": [
+          "重点是髋折叠，不是弯腰找地",
+          "背部保持中立",
+          "下放到拉伸明显即可，不必强求更低"
+        ]
+      },
+      "primaryMuscles": [
+        "hamstring",
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "lower-back"
+      ],
+      "movementTags": [
+        "腘绳肌",
+        "臀",
+        "下背等长稳定"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "dumbbell"
+      ],
+      "englishName": "dumbbell romanian deadlift",
+      "replaceAliases": true,
+      "mediaMatch": "exact",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": "1459",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/1459.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。与上游元数据对照；媒体授权独立。"
       }
     },
     {
@@ -923,9 +2270,8 @@
       ],
       "category": "legs",
       "muscleGroups": [
-        "股四头",
-        "臀",
-        "单腿稳定"
+        "股四头肌",
+        "臀肌群"
       ],
       "normalizationTags": [
         "legs",
@@ -937,6 +2283,51 @@
         "label": "保加利亚分腿蹲",
         "sourceUrl": "https://loadmuscle.com/exercises/bulgarian-split-squat",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "保加利亚分腿蹲，主要涉及股四头肌、臀肌群。后脚搭在凳子或固定支撑上，前脚站稳。具体用量按当天计划记录。",
+      "instructions": [
+        "后脚搭在凳子或固定支撑上，前脚站稳",
+        "前腿屈膝下蹲，躯干略前倾",
+        "前脚全脚掌踩稳，膝盖跟脚尖同向",
+        "站起：前腿发力站回"
+      ],
+      "guide": {
+        "diagram": "起始：后脚搭在凳子或固定支撑上，前脚站稳\n下降：前腿屈膝下蹲，躯干略前倾\n底部：前脚全脚掌踩稳，膝盖跟脚尖同向\n站起：前腿发力站回",
+        "cautions": [
+          "前脚别站太近，膝盖压力会变大",
+          "先徒手找平衡再加哑铃",
+          "不要用后腿猛蹬"
+        ]
+      },
+      "primaryMuscles": [
+        "quadriceps",
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "hamstring"
+      ],
+      "movementTags": [
+        "股四头",
+        "臀",
+        "单腿稳定"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -949,9 +2340,7 @@
       ],
       "category": "legs",
       "muscleGroups": [
-        "腓肠肌",
-        "比目鱼肌",
-        "脚踝稳定"
+        "小腿肌群"
       ],
       "normalizationTags": [
         "calf",
@@ -971,6 +2360,40 @@
           "不要弹跳借力",
           "可按计划徒手或持哑铃执行"
         ]
+      },
+      "description": "哑铃提踵，主要涉及小腿肌群。站稳，脚掌踩实，必要时扶墙保持平衡。具体用量按当天计划记录。",
+      "instructions": [
+        "站稳，脚掌踩实，必要时扶墙保持平衡",
+        "上抬：脚跟向上抬到最高点",
+        "顶端：小腿收紧，停1秒",
+        "控制脚跟回落，不要快速弹跳"
+      ],
+      "primaryMuscles": [
+        "calves"
+      ],
+      "secondaryMuscles": [],
+      "movementTags": [
+        "腓肠肌",
+        "比目鱼肌",
+        "脚踝稳定"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "dumbbell"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -981,8 +2404,7 @@
       ],
       "category": "core",
       "muscleGroups": [
-        "下腹控制",
-        "髋屈控制"
+        "髋屈肌群"
       ],
       "normalizationTags": [
         "core",
@@ -992,6 +2414,49 @@
       "media": {
         "path": "gifs/0620.gif",
         "label": "仰卧举腿"
+      },
+      "description": "仰卧屈髋抬腿，髋屈肌负责抬腿，腹部帮助控制骨盆和腰椎位置。",
+      "instructions": [
+        "仰卧在垫上，腹部收紧，腰背位置保持可控。",
+        "根据能力伸直或适度屈膝，缓慢抬腿。",
+        "下放到不导致腰部明显拱起的范围。",
+        "不甩腿，不把髋屈动作描述为孤立“下腹”训练。"
+      ],
+      "guide": {
+        "diagram": "仰卧在垫上，腹部收紧，腰背位置保持可控。\n根据能力伸直或适度屈膝，缓慢抬腿。\n下放到不导致腰部明显拱起的范围。\n不甩腿，不把髋屈动作描述为孤立“下腹”训练。",
+        "cautions": [
+          "腰离地太多就缩短下放幅度",
+          "不要甩腿借力",
+          "下放越慢越能练到控制"
+        ]
+      },
+      "primaryMuscles": [
+        "hip-flexors"
+      ],
+      "secondaryMuscles": [
+        "abs"
+      ],
+      "movementTags": [
+        "下腹控制",
+        "髋屈控制"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0620.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1002,8 +2467,7 @@
       ],
       "category": "core",
       "muscleGroups": [
-        "下腹卷动",
-        "骨盆后倾"
+        "腹直肌"
       ],
       "normalizationTags": [
         "core",
@@ -1013,6 +2477,48 @@
       "media": {
         "path": "gifs/0872.gif",
         "label": "反向卷腹"
+      },
+      "description": "反向卷腹，主要涉及腹直肌。仰卧屈膝，骨盆保持可控。具体用量按当天计划记录。",
+      "instructions": [
+        "仰卧屈膝，骨盆保持可控",
+        "卷起：膝向胸口方向收，小幅度卷起骨盆",
+        "回位：慢慢放回，不要让腰猛地砸回地面"
+      ],
+      "guide": {
+        "diagram": "起始：仰卧屈膝，骨盆保持可控\n卷起：膝向胸口方向收，小幅度卷起骨盆\n回位：慢慢放回，不要让腰猛地砸回地面",
+        "cautions": [
+          "重点是骨盆卷动，不是大幅甩腿",
+          "动作范围小也有效",
+          "腰不适时先减少次数和幅度"
+        ]
+      },
+      "primaryMuscles": [
+        "abs"
+      ],
+      "secondaryMuscles": [
+        "hip-flexors"
+      ],
+      "movementTags": [
+        "下腹卷动",
+        "骨盆后倾"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "reverse crunch",
+      "replaceAliases": true,
+      "mediaMatch": "exact",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": "0872",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0872.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。与上游元数据对照；媒体授权独立。"
       }
     },
     {
@@ -1023,8 +2529,7 @@
       ],
       "category": "core",
       "muscleGroups": [
-        "核心稳定",
-        "抗伸展"
+        "腹直肌"
       ],
       "normalizationTags": [
         "core",
@@ -1035,6 +2540,48 @@
       "media": {
         "path": "gifs/2135.gif",
         "label": "近似替代图示：短平板支撑"
+      },
+      "description": "短平板支撑，主要涉及腹直肌。前臂撑地，身体成一条线。具体用量按当天计划记录。",
+      "instructions": [
+        "前臂撑地，身体成一条线",
+        "保持：收紧腹部和臀部，短时间高质量维持",
+        "结束：保持控制，不要突然塌腰落地"
+      ],
+      "guide": {
+        "diagram": "起始：前臂撑地，身体成一条线\n保持：收紧腹部和臀部，短时间高质量维持\n结束：保持控制，不要突然塌腰落地",
+        "cautions": [
+          "短时间也要保持标准姿势",
+          "腰酸明显时立刻停下调整",
+          "不要屏气硬撑"
+        ]
+      },
+      "primaryMuscles": [
+        "abs"
+      ],
+      "secondaryMuscles": [
+        "obliques"
+      ],
+      "movementTags": [
+        "核心稳定",
+        "抗伸展"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/2135.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1045,8 +2592,7 @@
       ],
       "category": "core",
       "muscleGroups": [
-        "核心稳定",
-        "抗伸展"
+        "腹直肌"
       ],
       "normalizationTags": [
         "core",
@@ -1056,6 +2602,48 @@
       "media": {
         "path": "gifs/2135.gif",
         "label": "近似替代图示：平板支撑"
+      },
+      "description": "平板支撑，主要涉及腹直肌。前臂撑地，肩在肘上方，身体从头到脚一线。具体用量按当天计划记录。",
+      "instructions": [
+        "前臂撑地，肩在肘上方，身体从头到脚一线",
+        "保持：腹部、臀部同时收紧，稳定呼吸",
+        "结束：膝盖先落地，再放松身体"
+      ],
+      "guide": {
+        "diagram": "起始：前臂撑地，肩在肘上方，身体从头到脚一线\n保持：腹部、臀部同时收紧，稳定呼吸\n结束：膝盖先落地，再放松身体",
+        "cautions": [
+          "不要塌腰或撅臀",
+          "肩膀不要耸到耳朵旁",
+          "宁可缩短时间，也不要靠变形硬撑"
+        ]
+      },
+      "primaryMuscles": [
+        "abs"
+      ],
+      "secondaryMuscles": [
+        "obliques"
+      ],
+      "movementTags": [
+        "核心稳定",
+        "抗伸展"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/2135.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1068,9 +2656,7 @@
       ],
       "category": "core",
       "muscleGroups": [
-        "侧腹",
-        "抗侧屈",
-        "肩胛稳定"
+        "腹斜肌"
       ],
       "normalizationTags": [
         "core",
@@ -1080,6 +2666,50 @@
       "media": {
         "path": "gifs/0705.gif",
         "label": "侧桥"
+      },
+      "description": "侧桥，主要涉及腹斜肌。侧身前臂撑地，双脚叠放或前后错开。具体用量按当天计划记录。",
+      "instructions": [
+        "侧身前臂撑地，双脚叠放或前后错开",
+        "撑起：让肩、髋、脚形成一条线",
+        "保持：侧腹发力，骨盆不要向下掉"
+      ],
+      "guide": {
+        "diagram": "起始：侧身前臂撑地，双脚叠放或前后错开\n撑起：让肩、髋、脚形成一条线\n保持：侧腹发力，骨盆不要向下掉",
+        "cautions": [
+          "支撑肩不舒服时缩短时间",
+          "骨盆不要前后转动",
+          "先做短组数，保证左右侧质量一致"
+        ]
+      },
+      "primaryMuscles": [
+        "obliques"
+      ],
+      "secondaryMuscles": [
+        "abs",
+        "deltoids"
+      ],
+      "movementTags": [
+        "侧腹",
+        "抗侧屈",
+        "肩胛稳定"
+      ],
+      "recordingMode": "time",
+      "laterality": "unilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "side bridge v. 2",
+      "replaceAliases": true,
+      "mediaMatch": "exact",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": "0705",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0705.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。与上游元数据对照；媒体授权独立。"
       }
     },
     {
@@ -1091,8 +2721,7 @@
       ],
       "category": "core",
       "muscleGroups": [
-        "核心稳定",
-        "抗伸展"
+        "腹直肌"
       ],
       "normalizationTags": [
         "core",
@@ -1102,6 +2731,48 @@
       "media": {
         "path": "gifs/0276.gif",
         "label": "死虫"
+      },
+      "description": "死虫，主要涉及腹直肌。仰卧，手臂朝上，髋膝约 90 度。具体用量按当天计划记录。",
+      "instructions": [
+        "仰卧，手臂朝上，髋膝约 90 度",
+        "伸展：对侧手脚慢慢向远处伸直",
+        "回位：腰背保持贴地，回到起始位后换边"
+      ],
+      "guide": {
+        "diagram": "起始：仰卧，手臂朝上，髋膝约 90 度\n伸展：对侧手脚慢慢向远处伸直\n回位：腰背保持贴地，回到起始位后换边",
+        "cautions": [
+          "腰离地就缩短伸展幅度",
+          "动作越慢越有效",
+          "不要为了伸得远而失去骨盆控制"
+        ]
+      },
+      "primaryMuscles": [
+        "abs"
+      ],
+      "secondaryMuscles": [
+        "hip-flexors"
+      ],
+      "movementTags": [
+        "核心稳定",
+        "抗伸展"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "dead bug",
+      "replaceAliases": true,
+      "mediaMatch": "exact",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": "0276",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0276.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。与上游元数据对照；媒体授权独立。"
       }
     },
     {
@@ -1113,8 +2784,7 @@
       ],
       "category": "core",
       "muscleGroups": [
-        "腹直肌",
-        "上腹卷动"
+        "腹直肌"
       ],
       "normalizationTags": [
         "core",
@@ -1124,6 +2794,48 @@
       "media": {
         "path": "gifs/0274.gif",
         "label": "卷腹"
+      },
+      "description": "卷腹，主要涉及腹直肌。仰卧屈膝，手轻放头侧或胸前。具体用量按当天计划记录。",
+      "instructions": [
+        "仰卧屈膝，手轻放头侧或胸前",
+        "卷起：上背离地，肋骨向骨盆靠近",
+        "回位：控制下放，不要用脖子猛拉"
+      ],
+      "guide": {
+        "diagram": "起始：仰卧屈膝，手轻放头侧或胸前\n卷起：上背离地，肋骨向骨盆靠近\n回位：控制下放，不要用脖子猛拉",
+        "cautions": [
+          "不要拉脖子",
+          "下背保持自然贴近地面",
+          "顶端短暂停顿再下放"
+        ]
+      },
+      "primaryMuscles": [
+        "abs"
+      ],
+      "secondaryMuscles": [
+        "obliques"
+      ],
+      "movementTags": [
+        "腹直肌",
+        "上腹卷动"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "crunch floor",
+      "replaceAliases": true,
+      "mediaMatch": "exact",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": "0274",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0274.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。与上游元数据对照；媒体授权独立。"
       }
     },
     {
@@ -1134,8 +2846,7 @@
       ],
       "category": "core",
       "muscleGroups": [
-        "腹斜肌",
-        "抗旋转控制"
+        "腹斜肌"
       ],
       "normalizationTags": [
         "core",
@@ -1145,6 +2856,49 @@
       "media": {
         "path": "gifs/0687.gif",
         "label": "俄罗斯转体"
+      },
+      "description": "坐姿进行受控躯干旋转的核心动作，区别于帕洛夫推举等抗旋转保持动作。",
+      "instructions": [
+        "坐稳并屈膝，躯干保持可控位置，双脚可以踩地。",
+        "双手放于胸前，从躯干转向一侧，不只甩手。",
+        "回中间再转向另一侧，动作幅度保持舒适。",
+        "避免弓背大幅甩转；记录时明确左右往返的次数口径。"
+      ],
+      "guide": {
+        "diagram": "坐稳并屈膝，躯干保持可控位置，双脚可以踩地。\n双手放于胸前，从躯干转向一侧，不只甩手。\n回中间再转向另一侧，动作幅度保持舒适。\n避免弓背大幅甩转；记录时明确左右往返的次数口径。",
+        "cautions": [
+          "腰不舒服时缩小幅度或双脚落地",
+          "不要靠手臂快速甩动",
+          "保持呼吸，不要憋气"
+        ]
+      },
+      "primaryMuscles": [
+        "obliques"
+      ],
+      "secondaryMuscles": [
+        "abs"
+      ],
+      "movementTags": [
+        "腹斜肌",
+        "抗旋转控制"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "russian twist",
+      "replaceAliases": true,
+      "mediaMatch": "exact",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": "0687",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0687.json",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。与上游元数据对照；媒体授权独立。"
       }
     },
     {
@@ -1156,9 +2910,7 @@
       ],
       "category": "core",
       "muscleGroups": [
-        "核心稳定",
-        "臀",
-        "肩胛稳定"
+        "腹直肌"
       ],
       "normalizationTags": [
         "core",
@@ -1170,6 +2922,51 @@
         "label": "鸟狗",
         "sourceUrl": "https://tenor.com/view/bird-dog-gif-27559649",
         "sourceLabel": "素材来源：Tenor"
+      },
+      "description": "鸟狗，主要涉及腹直肌。四点跪姿，双手在肩下，双膝在髋下。具体用量按当天计划记录。",
+      "instructions": [
+        "四点跪姿，双手在肩下，双膝在髋下",
+        "伸展：对侧手脚同时向远处伸直",
+        "停顿：骨盆保持水平，腰不塌",
+        "回位：慢慢收回，再换另一侧"
+      ],
+      "guide": {
+        "diagram": "起始：四点跪姿，双手在肩下，双膝在髋下\n伸展：对侧手脚同时向远处伸直\n停顿：骨盆保持水平，腰不塌\n回位：慢慢收回，再换另一侧",
+        "cautions": [
+          "不要为了抬高腿而塌腰",
+          "动作越慢越能练核心稳定",
+          "骨盆左右晃动明显就缩短幅度"
+        ]
+      },
+      "primaryMuscles": [
+        "abs"
+      ],
+      "secondaryMuscles": [
+        "gluteal",
+        "lower-back"
+      ],
+      "movementTags": [
+        "核心稳定",
+        "臀",
+        "肩胛稳定"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1179,11 +2976,7 @@
         "快走"
       ],
       "category": "recovery",
-      "muscleGroups": [
-        "恢复",
-        "循环",
-        "低强度有氧"
-      ],
+      "muscleGroups": [],
       "normalizationTags": [
         "walk",
         "recovery"
@@ -1194,6 +2987,44 @@
         "label": "快走 / 原地踏步参考",
         "sourceUrl": "https://loadmuscle.com/exercises/marching-on-spot",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "快走，主要涉及低强度活动与恢复。保持轻微气喘但能说话的节奏，步幅自然，手臂轻微摆动。具体用量按当天计划记录。",
+      "instructions": [
+        "保持轻微气喘但能说话的节奏，步幅自然，手臂轻微摆动",
+        "结束前逐渐放慢，不要突然停下"
+      ],
+      "guide": {
+        "diagram": "保持轻微气喘但能说话的节奏，步幅自然，手臂轻微摆动\n结束前逐渐放慢，不要突然停下",
+        "cautions": [
+          "恢复日不要做成高强度冲刺",
+          "膝踝不适时降低速度",
+          "保持能稳定呼吸的强度"
+        ]
+      },
+      "primaryMuscles": [],
+      "secondaryMuscles": [],
+      "movementTags": [
+        "恢复",
+        "循环",
+        "低强度有氧"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "exerciseType": "cardio",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1203,11 +3034,7 @@
         "散步"
       ],
       "category": "recovery",
-      "muscleGroups": [
-        "恢复",
-        "循环",
-        "放松"
-      ],
+      "muscleGroups": [],
       "normalizationTags": [
         "walk",
         "recovery"
@@ -1218,6 +3045,44 @@
         "label": "散步 / 原地踏步参考",
         "sourceUrl": "https://loadmuscle.com/exercises/marching-on-spot",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "散步，主要涉及低强度活动与恢复。保持轻松步速，呼吸自然，身体放松。具体用量按当天计划记录。",
+      "instructions": [
+        "保持轻松步速，呼吸自然，身体放松",
+        "适合休息日或训练后作为低压力活动"
+      ],
+      "guide": {
+        "diagram": "保持轻松步速，呼吸自然，身体放松\n适合休息日或训练后作为低压力活动",
+        "cautions": [
+          "不要为了补量走到疲劳明显",
+          "脚底或膝盖不适时减少时长",
+          "天气或路面差时优先安全"
+        ]
+      },
+      "primaryMuscles": [],
+      "secondaryMuscles": [],
+      "movementTags": [
+        "恢复",
+        "循环",
+        "放松"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "exerciseType": "cardio",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1233,8 +3098,9 @@
       ],
       "category": "recovery",
       "muscleGroups": [
-        "胸背肩活动度",
-        "恢复"
+        "胸大肌",
+        "背阔与上背肌群",
+        "三角肌"
       ],
       "normalizationTags": [
         "stretch",
@@ -1246,6 +3112,47 @@
         "label": "胸背肩拉伸参考",
         "sourceUrl": "https://loadmuscle.com/exercises/standing-reach-up-back-rotation-stretch",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "胸、背、肩拉伸，主要涉及胸大肌、背阔与上背肌群、三角肌。围绕胸、背、肩做轻柔拉伸，每个方向保持稳定呼吸。具体用量按当天计划记录。",
+      "instructions": [
+        "围绕胸、背、肩做轻柔拉伸，每个方向保持稳定呼吸",
+        "需要髋部放松时另加髋屈肌或内收肌拉伸"
+      ],
+      "guide": {
+        "diagram": "围绕胸、背、肩做轻柔拉伸，每个方向保持稳定呼吸\n需要髋部放松时另加髋屈肌或内收肌拉伸",
+        "cautions": [
+          "拉伸不要弹震",
+          "只要拉伸感，不追求疼痛",
+          "肩前侧不适时缩小幅度"
+        ]
+      },
+      "primaryMuscles": [
+        "chest",
+        "upper-back",
+        "deltoids"
+      ],
+      "secondaryMuscles": [],
+      "movementTags": [
+        "胸背肩活动度",
+        "恢复"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "exerciseType": "mobility",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1256,10 +3163,7 @@
         "全身轻拉伸"
       ],
       "category": "recovery",
-      "muscleGroups": [
-        "全身恢复",
-        "活动度"
-      ],
+      "muscleGroups": [],
       "normalizationTags": [
         "stretch",
         "full-body"
@@ -1270,6 +3174,43 @@
         "label": "全身拉伸参考",
         "sourceUrl": "https://loadmuscle.com/exercises/standing-reach-up-back-rotation-stretch",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "全身拉伸，主要涉及低强度活动与恢复。按肩背、髋、腿后侧、内侧等部位依次轻柔拉伸。具体用量按当天计划记录。",
+      "instructions": [
+        "按肩背、髋、腿后侧、内侧等部位依次轻柔拉伸",
+        "每个动作保持稳定呼吸，整体以恢复为主"
+      ],
+      "guide": {
+        "diagram": "按肩背、髋、腿后侧、内侧等部位依次轻柔拉伸\n每个动作保持稳定呼吸，整体以恢复为主",
+        "cautions": [
+          "不要把恢复拉伸做成高强度训练",
+          "酸痛明显的部位缩短时间",
+          "出现刺痛或麻木立即停止"
+        ]
+      },
+      "primaryMuscles": [],
+      "secondaryMuscles": [],
+      "movementTags": [
+        "全身恢复",
+        "活动度"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "exerciseType": "mobility",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1281,10 +3222,7 @@
         "轻拉伸"
       ],
       "category": "recovery",
-      "muscleGroups": [
-        "恢复",
-        "活动度"
-      ],
+      "muscleGroups": [],
       "normalizationTags": [
         "stretch",
         "general"
@@ -1295,6 +3233,43 @@
         "label": "通用拉伸参考",
         "sourceUrl": "https://loadmuscle.com/exercises/standing-reach-up-back-rotation-stretch",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "拉伸，主要涉及低强度活动与恢复。缓慢进入拉伸位，保持稳定呼吸，再缓慢退出。具体用量按当天计划记录。",
+      "instructions": [
+        "缓慢进入拉伸位，保持稳定呼吸，再缓慢退出",
+        "具体部位按当天计划文字执行"
+      ],
+      "guide": {
+        "diagram": "缓慢进入拉伸位，保持稳定呼吸，再缓慢退出\n具体部位按当天计划文字执行",
+        "cautions": [
+          "不要弹震",
+          "有疼痛而不是拉伸感时立即停",
+          "训练后拉伸以放松为主"
+        ]
+      },
+      "primaryMuscles": [],
+      "secondaryMuscles": [],
+      "movementTags": [
+        "恢复",
+        "活动度"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "exerciseType": "mobility",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1307,9 +3282,7 @@
       ],
       "category": "recovery",
       "muscleGroups": [
-        "内收肌",
-        "髋部活动度",
-        "恢复"
+        "内收肌群"
       ],
       "normalizationTags": [
         "stretch",
@@ -1321,6 +3294,48 @@
         "label": "大腿内侧拉伸",
         "sourceUrl": "https://loadmuscle.com/exercises/standing-wide-knees-adductor-stretch",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "大腿内侧拉伸，主要涉及内收肌群。进入侧向或侧卧大腿内侧拉伸位。具体用量按当天计划记录。",
+      "instructions": [
+        "进入侧向或侧卧大腿内侧拉伸位",
+        "拉伸：慢慢打开髋部，找到大腿内侧拉伸感",
+        "保持：稳定呼吸 30–40 秒",
+        "回位：缓慢退出，不要弹震"
+      ],
+      "guide": {
+        "diagram": "起始：进入侧向或侧卧大腿内侧拉伸位\n拉伸：慢慢打开髋部，找到大腿内侧拉伸感\n保持：稳定呼吸 30–40 秒\n回位：缓慢退出，不要弹震",
+        "cautions": [
+          "只要拉伸感，不追求疼痛",
+          "酸痛明显时减小幅度",
+          "两侧都做，注意左右差异"
+        ]
+      },
+      "primaryMuscles": [
+        "adductors"
+      ],
+      "secondaryMuscles": [],
+      "movementTags": [
+        "内收肌",
+        "髋部活动度",
+        "恢复"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "exerciseType": "mobility",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1333,9 +3348,7 @@
       ],
       "category": "push",
       "muscleGroups": [
-        "肩胛稳定",
-        "前锯肌",
-        "胸肩热身"
+        "前锯肌"
       ],
       "normalizationTags": [
         "pushup",
@@ -1356,6 +3369,42 @@
         "label": "肩胛俯卧撑",
         "sourceUrl": "https://loadmuscle.com/exercises/scapula-push-up",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "肩胛俯卧撑，主要涉及前锯肌。直臂俯卧撑支撑，身体保持一条线。具体用量按当天计划记录。",
+      "instructions": [
+        "直臂俯卧撑支撑，身体保持一条线",
+        "下沉：手臂不弯，让肩胛自然靠近",
+        "推远：把地面推远，肩胛前伸，背上方微微拱起",
+        "回位：保持核心稳定，节奏慢而可控"
+      ],
+      "primaryMuscles": [
+        "serratus"
+      ],
+      "secondaryMuscles": [
+        "deltoids"
+      ],
+      "movementTags": [
+        "肩胛稳定",
+        "前锯肌",
+        "胸肩热身"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1367,10 +3416,7 @@
         "肩关节绕环"
       ],
       "category": "recovery",
-      "muscleGroups": [
-        "肩关节活动度",
-        "肩胛热身"
-      ],
+      "muscleGroups": [],
       "normalizationTags": [
         "warmup",
         "mobility",
@@ -1390,6 +3436,36 @@
         "label": "肩绕环",
         "sourceUrl": "https://loadmuscle.com/exercises/shoulder-circle",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "肩绕环，主要涉及低强度活动与恢复。站姿或跪姿保持躯干稳定。具体用量按当天计划记录。",
+      "instructions": [
+        "站姿或跪姿保持躯干稳定",
+        "肩膀带动手臂做小到中等幅度绕环",
+        "先向前绕，再向后绕，保持呼吸自然"
+      ],
+      "primaryMuscles": [],
+      "secondaryMuscles": [],
+      "movementTags": [
+        "肩关节活动度",
+        "肩胛热身"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "exerciseType": "mobility",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1403,9 +3479,8 @@
       ],
       "category": "legs",
       "muscleGroups": [
-        "股四头",
-        "臀",
-        "髋膝踝协调"
+        "股四头肌",
+        "臀肌群"
       ],
       "normalizationTags": [
         "squat",
@@ -1426,6 +3501,43 @@
         "label": "标准深蹲 / 徒手深蹲",
         "sourceUrl": "https://loadmuscle.com/exercises/air-squat",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "标准深蹲，主要涉及股四头肌、臀肌群。双脚约肩宽或略宽，脚尖略微外转。具体用量按当天计划记录。",
+      "instructions": [
+        "双脚约肩宽或略宽，脚尖略微外转",
+        "下蹲：背部保持挺直，髋和膝同时弯曲",
+        "有控制地下到足够深，大腿后侧接近小腿",
+        "站起：只靠腿部力量站起，不用摇晃反弹"
+      ],
+      "primaryMuscles": [
+        "quadriceps",
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "hamstring"
+      ],
+      "movementTags": [
+        "股四头",
+        "臀",
+        "髋膝踝协调"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1438,9 +3550,8 @@
       ],
       "category": "legs",
       "muscleGroups": [
-        "股四头",
-        "臀",
-        "踝关节活动度"
+        "股四头肌",
+        "臀肌群"
       ],
       "normalizationTags": [
         "squat",
@@ -1462,6 +3573,43 @@
         "note": "真实动作 GIF，演示窄站距深蹲轨迹；计划中按徒手版本执行。",
         "sourceUrl": "https://oss.exercisedb.dev/api/v1/exercises/search?search=narrow%20squat",
         "sourceLabel": "素材来源：ExerciseDB"
+      },
+      "description": "窄距深蹲，主要涉及股四头肌、臀肌群。双脚脚跟相碰或非常接近，脚尖微微外转，双臂前伸帮助平衡。具体用量按当天计划记录。",
+      "instructions": [
+        "双脚脚跟相碰或非常接近，脚尖微微外转，双臂前伸帮助平衡",
+        "下蹲：胸部逐渐接近大腿，脚跟保持贴地",
+        "膝盖不内扣，身体不后倒",
+        "站起：从底部稳定站回"
+      ],
+      "primaryMuscles": [
+        "quadriceps",
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "hamstring"
+      ],
+      "movementTags": [
+        "股四头",
+        "臀",
+        "踝关节活动度"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1474,10 +3622,8 @@
       ],
       "category": "legs",
       "muscleGroups": [
-        "股四头",
-        "臀",
-        "单腿稳定",
-        "平衡协调"
+        "股四头肌",
+        "臀肌群"
       ],
       "normalizationTags": [
         "squat",
@@ -1490,8 +3636,7 @@
         "diagram": "起始：一只脚踩地，另一只脚的脚跟放在前方支撑物上\n下蹲：主力腿承担大部分负荷，辅助腿只帮助平衡\n底部：短暂停顿，保持脚跟贴地和身体控制\n站起：主力腿发力回到起始位",
         "cautions": [
           "支撑物从稳定低物开始，不必一开始就用球",
-          "前方支撑腿不能承担主要发力",
-          "本周只做预备探索，平衡明显差时取消"
+          "前方支撑腿不能承担主要发力"
         ]
       },
       "media": {
@@ -1499,6 +3644,44 @@
         "label": "偏重深蹲起始",
         "note": "底部图见动作图解 md 中 image00590.jpeg。",
         "sourceLabel": "本地图解：2026.6.15-2026.6.21 六艺动作图解"
+      },
+      "description": "偏重深蹲，主要涉及股四头肌、臀肌群。一只脚踩地，另一只脚的脚跟放在前方支撑物上。具体用量按当天计划记录。",
+      "instructions": [
+        "一只脚踩地，另一只脚的脚跟放在前方支撑物上",
+        "下蹲：主力腿承担大部分负荷，辅助腿只帮助平衡",
+        "短暂停顿，保持脚跟贴地和身体控制",
+        "站起：主力腿发力回到起始位"
+      ],
+      "primaryMuscles": [
+        "quadriceps",
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "hamstring"
+      ],
+      "movementTags": [
+        "股四头",
+        "臀",
+        "单腿稳定",
+        "平衡协调"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1511,9 +3694,8 @@
       ],
       "category": "legs",
       "muscleGroups": [
-        "股四头",
-        "臀",
-        "单腿稳定"
+        "股四头肌",
+        "臀肌群"
       ],
       "normalizationTags": [
         "squat",
@@ -1535,6 +3717,43 @@
         "label": "辅助单腿半深蹲",
         "sourceUrl": "https://loadmuscle.com/exercises/suspender-single-leg-squat",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "辅助单腿半深蹲，主要涉及股四头肌、臀肌群。单脚站稳，手扶墙或门框保持平衡。具体用量按当天计划记录。",
+      "instructions": [
+        "单脚站稳，手扶墙或门框保持平衡",
+        "慢慢屈膝屈髋，下到能控制的半程深度",
+        "站起：前脚全脚掌发力，膝盖保持稳定",
+        "换边：左右侧分别完成，不抢速度"
+      ],
+      "primaryMuscles": [
+        "quadriceps",
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "hamstring"
+      ],
+      "movementTags": [
+        "股四头",
+        "臀",
+        "单腿稳定"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1549,9 +3768,8 @@
       ],
       "category": "legs",
       "muscleGroups": [
-        "股四头",
-        "臀",
-        "单腿稳定"
+        "股四头肌",
+        "臀肌群"
       ],
       "normalizationTags": [
         "squat",
@@ -1575,6 +3793,43 @@
         "note": "真实动作 GIF，用于参考辅助单腿下蹲轨迹；箱/椅高度按计划文字控制。",
         "sourceUrl": "https://loadmuscle.com/exercises/suspender-single-leg-squat",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "辅助单腿深蹲到箱/椅，主要涉及股四头肌、臀肌群。站在箱或椅前，单脚站稳，另一腿向前轻伸。具体用量按当天计划记录。",
+      "instructions": [
+        "站在箱或椅前，单脚站稳，另一腿向前轻伸",
+        "慢慢坐向箱面，只轻触不放松",
+        "站起：站立腿发力推回，保持膝盖跟脚尖同向",
+        "辅助：需要时扶墙或门框控制平衡"
+      ],
+      "primaryMuscles": [
+        "quadriceps",
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "hamstring"
+      ],
+      "movementTags": [
+        "股四头",
+        "臀",
+        "单腿稳定"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1588,9 +3843,7 @@
       ],
       "category": "legs",
       "muscleGroups": [
-        "臀",
-        "腘绳肌",
-        "脊柱后侧链"
+        "臀肌群"
       ],
       "normalizationTags": [
         "bridge",
@@ -1611,6 +3864,42 @@
         "label": "臀桥 / 短桥",
         "sourceUrl": "https://loadmuscle.com/exercises/glute-bridge-two-legs-on-floor",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "臀桥 / 短桥，主要涉及臀肌群。仰卧屈膝，脚掌踩地，双脚约肩宽或略窄。具体用量按当天计划记录。",
+      "instructions": [
+        "仰卧屈膝，脚掌踩地，双脚约肩宽或略窄",
+        "双脚发力把髋部和背部抬起",
+        "大腿和躯干接近一条线，髋部不下沉",
+        "控制回到地面"
+      ],
+      "primaryMuscles": [
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "hamstring"
+      ],
+      "movementTags": [
+        "臀",
+        "腘绳肌",
+        "脊柱后侧链"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1624,10 +3913,7 @@
       ],
       "category": "legs",
       "muscleGroups": [
-        "脊柱后侧链",
-        "肩伸展",
-        "臀",
-        "手臂支撑"
+        "臀肌群"
       ],
       "normalizationTags": [
         "bridge",
@@ -1650,6 +3936,44 @@
         "sourceUrl": "",
         "sourceLabel": "本地图解：2026.6.15-2026.6.21 六艺动作图解",
         "note": "顶部图见动作图解 md 中 image00662.jpeg。"
+      },
+      "description": "直桥，主要涉及臀肌群。坐姿，双腿伸直，双手撑在髋部两侧。具体用量按当天计划记录。",
+      "instructions": [
+        "坐姿，双腿伸直，双手撑在髋部两侧",
+        "手掌下压，手臂绷紧，把髋部向上推到双腿和躯干成一条线",
+        "看向上方，身体由手掌和脚跟支撑",
+        "受控回到起始位"
+      ],
+      "primaryMuscles": [
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "hamstring",
+        "deltoids"
+      ],
+      "movementTags": [
+        "脊柱后侧链",
+        "肩伸展",
+        "臀",
+        "手臂支撑"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1661,10 +3985,8 @@
       ],
       "category": "legs",
       "muscleGroups": [
-        "脊柱后侧链",
-        "肩胸活动度",
-        "手腕支撑",
-        "桥进阶"
+        "臀肌群",
+        "下背肌群"
       ],
       "normalizationTags": [
         "bridge",
@@ -1685,6 +4007,44 @@
         "label": "高低桥起始",
         "note": "顶部图见动作图解 md 中 image00664.jpeg。",
         "sourceLabel": "本地图解：2026.6.15-2026.6.21 六艺动作图解"
+      },
+      "description": "高低桥，主要涉及臀肌群、下背肌群。找一个约膝盖高度或略高的稳固支撑物，身体向后躺在支撑物上，双脚踩地。具体用量按当天计划记录。",
+      "instructions": [
+        "找一个约膝盖高度或略高的稳固支撑物，身体向后躺在支撑物上，双脚踩地",
+        "手位：双手放在头部两侧，手指朝脚",
+        "用手和腿推起髋部，让背部形成弧形",
+        "完成：不要求手臂完全伸直，先以控制和舒适为主"
+      ],
+      "primaryMuscles": [
+        "gluteal",
+        "lower-back"
+      ],
+      "secondaryMuscles": [
+        "deltoids"
+      ],
+      "movementTags": [
+        "脊柱后侧链",
+        "肩胸活动度",
+        "手腕支撑",
+        "桥进阶"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1698,9 +4058,7 @@
       ],
       "category": "core",
       "muscleGroups": [
-        "下腹控制",
-        "髋屈控制",
-        "握力"
+        "髋屈肌群"
       ],
       "normalizationTags": [
         "core",
@@ -1722,6 +4080,43 @@
         "label": "悬垂屈膝举腿",
         "sourceUrl": "https://loadmuscle.com/exercises/assisted-hanging-knee-raise",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "悬垂屈膝举腿，主要涉及髋屈肌群。双手抓住高过头顶的横杆，身体自然悬垂，肩部保持收紧。具体用量按当天计划记录。",
+      "instructions": [
+        "双手抓住高过头顶的横杆，身体自然悬垂，肩部保持收紧",
+        "上举：平稳抬膝到骨盆高度，大腿约与地面平行",
+        "腹部收紧并短暂停顿",
+        "控制下降到身体伸展"
+      ],
+      "primaryMuscles": [
+        "hip-flexors"
+      ],
+      "secondaryMuscles": [
+        "abs",
+        "forearm"
+      ],
+      "movementTags": [
+        "下腹控制",
+        "髋屈控制",
+        "握力"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "pull-up-bar"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1735,9 +4130,7 @@
       ],
       "category": "pull",
       "muscleGroups": [
-        "握力",
-        "肩胛稳定",
-        "前臂"
+        "前臂肌群"
       ],
       "normalizationTags": [
         "hang",
@@ -1758,6 +4151,41 @@
         "label": "悬垂抓握",
         "sourceUrl": "https://loadmuscle.com/exercises/dead-hang-stretch",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "悬垂抓握，主要涉及前臂肌群。双手握杠，脚离地或轻触地面减重。具体用量按当天计划记录。",
+      "instructions": [
+        "双手握杠，脚离地或轻触地面减重",
+        "保持：肩膀远离耳朵，身体稳定，呼吸自然",
+        "结束：脚先落地，再松手退出"
+      ],
+      "primaryMuscles": [
+        "forearm"
+      ],
+      "secondaryMuscles": [
+        "upper-back"
+      ],
+      "movementTags": [
+        "握力",
+        "肩胛稳定",
+        "前臂"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "equipment": [
+        "pull-up-bar"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1769,10 +4197,7 @@
         "髋绕环"
       ],
       "category": "recovery",
-      "muscleGroups": [
-        "髋关节活动度",
-        "热身"
-      ],
+      "muscleGroups": [],
       "normalizationTags": [
         "warmup",
         "mobility",
@@ -1792,6 +4217,36 @@
         "label": "髋部环绕",
         "sourceUrl": "https://loadmuscle.com/exercises/standing-hip-circle",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "髋部环绕，主要涉及低强度活动与恢复。站姿双脚踩稳，双手可扶髋。具体用量按当天计划记录。",
+      "instructions": [
+        "站姿双脚踩稳，双手可扶髋",
+        "骨盆带动髋部做小幅环绕",
+        "左右方向都做，逐渐找到顺畅范围"
+      ],
+      "primaryMuscles": [],
+      "secondaryMuscles": [],
+      "movementTags": [
+        "髋关节活动度",
+        "热身"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "exerciseType": "mobility",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1803,11 +4258,7 @@
         "踝关节活动度"
       ],
       "category": "recovery",
-      "muscleGroups": [
-        "踝关节活动度",
-        "小腿",
-        "深蹲准备"
-      ],
+      "muscleGroups": [],
       "normalizationTags": [
         "warmup",
         "mobility",
@@ -1827,6 +4278,37 @@
         "label": "踝关节活动",
         "sourceUrl": "https://loadmuscle.com/exercises/ankle-dorsal-flexion",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "踝关节活动，主要涉及低强度活动与恢复。进入半跪或弓步位，前脚全脚掌踩稳。具体用量按当天计划记录。",
+      "instructions": [
+        "进入半跪或弓步位，前脚全脚掌踩稳",
+        "膝盖沿脚尖方向缓慢向前移动",
+        "回到起始位，重复几次后换边"
+      ],
+      "primaryMuscles": [],
+      "secondaryMuscles": [],
+      "movementTags": [
+        "踝关节活动度",
+        "小腿",
+        "深蹲准备"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "exerciseType": "mobility",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1840,9 +4322,7 @@
       ],
       "category": "recovery",
       "muscleGroups": [
-        "胸大肌",
-        "胸小肌",
-        "肩前侧放松"
+        "胸大肌"
       ],
       "normalizationTags": [
         "stretch",
@@ -1862,6 +4342,39 @@
         "label": "胸小肌 / 胸大肌拉伸",
         "sourceUrl": "https://loadmuscle.com/exercises/doorway-chest-stretch",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "胸小肌/胸大肌拉伸，主要涉及胸大肌。前臂或手掌扶在墙边，肩膀放松。具体用量按当天计划记录。",
+      "instructions": [
+        "前臂或手掌扶在墙边，肩膀放松",
+        "身体慢慢向外转开，找到胸前侧拉伸感",
+        "保持稳定呼吸，再缓慢退出换边"
+      ],
+      "primaryMuscles": [
+        "chest"
+      ],
+      "secondaryMuscles": [],
+      "movementTags": [
+        "胸大肌",
+        "胸小肌",
+        "肩前侧放松"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "exerciseType": "mobility",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1873,8 +4386,7 @@
       ],
       "category": "recovery",
       "muscleGroups": [
-        "背阔肌",
-        "肩背活动度"
+        "背阔与上背肌群"
       ],
       "normalizationTags": [
         "stretch",
@@ -1894,6 +4406,38 @@
         "label": "背阔肌拉伸",
         "sourceUrl": "https://loadmuscle.com/exercises/kneeling-lat-stretch",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "背阔肌拉伸，主要涉及背阔与上背肌群。双手扶墙、桌沿或固定支撑。具体用量按当天计划记录。",
+      "instructions": [
+        "双手扶墙、桌沿或固定支撑",
+        "髋部向后坐，胸口慢慢向下沉",
+        "在腋下到背侧找到拉伸感，保持呼吸"
+      ],
+      "primaryMuscles": [
+        "upper-back"
+      ],
+      "secondaryMuscles": [],
+      "movementTags": [
+        "背阔肌",
+        "肩背活动度"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "exerciseType": "mobility",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
       }
     },
     {
@@ -1906,9 +4450,7 @@
       ],
       "category": "recovery",
       "muscleGroups": [
-        "髋屈肌",
-        "髂腰肌",
-        "股直肌"
+        "髋屈肌群"
       ],
       "normalizationTags": [
         "stretch",
@@ -1928,7 +4470,2528 @@
         "label": "髋屈肌拉伸",
         "sourceUrl": "https://loadmuscle.com/exercises/intermediate-hip-flexor-and-quad-stretch",
         "sourceLabel": "素材来源：LoadMuscle"
+      },
+      "description": "髋屈肌拉伸，主要涉及髋屈肌群。半跪姿，前脚踩稳，后膝垫软物。具体用量按当天计划记录。",
+      "instructions": [
+        "半跪姿，前脚踩稳，后膝垫软物",
+        "骨盆轻微后倾，身体整体向前移动一点",
+        "在后侧髋前方找到拉伸感，保持呼吸后换边"
+      ],
+      "primaryMuscles": [
+        "hip-flexors"
+      ],
+      "secondaryMuscles": [
+        "quadriceps"
+      ],
+      "movementTags": [
+        "髋屈肌",
+        "髂腰肌",
+        "股直肌"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "exerciseType": "mobility",
+      "equipment": [
+        "bodyweight"
+      ],
+      "englishName": "",
+      "replaceAliases": true,
+      "mediaMatch": "reference",
+      "provenance": {
+        "project": "openGym + 本地原有指南",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "upstreamId": null,
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/README.md",
+        "license": "本地修订文本；上游引用分别遵循 AGPL-3.0 或原始 ExerciseDB MIT 条款",
+        "note": "保留本地稳定键；已拆分肌群、动作功能与计划剂量。本地变式或组合项；没有断言与上游为一一对应。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-0025",
+      "displayName": "杠铃平板卧推",
+      "englishName": "barbell bench press",
+      "aliases": [
+        "杠铃平板卧推",
+        "barbell bench press"
+      ],
+      "category": "push",
+      "muscleGroups": [
+        "胸大肌"
+      ],
+      "primaryMuscles": [
+        "chest"
+      ],
+      "secondaryMuscles": [
+        "triceps",
+        "deltoids"
+      ],
+      "movementTags": [
+        "press"
+      ],
+      "normalizationTags": [
+        "press",
+        "opengym"
+      ],
+      "equipment": [
+        "barbell"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "仰卧在平凳上，用杠铃完成水平推举。主要训练胸部，肩前侧和肱三头肌参与。",
+      "instructions": [
+        "平凳置于稳固架内，脚掌踩稳，握距略宽于肩，手腕保持稳定。",
+        "收紧躯干，保持上背稳定，将杠铃移至胸部上方。",
+        "受控下放到自己可控的胸部附近，不反弹或强压肩部。",
+        "向上推回，身体保持稳定；结束后稳妥回架。"
+      ],
+      "guide": {
+        "diagram": "平凳置于稳固架内，脚掌踩稳，握距略宽于肩，手腕保持稳定。\n收紧躯干，保持上背稳定，将杠铃移至胸部上方。\n受控下放到自己可控的胸部附近，不反弹或强压肩部。\n向上推回，身体保持稳定；结束后稳妥回架。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "0025",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0025.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-0289",
+      "displayName": "哑铃平板卧推",
+      "englishName": "dumbbell bench press",
+      "aliases": [
+        "哑铃平板卧推",
+        "dumbbell bench press"
+      ],
+      "category": "push",
+      "muscleGroups": [
+        "胸大肌"
+      ],
+      "primaryMuscles": [
+        "chest"
+      ],
+      "secondaryMuscles": [
+        "triceps",
+        "deltoids"
+      ],
+      "movementTags": [
+        "press"
+      ],
+      "normalizationTags": [
+        "press",
+        "opengym"
+      ],
+      "equipment": [
+        "dumbbell",
+        "bench"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "在平凳上用两只哑铃完成卧推，左右手独立控制负重。",
+      "instructions": [
+        "仰卧稳固平凳，双脚踩稳，将哑铃置于胸部两侧。",
+        "收紧躯干，手腕位于前臂上方，肘部保持可控角度。",
+        "向上推起至手臂接近伸直，不相撞哑铃。",
+        "慢慢降回可控深度，不借下落反弹。"
+      ],
+      "guide": {
+        "diagram": "仰卧稳固平凳，双脚踩稳，将哑铃置于胸部两侧。\n收紧躯干，手腕位于前臂上方，肘部保持可控角度。\n向上推起至手臂接近伸直，不相撞哑铃。\n慢慢降回可控深度，不借下落反弹。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "0289",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0289.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-0314",
+      "displayName": "上斜哑铃卧推",
+      "englishName": "dumbbell incline bench press",
+      "aliases": [
+        "上斜哑铃卧推",
+        "dumbbell incline bench press"
+      ],
+      "category": "push",
+      "muscleGroups": [
+        "胸大肌"
+      ],
+      "primaryMuscles": [
+        "chest"
+      ],
+      "secondaryMuscles": [
+        "triceps",
+        "deltoids"
+      ],
+      "movementTags": [
+        "press"
+      ],
+      "normalizationTags": [
+        "press",
+        "opengym"
+      ],
+      "equipment": [
+        "dumbbell",
+        "bench"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "在上斜训练凳上完成哑铃卧推，胸部锁骨部和肩前侧参与较多。",
+      "instructions": [
+        "调整稳固上斜凳，坐稳后将哑铃带到胸部两侧。",
+        "双脚踩地，保持背部和骨盆稳定。",
+        "沿自然轨迹推起，不耸肩或互撞哑铃。",
+        "慢慢回到可控幅度；凳角度与负重以个人活动范围为限。"
+      ],
+      "guide": {
+        "diagram": "调整稳固上斜凳，坐稳后将哑铃带到胸部两侧。\n双脚踩地，保持背部和骨盆稳定。\n沿自然轨迹推起，不耸肩或互撞哑铃。\n慢慢回到可控幅度；凳角度与负重以个人活动范围为限。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "0314",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0314.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-0375",
+      "displayName": "哑铃仰卧上拉",
+      "englishName": "dumbbell pullover",
+      "aliases": [
+        "哑铃仰卧上拉",
+        "dumbbell pullover"
+      ],
+      "category": "pull",
+      "muscleGroups": [
+        "胸大肌",
+        "背阔与上背肌群"
+      ],
+      "primaryMuscles": [
+        "chest",
+        "upper-back"
+      ],
+      "secondaryMuscles": [
+        "triceps"
+      ],
+      "movementTags": [
+        "pullover"
+      ],
+      "normalizationTags": [
+        "pullover",
+        "opengym"
+      ],
+      "equipment": [
+        "dumbbell",
+        "bench"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "仰卧持一只哑铃完成肩关节上拉，胸部与背阔肌共同参与；不是单纯肱三头伸展。",
+      "instructions": [
+        "沿稳固平凳仰卧，双脚踩地，双手稳握哑铃。",
+        "手臂在胸上方，肘微屈并保持角度相对稳定。",
+        "向头后方缓慢移动，在肩部可控范围内停住，不塌腰追求深度。",
+        "沿原轨迹拉回胸上方，保持负重始终受控。"
+      ],
+      "guide": {
+        "diagram": "沿稳固平凳仰卧，双脚踩地，双手稳握哑铃。\n手臂在胸上方，肘微屈并保持角度相对稳定。\n向头后方缓慢移动，在肩部可控范围内停住，不塌腰追求深度。\n沿原轨迹拉回胸上方，保持负重始终受控。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "0375",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0375.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-0493",
+      "displayName": "手抬高俯卧撑",
+      "englishName": "incline push-up",
+      "aliases": [
+        "手抬高俯卧撑",
+        "incline push-up"
+      ],
+      "category": "push",
+      "muscleGroups": [
+        "胸大肌"
+      ],
+      "primaryMuscles": [
+        "chest"
+      ],
+      "secondaryMuscles": [
+        "triceps",
+        "deltoids"
+      ],
+      "movementTags": [
+        "pushup"
+      ],
+      "normalizationTags": [
+        "pushup",
+        "opengym"
+      ],
+      "equipment": [
+        "support"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "双手置于高于地面的稳固支撑上完成俯卧撑，区别于脚抬高版本。",
+      "instructions": [
+        "确认台面稳定，将双手置于台边略宽于肩。",
+        "双脚向后移动，身体从头到脚保持连贯。",
+        "屈肘让胸部接近支撑边缘，不塌腰或耸肩。",
+        "推回起始位置；支撑高度可按能力调整。"
+      ],
+      "guide": {
+        "diagram": "确认台面稳定，将双手置于台边略宽于肩。\n双脚向后移动，身体从头到脚保持连贯。\n屈肘让胸部接近支撑边缘，不塌腰或耸肩。\n推回起始位置；支撑高度可按能力调整。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "0493",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0493.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-3211",
+      "displayName": "跪姿俯卧撑",
+      "englishName": "kneeling push-up (male)",
+      "aliases": [
+        "跪姿俯卧撑",
+        "kneeling push-up (male)"
+      ],
+      "category": "push",
+      "muscleGroups": [
+        "胸大肌"
+      ],
+      "primaryMuscles": [
+        "chest"
+      ],
+      "secondaryMuscles": [
+        "triceps",
+        "deltoids"
+      ],
+      "movementTags": [
+        "pushup"
+      ],
+      "normalizationTags": [
+        "pushup",
+        "opengym"
+      ],
+      "equipment": [
+        "bodyweight"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "双膝支地的俯卧撑变式，以较短支撑杠杆练习水平推举。",
+      "instructions": [
+        "双手略宽于肩，双膝支撑在软垫上。",
+        "从头部到膝部保持整体稳定，不只弯腰。",
+        "屈肘下放胸部至可控位置。",
+        "推回，避免头部先抬起或腰部下沉。"
+      ],
+      "guide": {
+        "diagram": "双手略宽于肩，双膝支撑在软垫上。\n从头部到膝部保持整体稳定，不只弯腰。\n屈肘下放胸部至可控位置。\n推回，避免头部先抬起或腰部下沉。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "3211",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/3211.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-3294",
+      "displayName": "弓箭手俯卧撑",
+      "englishName": "archer push up",
+      "aliases": [
+        "弓箭手俯卧撑",
+        "archer push up"
+      ],
+      "category": "push",
+      "muscleGroups": [
+        "胸大肌"
+      ],
+      "primaryMuscles": [
+        "chest"
+      ],
+      "secondaryMuscles": [
+        "triceps",
+        "deltoids"
+      ],
+      "movementTags": [
+        "pushup"
+      ],
+      "normalizationTags": [
+        "pushup",
+        "opengym"
+      ],
+      "equipment": [
+        "bodyweight"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "exerciseType": "strength",
+      "description": "宽距支撑下向一侧移重完成俯卧撑，另一侧手臂提供辅助支撑。",
+      "instructions": [
+        "双手宽距支地，躯干收紧。",
+        "将胸部受控移向一侧手掌，该侧屈肘，另一侧手臂相对伸直。",
+        "只下降到肩部可控的范围，不强迫直臂侧过伸。",
+        "推回中间再换侧；左右次数分别记录。"
+      ],
+      "guide": {
+        "diagram": "双手宽距支地，躯干收紧。\n将胸部受控移向一侧手掌，该侧屈肘，另一侧手臂相对伸直。\n只下降到肩部可控的范围，不强迫直臂侧过伸。\n推回中间再换侧；左右次数分别记录。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "3294",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/3294.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-4075",
+      "displayName": "弹力带夹胸",
+      "englishName": "band chest fly",
+      "aliases": [
+        "弹力带夹胸",
+        "band chest fly"
+      ],
+      "category": "push",
+      "muscleGroups": [
+        "胸大肌"
+      ],
+      "primaryMuscles": [
+        "chest"
+      ],
+      "secondaryMuscles": [
+        "deltoids"
+      ],
+      "movementTags": [
+        "fly"
+      ],
+      "normalizationTags": [
+        "fly",
+        "opengym"
+      ],
+      "equipment": [
+        "band"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "站姿双手持弹力带完成水平夹胸，胸部发力，动作区别于推举。",
+      "instructions": [
+        "将弹力带可靠固定在身体后方约胸部高度。",
+        "站稳并收紧躯干，双臂张开，肘微屈。",
+        "保持肘角相对稳定，将双手向胸前合拢。",
+        "受控打开，不让弹力带突然把肩部拉向后方。"
+      ],
+      "guide": {
+        "diagram": "将弹力带可靠固定在身体后方约胸部高度。\n站稳并收紧躯干，双臂张开，肘微屈。\n保持肘角相对稳定，将双手向胸前合拢。\n受控打开，不让弹力带突然把肩部拉向后方。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "4075",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/4075.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-1430",
+      "displayName": "双杠臂屈伸",
+      "englishName": "chest dip (on dip-pull-up cage)",
+      "aliases": [
+        "双杠臂屈伸",
+        "chest dip (on dip-pull-up cage)"
+      ],
+      "category": "push",
+      "muscleGroups": [
+        "胸大肌",
+        "肱三头肌"
+      ],
+      "primaryMuscles": [
+        "chest",
+        "triceps"
+      ],
+      "secondaryMuscles": [
+        "deltoids"
+      ],
+      "movementTags": [
+        "dip"
+      ],
+      "normalizationTags": [
+        "dip",
+        "opengym"
+      ],
+      "equipment": [
+        "parallel-bars"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "在双杠上屈肘下降再撑起，胸部和肱三头肌参与，躯干可轻微前倾。",
+      "instructions": [
+        "确认双杠稳固，双手支撑身体，肩部保持主动稳定。",
+        "轻微前倾，屈肘下放到个人肩部能控制的深度。",
+        "避免耸肩、突然下坠或强压到极深位置。",
+        "伸肘撑起；不能控制全程时采用辅助版本。"
+      ],
+      "guide": {
+        "diagram": "确认双杠稳固，双手支撑身体，肩部保持主动稳定。\n轻微前倾，屈肘下放到个人肩部能控制的深度。\n避免耸肩、突然下坠或强压到极深位置。\n伸肘撑起；不能控制全程时采用辅助版本。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "1430",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/1430.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-1162",
+      "displayName": "站姿杠铃肩上推举",
+      "englishName": "barbell standing military press",
+      "aliases": [
+        "站姿杠铃肩上推举",
+        "barbell standing military press"
+      ],
+      "category": "shoulder",
+      "muscleGroups": [
+        "三角肌"
+      ],
+      "primaryMuscles": [
+        "deltoids"
+      ],
+      "secondaryMuscles": [
+        "triceps"
+      ],
+      "movementTags": [
+        "overhead"
+      ],
+      "normalizationTags": [
+        "overhead",
+        "opengym"
+      ],
+      "equipment": [
+        "barbell"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "站姿严格杠铃肩上推举，以肩部和肱三头肌完成上推，不用腿部弹震借力。",
+      "instructions": [
+        "双脚站稳，杠铃位于肩前，手腕和前臂对齐。",
+        "收紧腹部与臀部，保持躯干稳定。",
+        "把杠铃沿靠近身体的路径推到头顶，不后仰顶腰。",
+        "受控降回肩前，负重超过控制能力时停止。"
+      ],
+      "guide": {
+        "diagram": "双脚站稳，杠铃位于肩前，手腕和前臂对齐。\n收紧腹部与臀部，保持躯干稳定。\n把杠铃沿靠近身体的路径推到头顶，不后仰顶腰。\n受控降回肩前，负重超过控制能力时停止。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "1162",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/1162.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-0426",
+      "displayName": "站姿哑铃肩推",
+      "englishName": "dumbbell standing overhead press",
+      "aliases": [
+        "站姿哑铃肩推",
+        "dumbbell standing overhead press"
+      ],
+      "category": "shoulder",
+      "muscleGroups": [
+        "三角肌"
+      ],
+      "primaryMuscles": [
+        "deltoids"
+      ],
+      "secondaryMuscles": [
+        "triceps"
+      ],
+      "movementTags": [
+        "overhead"
+      ],
+      "normalizationTags": [
+        "overhead",
+        "opengym"
+      ],
+      "equipment": [
+        "dumbbell"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "站姿哑铃肩上推举，以躯干主动稳定控制两只哑铃。",
+      "instructions": [
+        "双脚站稳，收紧腹部与臀部。",
+        "哑铃置于肩侧，手腕保持稳定。",
+        "向上推到手臂接近伸直，不蹬腿或后仰顶腰。",
+        "慢慢下放至可控高度。"
+      ],
+      "guide": {
+        "diagram": "双脚站稳，收紧腹部与臀部。\n哑铃置于肩侧，手腕保持稳定。\n向上推到手臂接近伸直，不蹬腿或后仰顶腰。\n慢慢下放至可控高度。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "0426",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0426.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-0404",
+      "displayName": "坐姿对握哑铃肩推",
+      "englishName": "dumbbell seated shoulder press (parallel grip)",
+      "aliases": [
+        "坐姿对握哑铃肩推",
+        "dumbbell seated shoulder press (parallel grip)"
+      ],
+      "category": "shoulder",
+      "muscleGroups": [
+        "三角肌"
+      ],
+      "primaryMuscles": [
+        "deltoids"
+      ],
+      "secondaryMuscles": [
+        "triceps"
+      ],
+      "movementTags": [
+        "overhead"
+      ],
+      "normalizationTags": [
+        "overhead",
+        "opengym"
+      ],
+      "equipment": [
+        "dumbbell",
+        "bench"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "掌心相对的坐姿哑铃肩推；握法与普通坐姿肩推不同。",
+      "instructions": [
+        "坐稳并支撑背部，双手掌心相对持哑铃于肩侧。",
+        "收紧躯干，保持肘部在身体前侧的自然位置。",
+        "向上推起，不改变为大幅后仰。",
+        "受控降回，保持掌心相对。"
+      ],
+      "guide": {
+        "diagram": "坐稳并支撑背部，双手掌心相对持哑铃于肩侧。\n收紧躯干，保持肘部在身体前侧的自然位置。\n向上推起，不改变为大幅后仰。\n受控降回，保持掌心相对。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "0404",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0404.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-0396",
+      "displayName": "坐姿哑铃侧平举",
+      "englishName": "dumbbell seated lateral raise",
+      "aliases": [
+        "坐姿哑铃侧平举",
+        "dumbbell seated lateral raise"
+      ],
+      "category": "shoulder",
+      "muscleGroups": [
+        "三角肌"
+      ],
+      "primaryMuscles": [
+        "deltoids"
+      ],
+      "secondaryMuscles": [
+        "trapezius"
+      ],
+      "movementTags": [
+        "raise"
+      ],
+      "normalizationTags": [
+        "raise",
+        "opengym"
+      ],
+      "equipment": [
+        "dumbbell",
+        "bench"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "坐姿向侧方抬起哑铃，主要训练肩部，减少腿部摆动借力。",
+      "instructions": [
+        "坐稳，双脚踩地，双手持哑铃自然垂下。",
+        "肘微屈，手臂沿略靠前的侧方抬起。",
+        "到个人可控高度即可，不用耸肩甩起。",
+        "慢慢回落，保持左右节奏一致。"
+      ],
+      "guide": {
+        "diagram": "坐稳，双脚踩地，双手持哑铃自然垂下。\n肘微屈，手臂沿略靠前的侧方抬起。\n到个人可控高度即可，不用耸肩甩起。\n慢慢回落，保持左右节奏一致。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "0396",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0396.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-0921",
+      "displayName": "站姿弹力带肩外旋",
+      "englishName": "band standing external shoulder rotation",
+      "aliases": [
+        "站姿弹力带肩外旋",
+        "band standing external shoulder rotation"
+      ],
+      "category": "shoulder",
+      "muscleGroups": [
+        "三角肌"
+      ],
+      "primaryMuscles": [
+        "deltoids"
+      ],
+      "secondaryMuscles": [
+        "upper-back"
+      ],
+      "movementTags": [
+        "rotation"
+      ],
+      "normalizationTags": [
+        "rotation",
+        "opengym"
+      ],
+      "equipment": [
+        "band"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "上臂相对稳定时向外转动肩关节，训练肩袖外旋功能；人体图归入肩部大区。",
+      "instructions": [
+        "弹力带固定在身体一侧，使用轻阻力。",
+        "肘屈约直角，上臂靠近躯干，可用薄毛巾辅助定位。",
+        "保持肘位置，前臂缓慢向外旋转，不转动整个躯干。",
+        "受控返回，避免弹力带突然拉回。"
+      ],
+      "guide": {
+        "diagram": "弹力带固定在身体一侧，使用轻阻力。\n肘屈约直角，上臂靠近躯干，可用薄毛巾辅助定位。\n保持肘位置，前臂缓慢向外旋转，不转动整个躯干。\n受控返回，避免弹力带突然拉回。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "0921",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0921.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-0924",
+      "displayName": "站姿弹力带肩内旋",
+      "englishName": "band standing internal shoulder rotation",
+      "aliases": [
+        "站姿弹力带肩内旋",
+        "band standing internal shoulder rotation"
+      ],
+      "category": "shoulder",
+      "muscleGroups": [
+        "三角肌"
+      ],
+      "primaryMuscles": [
+        "deltoids"
+      ],
+      "secondaryMuscles": [
+        "chest"
+      ],
+      "movementTags": [
+        "rotation"
+      ],
+      "normalizationTags": [
+        "rotation",
+        "opengym"
+      ],
+      "equipment": [
+        "band"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "上臂相对稳定时向内转动肩关节，训练肩袖内旋功能；不以大负重摆动代替旋转。",
+      "instructions": [
+        "弹力带固定在身体一侧，站姿稳定。",
+        "屈肘约直角，上臂靠近躯干，肩部不耸起。",
+        "在不移动肘部的前提下，前臂向腹部方向旋转。",
+        "受控回到起点，不用躯干扭转借力。"
+      ],
+      "guide": {
+        "diagram": "弹力带固定在身体一侧，站姿稳定。\n屈肘约直角，上臂靠近躯干，肩部不耸起。\n在不移动肘部的前提下，前臂向腹部方向旋转。\n受控回到起点，不用躯干扭转借力。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "0924",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0924.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-1017",
+      "displayName": "弹力带Y字上举",
+      "englishName": "band y-raise",
+      "aliases": [
+        "弹力带Y字上举",
+        "band y-raise"
+      ],
+      "category": "shoulder",
+      "muscleGroups": [
+        "三角肌"
+      ],
+      "primaryMuscles": [
+        "deltoids"
+      ],
+      "secondaryMuscles": [
+        "trapezius",
+        "upper-back"
+      ],
+      "movementTags": [
+        "raise"
+      ],
+      "normalizationTags": [
+        "raise",
+        "opengym"
+      ],
+      "equipment": [
+        "band"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "持弹力带将手臂抬成Y形，训练肩部和上背的协同控制。",
+      "instructions": [
+        "双脚稳固踩住弹力带或按器材要求固定。",
+        "双手持带，躯干稳定，手臂略在身体前方。",
+        "向前上方抬成Y形，避免塌腰或耸肩抢动作。",
+        "受控降回，阻力以能保持姿势为准。"
+      ],
+      "guide": {
+        "diagram": "双脚稳固踩住弹力带或按器材要求固定。\n双手持带，躯干稳定，手臂略在身体前方。\n向前上方抬成Y形，避免塌腰或耸肩抢动作。\n受控降回，阻力以能保持姿势为准。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "1017",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/1017.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-0032",
+      "displayName": "杠铃硬拉",
+      "englishName": "barbell deadlift",
+      "aliases": [
+        "杠铃硬拉",
+        "barbell deadlift"
+      ],
+      "category": "legs",
+      "muscleGroups": [
+        "臀肌群",
+        "腘绳肌"
+      ],
+      "primaryMuscles": [
+        "gluteal",
+        "hamstring"
+      ],
+      "secondaryMuscles": [
+        "lower-back",
+        "quadriceps",
+        "forearm"
+      ],
+      "movementTags": [
+        "hinge"
+      ],
+      "normalizationTags": [
+        "hinge",
+        "opengym"
+      ],
+      "equipment": [
+        "barbell"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "从地面以髋伸和腿部发力提起杠铃，臀部、腿后侧和躯干稳定肌参与。",
+      "instructions": [
+        "杠铃靠近小腿，双脚站稳，屈髋屈膝握杠。",
+        "收紧躯干，保持脊柱在可控位置。",
+        "蹬地并伸髋站起，让杠铃靠近身体，不猛拽或后仰。",
+        "先屈髋再适度屈膝，受控把杠铃放回地面。"
+      ],
+      "guide": {
+        "diagram": "杠铃靠近小腿，双脚站稳，屈髋屈膝握杠。\n收紧躯干，保持脊柱在可控位置。\n蹬地并伸髋站起，让杠铃靠近身体，不猛拽或后仰。\n先屈髋再适度屈膝，受控把杠铃放回地面。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "0032",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0032.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-3593",
+      "displayName": "杠铃深蹲",
+      "englishName": "barbell squat",
+      "aliases": [
+        "杠铃深蹲",
+        "barbell squat"
+      ],
+      "category": "legs",
+      "muscleGroups": [
+        "股四头肌",
+        "臀肌群"
+      ],
+      "primaryMuscles": [
+        "quadriceps",
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "hamstring",
+        "abs"
+      ],
+      "movementTags": [
+        "squat"
+      ],
+      "normalizationTags": [
+        "squat",
+        "opengym"
+      ],
+      "equipment": [
+        "barbell"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "杠铃背负深蹲，以膝髋协同屈伸训练大腿和臀部。",
+      "instructions": [
+        "在带保护杆的稳固深蹲架内设置杠位。",
+        "杠铃放在可稳定承托的上背部，双脚站稳。",
+        "收紧躯干，屈髋屈膝下蹲至个人可控深度，膝部沿脚尖方向移动。",
+        "脚掌持续踩稳，站起后再稳妥回架。"
+      ],
+      "guide": {
+        "diagram": "在带保护杆的稳固深蹲架内设置杠位。\n杠铃放在可稳定承托的上背部，双脚站稳。\n收紧躯干，屈髋屈膝下蹲至个人可控深度，膝部沿脚尖方向移动。\n脚掌持续踩稳，站起后再稳妥回架。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "3593",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/3593.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-1060",
+      "displayName": "杠铃臀推",
+      "englishName": "barbell hip thrust",
+      "aliases": [
+        "杠铃臀推",
+        "barbell hip thrust"
+      ],
+      "category": "legs",
+      "muscleGroups": [
+        "臀肌群"
+      ],
+      "primaryMuscles": [
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "hamstring"
+      ],
+      "movementTags": [
+        "bridge"
+      ],
+      "normalizationTags": [
+        "bridge",
+        "opengym"
+      ],
+      "equipment": [
+        "barbell",
+        "bench"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "上背靠凳、杠铃置于髋前完成臀推，重点练习伸髋。",
+      "instructions": [
+        "将凳固定，上背靠凳，髋前杠铃加垫。",
+        "双脚踩稳，颈部保持自然，躯干收紧。",
+        "伸髋抬起，顶部大腿与躯干接近连线，不用腰部过伸顶高。",
+        "缓慢下降，保持杠铃和凳稳定。"
+      ],
+      "guide": {
+        "diagram": "将凳固定，上背靠凳，髋前杠铃加垫。\n双脚踩稳，颈部保持自然，躯干收紧。\n伸髋抬起，顶部大腿与躯干接近连线，不用腰部过伸顶高。\n缓慢下降，保持杠铃和凳稳定。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "1060",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/1060.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-1581",
+      "displayName": "徒手后撤弓步蹲",
+      "englishName": "bodyweight rear lunge",
+      "aliases": [
+        "徒手后撤弓步蹲",
+        "bodyweight rear lunge"
+      ],
+      "category": "legs",
+      "muscleGroups": [
+        "股四头肌",
+        "臀肌群"
+      ],
+      "primaryMuscles": [
+        "quadriceps",
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "hamstring"
+      ],
+      "movementTags": [
+        "lunge"
+      ],
+      "normalizationTags": [
+        "lunge",
+        "opengym"
+      ],
+      "equipment": [
+        "bodyweight"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "exerciseType": "strength",
+      "description": "向后迈步再回到站姿的弓步蹲，前侧腿承担主要起身工作。",
+      "instructions": [
+        "站稳，双脚约髋宽。",
+        "一脚向后迈出，双膝屈曲，前脚全掌保持支撑。",
+        "下蹲到可控位置，骨盆和膝部保持稳定。",
+        "前侧腿发力回到站姿，再换侧。"
+      ],
+      "guide": {
+        "diagram": "站稳，双脚约髋宽。\n一脚向后迈出，双膝屈曲，前脚全掌保持支撑。\n下蹲到可控位置，骨盆和膝部保持稳定。\n前侧腿发力回到站姿，再换侧。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "1581",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/1581.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-3928",
+      "displayName": "徒手单腿硬拉",
+      "englishName": "bodyweight single leg deadlift",
+      "aliases": [
+        "徒手单腿硬拉",
+        "bodyweight single leg deadlift"
+      ],
+      "category": "legs",
+      "muscleGroups": [
+        "腘绳肌",
+        "臀肌群"
+      ],
+      "primaryMuscles": [
+        "hamstring",
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "lower-back"
+      ],
+      "movementTags": [
+        "hinge"
+      ],
+      "normalizationTags": [
+        "hinge",
+        "opengym"
+      ],
+      "equipment": [
+        "bodyweight"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "exerciseType": "strength",
+      "description": "以单腿支撑完成徒手髋铰链，训练腿后侧、臀部与平衡控制。",
+      "instructions": [
+        "单脚站稳，支撑膝微屈。",
+        "保持骨盆朝向地面，屈髋使躯干向前、另一腿向后。",
+        "背部保持可控，幅度以平衡和髋活动范围为限。",
+        "支撑侧伸髋回到站姿，左右分别记录。"
+      ],
+      "guide": {
+        "diagram": "单脚站稳，支撑膝微屈。\n保持骨盆朝向地面，屈髋使躯干向前、另一腿向后。\n背部保持可控，幅度以平衡和髋活动范围为限。\n支撑侧伸髋回到站姿，左右分别记录。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "3928",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/3928.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-4031",
+      "displayName": "弹力带髋外展",
+      "englishName": "band hip abduction",
+      "aliases": [
+        "弹力带髋外展",
+        "band hip abduction"
+      ],
+      "category": "legs",
+      "muscleGroups": [
+        "臀肌群"
+      ],
+      "primaryMuscles": [
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "abs"
+      ],
+      "movementTags": [
+        "hip"
+      ],
+      "normalizationTags": [
+        "hip",
+        "opengym"
+      ],
+      "equipment": [
+        "band"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "exerciseType": "strength",
+      "description": "站姿对抗弹力带把腿移向身体外侧，训练髋外展肌群。",
+      "instructions": [
+        "弹力带可靠固定在低处并连接训练侧踝部。",
+        "扶稳支撑，躯干直立，支撑腿微屈。",
+        "训练腿向外侧移动，不侧倒躯干或大幅旋转骨盆。",
+        "缓慢回收，换侧重复；左右次数分别记录。"
+      ],
+      "guide": {
+        "diagram": "弹力带可靠固定在低处并连接训练侧踝部。\n扶稳支撑，躯干直立，支撑腿微屈。\n训练腿向外侧移动，不侧倒躯干或大幅旋转骨盆。\n缓慢回收，换侧重复；左右次数分别记录。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "4031",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/4031.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-4029",
+      "displayName": "弹力带髋内收",
+      "englishName": "band hip adduction",
+      "aliases": [
+        "弹力带髋内收",
+        "band hip adduction"
+      ],
+      "category": "legs",
+      "muscleGroups": [
+        "内收肌群"
+      ],
+      "primaryMuscles": [
+        "adductors"
+      ],
+      "secondaryMuscles": [
+        "abs"
+      ],
+      "movementTags": [
+        "hip"
+      ],
+      "normalizationTags": [
+        "hip",
+        "opengym"
+      ],
+      "equipment": [
+        "band"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "exerciseType": "strength",
+      "description": "站姿对抗弹力带把腿移向身体中线，训练髋内收肌群。",
+      "instructions": [
+        "弹力带固定在低处并连接训练侧踝部。",
+        "侧身站稳并扶好支撑，训练腿从外侧起始。",
+        "受控向中线方向内收，不用躯干侧倒代偿。",
+        "慢慢回到外侧，换侧重复；左右次数分别记录。"
+      ],
+      "guide": {
+        "diagram": "弹力带固定在低处并连接训练侧踝部。\n侧身站稳并扶好支撑，训练腿从外侧起始。\n受控向中线方向内收，不用躯干侧倒代偿。\n慢慢回到外侧，换侧重复；左右次数分别记录。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "4029",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/4029.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-0911",
+      "displayName": "俯卧弹力带腿弯举",
+      "englishName": "band lying leg curl",
+      "aliases": [
+        "俯卧弹力带腿弯举",
+        "band lying leg curl"
+      ],
+      "category": "legs",
+      "muscleGroups": [
+        "腘绳肌"
+      ],
+      "primaryMuscles": [
+        "hamstring"
+      ],
+      "secondaryMuscles": [
+        "calves"
+      ],
+      "movementTags": [
+        "legcurl"
+      ],
+      "normalizationTags": [
+        "legcurl",
+        "opengym"
+      ],
+      "equipment": [
+        "band"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "俯卧对抗弹力带屈膝，主要训练腘绳肌。",
+      "instructions": [
+        "将弹力带可靠固定在低位，连接踝部，俯卧于垫上。",
+        "保持骨盆贴稳，腹部轻收。",
+        "屈膝把脚跟向臀部方向移动，不抬髋顶腰。",
+        "受控伸膝，避免弹力带猛拉。"
+      ],
+      "guide": {
+        "diagram": "将弹力带可靠固定在低位，连接踝部，俯卧于垫上。\n保持骨盆贴稳，腹部轻收。\n屈膝把脚跟向臀部方向移动，不抬髋顶腰。\n受控伸膝，避免弹力带猛拉。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "0911",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0911.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-1004",
+      "displayName": "弹力带深蹲",
+      "englishName": "band squat",
+      "aliases": [
+        "弹力带深蹲",
+        "band squat"
+      ],
+      "category": "legs",
+      "muscleGroups": [
+        "股四头肌",
+        "臀肌群"
+      ],
+      "primaryMuscles": [
+        "quadriceps",
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "abs"
+      ],
+      "movementTags": [
+        "squat"
+      ],
+      "normalizationTags": [
+        "squat",
+        "opengym"
+      ],
+      "equipment": [
+        "band"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "环形弹力带置于双膝上方的深蹲变式，保持大腿和臀部协同控制。",
+      "instructions": [
+        "将合适阻力的环带放在双膝上方，双脚站稳。",
+        "保持膝盖沿脚尖方向，屈髋屈膝下蹲。",
+        "幅度以脚掌稳定、躯干可控为限，不刻意过度把膝盖向外顶。",
+        "站起回到初始姿势，保持环带受控。"
+      ],
+      "guide": {
+        "diagram": "将合适阻力的环带放在双膝上方，双脚站稳。\n保持膝盖沿脚尖方向，屈髋屈膝下蹲。\n幅度以脚掌稳定、躯干可控为限，不刻意过度把膝盖向外顶。\n站起回到初始姿势，保持环带受控。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "1004",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/1004.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-6607",
+      "displayName": "弹力带侧向行走",
+      "englishName": "band lateral walk",
+      "aliases": [
+        "弹力带侧向行走",
+        "band lateral walk"
+      ],
+      "category": "legs",
+      "muscleGroups": [
+        "臀肌群"
+      ],
+      "primaryMuscles": [
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "quadriceps"
+      ],
+      "movementTags": [
+        "sidewalk"
+      ],
+      "normalizationTags": [
+        "sidewalk",
+        "opengym"
+      ],
+      "equipment": [
+        "band"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "在环形弹力带阻力下侧向迈步，训练髋外展控制。",
+      "instructions": [
+        "环带按动作设置放在腿部，双脚分开保持轻张力。",
+        "屈髋屈膝成小幅半蹲，躯干稳定。",
+        "向一侧迈出一小步，另一脚随后跟进，不完全并脚放松。",
+        "在可控范围往返，记录左右方向实际步数。"
+      ],
+      "guide": {
+        "diagram": "环带按动作设置放在腿部，双脚分开保持轻张力。\n屈髋屈膝成小幅半蹲，躯干稳定。\n向一侧迈出一小步，另一脚随后跟进，不完全并脚放松。\n在可控范围往返，记录左右方向实际步数。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "6607",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/6607.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-1513",
+      "displayName": "弹力带早安式",
+      "englishName": "band good morning",
+      "aliases": [
+        "弹力带早安式",
+        "band good morning"
+      ],
+      "category": "legs",
+      "muscleGroups": [
+        "腘绳肌",
+        "臀肌群"
+      ],
+      "primaryMuscles": [
+        "hamstring",
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "lower-back"
+      ],
+      "movementTags": [
+        "hinge"
+      ],
+      "normalizationTags": [
+        "hinge",
+        "opengym"
+      ],
+      "equipment": [
+        "band"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "弹力带阻力下的髋铰链，训练腿后侧、臀部及躯干稳定。",
+      "instructions": [
+        "使用适合此动作的弹力带，脚下踩稳，另一端安置于上背而非颈部。",
+        "膝微屈，收紧躯干。",
+        "臀部向后移动，屈髋使上身前倾，背部保持可控。",
+        "伸髋站回，不向后甩腰。"
+      ],
+      "guide": {
+        "diagram": "使用适合此动作的弹力带，脚下踩稳，另一端安置于上背而非颈部。\n膝微屈，收紧躯干。\n臀部向后移动，屈髋使上身前倾，背部保持可控。\n伸髋站回，不向后甩腰。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "1513",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/1513.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-0909",
+      "displayName": "弹力带弓步蹲",
+      "englishName": "band lunges",
+      "aliases": [
+        "弹力带弓步蹲",
+        "band lunges"
+      ],
+      "category": "legs",
+      "muscleGroups": [
+        "股四头肌",
+        "臀肌群"
+      ],
+      "primaryMuscles": [
+        "quadriceps",
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "hamstring"
+      ],
+      "movementTags": [
+        "lunge"
+      ],
+      "normalizationTags": [
+        "lunge",
+        "opengym"
+      ],
+      "equipment": [
+        "band"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "exerciseType": "strength",
+      "description": "弓步站姿配合弹力带阻力完成下蹲和起身，训练大腿与臀部。",
+      "instructions": [
+        "按动作要求稳妥踩住或固定弹力带，采用前后站姿。",
+        "保持前脚全掌支撑，骨盆稳定。",
+        "屈髋屈膝下蹲，前膝沿脚尖方向移动。",
+        "受控站回；完成一侧后换侧。"
+      ],
+      "guide": {
+        "diagram": "按动作要求稳妥踩住或固定弹力带，采用前后站姿。\n保持前脚全掌支撑，骨盆稳定。\n屈髋屈膝下蹲，前膝沿脚尖方向移动。\n受控站回；完成一侧后换侧。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "0909",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0909.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-4442",
+      "displayName": "扶持保加利亚分腿蹲",
+      "englishName": "assisted bulgarian split squat",
+      "aliases": [
+        "扶持保加利亚分腿蹲",
+        "assisted bulgarian split squat"
+      ],
+      "category": "legs",
+      "muscleGroups": [
+        "股四头肌",
+        "臀肌群"
+      ],
+      "primaryMuscles": [
+        "quadriceps",
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "hamstring"
+      ],
+      "movementTags": [
+        "lunge"
+      ],
+      "normalizationTags": [
+        "lunge",
+        "opengym"
+      ],
+      "equipment": [
+        "bench",
+        "support"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "exerciseType": "strength",
+      "description": "后脚抬高、手扶稳固支撑的分腿蹲，减少平衡限制。",
+      "instructions": [
+        "后脚置于稳固低凳，前脚站稳，一手轻扶支撑。",
+        "保持骨盆和躯干稳定，主要用前侧腿承重。",
+        "屈膝屈髋下降到可控深度，避免后腿大力蹬凳。",
+        "前侧腿发力回到起点，左右分别完成。"
+      ],
+      "guide": {
+        "diagram": "后脚置于稳固低凳，前脚站稳，一手轻扶支撑。\n保持骨盆和躯干稳定，主要用前侧腿承重。\n屈膝屈髋下降到可控深度，避免后腿大力蹬凳。\n前侧腿发力回到起点，左右分别完成。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "4442",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/4442.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-6560",
+      "displayName": "90/90坐姿髋部拉伸",
+      "englishName": "90 to 90 stretch",
+      "aliases": [
+        "90/90坐姿髋部拉伸",
+        "90 to 90 stretch"
+      ],
+      "category": "recovery",
+      "muscleGroups": [
+        "臀肌群"
+      ],
+      "primaryMuscles": [
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "adductors"
+      ],
+      "movementTags": [
+        "stretch"
+      ],
+      "normalizationTags": [
+        "stretch",
+        "opengym"
+      ],
+      "equipment": [
+        "bodyweight"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "exerciseType": "mobility",
+      "description": "双腿在坐姿中各屈曲约直角，练习髋部旋转位置的温和拉伸。",
+      "instructions": [
+        "坐在垫上，一腿在前、一腿在侧后，双膝屈曲。",
+        "可用手支撑身体，保持在自己能控制的位置。",
+        "温和前倾或保持，不强压膝盖追求角度。",
+        "自然呼吸，完成后缓慢换侧。"
+      ],
+      "guide": {
+        "diagram": "坐在垫上，一腿在前、一腿在侧后，双膝屈曲。\n可用手支撑身体，保持在自己能控制的位置。\n温和前倾或保持，不强压膝盖追求角度。\n自然呼吸，完成后缓慢换侧。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "6560",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/6560.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-1379",
+      "displayName": "坐姿哑铃提踵",
+      "englishName": "dumbbell seated calf raise",
+      "aliases": [
+        "坐姿哑铃提踵",
+        "dumbbell seated calf raise"
+      ],
+      "category": "legs",
+      "muscleGroups": [
+        "小腿肌群"
+      ],
+      "primaryMuscles": [
+        "calves"
+      ],
+      "secondaryMuscles": [],
+      "movementTags": [
+        "calf"
+      ],
+      "normalizationTags": [
+        "calf",
+        "opengym"
+      ],
+      "equipment": [
+        "dumbbell",
+        "bench"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "坐姿屈膝提踵，训练小腿，屈膝姿势下比目鱼肌参与突出。",
+      "instructions": [
+        "坐稳，前脚掌踩地或稳固垫块，膝部约屈直角。",
+        "将哑铃用手扶稳放于大腿靠近膝部的位置，避免压在关节骨点。",
+        "抬起脚跟，短暂停住，不用身体起伏借力。",
+        "慢慢下放到可控范围。"
+      ],
+      "guide": {
+        "diagram": "坐稳，前脚掌踩地或稳固垫块，膝部约屈直角。\n将哑铃用手扶稳放于大腿靠近膝部的位置，避免压在关节骨点。\n抬起脚跟，短暂停住，不用身体起伏借力。\n慢慢下放到可控范围。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "1379",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/1379.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-1178",
+      "displayName": "站姿单腿哑铃提踵",
+      "englishName": "dumbbell standing single leg calf raise",
+      "aliases": [
+        "站姿单腿哑铃提踵",
+        "dumbbell standing single leg calf raise"
+      ],
+      "category": "legs",
+      "muscleGroups": [
+        "小腿肌群"
+      ],
+      "primaryMuscles": [
+        "calves"
+      ],
+      "secondaryMuscles": [
+        "forearm"
+      ],
+      "movementTags": [
+        "calf"
+      ],
+      "normalizationTags": [
+        "calf",
+        "opengym"
+      ],
+      "equipment": [
+        "dumbbell"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "exerciseType": "strength",
+      "description": "单腿支撑并持哑铃提踵，训练小腿跖屈力量。",
+      "instructions": [
+        "单腿站稳，一手持哑铃，另一手可轻扶支撑。",
+        "支撑腿保持自然伸展，脚掌稳定。",
+        "抬高脚跟，避免脚踝向内或向外翻。",
+        "受控下降，左右分别记录次数；重量为所持哑铃总重量。"
+      ],
+      "guide": {
+        "diagram": "单腿站稳，一手持哑铃，另一手可轻扶支撑。\n支撑腿保持自然伸展，脚掌稳定。\n抬高脚跟，避免脚踝向内或向外翻。\n受控下降，左右分别记录次数；重量为所持哑铃总重量。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "1178",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/1178.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-1246",
+      "displayName": "中空保持",
+      "englishName": "hollow hold",
+      "aliases": [
+        "中空保持",
+        "hollow hold"
+      ],
+      "category": "core",
+      "muscleGroups": [
+        "腹直肌"
+      ],
+      "primaryMuscles": [
+        "abs"
+      ],
+      "secondaryMuscles": [
+        "hip-flexors"
+      ],
+      "movementTags": [
+        "hollow"
+      ],
+      "normalizationTags": [
+        "hollow",
+        "opengym"
+      ],
+      "equipment": [
+        "bodyweight"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "仰卧抬起肩部和腿部保持中空姿势，训练腹部对躯干位置的控制。",
+      "instructions": [
+        "仰卧，收紧腹部，让腰背保持可控贴近垫面。",
+        "轻抬肩部与双腿，双手可先放在体侧。",
+        "仅在不塌腰的情况下逐渐伸长手臂或腿部杠杆。",
+        "保持自然呼吸，姿势失控前结束计时。"
+      ],
+      "guide": {
+        "diagram": "仰卧，收紧腹部，让腰背保持可控贴近垫面。\n轻抬肩部与双腿，双手可先放在体侧。\n仅在不塌腰的情况下逐渐伸长手臂或腿部杠杆。\n保持自然呼吸，姿势失控前结束计时。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "1246",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/1246.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-5649",
+      "displayName": "中空摇摆",
+      "englishName": "hollow rock",
+      "aliases": [
+        "中空摇摆",
+        "hollow rock"
+      ],
+      "category": "core",
+      "muscleGroups": [
+        "腹直肌"
+      ],
+      "primaryMuscles": [
+        "abs"
+      ],
+      "secondaryMuscles": [
+        "hip-flexors"
+      ],
+      "movementTags": [
+        "hollow"
+      ],
+      "normalizationTags": [
+        "hollow",
+        "opengym"
+      ],
+      "equipment": [
+        "bodyweight"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "保持中空姿势做小幅整体摇摆，区别于静止的中空保持。",
+      "instructions": [
+        "先建立能稳定维持的中空姿势。",
+        "保持躯干和腿部相对形状不变，整体小幅前后摇动。",
+        "避免用腰部反复屈伸或甩腿制造幅度。",
+        "回到起始方向为一次完整摇摆，失去控制时停止。"
+      ],
+      "guide": {
+        "diagram": "先建立能稳定维持的中空姿势。\n保持躯干和腿部相对形状不变，整体小幅前后摇动。\n避免用腰部反复屈伸或甩腿制造幅度。\n回到起始方向为一次完整摇摆，失去控制时停止。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "5649",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/5649.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-0979",
+      "displayName": "弹力带帕洛夫推举",
+      "englishName": "band horizontal pallof press",
+      "aliases": [
+        "弹力带帕洛夫推举",
+        "band horizontal pallof press"
+      ],
+      "category": "core",
+      "muscleGroups": [
+        "腹斜肌"
+      ],
+      "primaryMuscles": [
+        "obliques"
+      ],
+      "secondaryMuscles": [
+        "abs"
+      ],
+      "movementTags": [
+        "pallof"
+      ],
+      "normalizationTags": [
+        "pallof",
+        "opengym"
+      ],
+      "equipment": [
+        "band"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "exerciseType": "strength",
+      "description": "面对来自侧方的弹力带阻力向前推手，训练躯干抗旋转控制。",
+      "instructions": [
+        "弹力带固定于身体侧方约胸部高度。",
+        "双手将带柄握在胸前，双脚站稳。",
+        "向前推手，保持骨盆和胸部朝向不被拉转。",
+        "受控收回胸前；转身换另一朝向练习。"
+      ],
+      "guide": {
+        "diagram": "弹力带固定于身体侧方约胸部高度。\n双手将带柄握在胸前，双脚站稳。\n向前推手，保持骨盆和胸部朝向不被拉转。\n受控收回胸前；转身换另一朝向练习。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "0979",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0979.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-6211",
+      "displayName": "自行车卷腹",
+      "englishName": "bicycle crunch",
+      "aliases": [
+        "自行车卷腹",
+        "bicycle crunch"
+      ],
+      "category": "core",
+      "muscleGroups": [
+        "腹直肌",
+        "腹斜肌"
+      ],
+      "primaryMuscles": [
+        "abs",
+        "obliques"
+      ],
+      "secondaryMuscles": [
+        "hip-flexors"
+      ],
+      "movementTags": [
+        "crunch"
+      ],
+      "normalizationTags": [
+        "crunch",
+        "opengym"
+      ],
+      "equipment": [
+        "bodyweight"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "exerciseType": "strength",
+      "description": "仰卧交替屈膝和躯干旋转，训练腹部和腹斜肌。",
+      "instructions": [
+        "仰卧，抬腿屈髋屈膝，双手轻扶头侧，不拉颈。",
+        "肩部轻抬，一侧腿伸出，躯干向另一侧旋转。",
+        "以相反肘和膝靠近为动作方向，不强求碰到。",
+        "慢慢交替；左右分别记录，保持腰背可控。"
+      ],
+      "guide": {
+        "diagram": "仰卧，抬腿屈髋屈膝，双手轻扶头侧，不拉颈。\n肩部轻抬，一侧腿伸出，躯干向另一侧旋转。\n以相反肘和膝靠近为动作方向，不强求碰到。\n慢慢交替；左右分别记录，保持腰背可控。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "6211",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/6211.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-4170",
+      "displayName": "熊式平板支撑",
+      "englishName": "bear plank",
+      "aliases": [
+        "熊式平板支撑",
+        "bear plank"
+      ],
+      "category": "core",
+      "muscleGroups": [
+        "腹直肌"
+      ],
+      "primaryMuscles": [
+        "abs"
+      ],
+      "secondaryMuscles": [
+        "deltoids",
+        "quadriceps"
+      ],
+      "movementTags": [
+        "plank"
+      ],
+      "normalizationTags": [
+        "plank",
+        "opengym"
+      ],
+      "equipment": [
+        "bodyweight"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "四点跪姿抬膝离地保持，训练核心和肩部支撑控制。",
+      "instructions": [
+        "双手在肩下，双膝在髋下，脚趾踩地。",
+        "收紧腹部，膝盖抬离地面少许。",
+        "保持背部与骨盆稳定，不耸肩塌腰。",
+        "自然呼吸，姿势改变前结束保持。"
+      ],
+      "guide": {
+        "diagram": "双手在肩下，双膝在髋下，脚趾踩地。\n收紧腹部，膝盖抬离地面少许。\n保持背部与骨盆稳定，不耸肩塌腰。\n自然呼吸，姿势改变前结束保持。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "4170",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/4170.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-0133",
+      "displayName": "屈膝侧平板支撑",
+      "englishName": "bent knee side plank",
+      "aliases": [
+        "屈膝侧平板支撑",
+        "bent knee side plank"
+      ],
+      "category": "core",
+      "muscleGroups": [
+        "腹斜肌"
+      ],
+      "primaryMuscles": [
+        "obliques"
+      ],
+      "secondaryMuscles": [
+        "abs",
+        "deltoids"
+      ],
+      "movementTags": [
+        "plank"
+      ],
+      "normalizationTags": [
+        "plank",
+        "opengym"
+      ],
+      "equipment": [
+        "bodyweight"
+      ],
+      "recordingMode": "time",
+      "laterality": "unilateral",
+      "exerciseType": "strength",
+      "description": "屈膝侧桥，用前臂和膝部支撑身体，训练侧向躯干稳定。",
+      "instructions": [
+        "侧卧屈膝，肘部位于肩下，前臂支撑。",
+        "抬起髋部，让肩、髋、膝形成稳定连线。",
+        "避免向前后滚转或耸肩。",
+        "保持呼吸，完成一侧后换侧并分别计时。"
+      ],
+      "guide": {
+        "diagram": "侧卧屈膝，肘部位于肩下，前臂支撑。\n抬起髋部，让肩、髋、膝形成稳定连线。\n避免向前后滚转或耸肩。\n保持呼吸，完成一侧后换侧并分别计时。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "0133",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0133.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-0867",
+      "displayName": "反向平板支撑",
+      "englishName": "reverse plank",
+      "aliases": [
+        "反向平板支撑",
+        "reverse plank"
+      ],
+      "category": "core",
+      "muscleGroups": [
+        "臀肌群"
+      ],
+      "primaryMuscles": [
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "hamstring",
+        "lower-back",
+        "deltoids"
+      ],
+      "movementTags": [
+        "plank"
+      ],
+      "normalizationTags": [
+        "plank",
+        "opengym"
+      ],
+      "equipment": [
+        "bodyweight"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "面朝上的平板保持，用手掌和脚跟支撑，臀部及身体后侧参与。",
+      "instructions": [
+        "坐姿双手置于身后，支撑方向以手腕能控制为限。",
+        "双脚向前伸，脚跟踩稳。",
+        "抬髋至躯干与腿部接近连线，不仰头或用腰猛拱。",
+        "保持自然呼吸，受控落回坐姿。"
+      ],
+      "guide": {
+        "diagram": "坐姿双手置于身后，支撑方向以手腕能控制为限。\n双脚向前伸，脚跟踩稳。\n抬髋至躯干与腿部接近连线，不仰头或用腰猛拱。\n保持自然呼吸，受控落回坐姿。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "0867",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0867.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-1326",
+      "displayName": "反握引体向上",
+      "englishName": "chin-up",
+      "aliases": [
+        "反握引体向上",
+        "chin-up"
+      ],
+      "category": "pull",
+      "muscleGroups": [
+        "背阔与上背肌群",
+        "肱二头肌"
+      ],
+      "primaryMuscles": [
+        "upper-back",
+        "biceps"
+      ],
+      "secondaryMuscles": [
+        "forearm"
+      ],
+      "movementTags": [
+        "pullup"
+      ],
+      "normalizationTags": [
+        "pullup",
+        "opengym"
+      ],
+      "equipment": [
+        "pull-up-bar"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "掌心朝向自己的反握引体，背部和肱二头肌共同完成上拉。",
+      "instructions": [
+        "双手反握稳固单杠，身体悬垂，肩部保持主动控制。",
+        "收紧躯干，屈肘将身体拉向杠。",
+        "在可控幅度内上拉，不甩腿或伸颈硬凑高度。",
+        "受控下降，不突然坠入肩部。"
+      ],
+      "guide": {
+        "diagram": "双手反握稳固单杠，身体悬垂，肩部保持主动控制。\n收紧躯干，屈肘将身体拉向杠。\n在可控幅度内上拉，不甩腿或伸颈硬凑高度。\n受控下降，不突然坠入肩部。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "1326",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/1326.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-0253",
+      "displayName": "窄距对握引体向上",
+      "englishName": "chin-ups (narrow parallel grip)",
+      "aliases": [
+        "窄距对握引体向上",
+        "chin-ups (narrow parallel grip)"
+      ],
+      "category": "pull",
+      "muscleGroups": [
+        "背阔与上背肌群"
+      ],
+      "primaryMuscles": [
+        "upper-back"
+      ],
+      "secondaryMuscles": [
+        "biceps",
+        "forearm"
+      ],
+      "movementTags": [
+        "pullup"
+      ],
+      "normalizationTags": [
+        "pullup",
+        "opengym"
+      ],
+      "equipment": [
+        "parallel-pull-up-bar"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "使用窄距平行握把、掌心相对的引体向上。",
+      "instructions": [
+        "双手握住稳固平行握把，身体悬垂。",
+        "稳定肩部与躯干，屈肘向上拉。",
+        "保持自然头位，不摆荡借力。",
+        "受控下降到个人可控范围。"
+      ],
+      "guide": {
+        "diagram": "双手握住稳固平行握把，身体悬垂。\n稳定肩部与躯干，屈肘向上拉。\n保持自然头位，不摆荡借力。\n受控下降到个人可控范围。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "0253",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/0253.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
+      }
+    },
+    {
+      "exerciseKey": "opengym-4718",
+      "displayName": "弹力带辅助反握引体向上",
+      "englishName": "band assisted chin up",
+      "aliases": [
+        "弹力带辅助反握引体向上",
+        "band assisted chin up"
+      ],
+      "category": "pull",
+      "muscleGroups": [
+        "背阔与上背肌群",
+        "肱二头肌"
+      ],
+      "primaryMuscles": [
+        "upper-back",
+        "biceps"
+      ],
+      "secondaryMuscles": [
+        "forearm"
+      ],
+      "movementTags": [
+        "pullup"
+      ],
+      "normalizationTags": [
+        "pullup",
+        "opengym"
+      ],
+      "equipment": [
+        "band",
+        "pull-up-bar"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "exerciseType": "strength",
+      "description": "用弹力带托住脚或膝部辅助完成反握引体，辅助量随拉伸长度变化。",
+      "instructions": [
+        "检查弹力带完好并可靠固定在单杠，稳妥进入辅助位置。",
+        "反握单杠，收紧躯干，避免弹力带滑脱。",
+        "屈肘上拉，不甩腿或依赖突然回弹。",
+        "受控下降并安全退出；记录弹力带规格，不虚构辅助公斤数。"
+      ],
+      "guide": {
+        "diagram": "检查弹力带完好并可靠固定在单杠，稳妥进入辅助位置。\n反握单杠，收紧躯干，避免弹力带滑脱。\n屈肘上拉，不甩腿或依赖突然回弹。\n受控下降并安全退出；记录弹力带规格，不虚构辅助公斤数。",
+        "cautions": [
+          "器材与支撑固定可靠，使用能全程控制的负重与幅度。",
+          "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
+        ]
+      },
+      "media": null,
+      "mediaMatch": "none",
+      "status": "confirmed",
+      "provenance": {
+        "project": "openGym",
+        "upstreamId": "4718",
+        "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+        "checkedAt": "2026-11-07",
+        "url": "https://github.com/DuarteSantos8/openGym/blob/8fb98b16861a2728652302a7e6e30c50548493a0/catalogue/exercises/4718.json",
+        "license": "AGPL-3.0（本地中文审校文本）；原始 ExerciseDB 文本按上游逐项标识保留 MIT",
+        "note": "中文步骤已结合上游描述逐项整理；不包含上游图片、动画或其热链。"
       }
     }
-  ]
+  ],
+  "revision": "2026-11-07",
+  "upstreamCommit": "8fb98b16861a2728652302a7e6e30c50548493a0"
 }

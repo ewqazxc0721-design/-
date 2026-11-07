@@ -1,0 +1,41 @@
+// Destructive to TEST data only. Run in the isolated browse profile at localhost:8765.
+(async()=>{
+  if(location.hostname!=='127.0.0.1'||location.port!=='8765')throw new Error('This verification is restricted to the isolated localhost test server.');
+  appState.load();
+  const results=[];const check=(name,condition,details)=>{results.push({name,passed:!!condition,...(!condition?{details}: {})});if(!condition)throw new Error(name+': '+JSON.stringify(details));};
+  window.__preTrainingBrowserCheck=appState.exportSnapshot();
+  localStorage.setItem('supabase-auto-sync-enabled','0');
+  const date=TrainingCore.dayKey(new Date()),index=(new Date().getDay()+6)%7;
+  const template=getPlanTemplate();template.days[index].items=['俯卧撑 3组 x 每组12次','平板支撑 2组 x 每组45秒'];template.days[index].focus='力量训练测试';
+  setPlanTemplate(template,true);domainPersistence.setJson('gain-daily-logs',{});setTrainingSession(null);setActivePlanDay(index);ensureDailyLogSnapshot(date);
+  const click=selector=>{const node=document.querySelector(selector);if(!node)throw new Error('missing '+selector);node.click();};
+  const fill=(selector,value)=>{const input=document.querySelector(selector);input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));};
+  TrainingEnhancements.openPlan(index,template.days[index].items[0]);
+  for(const reps of [12,10,8]){click('#te-overlay [data-te="add-set"]');const sets=document.querySelectorAll('#te-overlay .te-set');const node=sets[sets.length-1];const input=node.querySelector('[data-field="reps"]');input.value=reps;input.dispatchEvent(new Event('input',{bubbles:true}));node.querySelector('[data-te="complete-set"]').click();}
+  check('draft omitted from official stats',TrainingCore.stats(getDailyLogs(),getExerciseLibrary()).groups===0);
+  click('#te-overlay [data-te="finish"]');
+  let log=getDailyLogs()[date],entry=log.exerciseEntries[0],stats=TrainingCore.stats(getDailyLogs(),getExerciseLibrary());
+  check('uneven sets save true quantities',stats.groups===3&&stats.reps===30,stats);
+  check('dose mismatch waits for confirmation',entry.reconciliationState==='needs_confirmation'&&log.planProgressItems[0].completedAmount===0,log.planProgressItems[0]);
+  click('#te-overlay [data-te="accept-dose"]');
+  log=getDailyLogs()[date];entry=log.exerciseEntries[0];
+  check('confirmed dose revision changes daily snapshot',entry.reconciliationState==='accepted'&&log.planProgressItems[0].completedAmount===3&&log.allItems[0].includes('已确认实际'),log.planProgressItems[0]);
+  check('weekly template remains unchanged',getPlanTemplate().days[index].items[0]===template.days[index].items[0]);
+  const duplicate=writeTrainingCaptureIntent({action:'write',date,recordType:'training_fact',currentValue:{exercise:'俯卧撑',sets:3},originalText:'刚才俯卧撑三组做完了'});
+  check('chat duplicate is blocked',duplicate.status==='duplicate'&&TrainingCore.stats(getDailyLogs(),getExerciseLibrary()).reps===30,duplicate);
+  const stale=TrainingCore.copy(log);
+  TrainingEnhancements.openEditor(entry,date,true);click('#te-overlay [data-te="delete-set"]');click('#te-overlay [data-te="save-edit"]');
+  log=getDailyLogs()[date];stats=TrainingCore.stats(getDailyLogs(),getExerciseLibrary());
+  check('deletion reduces count and clears plan completion',stats.groups===2&&stats.reps===18&&log.planProgressItems[0].completedAmount===2&&!getPlanChecks()[log.planProgressItems[0].planCheckKey],{groups:stats.groups,reps:stats.reps,plan:log.planProgressItems[0]});
+  const merged=mergeCloudDailyLog(stale,log);
+  check('stale cloud copy cannot resurrect deleted group',TrainingCore.stats({[date]:merged},getExerciseLibrary()).groups===2&&merged.planProgressItems[0].completedAmount===2);
+  const beforeExport=appState.exportSnapshot(),dump=JSON.stringify(beforeExport),parsed=JSON.parse(dump);check('export preserves set tombstones',parsed.dailyLogs[date].exerciseEntries[0].sets.some(s=>s.deletedAt));
+  check('catalogue shows 110 entries',getExerciseLibrary().length===110);
+  const action=getExerciseLibrary().find(a=>a.exerciseKey==='scapular-pull');check('removed ambiguous aliases stay removed',!action.aliases.includes('沉肩悬垂'));
+  switchTab('history',false);click('[data-te="history-mode"][data-value="stats"]');
+  check('statistics visible',!document.getElementById('te-statistics').hidden&&document.querySelector('#te-statistics .te-metric strong').textContent==='1');
+  const overflows=Array.from(document.querySelectorAll('#te-statistics input,#te-statistics select,#te-statistics .te-map-layout')).filter(e=>e.getBoundingClientRect().right>innerWidth+2);
+  check('mobile controls stay inside viewport',overflows.length===0,overflows.map(e=>e.outerHTML.slice(0,100)));
+  window.__trainingBrowserResults=results;
+  return JSON.stringify(results);
+})();

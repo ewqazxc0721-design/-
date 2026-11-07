@@ -1,0 +1,1738 @@
+{
+  "commit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+  "source": "https://github.com/DuarteSantos8/openGym",
+  "notice": "Text metadata only. Per-entry textSource and upstream NOTICE apply. No media.",
+  "exercises": {
+    "0279": {
+      "id": "0279",
+      "name": "decline push-up",
+      "bodyPart": "chest",
+      "equipment": "body weight",
+      "target": "pectorals",
+      "secondaryMuscles": [
+        "triceps",
+        "shoulders"
+      ],
+      "category": "calisthenics",
+      "description": "A push-up with the feet raised on a surface. The incline puts more load on the upper chest and shoulders.",
+      "instructions": [
+        "Place your hands on the ground slightly wider than shoulder-width apart, with your feet elevated on a stable surface.",
+        "Keep your body in a straight line from head to toe, engaging your core muscles.",
+        "Lower your chest towards the ground by bending your elbows, keeping them close to your body.",
+        "Push through your palms to extend your arms and return to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "femaleVariant": "0280",
+      "textSource": "exercisedb"
+    },
+    "1311": {
+      "id": "1311",
+      "name": "wide hand push up",
+      "bodyPart": "chest",
+      "equipment": "body weight",
+      "target": "pectorals",
+      "secondaryMuscles": [
+        "triceps",
+        "shoulders"
+      ],
+      "category": "calisthenics",
+      "description": "A push-up with your hands placed wider than your shoulders. It puts more emphasis on the chest and less on the triceps.",
+      "instructions": [
+        "Start in a high plank position with your hands wider than shoulder-width apart.",
+        "Keep your body in a straight line from head to toe.",
+        "Lower your chest towards the ground by bending your elbows, keeping them close to your sides.",
+        "Push through your palms to extend your arms and return to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "femaleVariant": "4037",
+      "textSource": "exercisedb"
+    },
+    "0662": {
+      "id": "0662",
+      "name": "push-up",
+      "bodyPart": "chest",
+      "equipment": "body weight",
+      "target": "pectorals",
+      "secondaryMuscles": [
+        "triceps",
+        "deltoids",
+        "core"
+      ],
+      "category": "calisthenics",
+      "description": "The classic push-up from a high plank. Works the chest, shoulders, triceps and core in one move.",
+      "instructions": [
+        "Start in a high plank position with your hands slightly wider than shoulder-width apart and your feet together.",
+        "Engage your core and lower your body towards the ground by bending your elbows, keeping your body in a straight line.",
+        "Pause for a moment when your chest is just above the ground, then push yourself back up to the starting position by straightening your arms.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "femaleVariant": "2881",
+      "textSource": "exercisedb"
+    },
+    "0259": {
+      "id": "0259",
+      "name": "close-grip push-up",
+      "bodyPart": "upper arms",
+      "equipment": "body weight",
+      "target": "triceps",
+      "secondaryMuscles": [
+        "chest",
+        "shoulders"
+      ],
+      "category": "calisthenics",
+      "description": "A push-up with the hands placed close together under the chest. It shifts more of the load onto the triceps.",
+      "instructions": [
+        "Start in a high plank position with your hands placed close together, directly under your shoulders.",
+        "Engage your core and lower your body towards the ground, keeping your elbows close to your sides.",
+        "Push through your palms to extend your arms and return to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "femaleVariant": "2615",
+      "textSource": "exercisedb"
+    },
+    "3211": {
+      "id": "3211",
+      "name": "kneeling push-up (male)",
+      "bodyPart": "chest",
+      "equipment": "body weight",
+      "target": "pectorals",
+      "secondaryMuscles": [
+        "triceps",
+        "shoulders"
+      ],
+      "category": "calisthenics",
+      "description": "A beginner-friendly push-up with the knees on the floor. It builds chest, shoulder and triceps strength with less load than a standard push-up.",
+      "instructions": [
+        "Start by kneeling on the ground with your hands shoulder-width apart, fingers pointing forward.",
+        "Extend your legs behind you, resting on the balls of your feet, so that your body forms a straight line from head to heels.",
+        "Engage your core and lower your body towards the ground by bending your elbows, keeping them close to your sides.",
+        "Continue lowering until your chest is just above the ground, then push back up to the starting position by straightening your arms.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "textSource": "exercisedb"
+    },
+    "0308": {
+      "id": "0308",
+      "name": "dumbbell fly",
+      "bodyPart": "chest",
+      "equipment": "dumbbell",
+      "target": "pectorals",
+      "secondaryMuscles": [
+        "shoulders"
+      ],
+      "category": "strength",
+      "needs": [
+        "bench"
+      ],
+      "description": "The classic flat bench dumbbell fly. The arms open in an arc to stretch and squeeze the chest.",
+      "instructions": [
+        "Lie flat on a bench with a dumbbell in each hand, palms facing each other.",
+        "Extend your arms straight up over your chest, with a slight bend in your elbows.",
+        "Keeping a slight bend in your elbows, lower your arms out to the sides in a wide arc until you feel a stretch in your chest.",
+        "Pause for a moment, then reverse the movement and bring the dumbbells back up to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "femaleVariant": "2253",
+      "textSource": "exercisedb"
+    },
+    "0405": {
+      "id": "0405",
+      "name": "dumbbell seated shoulder press",
+      "bodyPart": "shoulders",
+      "equipment": "dumbbell",
+      "target": "delts",
+      "secondaryMuscles": [
+        "triceps",
+        "upper back"
+      ],
+      "category": "strength",
+      "description": "Seated with back support, you press dumbbells from shoulder height to overhead. It builds the shoulders and triceps.",
+      "instructions": [
+        "Sit on a bench with a dumbbell in each hand, resting on your thighs.",
+        "Raise the dumbbells to shoulder height, palms facing forward.",
+        "Press the dumbbells upward until your arms are fully extended overhead.",
+        "Pause for a moment at the top, then slowly lower the dumbbells back to shoulder height.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "muscleMap": {
+        "primaries": [
+          "deltoids"
+        ],
+        "secondaries": [
+          "chest",
+          "triceps",
+          "trapezius",
+          "serratus"
+        ]
+      },
+      "femaleVariant": "2237",
+      "textSource": "exercisedb"
+    },
+    "0334": {
+      "id": "0334",
+      "name": "dumbbell lateral raise",
+      "bodyPart": "shoulders",
+      "equipment": "dumbbell",
+      "target": "delts",
+      "secondaryMuscles": [
+        "traps"
+      ],
+      "category": "strength",
+      "description": "The standard standing dumbbell lateral raise. Lifting the arms out to the sides builds the side delts.",
+      "instructions": [
+        "Stand with your feet shoulder-width apart and hold a dumbbell in each hand, palms facing your body.",
+        "Keep your back straight and engage your core.",
+        "Raise your arms out to the sides until they are parallel to the floor, keeping a slight bend in your elbows.",
+        "Pause for a moment at the top, then slowly lower your arms back down to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "textSource": "exercisedb"
+    },
+    "0310": {
+      "id": "0310",
+      "name": "dumbbell front raise",
+      "bodyPart": "shoulders",
+      "equipment": "dumbbell",
+      "target": "delts",
+      "secondaryMuscles": [
+        "biceps",
+        "trapezius"
+      ],
+      "category": "strength",
+      "description": "A standing dumbbell front raise. You lift the weights to shoulder height to train the front delts.",
+      "instructions": [
+        "Stand with your feet shoulder-width apart, holding a dumbbell in each hand with your palms facing your thighs.",
+        "Keeping your arms straight, exhale and lift the dumbbells in front of you until they are at shoulder level.",
+        "Pause for a moment at the top, then inhale and slowly lower the dumbbells back down to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "femaleVariant": "2233",
+      "textSource": "exercisedb"
+    },
+    "0652": {
+      "id": "0652",
+      "name": "pull-up",
+      "bodyPart": "back",
+      "equipment": "body weight",
+      "target": "lats",
+      "secondaryMuscles": [
+        "biceps",
+        "forearms"
+      ],
+      "category": "calisthenics",
+      "description": "You hang from a bar with an overhand grip and pull your chin above it. A classic builder for the lats and upper back.",
+      "instructions": [
+        "Hang from a pull-up bar with your palms facing away from you and your arms fully extended.",
+        "Engage your core and squeeze your shoulder blades together.",
+        "Pull your body up towards the bar by bending your elbows and bringing your chest towards the bar.",
+        "Pause at the top of the movement, then slowly lower your body back down to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "muscleMap": {
+        "primaries": [
+          "upper-back"
+        ],
+        "secondaries": [
+          "biceps",
+          "deltoids",
+          "forearm"
+        ],
+        "weights": {
+          "upper-back": 1,
+          "biceps": 0.4,
+          "deltoids": 0.4,
+          "forearm": 0.4,
+          "triceps": 0
+        }
+      },
+      "textSource": "exercisedb"
+    },
+    "1330": {
+      "id": "1330",
+      "name": "dumbbell reverse grip incline bench one arm row",
+      "bodyPart": "back",
+      "equipment": "dumbbell",
+      "target": "upper back",
+      "secondaryMuscles": [
+        "biceps",
+        "shoulders"
+      ],
+      "category": "strength",
+      "description": "A one-arm row with an underhand grip, supported on an incline bench. It works the upper back and biceps one side at a time.",
+      "instructions": [
+        "Set up an incline bench at a 45-degree angle.",
+        "Place a dumbbell on the floor next to the bench.",
+        "Stand facing the bench with your feet shoulder-width apart.",
+        "Bend at the waist and place your left knee and left hand on the bench for support.",
+        "Pick up the dumbbell with your right hand using a reverse grip (palm facing down).",
+        "Keep your back straight and your core engaged.",
+        "Pull the dumbbell up towards your chest, keeping your elbow close to your body.",
+        "Squeeze your back muscles at the top of the movement.",
+        "Lower the dumbbell back down to the starting position in a controlled manner.",
+        "Repeat for the desired number of repetitions.",
+        "Switch sides and repeat the exercise with your left arm."
+      ],
+      "femaleVariant": "2623",
+      "textSource": "exercisedb"
+    },
+    "0293": {
+      "id": "0293",
+      "name": "dumbbell bent over row",
+      "bodyPart": "back",
+      "equipment": "dumbbell",
+      "target": "upper back",
+      "secondaryMuscles": [
+        "biceps",
+        "forearms"
+      ],
+      "category": "strength",
+      "description": "A two-arm dumbbell row done bent over. You pull the weights to the chest to build the upper back.",
+      "instructions": [
+        "Stand with your feet shoulder-width apart, knees slightly bent, and hold a dumbbell in each hand with your palms facing your body.",
+        "Bend forward at the hips, keeping your back straight and your core engaged.",
+        "Let your arms hang straight down towards the floor, with your elbows slightly bent.",
+        "Pull the dumbbells up towards your chest, squeezing your shoulder blades together.",
+        "Pause for a moment at the top, then slowly lower the dumbbells back down to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "muscleMap": {
+        "primaries": [
+          "upper-back"
+        ],
+        "secondaries": [
+          "biceps",
+          "deltoids",
+          "forearm"
+        ]
+      },
+      "femaleVariant": "2482",
+      "textSource": "exercisedb"
+    },
+    "0988": {
+      "id": "0988",
+      "name": "band one arm standing low row",
+      "bodyPart": "back",
+      "equipment": "band",
+      "target": "upper back",
+      "secondaryMuscles": [
+        "biceps",
+        "shoulders"
+      ],
+      "category": "strength",
+      "description": "A standing one-arm low row with a band. It trains the back and biceps.",
+      "instructions": [
+        "Attach the band to a stable anchor point at waist height.",
+        "Stand facing the anchor point with your feet shoulder-width apart.",
+        "Hold the band with one hand, palm facing inward, and step back to create tension in the band.",
+        "Bend your knees slightly and hinge forward at the hips, keeping your back straight.",
+        "Pull the band towards your waist, squeezing your shoulder blades together.",
+        "Pause for a moment at the top of the movement, then slowly release the band back to the starting position.",
+        "Repeat for the desired number of repetitions, then switch sides."
+      ],
+      "muscleMap": {
+        "primaries": [
+          "upper-back"
+        ],
+        "secondaries": [
+          "biceps",
+          "deltoids",
+          "forearm"
+        ]
+      },
+      "textSource": "exercisedb"
+    },
+    "0983": {
+      "id": "0983",
+      "name": "band kneeling one arm pulldown",
+      "bodyPart": "back",
+      "equipment": "band",
+      "target": "lats",
+      "secondaryMuscles": [
+        "biceps",
+        "rhomboids"
+      ],
+      "category": "strength",
+      "description": "A kneeling one-arm pulldown with a band, driving the elbow toward the ribs. It trains the lats.",
+      "instructions": [
+        "Attach the band to a sturdy anchor point above your head.",
+        "Kneel down and hold the band with one hand, palm facing down.",
+        "Extend your arm fully overhead, keeping your elbow slightly bent.",
+        "Engage your lat muscles and pull the band down towards your side, bringing your elbow towards your ribcage.",
+        "Pause for a moment at the bottom, then slowly release the tension and return to the starting position.",
+        "Repeat for the desired number of repetitions, then switch sides."
+      ],
+      "femaleVariant": "3842",
+      "textSource": "exercisedb"
+    },
+    "1022": {
+      "id": "1022",
+      "name": "band standing rear delt row",
+      "bodyPart": "shoulders",
+      "equipment": "band",
+      "target": "delts",
+      "secondaryMuscles": [
+        "trapezius",
+        "rhomboids",
+        "biceps"
+      ],
+      "category": "strength",
+      "description": "A standing rear delt row with a band, pulling the handles toward the chest. It trains the rear delts.",
+      "instructions": [
+        "Stand with your feet shoulder-width apart and place the band under your feet.",
+        "Hold the band handles with your palms facing each other and your arms extended in front of you.",
+        "Bend your knees slightly and hinge forward at the hips, keeping your back straight.",
+        "Pull the band towards your chest, squeezing your shoulder blades together.",
+        "Pause for a moment at the top, then slowly release the tension and return to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "femaleVariant": "3976",
+      "textSource": "exercisedb"
+    },
+    "0383": {
+      "id": "0383",
+      "name": "dumbbell reverse fly",
+      "bodyPart": "shoulders",
+      "equipment": "dumbbell",
+      "target": "delts",
+      "secondaryMuscles": [
+        "trapezius",
+        "rhomboids"
+      ],
+      "category": "strength",
+      "description": "Bent forward, you open your arms wide with dumbbells. It targets the rear shoulders and upper back.",
+      "instructions": [
+        "Stand with your feet shoulder-width apart and hold a dumbbell in each hand.",
+        "Bend your knees slightly and hinge forward at the hips, keeping your back straight.",
+        "Extend your arms straight down in front of you, palms facing each other.",
+        "Keeping a slight bend in your elbows, raise your arms out to the sides until they are parallel to the ground.",
+        "Pause for a moment at the top, then slowly lower your arms back down to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "textSource": "exercisedb"
+    },
+    "1677": {
+      "id": "1677",
+      "name": "dumbbell seated bicep curl",
+      "bodyPart": "upper arms",
+      "equipment": "dumbbell",
+      "target": "biceps",
+      "secondaryMuscles": [
+        "forearms"
+      ],
+      "category": "strength",
+      "description": "A dumbbell biceps curl performed seated. It keeps your legs out of the movement.",
+      "instructions": [
+        "Sit on a bench with your feet flat on the ground and hold a dumbbell in each hand, palms facing up.",
+        "Keep your back straight and your elbows close to your torso.",
+        "Exhale and curl the dumbbells up towards your shoulders, contracting your biceps.",
+        "Pause for a moment at the top, then inhale and slowly lower the dumbbells back down to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "textSource": "exercisedb"
+    },
+    "0313": {
+      "id": "0313",
+      "name": "dumbbell hammer curl",
+      "bodyPart": "upper arms",
+      "equipment": "dumbbell",
+      "target": "biceps",
+      "secondaryMuscles": [
+        "forearms"
+      ],
+      "category": "strength",
+      "description": "The standard hammer curl with the palms facing in. It trains the brachialis, biceps and forearms.",
+      "instructions": [
+        "Stand up straight with a dumbbell in each hand, palms facing your torso.",
+        "Keep your elbows close to your torso and rotate the palms of your hands until they are facing forward.",
+        "This will be your starting position.",
+        "Now, keeping the upper arms stationary, exhale and curl the weights while contracting your biceps.",
+        "Continue to raise the weights until your biceps are fully contracted and the dumbbells are at shoulder level.",
+        "Hold the contracted position for a brief pause as you squeeze your biceps.",
+        "Then, inhale and slowly begin to lower the dumbbells back to the starting position.",
+        "Repeat for the recommended amount of repetitions."
+      ],
+      "femaleVariant": "2239",
+      "textSource": "exercisedb"
+    },
+    "0430": {
+      "id": "0430",
+      "name": "dumbbell standing triceps extension",
+      "bodyPart": "upper arms",
+      "equipment": "dumbbell",
+      "target": "triceps",
+      "secondaryMuscles": [
+        "shoulders"
+      ],
+      "category": "strength",
+      "description": "Standing, you lower a dumbbell behind your head and press it back up. It builds the back of the upper arm.",
+      "instructions": [
+        "Stand with your feet shoulder-width apart and hold a dumbbell in one hand.",
+        "Raise the dumbbell overhead, keeping your arm straight.",
+        "Bend your elbow and lower the dumbbell behind your head, keeping your upper arm stationary.",
+        "Extend your arm back up to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "femaleVariant": "2390",
+      "textSource": "exercisedb"
+    },
+    "1760": {
+      "id": "1760",
+      "name": "dumbbell goblet squat",
+      "bodyPart": "upper legs",
+      "equipment": "dumbbell",
+      "target": "quads",
+      "secondaryMuscles": [
+        "glutes",
+        "hamstrings",
+        "calves"
+      ],
+      "category": "strength",
+      "description": "A squat holding one dumbbell at your chest. Trains the quads and glutes while keeping your torso upright.",
+      "instructions": [
+        "Stand with your feet shoulder-width apart, holding a dumbbell vertically against your chest with both hands.",
+        "Keeping your chest up and core engaged, lower your body down into a squat position by pushing your hips back and bending your knees.",
+        "Continue lowering until your thighs are parallel to the ground, or as low as you can comfortably go.",
+        "Pause for a moment at the bottom, then push through your heels to return to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "muscleMap": {
+        "primaries": [
+          "quadriceps",
+          "gluteal",
+          "adductors"
+        ],
+        "secondaries": [
+          "hamstring",
+          "calves",
+          "lower-back",
+          "abs",
+          "obliques"
+        ]
+      },
+      "femaleVariant": "2281",
+      "textSource": "exercisedb"
+    },
+    "1459": {
+      "id": "1459",
+      "name": "dumbbell romanian deadlift",
+      "bodyPart": "upper legs",
+      "equipment": "dumbbell",
+      "target": "hamstrings",
+      "secondaryMuscles": [
+        "glutes",
+        "lower back"
+      ],
+      "category": "strength",
+      "description": "A hip hinge with dumbbells that lowers them down the legs while your back stays flat. It trains the hamstrings and glutes.",
+      "instructions": [
+        "Stand with your feet shoulder-width apart, holding a dumbbell in each hand with an overhand grip.",
+        "Keeping your back straight and your core engaged, hinge at the hips and lower the dumbbells towards the ground, allowing your knees to bend slightly.",
+        "Lower the dumbbells until you feel a stretch in your hamstrings, then push through your heels and engage your glutes to return to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "muscleMap": {
+        "primaries": [
+          "gluteal",
+          "hamstring"
+        ],
+        "secondaries": [
+          "lower-back",
+          "quadriceps",
+          "adductors",
+          "calves"
+        ]
+      },
+      "femaleVariant": "2222",
+      "textSource": "exercisedb"
+    },
+    "0620": {
+      "id": "0620",
+      "name": "lying leg raise flat bench",
+      "bodyPart": "waist",
+      "equipment": "body weight",
+      "target": "abs",
+      "secondaryMuscles": [
+        "hip flexors"
+      ],
+      "category": "strength",
+      "description": "Lying on a flat bench, you raise and lower straight legs. Works the lower abs and hip flexors.",
+      "instructions": [
+        "Lie flat on a flat bench with your back pressed against it.",
+        "Place your hands under your glutes for support.",
+        "Keep your legs straight and together, and lift them up towards the ceiling.",
+        "Pause for a moment at the top, then slowly lower your legs back down to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "textSource": "exercisedb"
+    },
+    "0872": {
+      "id": "0872",
+      "name": "reverse crunch",
+      "bodyPart": "waist",
+      "equipment": "body weight",
+      "target": "abs",
+      "secondaryMuscles": [
+        "hip flexors"
+      ],
+      "category": "calisthenics",
+      "description": "A crunch that curls the hips off the floor with the knees bent. It targets the lower abs.",
+      "instructions": [
+        "Lie flat on your back with your arms extended along your sides.",
+        "Bend your knees and lift your feet off the ground, bringing your thighs perpendicular to the floor.",
+        "Contract your abs and curl your hips off the floor, bringing your knees towards your chest.",
+        "Pause for a moment at the top, then slowly lower your hips back down to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "femaleVariant": "0671",
+      "textSource": "exercisedb"
+    },
+    "2135": {
+      "id": "2135",
+      "name": "weighted front plank",
+      "bodyPart": "waist",
+      "equipment": "weighted",
+      "target": "abs",
+      "secondaryMuscles": [
+        "shoulders",
+        "lower back"
+      ],
+      "category": "isometric",
+      "hold": true,
+      "description": "A forearm plank held with extra weight on your back. Builds core strength and stability.",
+      "instructions": [
+        "Start by lying face down on the floor.",
+        "Place your forearms on the ground, with your elbows directly under your shoulders.",
+        "Extend your legs straight out behind you, with your toes on the ground.",
+        "Engage your core and lift your body off the ground, balancing on your forearms and toes.",
+        "Keep your body in a straight line from your head to your heels.",
+        "Hold this position for the desired amount of time.",
+        "Lower your body back down to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "textSource": "exercisedb"
+    },
+    "0705": {
+      "id": "0705",
+      "name": "side bridge v. 2",
+      "bodyPart": "waist",
+      "equipment": "body weight",
+      "target": "obliques",
+      "secondaryMuscles": [
+        "abdominals",
+        "glutes"
+      ],
+      "category": "isometric",
+      "hold": true,
+      "description": "Lying on your side, you hold your hips up off the floor on your forearm. Works the obliques and core.",
+      "instructions": [
+        "Lie on your side with your legs extended and stacked on top of each other.",
+        "Place your forearm on the ground directly below your shoulder, with your elbow bent at a 90-degree angle.",
+        "Engage your core and lift your hips off the ground, creating a straight line from your head to your feet.",
+        "Hold this position for the desired amount of time.",
+        "Lower your hips back down to the starting position.",
+        "Repeat on the other side."
+      ],
+      "textSource": "exercisedb"
+    },
+    "0276": {
+      "id": "0276",
+      "name": "dead bug",
+      "bodyPart": "waist",
+      "equipment": "body weight",
+      "target": "abs",
+      "secondaryMuscles": [
+        "hip flexors",
+        "lower back"
+      ],
+      "category": "calisthenics",
+      "description": "A core drill where you extend opposite arm and leg while keeping the lower back pressed to the floor. It builds stability in the abs.",
+      "instructions": [
+        "Lie flat on your back with your arms extended towards the ceiling.",
+        "Bend your knees and lift your legs off the ground, creating a 90-degree angle at your hips and knees.",
+        "Engage your core and lower back to press your lower back into the ground.",
+        "Slowly lower your right arm and left leg towards the ground, keeping them straight and hovering just above the floor.",
+        "Pause for a moment, then return to the starting position.",
+        "Repeat the movement with your left arm and right leg.",
+        "Continue alternating sides for the desired number of repetitions."
+      ],
+      "femaleVariant": "3071",
+      "textSource": "exercisedb"
+    },
+    "0274": {
+      "id": "0274",
+      "name": "crunch floor",
+      "bodyPart": "waist",
+      "equipment": "body weight",
+      "target": "abs",
+      "secondaryMuscles": [
+        "hip flexors"
+      ],
+      "category": "calisthenics",
+      "description": "A basic floor crunch. You curl the shoulders off the ground to work the upper abs.",
+      "instructions": [
+        "Lie flat on your back with your knees bent and feet flat on the ground.",
+        "Place your hands behind your head with your elbows pointing outwards.",
+        "Engage your abs and lift your shoulders off the ground, curling forward towards your knees.",
+        "Pause for a moment at the top, then slowly lower your shoulders back down to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "textSource": "exercisedb"
+    },
+    "0687": {
+      "id": "0687",
+      "name": "russian twist",
+      "bodyPart": "waist",
+      "equipment": "body weight",
+      "target": "obliques",
+      "secondaryMuscles": [
+        "abdominals"
+      ],
+      "category": "strength",
+      "description": "Seated and leaning back, you rotate your torso from side to side. Works the obliques and abs.",
+      "instructions": [
+        "Sit on the ground with your knees bent and feet flat on the floor.",
+        "Lean back slightly while keeping your back straight and your core engaged.",
+        "Hold your hands together in front of your chest or hold a weight if desired.",
+        "Lift your feet off the ground, balancing on your sit bones.",
+        "Twist your torso to the right, bringing your hands or weight towards the right side of your body.",
+        "Pause for a moment, then twist your torso to the left, bringing your hands or weight towards the left side of your body.",
+        "Continue alternating sides for the desired number of repetitions."
+      ],
+      "femaleVariant": "2538",
+      "textSource": "exercisedb"
+    },
+    "0025": {
+      "id": "0025",
+      "name": "barbell bench press",
+      "bodyPart": "chest",
+      "equipment": "barbell",
+      "target": "pectorals",
+      "secondaryMuscles": [
+        "triceps",
+        "shoulders"
+      ],
+      "category": "strength",
+      "description": "The classic flat bench press. Lower the bar to your chest and press it up to build the chest, shoulders and triceps.",
+      "instructions": [
+        "Lie flat on a bench with your feet flat on the ground and your back pressed against the bench.",
+        "Grasp the barbell with an overhand grip slightly wider than shoulder-width apart.",
+        "Lift the barbell off the rack and hold it directly above your chest with your arms fully extended.",
+        "Lower the barbell slowly towards your chest, keeping your elbows tucked in.",
+        "Pause for a moment when the barbell touches your chest.",
+        "Push the barbell back up to the starting position by extending your arms.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "muscleMap": {
+        "primaries": [
+          "chest"
+        ],
+        "secondaries": [
+          "triceps",
+          "deltoids",
+          "biceps"
+        ],
+        "weights": {
+          "chest": 1,
+          "deltoids": 0.4,
+          "triceps": 0.4,
+          "biceps": 0
+        }
+      },
+      "femaleVariant": "2440",
+      "textSource": "exercisedb"
+    },
+    "0289": {
+      "id": "0289",
+      "name": "dumbbell bench press",
+      "bodyPart": "chest",
+      "equipment": "dumbbell",
+      "target": "pectorals",
+      "secondaryMuscles": [
+        "triceps",
+        "shoulders"
+      ],
+      "category": "strength",
+      "description": "The classic dumbbell press on a flat bench. It builds the chest, shoulders and triceps with a good range of motion.",
+      "instructions": [
+        "Lie flat on a bench with your feet flat on the ground and your back pressed against the bench.",
+        "Hold a dumbbell in each hand, with your palms facing forward and your arms extended above your chest.",
+        "Lower the dumbbells slowly to the sides of your chest, keeping your elbows at a 90-degree angle.",
+        "Pause for a moment, then push the dumbbells back up to the starting position, fully extending your arms.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "muscleMap": {
+        "primaries": [
+          "chest"
+        ],
+        "secondaries": [
+          "triceps",
+          "deltoids",
+          "biceps"
+        ],
+        "weights": {
+          "chest": 1,
+          "deltoids": 0.4,
+          "triceps": 0.4,
+          "biceps": 0
+        }
+      },
+      "femaleVariant": "2254",
+      "textSource": "exercisedb"
+    },
+    "0314": {
+      "id": "0314",
+      "name": "dumbbell incline bench press",
+      "bodyPart": "chest",
+      "equipment": "dumbbell",
+      "target": "pectorals",
+      "secondaryMuscles": [
+        "shoulders",
+        "triceps"
+      ],
+      "category": "strength",
+      "description": "An incline dumbbell bench press. The raised bench shifts the work toward the upper chest.",
+      "instructions": [
+        "Set up an incline bench at a 45-degree angle.",
+        "Sit on the bench with your feet flat on the ground and your back pressed firmly against the bench.",
+        "Hold a dumbbell in each hand, palms facing forward, and lift them to shoulder height.",
+        "Slowly lower the dumbbells to the sides of your chest, keeping your elbows at a 90-degree angle.",
+        "Push the dumbbells back up to the starting position, fully extending your arms.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "muscleMap": {
+        "primaries": [
+          "chest"
+        ],
+        "secondaries": [
+          "triceps",
+          "deltoids",
+          "biceps"
+        ],
+        "weights": {
+          "chest": 1,
+          "deltoids": 0.4,
+          "triceps": 0.4,
+          "biceps": 0
+        }
+      },
+      "femaleVariant": "2441",
+      "textSource": "exercisedb"
+    },
+    "0375": {
+      "id": "0375",
+      "name": "dumbbell pullover",
+      "bodyPart": "chest",
+      "equipment": "dumbbell",
+      "target": "pectorals",
+      "secondaryMuscles": [
+        "latissimus dorsi",
+        "triceps"
+      ],
+      "category": "strength",
+      "needs": [
+        "bench"
+      ],
+      "description": "Lying across or along a bench, you lower one dumbbell behind your head and pull it back over your chest. It works the chest and lats with a deep stretch.",
+      "instructions": [
+        "Lie flat on a bench with your head at one end and your feet on the floor.",
+        "Hold a dumbbell with both hands and extend your arms straight above your chest.",
+        "Keeping a slight bend in your elbows, slowly lower the dumbbell behind your head until you feel a stretch in your chest and shoulders.",
+        "Pause for a moment, then raise the dumbbell back to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "textSource": "exercisedb"
+    },
+    "0493": {
+      "id": "0493",
+      "name": "incline push-up",
+      "bodyPart": "chest",
+      "equipment": "body weight",
+      "target": "pectorals",
+      "secondaryMuscles": [
+        "triceps",
+        "shoulders"
+      ],
+      "category": "calisthenics",
+      "description": "You perform a push-up with hands elevated. It makes the push-up easier and trains the chest, shoulders and triceps.",
+      "instructions": [
+        "Place your hands on an elevated surface, such as a bench or step, slightly wider than shoulder-width apart.",
+        "Extend your legs behind you, resting on the balls of your feet, creating a straight line from your head to your heels.",
+        "Lower your chest towards the elevated surface by bending your elbows, keeping your body in a straight line.",
+        "Pause for a moment at the bottom, then push yourself back up to the starting position by straightening your arms.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "textSource": "exercisedb"
+    },
+    "3294": {
+      "id": "3294",
+      "name": "archer push up",
+      "bodyPart": "chest",
+      "equipment": "body weight",
+      "target": "pectorals",
+      "secondaryMuscles": [
+        "triceps",
+        "shoulders",
+        "core"
+      ],
+      "category": "calisthenics",
+      "description": "A wide push-up that shifts the weight to one arm while the other arm stays straight. It trains the chest and triceps on the way to one arm push-ups.",
+      "instructions": [
+        "Start in a push-up position with your hands slightly wider than shoulder-width apart.",
+        "Extend one arm straight out to the side, parallel to the ground.",
+        "Lower your body by bending your elbows, keeping your back straight and core engaged.",
+        "Push back up to the starting position.",
+        "Repeat on the other side, extending the opposite arm out to the side.",
+        "Continue alternating sides for the desired number of repetitions."
+      ],
+      "textSource": "exercisedb"
+    },
+    "4075": {
+      "id": "4075",
+      "name": "band chest fly",
+      "bodyPart": "chest",
+      "equipment": "band",
+      "target": "pectorals",
+      "secondaryMuscles": [
+        "shoulders",
+        "biceps",
+        "upper chest"
+      ],
+      "category": "strength",
+      "description": "Standing band fly bringing the hands together in front of the chest. It trains the pecs.",
+      "instructions": [
+        "Anchor the band behind you at chest height and hold the ends.",
+        "Stand in a staggered stance.",
+        "Start with arms out to the sides and slightly bent.",
+        "Bring your hands together in front of your chest.",
+        "Return slowly under control."
+      ],
+      "textSource": "opengym"
+    },
+    "1430": {
+      "id": "1430",
+      "name": "chest dip (on dip-pull-up cage)",
+      "bodyPart": "chest",
+      "equipment": "body weight",
+      "target": "pectorals",
+      "secondaryMuscles": [
+        "triceps",
+        "shoulders"
+      ],
+      "category": "calisthenics",
+      "description": "A chest dip done on a dip station with a forward lean. It works the lower chest, triceps and front shoulders.",
+      "instructions": [
+        "Adjust the dip bars to a height that allows you to comfortably grip them.",
+        "Stand between the bars and place your hands on each bar, slightly wider than shoulder-width apart.",
+        "Jump up and straighten your arms, supporting your body weight on the bars.",
+        "Bend your knees and cross your ankles behind you.",
+        "Lower your body by bending your elbows, keeping your chest up and your shoulders down.",
+        "Continue lowering until your shoulders are below your elbows or until you feel a stretch in your chest.",
+        "Push through your palms and extend your elbows to raise your body back up to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "textSource": "exercisedb"
+    },
+    "1162": {
+      "id": "1162",
+      "name": "barbell standing military press",
+      "bodyPart": "shoulders",
+      "equipment": "barbell",
+      "target": "delts",
+      "secondaryMuscles": [
+        "triceps",
+        "upper chest",
+        "core"
+      ],
+      "category": "strength",
+      "description": "A strict standing overhead press with a barbell. It builds shoulder and triceps strength.",
+      "instructions": [
+        "Unrack the bar at shoulder height, hands just outside your shoulders.",
+        "Stand tall with feet hip-width apart and squeeze your glutes.",
+        "Press the bar straight up, moving your head slightly back then through.",
+        "Lock out overhead with the bar over your mid-foot.",
+        "Lower the bar back to your collarbone with control."
+      ],
+      "textSource": "opengym"
+    },
+    "0426": {
+      "id": "0426",
+      "name": "dumbbell standing overhead press",
+      "bodyPart": "shoulders",
+      "equipment": "dumbbell",
+      "target": "delts",
+      "secondaryMuscles": [
+        "triceps",
+        "upper back"
+      ],
+      "category": "strength",
+      "description": "Standing, you press dumbbells from your shoulders to overhead. It builds the shoulders, triceps and trunk stability.",
+      "instructions": [
+        "Stand with your feet shoulder-width apart, holding a dumbbell in each hand at shoulder level with your palms facing forward.",
+        "Press the dumbbells upward until your arms are fully extended overhead.",
+        "Pause for a moment at the top, then slowly lower the dumbbells back down to shoulder level.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "muscleMap": {
+        "primaries": [
+          "deltoids"
+        ],
+        "secondaries": [
+          "chest",
+          "triceps",
+          "trapezius",
+          "serratus"
+        ]
+      },
+      "femaleVariant": "2380",
+      "textSource": "exercisedb"
+    },
+    "0404": {
+      "id": "0404",
+      "name": "dumbbell seated shoulder press (parallel grip)",
+      "bodyPart": "shoulders",
+      "equipment": "dumbbell",
+      "target": "delts",
+      "secondaryMuscles": [
+        "triceps",
+        "upper back"
+      ],
+      "category": "strength",
+      "description": "Seated, you press dumbbells overhead with palms facing each other. A shoulder-friendly press for the shoulders and triceps.",
+      "instructions": [
+        "Sit on a bench with a dumbbell in each hand, palms facing inward.",
+        "Raise the dumbbells to shoulder height, elbows bent and palms facing forward.",
+        "Press the dumbbells upward until your arms are fully extended overhead.",
+        "Pause for a moment at the top, then slowly lower the dumbbells back to shoulder height.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "muscleMap": {
+        "primaries": [
+          "deltoids"
+        ],
+        "secondaries": [
+          "chest",
+          "triceps",
+          "trapezius",
+          "serratus"
+        ]
+      },
+      "femaleVariant": "2593",
+      "textSource": "exercisedb"
+    },
+    "0396": {
+      "id": "0396",
+      "name": "dumbbell seated lateral raise",
+      "bodyPart": "shoulders",
+      "equipment": "dumbbell",
+      "target": "delts",
+      "secondaryMuscles": [
+        "traps",
+        "upper back"
+      ],
+      "category": "strength",
+      "description": "Seated, you raise dumbbells out to the sides to shoulder height. It builds the side shoulders without leg drive.",
+      "instructions": [
+        "Sit on a bench with your feet flat on the ground and a dumbbell in each hand, resting on your thighs.",
+        "Keep your back straight and core engaged.",
+        "Raise the dumbbells to your sides with a slight bend in your elbows, until your arms are parallel to the ground.",
+        "Pause for a moment at the top, then slowly lower the dumbbells back down to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "textSource": "exercisedb"
+    },
+    "0921": {
+      "id": "0921",
+      "name": "band standing external shoulder rotation",
+      "bodyPart": "shoulders",
+      "equipment": "band",
+      "target": "delts",
+      "secondaryMuscles": [
+        "rotator cuff",
+        "rear deltoids"
+      ],
+      "category": "strength",
+      "description": "An external rotation with a band. It strengthens the rotator cuff.",
+      "instructions": [
+        "Anchor the band at elbow height and stand sideways to it.",
+        "Hold the end with your elbow bent at 90 degrees.",
+        "Rotate your forearm outward away from your body.",
+        "Return slowly.",
+        "Finish reps, then switch arms."
+      ],
+      "textSource": "opengym"
+    },
+    "0924": {
+      "id": "0924",
+      "name": "band standing internal shoulder rotation",
+      "bodyPart": "shoulders",
+      "equipment": "band",
+      "target": "delts",
+      "secondaryMuscles": [
+        "rotator cuff"
+      ],
+      "category": "strength",
+      "description": "An internal rotation with a band. It strengthens the rotator cuff.",
+      "instructions": [
+        "Anchor the band at elbow height and stand sideways to it.",
+        "Hold the end with your elbow bent at 90 degrees.",
+        "Rotate your forearm across toward your belly.",
+        "Return slowly.",
+        "Finish reps, then switch arms."
+      ],
+      "textSource": "opengym"
+    },
+    "1017": {
+      "id": "1017",
+      "name": "band y-raise",
+      "bodyPart": "shoulders",
+      "equipment": "band",
+      "target": "delts",
+      "secondaryMuscles": [
+        "traps",
+        "rhomboids"
+      ],
+      "category": "strength",
+      "description": "A Y-raise with a band, lifting the arms into a Y shape. It trains the delts and upper back.",
+      "instructions": [
+        "Stand with your feet shoulder-width apart and hold the band in front of your thighs with your palms facing inwards.",
+        "Keep your arms straight and lift them up and out to the sides, forming a 'Y' shape with your body.",
+        "Squeeze your shoulder blades together at the top of the movement.",
+        "Slowly lower your arms back down to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "textSource": "exercisedb"
+    },
+    "0032": {
+      "id": "0032",
+      "name": "barbell deadlift",
+      "bodyPart": "upper legs",
+      "equipment": "barbell",
+      "target": "glutes",
+      "secondaryMuscles": [
+        "hamstrings",
+        "lower back"
+      ],
+      "category": "strength",
+      "description": "Lift the bar from the floor by driving the hips and legs until you stand tall. Trains the glutes, hamstrings and back.",
+      "instructions": [
+        "Stand with your feet shoulder-width apart and the barbell on the ground in front of you.",
+        "Bend your knees and hinge at the hips to lower your torso and grip the barbell with an overhand grip, hands slightly wider than shoulder-width apart.",
+        "Keep your back straight and chest lifted as you drive through your heels to lift the barbell off the ground, extending your hips and knees.",
+        "As you stand up straight, squeeze your glutes and keep your core engaged.",
+        "Lower the barbell back down to the ground by bending at the hips and knees, keeping your back straight.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "muscleMap": {
+        "bodyPart": "full body",
+        "primaries": [
+          "gluteal",
+          "hamstring",
+          "lower-back"
+        ],
+        "secondaries": [
+          "quadriceps",
+          "adductors",
+          "calves",
+          "abs",
+          "obliques"
+        ]
+      },
+      "femaleVariant": "2214",
+      "textSource": "exercisedb"
+    },
+    "3593": {
+      "id": "3593",
+      "name": "barbell squat",
+      "bodyPart": "upper legs",
+      "equipment": "barbell",
+      "target": "quads",
+      "secondaryMuscles": [
+        "glutes",
+        "hamstrings",
+        "adductors",
+        "core",
+        "lower back"
+      ],
+      "category": "strength",
+      "description": "The classic barbell squat that builds strength in the thighs and hips.",
+      "instructions": [
+        "Set the bar on your upper back and stand with feet shoulder-width apart.",
+        "Brace your core and keep your chest up.",
+        "Sit your hips back and down until your thighs are about parallel to the floor.",
+        "Keep your knees tracking over your toes.",
+        "Drive through your feet to stand tall."
+      ],
+      "textSource": "opengym"
+    },
+    "1060": {
+      "id": "1060",
+      "name": "barbell hip thrust",
+      "bodyPart": "upper legs",
+      "equipment": "barbell",
+      "target": "glutes",
+      "secondaryMuscles": [
+        "hamstrings",
+        "quadriceps",
+        "core"
+      ],
+      "category": "strength",
+      "description": "A bench-supported bridge with a barbell across your hips. It is a go-to move for building strong glutes.",
+      "instructions": [
+        "Sit on the floor with your upper back against a bench and a padded barbell over your hips.",
+        "Plant your feet hip-width apart and drive through your heels.",
+        "Lift your hips until your torso is level with the floor.",
+        "Squeeze your glutes at the top and keep your chin tucked.",
+        "Lower your hips under control.",
+        "Repeat without arching your lower back."
+      ],
+      "femaleVariant": "2216",
+      "textSource": "opengym"
+    },
+    "1581": {
+      "id": "1581",
+      "name": "bodyweight rear lunge",
+      "bodyPart": "upper legs",
+      "equipment": "body weight",
+      "target": "glutes",
+      "secondaryMuscles": [
+        "quadriceps",
+        "hamstrings",
+        "calves"
+      ],
+      "category": "calisthenics",
+      "description": "A lunge where you step back instead of forward. It is gentler on the knees and focuses on the glutes.",
+      "instructions": [
+        "Stand tall with your feet hip-width apart.",
+        "Step one foot back and lower until both knees are bent at about 90 degrees.",
+        "Keep your torso upright and your front heel planted.",
+        "Push through your front foot to return to standing.",
+        "Alternate legs or finish all reps on one side first."
+      ],
+      "textSource": "opengym"
+    },
+    "3928": {
+      "id": "3928",
+      "name": "bodyweight single leg deadlift",
+      "bodyPart": "upper legs",
+      "equipment": "body weight",
+      "target": "hamstrings",
+      "secondaryMuscles": [
+        "glutes",
+        "lower back",
+        "core"
+      ],
+      "category": "calisthenics",
+      "description": "Hinge forward on one leg while the other reaches back. It builds hamstring and glute strength and trains balance.",
+      "instructions": [
+        "Stand on one foot with a soft knee and your arms hanging in front.",
+        "Hinge at the hips and extend the free leg straight behind you.",
+        "Lower your torso until it is nearly parallel to the floor, back flat.",
+        "Squeeze your glute to stand tall again.",
+        "Finish your reps, then switch legs."
+      ],
+      "textSource": "opengym"
+    },
+    "4031": {
+      "id": "4031",
+      "name": "band hip abduction",
+      "bodyPart": "upper legs",
+      "equipment": "band",
+      "target": "abductors",
+      "secondaryMuscles": [
+        "glutes",
+        "hip flexors",
+        "core"
+      ],
+      "category": "strength",
+      "description": "Standing leg raise to the side against a band. It targets the outer hip and glute muscles.",
+      "instructions": [
+        "Anchor the band low and loop it around the ankle farthest from the anchor.",
+        "Stand tall and hold a support for balance.",
+        "Lift the working leg out to the side without leaning.",
+        "Pause, then lower slowly against the band.",
+        "Finish all reps, then switch legs."
+      ],
+      "femaleVariant": "0899",
+      "textSource": "opengym"
+    },
+    "4029": {
+      "id": "4029",
+      "name": "band hip adduction",
+      "bodyPart": "upper legs",
+      "equipment": "band",
+      "target": "adductors",
+      "secondaryMuscles": [
+        "inner thighs",
+        "groin",
+        "glutes"
+      ],
+      "category": "strength",
+      "description": "Standing leg movement against a band that squeezes the thigh inward. It strengthens the inner thigh.",
+      "instructions": [
+        "Anchor the band low and loop it around the ankle nearest the anchor.",
+        "Stand tall and hold a support for balance.",
+        "Pull the working leg across in front of the other leg.",
+        "Pause for a moment and return slowly.",
+        "Finish all reps, then switch legs."
+      ],
+      "femaleVariant": "0900",
+      "textSource": "opengym"
+    },
+    "0911": {
+      "id": "0911",
+      "name": "band lying leg curl",
+      "bodyPart": "upper legs",
+      "equipment": "band",
+      "target": "hamstrings",
+      "secondaryMuscles": [
+        "calves",
+        "glutes"
+      ],
+      "category": "strength",
+      "description": "A leg curl while lying down using a band. It targets the hamstrings.",
+      "instructions": [
+        "Lie face down with a band anchored to your ankles.",
+        "Keep your hips pressed down.",
+        "Curl your heels toward your glutes.",
+        "Squeeze your hamstrings.",
+        "Lower slowly."
+      ],
+      "textSource": "opengym"
+    },
+    "1004": {
+      "id": "1004",
+      "name": "band squat",
+      "bodyPart": "upper legs",
+      "equipment": "band",
+      "target": "quads",
+      "secondaryMuscles": [
+        "glutes",
+        "hamstrings",
+        "calves"
+      ],
+      "category": "strength",
+      "description": "A squat with a band above the knees. It trains the glutes and thighs.",
+      "instructions": [
+        "Stand with your feet shoulder-width apart, with the band placed just above your knees.",
+        "Keeping your chest up and core engaged, push your hips back and bend your knees to lower into a squat position.",
+        "Make sure your knees are tracking over your toes and your weight is in your heels.",
+        "Pause for a moment at the bottom, then push through your heels to return to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "textSource": "exercisedb"
+    },
+    "6607": {
+      "id": "6607",
+      "name": "band lateral walk",
+      "bodyPart": "upper legs",
+      "equipment": "band",
+      "target": "abductors",
+      "secondaryMuscles": [
+        "glutes",
+        "hip flexors"
+      ],
+      "category": "strength",
+      "description": "Side stepping with a loop band around the legs. It fires up the hip abductors and glutes.",
+      "instructions": [
+        "Put a loop band around your legs just above the knees or ankles.",
+        "Stand in a quarter squat with feet hip-width apart.",
+        "Step sideways with the lead foot, keeping tension on the band.",
+        "Bring the trailing foot in without letting the feet touch.",
+        "Walk several steps one way, then return the other way."
+      ],
+      "femaleVariant": "2460",
+      "textSource": "opengym"
+    },
+    "1513": {
+      "id": "1513",
+      "name": "band good morning",
+      "bodyPart": "upper legs",
+      "equipment": "band",
+      "target": "hamstrings",
+      "secondaryMuscles": [
+        "glutes",
+        "lower back",
+        "core"
+      ],
+      "category": "strength",
+      "description": "A hip hinge with a band across your shoulders. It strengthens the hamstrings, glutes and lower back.",
+      "instructions": [
+        "Stand on the band and loop it behind your neck across your shoulders.",
+        "Keep your knees softly bent and your back flat.",
+        "Push your hips back and lean your torso forward.",
+        "Stop when you feel a stretch in the hamstrings.",
+        "Drive your hips forward to stand tall again."
+      ],
+      "textSource": "opengym"
+    },
+    "0909": {
+      "id": "0909",
+      "name": "band lunges",
+      "bodyPart": "upper legs",
+      "equipment": "band",
+      "target": "glutes",
+      "secondaryMuscles": [
+        "quadriceps",
+        "hamstrings",
+        "calves"
+      ],
+      "category": "strength",
+      "description": "Lunges with band resistance. They build the quads and glutes with extra tension.",
+      "instructions": [
+        "Stand on the band with the ends held at your shoulders.",
+        "Step forward into a long stride.",
+        "Lower your back knee toward the floor.",
+        "Press through the front heel to return.",
+        "Alternate legs."
+      ],
+      "textSource": "opengym"
+    },
+    "4442": {
+      "id": "4442",
+      "name": "assisted bulgarian split squat",
+      "bodyPart": "upper legs",
+      "equipment": "body weight",
+      "target": "quads",
+      "secondaryMuscles": [
+        "glutes",
+        "hamstrings",
+        "adductors",
+        "core"
+      ],
+      "category": "strength",
+      "description": "A single-leg squat with the rear foot raised on a bench and a hand lightly holding a support for balance. Trains quads and glutes with less wobble.",
+      "instructions": [
+        "Stand facing away from a bench and hold a sturdy post or rack with one hand for balance.",
+        "Place the top of your rear foot on a bench behind you.",
+        "Step your front foot far enough forward to stay balanced.",
+        "Lower straight down until your front thigh is about parallel to the floor.",
+        "Keep your torso upright and your front knee tracking over your toes.",
+        "Drive through the front heel to stand, then switch legs after your set."
+      ],
+      "textSource": "opengym"
+    },
+    "6560": {
+      "id": "6560",
+      "name": "90 to 90 stretch",
+      "bodyPart": "upper legs",
+      "equipment": "body weight",
+      "target": "glutes",
+      "secondaryMuscles": [
+        "hip flexors",
+        "adductors",
+        "lower back"
+      ],
+      "category": "stretching",
+      "description": "A seated hip stretch with both legs bent at right angles. It loosens the hip rotators and the glutes.",
+      "instructions": [
+        "Sit on the floor with one leg bent in front and the other bent out to the side, both at about 90 degrees.",
+        "Sit tall with your hands on the floor.",
+        "Hinge forward over the front shin until you feel a stretch in the hip.",
+        "Hold for 20-30 seconds, breathing calmly.",
+        "Come back up slowly.",
+        "Switch sides."
+      ],
+      "textSource": "opengym"
+    },
+    "1379": {
+      "id": "1379",
+      "name": "dumbbell seated calf raise",
+      "bodyPart": "lower legs",
+      "equipment": "dumbbell",
+      "target": "calves",
+      "secondaryMuscles": [
+        "hamstrings"
+      ],
+      "category": "strength",
+      "description": "Seated calf raise with a dumbbell resting on your knees. The bent knee focuses on the soleus beneath the calf.",
+      "instructions": [
+        "Sit on a bench or chair with your feet flat on the ground and a dumbbell resting on your thighs.",
+        "Place the balls of your feet on a raised surface such as a step or block, with your heels hanging off the edge.",
+        "Hold onto the dumbbell for stability.",
+        "Raise your heels as high as possible, lifting your body weight onto the balls of your feet.",
+        "Pause for a moment at the top, then slowly lower your heels back down to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "femaleVariant": "3082",
+      "textSource": "exercisedb"
+    },
+    "1178": {
+      "id": "1178",
+      "name": "dumbbell standing single leg calf raise",
+      "bodyPart": "lower legs",
+      "equipment": "dumbbell",
+      "target": "calves",
+      "secondaryMuscles": [
+        "soleus",
+        "ankles"
+      ],
+      "category": "strength",
+      "description": "A one-leg calf raise holding a dumbbell for a challenging calf workout.",
+      "instructions": [
+        "Hold a dumbbell in one hand and stand on one foot on a step.",
+        "Hold a wall or rail with your other hand for balance.",
+        "Lower your heel to a full stretch.",
+        "Press up onto your toes as high as possible.",
+        "Complete your reps, then switch legs."
+      ],
+      "textSource": "opengym"
+    },
+    "1246": {
+      "id": "1246",
+      "name": "hollow hold",
+      "bodyPart": "waist",
+      "equipment": "body weight",
+      "target": "abs",
+      "secondaryMuscles": [
+        "lower abs",
+        "hip flexors",
+        "core"
+      ],
+      "category": "isometric",
+      "hold": true,
+      "description": "A gymnastics-style hold with your shoulders and legs lifted. It builds deep core strength.",
+      "instructions": [
+        "Lie on your back with your arms overhead and legs straight.",
+        "Press your lower back into the floor.",
+        "Lift your shoulders and legs a few inches off the ground.",
+        "Hold the shape and breathe steadily.",
+        "Hold for 20-30 seconds, then rest."
+      ],
+      "femaleVariant": "7157",
+      "textSource": "opengym"
+    },
+    "5649": {
+      "id": "5649",
+      "name": "hollow rock",
+      "bodyPart": "waist",
+      "equipment": "body weight",
+      "target": "abs",
+      "secondaryMuscles": [
+        "hip flexors",
+        "lower abs",
+        "core"
+      ],
+      "category": "calisthenics",
+      "description": "Rocking on your back in a hollow body position to challenge your core.",
+      "instructions": [
+        "Lie on your back and lift your arms and legs into a hollow position.",
+        "Press your lower back into the floor.",
+        "Rock back and forth like a boat.",
+        "Keep your body rigid.",
+        "Continue for reps or time."
+      ],
+      "textSource": "opengym"
+    },
+    "0979": {
+      "id": "0979",
+      "name": "band horizontal pallof press",
+      "bodyPart": "waist",
+      "equipment": "band",
+      "target": "abs",
+      "secondaryMuscles": [
+        "obliques",
+        "glutes"
+      ],
+      "category": "isometric",
+      "description": "A Pallof press with a band anchored to the side, pressing out and holding. It trains the core to resist rotation.",
+      "instructions": [
+        "Attach the band to a sturdy anchor point at waist height.",
+        "Stand perpendicular to the anchor point with your feet shoulder-width apart.",
+        "Grasp the band handle with both hands and step away from the anchor point to create tension in the band.",
+        "Bring your hands to your chest, keeping your elbows bent and close to your body.",
+        "Engage your core and maintain a stable stance.",
+        "Extend your arms straight out in front of you, pushing the band away from your body.",
+        "Hold the extended position for a few seconds, focusing on maintaining tension in your core.",
+        "Slowly bring your hands back to your chest, resisting the pull of the band.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "textSource": "exercisedb"
+    },
+    "6211": {
+      "id": "6211",
+      "name": "bicycle crunch",
+      "bodyPart": "waist",
+      "equipment": "body weight",
+      "target": "abs",
+      "secondaryMuscles": [
+        "obliques",
+        "hip flexors",
+        "core"
+      ],
+      "category": "calisthenics",
+      "description": "A pedalling crunch where you bring each elbow toward the opposite knee. It works the abs and obliques.",
+      "instructions": [
+        "Lie on your back with your hands by your head.",
+        "Lift your shoulders and bring your knees up.",
+        "Twist to bring one elbow to the opposite knee.",
+        "Extend the other leg.",
+        "Switch sides in a pedalling motion.",
+        "Keep your lower back pressed down."
+      ],
+      "femaleVariant": "6212",
+      "textSource": "opengym"
+    },
+    "4170": {
+      "id": "4170",
+      "name": "bear plank",
+      "bodyPart": "waist",
+      "equipment": "body weight",
+      "target": "abs",
+      "secondaryMuscles": [
+        "core",
+        "shoulders",
+        "quadriceps"
+      ],
+      "category": "isometric",
+      "hold": true,
+      "description": "A plank on hands and toes with knees hovering just off the floor. It challenges the core and shoulders.",
+      "instructions": [
+        "Start on hands and knees with wrists under shoulders.",
+        "Tuck your toes and lift your knees a few centimetres off the floor.",
+        "Keep your back flat and hips level.",
+        "Brace your abs and breathe steadily.",
+        "Hold for 20-30 seconds.",
+        "Lower your knees to rest."
+      ],
+      "textSource": "opengym"
+    },
+    "0133": {
+      "id": "0133",
+      "name": "bent knee side plank",
+      "bodyPart": "waist",
+      "equipment": "body weight",
+      "target": "obliques",
+      "secondaryMuscles": [
+        "abdominals",
+        "shoulders",
+        "glutes"
+      ],
+      "category": "isometric",
+      "hold": true,
+      "description": "A side plank with the knees bent, a more approachable version of the full move. It strengthens the obliques and the side of the hip.",
+      "instructions": [
+        "Lie on your side with your knees bent and your elbow under your shoulder.",
+        "Stack your hips and knees.",
+        "Lift your hips so your body forms a straight line from knee to head.",
+        "Hold for 20-30 seconds.",
+        "Lower your hips with control.",
+        "Repeat on the other side."
+      ],
+      "textSource": "opengym"
+    },
+    "0867": {
+      "id": "0867",
+      "name": "reverse plank",
+      "bodyPart": "upper legs",
+      "equipment": "body weight",
+      "target": "glutes",
+      "secondaryMuscles": [
+        "hamstrings",
+        "lower back",
+        "shoulders",
+        "triceps",
+        "core"
+      ],
+      "category": "isometric",
+      "hold": true,
+      "description": "A plank held face up, supported on your hands and heels. It strengthens the back of the body and opens up the chest.",
+      "instructions": [
+        "Sit on the floor with legs straight and hands behind your hips, fingers pointing forward.",
+        "Press into your hands and heels to lift your hips.",
+        "Straighten your body from head to heels.",
+        "Squeeze your glutes and keep your shoulders away from your ears.",
+        "Hold for 20-45 seconds.",
+        "Lower your hips with control."
+      ],
+      "textSource": "opengym"
+    },
+    "1326": {
+      "id": "1326",
+      "name": "chin-up",
+      "bodyPart": "back",
+      "equipment": "body weight",
+      "target": "lats",
+      "secondaryMuscles": [
+        "biceps",
+        "forearms"
+      ],
+      "category": "calisthenics",
+      "description": "Hang from a bar with an underhand grip and pull until your chin clears it. A classic builder of the lats and biceps.",
+      "instructions": [
+        "Hang from a pull-up bar with your palms facing towards you and your hands shoulder-width apart.",
+        "Engage your core and pull your body up towards the bar, leading with your chest.",
+        "Continue pulling until your chin is above the bar.",
+        "Pause for a moment at the top, then slowly lower your body back down to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "muscleMap": {
+        "primaries": [
+          "upper-back"
+        ],
+        "secondaries": [
+          "biceps",
+          "deltoids",
+          "forearm"
+        ]
+      },
+      "femaleVariant": "2379",
+      "textSource": "exercisedb"
+    },
+    "0253": {
+      "id": "0253",
+      "name": "chin-ups (narrow parallel grip)",
+      "bodyPart": "back",
+      "equipment": "body weight",
+      "target": "lats",
+      "secondaryMuscles": [
+        "upper back",
+        "biceps",
+        "forearms"
+      ],
+      "category": "calisthenics",
+      "description": "A chin-up on a bar with a narrow parallel grip and the palms facing in. It works the lats, upper back and biceps.",
+      "instructions": [
+        "Hang from a pull-up bar with a narrow parallel grip, palms facing towards you.",
+        "Engage your back muscles and pull your body up towards the bar, keeping your elbows close to your body.",
+        "Continue pulling until your chin is above the bar.",
+        "Pause for a moment at the top, then slowly lower your body back down to the starting position.",
+        "Repeat for the desired number of repetitions."
+      ],
+      "muscleMap": {
+        "primaries": [
+          "upper-back"
+        ],
+        "secondaries": [
+          "biceps",
+          "deltoids",
+          "forearm"
+        ]
+      },
+      "femaleVariant": "3600",
+      "textSource": "exercisedb"
+    },
+    "4718": {
+      "id": "4718",
+      "name": "band assisted chin up",
+      "bodyPart": "back",
+      "equipment": "assisted",
+      "target": "lats",
+      "secondaryMuscles": [
+        "biceps",
+        "upper back",
+        "forearms",
+        "core"
+      ],
+      "category": "calisthenics",
+      "description": "A chin-up with a band under your feet or knees to reduce the load. It helps you build toward unassisted reps.",
+      "instructions": [
+        "Hang from a bar with an underhand grip and the band looped under your feet.",
+        "Engage your lats and keep your core tight.",
+        "Pull your chin over the bar.",
+        "Pause at the top.",
+        "Lower slowly until your arms are straight and repeat."
+      ],
+      "textSource": "opengym"
+    }
+  }
+}

@@ -1,0 +1,448 @@
+{
+  "schema": "webapp-feature-coverage/v1",
+  "sourceOfTruth": {
+    "main": "index.html",
+    "functionalCopy": "index-liquid-glass-functional.html",
+    "generator": ".agents/scripts/generate-liquid-glass-functional.js",
+    "fullRegressionCommand": "node .agents/scripts/run-full-regression.js",
+    "humanMap": "docs/webapp-function-map.md"
+  },
+  "supportingTestFiles": [
+    ".agents/tests/webapp-feature-coverage.test.js"
+  ],
+  "features": [
+    {
+      "id": "static-app-shell-pwa",
+      "name": "Static app shell, PWA assets, and functional copy",
+      "status": "covered",
+      "changeRisk": "Layout, manifest, service worker, or functional copy drift can make the app appear usable while mobile or PWA surfaces are broken.",
+      "coverage": [
+        {
+          "testFile": ".agents/tests/ui-regression.test.js",
+          "tests": [
+            "PWA manifest and exercise library assets referenced by the page exist",
+            "iOS day indicator clamp keeps the dark pill inside the visible nav bounds",
+            "bottom navigation drag keeps the iOS touch chain locked until release"
+          ]
+        },
+        {
+          "testFile": ".agents/tests/liquid-glass-functional-ui.test.js",
+          "tests": [
+            "liquid glass functional UI copy preserves the production feature surface"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "weekly-plan-json-snapshot",
+      "name": "Weekly plan JSON import and daily plan snapshots",
+      "status": "covered",
+      "changeRisk": "Plan snapshots are the authority for target-day dose, including recovery days.",
+      "coverage": [
+        {
+          "testFile": ".agents/tests/daily-log-v2-action-library.test.js",
+          "tests": [
+            "DailyLog v2 snapshots separate training days from note-only recovery days",
+            "recovery-day capture updates visible plan progress and surplus extras",
+            "past cross-day training without an existing snapshot does not create structured progress"
+          ]
+        },
+        {
+          "testFile": ".agents/tests/exercise-library-weekly-plan-audit.test.js",
+          "tests": [
+            "exercise library covers every real exercise found in weekly training JSON files"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "exercise-library-resolver",
+      "name": "Merged exercise library and mention resolver",
+      "status": "covered",
+      "changeRisk": "Record protocol must not depend on a small hard-coded exercise list.",
+      "coverage": [
+        {
+          "testFile": ".agents/tests/exercise-library-weekly-plan-audit.test.js",
+          "tests": [
+            "core exercises stay as separate stable actions instead of aliases of Russian twist or plank",
+            "similar rows and lateral raise variations are not collapsed through broad aliases"
+          ]
+        },
+        {
+          "testFile": ".agents/tests/record-protocol-v2-low-token.test.js",
+          "tests": [
+            "compact record protocol request recognizes merged exercise-library actions outside legacy aliases",
+            "record protocol samples merged action-library exercises across sets, reps, and seconds"
+          ]
+        },
+        {
+          "testFile": ".agents/tests/record-protocol.test.js",
+          "tests": [
+            "applyRecordProtocol normalizes AI exercise aliases through the merged exercise library",
+            "applyRecordProtocol keeps ambiguous exercise-library aliases pending"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "daily-log-v2-and-calendar",
+      "name": "Structured daily logs, calendar detail, and summaries",
+      "status": "covered",
+      "changeRisk": "Views and summaries must read structured facts, not legacy-only capture records.",
+      "coverage": [
+        {
+          "testFile": ".agents/tests/daily-log-v2-action-library.test.js",
+          "tests": [
+            "daily facts are collected by category instead of reading only legacy AI capture records",
+            "daily facts and calendar detail include record protocol writes",
+            "training calendar detail shows completed and unfinished amounts for every planned action"
+          ]
+        },
+        {
+          "testFile": ".agents/tests/training-capture.test.js",
+          "tests": [
+            "daily and weekly summaries are derived from daily facts and exported with the app snapshot"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ai-record-protocol",
+      "name": "Candidate-based AI record protocol",
+      "status": "covered",
+      "changeRisk": "ADR-0001 requires the app, not AI, to own dates, writes, confirmations, corrections, and audit.",
+      "coverage": [
+        {
+          "testFile": ".agents/tests/record-protocol.test.js",
+          "tests": [
+            "applyRecordProtocol resolves weekday targetDateText from visibleWeekDates over advisory AI iso",
+            "applyRecordProtocol keeps correction candidates pending by default",
+            "record envelope parsing only exposes reply and filters candidate types and fields"
+          ]
+        },
+        {
+          "testFile": ".agents/tests/record-protocol-v2-low-token.test.js",
+          "tests": [
+            "role chat hides protocol reasoning text when JSON parsing fails",
+            "applyRecordProtocol preserves per-set reps and seconds on written records",
+            "JSON-mode complete nested fields without guard infer confidence and write"
+          ]
+        },
+        {
+          "testFile": ".agents/tests/record-protocol-chat-scenarios.test.js",
+          "tests": [
+            "chat scenario: Saturday completion ignores a wrong AI targetDateIso",
+            "chat scenario: candidate missing evidenceText is ignored and audited"
+          ]
+        },
+        {
+          "testFile": ".agents/tests/record-protocol-live-diagnostics.test.js",
+          "tests": [
+            "record protocol live diagnostics defines 100 real conversation scenarios across required categories"
+          ]
+        },
+        {
+          "testFile": ".agents/tests/record-protocol-docs.test.js",
+          "tests": [
+            "AI record protocol v1 docs preserve the candidate-based architecture decision"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plan-reconciliation",
+      "name": "Plan Reconciliation and surplus splitting",
+      "status": "covered",
+      "changeRisk": "Training facts must reconcile with daily plan snapshots before checking, splitting, or asking.",
+      "coverage": [
+        {
+          "testFile": ".agents/tests/record-protocol.test.js",
+          "tests": [
+            "record protocol asks before checking a matching plan item when completion has no quantity",
+            "record protocol reconciles AI extra-training candidates with today's plan dose before checking the item",
+            "record protocol splits surplus volume after completing the planned dose",
+            "record protocol keeps same-day dose mismatches pending instead of writing extra training"
+          ]
+        },
+        {
+          "testFile": ".agents/tests/training-capture.test.js",
+          "tests": [
+            "structured training capture asks before checking a matching plan item without quantity",
+            "structured training capture splits surplus same-dose work into plan progress plus extra training"
+          ]
+        },
+        {
+          "testFile": ".agents/tests/daily-log-v2-action-library.test.js",
+          "tests": [
+            "training capture updates plan progress first and writes extra events only after target is met"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "deterministic-local-fallback",
+      "name": "Deterministic local fallback for AI failures",
+      "status": "covered",
+      "changeRisk": "Malformed or empty AI output must still route clear facts through the same reconciliation path.",
+      "coverage": [
+        {
+          "testFile": ".agents/tests/record-protocol.test.js",
+          "tests": [
+            "role chat preserves deterministic fallback when engine has no write or pending decision",
+            "role chat deterministic fallback captures and reconciles multiple duration facts in one message",
+            "role chat protocol local fallback splits multiple duration facts before deterministic fallback",
+            "role chat local fallback can check every exercisable weekly JSON plan item"
+          ]
+        },
+        {
+          "testFile": ".agents/tests/record-protocol-v2-low-token.test.js",
+          "tests": [
+            "role chat records a clear training fact when the AI returns empty content",
+            "role chat protocol fallback recognizes the same merged exercise-library alias as compact gate"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "correction-and-dose-revision",
+      "name": "Correction, deletion, and plan dose revision",
+      "status": "covered",
+      "changeRisk": "Corrections should update existing state or wait for confirmation, not append duplicate records.",
+      "coverage": [
+        {
+          "testFile": ".agents/tests/record-protocol.test.js",
+          "tests": [
+            "record protocol correction updates an existing capture record instead of appending",
+            "dose revision confirmation updates only the daily snapshot, checks the plan, and records surplus",
+            "dose revision rejection keeps the plan unchecked and saves the reported work as actual training only",
+            "role chat per-set duration follow-up after checked plan enters dose revision pending"
+          ]
+        },
+        {
+          "testFile": ".agents/tests/training-capture.test.js",
+          "tests": [
+            "duration phrasing with 是 does not modify the latest record into reps",
+            "structured training capture keeps per-set duration mismatch pending before writing"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "character-chat-and-ai-coach",
+      "name": "Character chat, hidden capture, and AI coach context",
+      "status": "covered",
+      "changeRisk": "Visible chat and hidden record capture share one flow but must not leak or override each other.",
+      "coverage": [
+        {
+          "testFile": ".agents/tests/ai-coach-context.test.js",
+          "tests": [
+            "AI coach encouragement context reads counter plus today's calendar weight and sleep",
+            "saved AI coach feedback is mirrored into the active character chat"
+          ]
+        },
+        {
+          "testFile": ".agents/tests/record-protocol.test.js",
+          "tests": [
+            "role chat displays only reply while hidden candidates commit through record protocol",
+            "role chat commits AI candidates through RecordProtocolEngine and skips deterministic fallback",
+            "role chat does not let deterministic fallback override model candidates"
+          ]
+        },
+        {
+          "testFile": ".agents/tests/record-protocol-v2-low-token.test.js",
+          "tests": [
+            "role chat ordinary messages do not attach record protocol or training context",
+            "role chat surfaces API error bodies instead of hiding them as empty content"
+          ]
+        },
+        {
+          "testFile": ".agents/tests/character-chat-scroll.test.js",
+          "tests": [
+            "opening role chat scrolls to the latest message after the panel layout is ready"
+          ]
+        },
+        {
+          "testFile": ".agents/tests/ui-regression.test.js",
+          "tests": [
+            "AI bubble chat modal layout keeps the text input visible in the panel",
+            "AI bubble chat composer keeps the input and action buttons in separate rows"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "active-training-session",
+      "name": "Active training session start, save, discard, and capture",
+      "status": "covered",
+      "changeRisk": "Session capture must use the selected plan day and not write discarded work.",
+      "coverage": [
+        {
+          "testFile": ".agents/tests/training-capture.test.js",
+          "tests": [
+            "training sessions expose continue, finish-save, and discard exits",
+            "active training session chat records quantified completion against the selected plan day and auto-checks that page",
+            "active training session records one completed set with planned reps from the matched item",
+            "active training session records extra completed work instead of only checking the plan item"
+          ]
+        },
+        {
+          "testFile": ".agents/tests/record-protocol.test.js",
+          "tests": [
+            "role chat start-training request opens today's session and enters coach mode",
+            "role chat finish-training request saves the active session",
+            "role chat discard-training request abandons the active session without writing facts"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "capture-notifications-and-undo",
+      "name": "Training capture toasts and undo",
+      "status": "covered",
+      "changeRisk": "Undo must revoke structured progress and linked extra events, not only remove a visible message.",
+      "coverage": [
+        {
+          "testFile": ".agents/tests/training-capture.test.js",
+          "tests": [
+            "training session capture notifications are transient toasts without affecting the session",
+            "legacy capture notifications without expiry are upgraded and can be dismissed"
+          ]
+        },
+        {
+          "testFile": ".agents/tests/daily-log-v2-action-library.test.js",
+          "tests": [
+            "undo rolls back structured plan progress and revokes linked extra events"
+          ]
+        },
+        {
+          "testFile": ".agents/tests/ui-regression.test.js",
+          "tests": [
+            "training capture notifications render as transient toasts outside the AI chat card"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "weekly-record-history-and-summary",
+      "name": "Weekly record history and AI weekly summary",
+      "status": "covered",
+      "changeRisk": "Weekly saves should preserve derived summaries and exported daily facts.",
+      "coverage": [
+        {
+          "testFile": ".agents/tests/training-capture.test.js",
+          "tests": [
+            "saving the weekly record carries the AI weekly summary draft into history",
+            "daily and weekly summaries are derived from daily facts and exported with the app snapshot"
+          ]
+        },
+        {
+          "testFile": ".agents/tests/ui-regression.test.js",
+          "tests": [
+            "weekly record page exposes the AI weekly summary draft and refresh control"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "local-persistence-and-cloud-sync",
+      "name": "Local persistence and cloud sync settings",
+      "status": "covered",
+      "changeRisk": "Direct storage writes or sync triggers can duplicate writes, skip sync, or corrupt local state.",
+      "coverage": [
+        {
+          "testFile": ".agents/tests/training-capture.test.js",
+          "tests": [
+            "high-risk persistence setters write once per domain and hydrate cleanly after reload",
+            "cloud sync upload preserves remote daily logs when the local snapshot is newer"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "timer-counter-background-and-pet",
+      "name": "Timer, counter, custom background, AI pet, milestones, and reminders",
+      "status": "gap",
+      "changeRisk": "Support widgets are persistent and user-visible but currently have partial automated coverage.",
+      "coverage": [],
+      "manualChecks": [
+        "Increment the counter, reload, and verify AI coach context includes it.",
+        "Start, pause, resume, and finish the timer; reload while running if possible.",
+        "Set a custom background and AI pet icon, reload, and verify both remain visible."
+      ],
+      "recommendedTests": [
+        "Add timer persistence tests for running and paused states.",
+        "Add AI pet/background hydration tests.",
+        "Add late-night sleep reminder date gating tests."
+      ]
+    },
+    {
+      "id": "training-details-muscle-statistics",
+      "name": "逐组记录、肌肉分布、统计与动作库审校",
+      "status": "covered",
+      "changeRisk": "事实去重、单位、迁移、删除标记及云合并出错会虚增训练量或恢复被删除的记录。",
+      "coverage": [
+        {
+          "testFile": ".agents/tests/training-enhancements.test.js",
+          "tests": [
+            "set validation distinguishes missing values and zero and validates effort",
+            "unilateral and paired dumbbell inputs have explicit totals",
+            "stats count saved facts once and exclude warmups pending deleted and conflicts",
+            "time and recovery metrics never become repetition counts or strength days",
+            "legacy check marks never fabricate actual groups repetitions or weight",
+            "explicit aggregate extra sets count while linked detail replaces the aggregate",
+            "user-stated legacy aggregate quantities replace their plan and extra projections",
+            "standalone protocol records provide explicit quantities without multiplying mirrored AI facts",
+            "both sides of timed holds are stored explicitly without becoming repetitions",
+            "same exercise on same day in two real sessions remains distinct",
+            "merge preserves deletion and lower corrections even with a slow editing clock",
+            "concurrent offline edits are retained and excluded until resolved",
+            "entry merging is idempotent and preserves unrelated new sets",
+            "managed plan projection caps target and deletion reduces completion",
+            "pending dose mismatches do not advance the plan but remain actual training",
+            "date ranges use local Monday boundaries and do not cross UTC midnight",
+            "backup failure is surfaced and a successful backup is not overwritten",
+            "quota failures roll back all facts and plan check writes together",
+            "catalogue has reviewed metadata and exact pinned identities without imported media",
+            "shell normalization and reload retain new catalogue fields and all 110 stable actions",
+            "daily shell preserves entries and managed metadata instead of reviving old checks",
+            "cloud daily merge retains tombstones and recalculates the lower managed progress"
+          ]
+        }
+      ],
+      "manualChecks": [
+        "在手机宽度保存、刷新恢复、修改、删除逐组记录。",
+        "检查计划剂量差异确认、历史统计、肌肉图、导出和离线重载。"
+      ]
+    },
+    {
+      "id": "visual-plan-editor-persistence",
+      "name": "训练计划可视化编辑、导入与本周单日顺序持久化",
+      "status": "covered",
+      "changeRisk": "顺序变更可能造成打卡错位，模板更新或云同步可能覆盖单日调整及实际训练事实。",
+      "coverage": [
+        {
+          "testFile": ".agents/tests/plan-editor.test.js",
+          "tests": [
+            "editing a weekly template preserves independently adjusted daily order",
+            "all real weekly JSON templates including BOM import without losing action order",
+            "invalid imports fail before mutating the saved plan",
+            "a failed template import rolls back the template checks and dated snapshots together",
+            "visual reorder moves checks and fact links and updates the daily snapshot",
+            "removing a planned action retains performed sets without assigning them to another action",
+            "changed dose waits for reconciliation and does not check off old quantities",
+            "weekly template scope changes future template while week-only edits do not",
+            "removing all actions saves an empty recovery day without restoring old rows",
+            "AI daily adjustments update existing snapshots in the same order",
+            "daily adjustments are scoped to their calendar week and removal tombstones survive sync",
+            "a stale cloud plan snapshot cannot undo the new order or reattach deleted actions",
+            "object exercise imports produce meaningful names and dose",
+            "cloud merges preserve changes on different days rather than replacing the entire map"
+          ]
+        }
+      ],
+      "manualChecks": [
+        "真实 JSON 文件导入；手机编辑动作、组数和顺序；切换日期及刷新后核对。"
+      ]
+    }
+  ]
+}
