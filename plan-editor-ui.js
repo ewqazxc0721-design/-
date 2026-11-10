@@ -25,6 +25,7 @@
       current=draft?.dirty?draft:{index:activePlanDay,signature:signature(day),day:day.day,focus:day.focus,protein:day.protein,scope:'week',dirty:false,rows:day.items.map((text,origin)=>({text,origin}))};
     }
     if(!current)current={index:activePlanDay,signature:signature(day),day:day.day,focus:day.focus,protein:day.protein,scope:'week',dirty:false,rows:day.items.map((text,origin)=>({text,origin}))};
+    $('editorDayLabel').textContent=current.day||'';
     $('planDayNameEdit').value=current.day||'';$('planFocusEdit').value=current.focus||'';$('planProteinEdit').value=current.protein||'';
     const daySelect=$('planEditDaySelect');
     if(daySelect){daySelect.innerHTML=getPlanDays().map((d,i)=>`<option value="${i}">${esc(d.day)} · ${esc(d.moduleName||d.focus||'训练计划')}</option>`).join('');daySelect.value=String(activePlanDay);daySelect.onchange=()=>setActivePlanDay(Number(daySelect.value));}

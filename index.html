@@ -14,11 +14,11 @@
 
   <link rel="stylesheet" href="./training-enhancements.css?v=20261110-sets1" />
   <script src="./training-core.js?v=20261110-sets1"></script>
-  <script src="./training-ui.js?v=20261110-sets1" defer></script>
+  <script src="./training-ui.js?v=20261110-plan2" defer></script>
   <script src="./exercise-media.js?v=20261110-media2" defer></script>
   <link rel="stylesheet" href="./exercise-media.css?v=20261110-media2" />
-  <script src="./plan-editor-ui.js" defer></script>
-  <link rel="stylesheet" href="./plan-editor.css" />
+  <script src="./plan-editor-ui.js?v=20261110-plan2" defer></script>
+  <link rel="stylesheet" href="./plan-editor.css?v=20261110-plan2" />
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icons/app-icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="./icons/app-icon.svg" />
@@ -5261,7 +5261,7 @@
   </div>
 
   <script>
-    const APP_VERSION = "v2026.11.10-exercise-media-library";
+    const APP_VERSION = "v2026.11.10-compact-plan-editor";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const TEMP_DAILY_PLAN_OVERRIDES_KEY = "gain-temp-daily-plan-overrides";
     const DAILY_LOGS_KEY = "gain-daily-logs";
@@ -19907,6 +19907,9 @@
       localStorage.setItem(ACTIVE_PLAN_DAY_KEY, String(activePlanDay));
 
       if(isIosDayDockMode() && syncRenderedActivePlanDay(activePlanDay)){
+        fillPlanEditorFromActiveDay();
+        window.PlanEditor?.refresh();
+        window.TrainingEnhancements?.refreshPlan();
         positionIosDayDockScrollForIndex(activePlanDay);
         if(activePlanDay === 0){
           updateDayTabIndicator({ immediate:true, noForce:true });
