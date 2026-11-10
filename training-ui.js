@@ -22,7 +22,7 @@
     }
     C.persistTransaction(localStorage,{[DAILY_LOGS_KEY]:logs,[PLAN_CHECKS_KEY]:checks,[PLAN_CHECK_META_KEY]:meta});
     appState.load();
-    queueAutoSync('逐组记录更新');renderHistory();renderPlan();refresh();
+    queueAutoSync('训练组数更新');renderHistory();renderPlan({scrollDayDock:false,preserveDayDockScroll:true});updateSummary();refresh();
   }
   function refresh(){renderPlanMap();renderStats();renderSessionCard();renderSavedEntries();}
   function selectMuscle(key){
@@ -83,14 +83,15 @@
     document.querySelectorAll('#planContainer .day-row').forEach(row=>{
       if(row.querySelector('.te-record-open'))return;
       const b=document.createElement('button');b.type='button';b.className='te-record-open';b.textContent='记录组数';b.dataset.te='open-plan';b.dataset.day=row.dataset.guideOpen;b.dataset.text=row.dataset.guideItem;
-      row.insertBefore(b,row.querySelector('.check-btn'));
+      b.dataset.item=row.querySelector('[data-check]')?.dataset.check||'';
+      row.querySelector('.day-item').append(b);
     });
   }
   function renderStats(){
     const root=$('te-statistics');if(!root)return;
     const period=C.range(rangeKind,new Date(),customFrom,customTo),data=C.stats(getDailyLogs(),lib(),period);
     const opts=[['week','本周'],['lastWeek','上周'],['month','本月'],['30','近30天'],['custom','自定义']];
-    root.innerHTML=`<div class="te-kicker">YOUR TRAINING, IN NUMBERS</div><div class="te-head"><h2>训练统计</h2><button class="btn-outline" data-te="export-data">导出训练备份</button></div><div class="te-toolbar"><label>范围 <select id="te-range">${opts.map(([v,n])=>`<option value="${v}" ${rangeKind===v?'selected':''}>${n}</option>`).join('')}</select></label>${rangeKind==='custom'?`<label>起始 <input id="te-from" type="date" value="${esc(customFrom)}"></label><label>截止 <input id="te-to" type="date" value="${esc(customTo)}"></label>`:''}</div>${period.from&&period.to&&period.from>period.to?'<div class="te-warning">起始日期不能晚于截止日期。</div>':''}<div class="te-note">${esc(period.from||'请选择起始日期')} — ${esc(period.to||'请选择截止日期')}</div><div class="te-metrics">${[[data.trainingDays,'力量训练天'],[data.groups,'正式组'],[data.reps,'实际总次数'],[data.seconds,'计时动作秒数']].map(([n,t])=>`<div class="te-metric"><strong>${n}</strong><span>${t}</span></div>`).join('')}</div><div class="te-note">逐组明细 ${data.detail} 条 · 旧记录 ${data.legacy} 条 · 恢复活动 ${data.recoveryDays} 天。旧完成勾选不推算组数和次数。${data.unknown?` ${data.unknown} 条记录待分类。`:''}</div>${data.conflicts?`<div class="te-warning">有 ${data.conflicts} 组存在同步冲突，已暂时排除统计。请在下方已保存记录中选择保留的版本。</div>`:''}<h3 style="margin-top:22px">训练日历</h3>${calendarHTML(data,period)}<div class="te-note">绿色：力量训练；蓝色边框：恢复活动；灰色：无记录。</div><h3 style="margin-top:24px">肌肉分布</h3>${mapHTML(data)}<h3 style="margin-top:24px">动作进步</h3>${trendHTML(data)}<div class="te-note">所有统计读取已保存事实；正在进行的会话仅在记录面板预览。</div>${localStorage.getItem('gain-training-v3-backup')?'<button class="btn-outline full" style="margin-top:12px" data-te="export-before">导出首次升级前备份</button>':''}`;
+    root.innerHTML=`<div class="te-kicker">YOUR TRAINING, IN NUMBERS</div><div class="te-head"><h2>训练统计</h2><button class="btn-outline" data-te="export-data">导出训练备份</button></div><div class="te-toolbar"><label>范围 <select id="te-range">${opts.map(([v,n])=>`<option value="${v}" ${rangeKind===v?'selected':''}>${n}</option>`).join('')}</select></label>${rangeKind==='custom'?`<label>起始 <input id="te-from" type="date" value="${esc(customFrom)}"></label><label>截止 <input id="te-to" type="date" value="${esc(customTo)}"></label>`:''}</div>${period.from&&period.to&&period.from>period.to?'<div class="te-warning">起始日期不能晚于截止日期。</div>':''}<div class="te-note">${esc(period.from||'请选择起始日期')} — ${esc(period.to||'请选择截止日期')}</div><div class="te-metrics">${[[data.trainingDays,'力量训练天'],[data.groups,'正式组'],[data.reps,'实际总次数'],[data.seconds,'计时动作秒数']].map(([n,t])=>`<div class="te-metric"><strong>${n}</strong><span>${t}</span></div>`).join('')}</div><div class="te-note">逐组明细 ${data.detail} 条 · 旧记录 ${data.legacy} 条 · 恢复活动 ${data.recoveryDays} 天。勾选完成会记录计划组数，并同步肌肉分布；次数、时长和重量仅统计已填写的数据。历史旧勾选不自动补记。${data.unknown?` ${data.unknown} 条记录待分类。`:''}</div>${data.conflicts?`<div class="te-warning">有 ${data.conflicts} 组存在同步冲突，已暂时排除统计。请在下方已保存记录中选择保留的版本。</div>`:''}<h3 style="margin-top:22px">训练日历</h3>${calendarHTML(data,period)}<div class="te-note">绿色：力量训练；蓝色边框：恢复活动；灰色：无记录。</div><h3 style="margin-top:24px">肌肉分布</h3>${mapHTML(data)}<h3 style="margin-top:24px">动作进步</h3>${trendHTML(data)}<div class="te-note">所有统计读取已保存事实；正在进行的会话仅在记录面板预览。</div>${localStorage.getItem('gain-training-v3-backup')?'<button class="btn-outline full" style="margin-top:12px" data-te="export-before">导出首次升级前备份</button>':''}`;
   }
   function calendarHTML(data,period){
     if(!period.from||!period.to||period.from>period.to)return '<div class="te-empty">请选择有效日期范围。</div>';
@@ -117,7 +118,67 @@
     if(!session){const day=getPlanDays()[dayIndex]||{},isPlanned=date===getDateForPlanDayInCurrentWeek(day.day,dayIndex);session={id:C.uid('session'),status:'active',dayIndex,date,dayName:isPlanned?(day.day||'训练'):'自由训练 / 补记',focus:isPlanned?(day.focus||''):'',items:isPlanned?C.list(day.items):[],events:[],startedAt:new Date().toISOString()};}
     session.setEntries=C.list(session.setEntries);return session;
   }
-  function openPlan(dayIndex,text){
+  function planGroupContext(dayIndex,text,key=''){
+    const day=getPlanDays()[dayIndex];if(!day)throw new Error('找不到训练日');
+    const itemIndex=key?Number(key.match(/_i(\d+)$/)?.[1]):day.items.indexOf(text);
+    if(itemIndex<0||!Number.isInteger(itemIndex))throw new Error('找不到计划动作');
+    const date=getDateForPlanDayInCurrentWeek(day.day,dayIndex),logs=getDailyLogs();
+    const log=logs[date]?C.copy(logs[date]):buildDailyLogShell(date,{});
+    const p=C.list(log.planProgressItems).find(p=>p.planCheckKey===`d${dayIndex}_i${itemIndex}`)||C.list(log.planProgressItems).find(p=>p.snapshotItemText===text);
+    if(!p)throw new Error('计划快照已变化，请重新打开训练计划');
+    // A plus block contains multiple exercises; "or" names an alternative, not extra work.
+    const alternatives=/或/.test(text),parts=String(text).split(/[+＋]/).filter(Boolean),specs=[];
+    for(const part of parts){
+      const segment=alternatives?part.split('或')[0]:part;
+      const matches=lib().filter(a=>a.exerciseType!=='choice').flatMap(a=>[a.displayName,...C.list(a.aliases)].filter(Boolean).map(name=>({a,name}))).filter(x=>segment.includes(x.name)).sort((a,b)=>b.name.length-a.name.length);
+      const action=matches[0]?.a||getExerciseActionForPlanItem(segment),dose=parsePlanItemTrainingDose(part);
+      const groups=Number(dose.plannedSets)||Number(parsePlanItemTrainingDose(text).plannedSets)||1;
+      const recorded=C.list(log.exerciseEntries).filter(e=>e.planItemId===p.itemId&&e.exerciseKey===action.exerciseKey).reduce((n,e)=>n+C.projection(e).groups,0);
+      if(!specs.some(s=>s.action.exerciseKey===action.exerciseKey))specs.push({action,plannedGroups:groups,count:recorded||groups,recorded});
+    }
+    return {dayIndex,text,date,log,p,specs,alternatives};
+  }
+  let quickContext=null;
+  function openPlan(dayIndex,text,key=''){
+    editor=null;quickContext=planGroupContext(dayIndex,text,key);
+    const q=quickContext;
+    openSheet(`<div class="te-head"><h2>${esc(q.specs.length===1?q.specs[0].action.displayName:'记录本框训练组数')}</h2><button class="te-close" data-te="close" aria-label="关闭">×</button></div><div class="te-note">${esc(q.date)} · 保存后立即计入训练统计</div>`,
+      `<p class="te-note">${esc(text)}</p>${q.alternatives?'<p class="te-note">当前记录计划中的第一个备选动作。</p>':''}${q.specs.map((s,i)=>`<label class="te-quick-count">${esc(s.action.displayName)}<span class="te-note">计划 ${s.plannedGroups} 组${s.recorded?` · 已记录 ${s.recorded} 组`:''}</span><span class="te-quick-input"><input data-quick-count="${i}" type="number" inputmode="numeric" min="0" max="200" step="1" value="${s.count}" aria-label="${esc(s.action.displayName)}完成组数"><span>组</span></span></label>`).join('')}<p class="te-note">直接填写完成组数，默认计入正式组。填 0 可撤回；再次保存会修改原记录，不会重复增加。</p><div id="te-status" class="te-status" role="status"></div>`,
+      '<button class="btn-outline" data-te="close">取消</button><button class="btn" data-te="save-quick-groups">保存组数</button>');
+  }
+  function saveQuickGroups(){
+    if(!quickContext)return;
+    const q=quickContext,counts=[...$('te-overlay').querySelectorAll('[data-quick-count]')].map(input=>input.value);
+    // Read fresh saved facts so a stale panel cannot overwrite another edit.
+    const fresh=planGroupContext(q.dayIndex,q.text,q.p.planCheckKey);
+    if(fresh.p.itemId!==q.p.itemId||fresh.p.snapshotItemText!==q.p.snapshotItemText)throw new Error('计划已修改，请关闭后重新记录');
+    const specs=fresh.specs.map((s,i)=>({...s,count:counts[i]===''?NaN:Number(counts[i])}));
+    const log=C.recordPlanGroups(fresh.log,fresh.p.itemId,specs);
+    persist({...getDailyLogs(),[q.date]:log});quickContext=null;closeSheet();
+  }
+  function recordPlanCheck(key,done){
+    const match=String(key).match(/^d(\d+)_i(\d+)$/);if(!match)return;
+    const dayIndex=Number(match[1]),text=getPlanDays()[dayIndex]?.items[Number(match[2])];if(text===undefined)return;
+    const q=planGroupContext(dayIndex,text,key);
+    const specs=q.specs.map(s=>({...s,count:0})),log=C.recordPlanGroups(q.log,q.p.itemId,specs,{complete:done,source:'plan_check'});
+    persist({...getDailyLogs(),[q.date]:log});
+  }
+  function toggleQuickPlanCheck(key){
+    try{recordPlanCheck(key,!getPlanChecks()[key]);}catch(e){alert('组数未保存：'+e.message);}
+  }
+  function completeQuickDay(dayIndex){
+    try{
+      const day=getPlanDays()[dayIndex];if(!day)return;
+      let logs=getDailyLogs();
+      for(let i=0;i<day.items.length;i++){
+        const q=planGroupContext(dayIndex,day.items[i],`d${dayIndex}_i${i}`);
+        const log=logs[q.date]||q.log;
+        logs[q.date]=C.recordPlanGroups(log,q.p.itemId,q.specs,{complete:true,source:'plan_check'});
+      }
+      persist(logs);
+    }catch(e){alert('组数未保存：'+e.message);}
+  }
+  function openDetailedPlan(dayIndex,text){
     const segments=String(text).split(/[+＋]|或|\/(?!\d)/).filter(Boolean),actions=[];
     for(const segment of segments){
       const matches=lib().filter(a=>a.exerciseType!=='choice').flatMap(a=>[a.displayName,...C.list(a.aliases)].filter(Boolean).map(name=>({a,name}))).filter(x=>segment.includes(x.name)).sort((a,b)=>b.name.length-a.name.length);
@@ -133,7 +194,7 @@
       backup();
       const session=ensureSession(dayIndex,date),log=ensureDailyLogSnapshot(date),p=C.list(log?.planProgressItems).find(x=>x.snapshotItemText===text);
       let entry=session.setEntries.find(e=>e.planText===text&&e.exerciseKey===action.exerciseKey);
-      if(!entry){entry=makeEntry(action,date);entry.planItemId=/[+＋]/.test(text)?null:p?.itemId||null;entry.planCheckKey=p?.planCheckKey||null;entry.planText=text;entry.planBlockDayIndex=dayIndex;entry.defaultPhase=/热身/.test(text)?'warmup':'work';entry.legacyChoice=(p?.completedAmount>0)?'pending':'additional';session.setEntries.push(entry);}
+      if(!entry){entry=makeEntry(action,date);entry.planItemId=/[+＋]/.test(text)?null:p?.itemId||null;entry.planCheckKey=p?.planCheckKey||null;entry.planText=text;entry.planBlockDayIndex=dayIndex;entry.defaultPhase='work';entry.legacyChoice=(p?.completedAmount>0)?'pending':'additional';session.setEntries.push(entry);}
       setTrainingSession(session);openEditor(entry,date,false);
     }catch(e){alert(e.message);}
   }
@@ -157,7 +218,7 @@
     const input=(field,label,type='number',extra='')=>`<label>${label}<input data-field="${field}" type="${type}" inputmode="decimal" min="0" value="${s[field]??''}" ${extra}></label>`;
     const fields=e.mode==='time'?(e.laterality==='unilateral'?input('leftSeconds','左侧保持（秒）')+input('rightSeconds','右侧保持（秒）'):input('durationSeconds','实际保持（秒）')):(e.laterality==='unilateral'?input('leftReps','左侧次数','number','step="1"')+input('rightReps','右侧次数','number','step="1"'):input('reps','实际次数','number','step="1"'));
     const load=e.showLoad?`${input('loadInputKg',e.laterality==='unilateral'?'单侧使用重量（kg）':'外加重量（kg）','number','step="0.1"')}<label>重量口径<select data-field="loadInputMode"><option value="total" ${s.loadInputMode!=='perDumbbell'?'selected':''}>合计 / 单侧所用器械重量</option>${e.laterality!=='unilateral'?`<option value="perDumbbell" ${s.loadInputMode==='perDumbbell'?'selected':''}>双哑铃，每只重量</option>`:''}</select></label>`:'';
-    return `<div class="te-set" data-set-id="${esc(s.id)}" data-completed="${s.status==='completed'}"><div class="te-set-head"><strong>第 ${i+1} 组 · ${s.status==='completed'?'已完成':'待记录'}</strong><div><button class="te-inline-button" data-te="copy-set" data-id="${s.id}">复制</button> <button class="te-inline-button" data-te="delete-set" data-id="${s.id}">删除</button></div></div><div class="te-set-fields">${fields}${load}<label>组别<select data-field="phase"><option value="work" ${s.phase!=='warmup'?'selected':''}>正式组</option><option value="warmup" ${s.phase==='warmup'?'selected':''}>热身组</option></select></label><label>用力程度（选填）<input data-field="effortValue" type="number" min="0" max="10" step="0.5" placeholder="不填也可保存" value="${s.effort?.value??''}"></label><label>量表<select data-field="effortScale"><option ${s.effort?.scale!=='RPE'?'selected':''}>RIR</option><option ${s.effort?.scale==='RPE'?'selected':''}>RPE</option></select></label></div><button class="btn-outline full" style="margin-top:9px" data-te="complete-set" data-id="${s.id}">${s.status==='completed'?'已完成 · 可修改后重记':'完成该组'}</button></div>`;
+    return `<div class="te-set" data-set-id="${esc(s.id)}" data-completed="${s.status==='completed'}"><div class="te-set-head"><strong>第 ${i+1} 组 · ${s.status==='completed'?'已完成':'待记录'}</strong><div><button class="te-inline-button" data-te="copy-set" data-id="${s.id}">复制</button> <button class="te-inline-button" data-te="delete-set" data-id="${s.id}">删除</button></div></div><div class="te-set-fields">${fields}${load}</div>${s.countOnly?'<p class="te-note">已记录组数，次数和重量可选填。</p>':''}<button class="btn-outline full" style="margin-top:9px" data-te="complete-set" data-id="${s.id}">${s.status==='completed'?'已完成 · 可修改后重记':'完成该组'}</button></div>`;
   }
   function storeEditorDraft(){
     if(!editor||editor.saved)return;
@@ -167,9 +228,9 @@
   }
   function updateRow(el){
     const node=el.closest('[data-set-id]');if(!node||!editor)return;
-    const s=editor.entry.sets.find(x=>x.id===node.dataset.setId),patch={status:'pending'};
+    const s=editor.entry.sets.find(x=>x.id===node.dataset.setId),patch={status:'pending',countOnly:false,phase:'work'};
     node.querySelectorAll('[data-field]').forEach(input=>{patch[input.dataset.field]=input.value;});
-    patch.effort=patch.effortValue===''?null:{scale:patch.effortScale,value:patch.effortValue};delete patch.effortValue;delete patch.effortScale;
+    patch.effort=s.effort||null;
     Object.assign(s,C.editSet(s,patch));
     storeEditorDraft();
     node.dataset.completed='false';node.querySelector('strong').textContent=node.querySelector('strong').textContent.replace('已完成','待记录');
@@ -186,7 +247,7 @@
       let mismatched=plannedSets.some((s,i)=>{
         const reps=e.laterality==='unilateral'?(Number(s.leftReps)+Number(s.rightReps))/2:Number(s.reps);
         const unit=dose.durationUnit==='分钟'?60:1,seconds=e.laterality==='unilateral'?Number(s.durationSeconds)/2:Number(s.durationSeconds);
-        return (dose.repsPerSet&&reps!==dose.repsPerSet)||(repRange&&(reps<Number(repRange[1])||reps>Number(repRange[2])))||(targets&&i<targets.length&&reps!==targets[i])||(dose.duration&&seconds&&(seconds/unit<Number(dose.durationMin||dose.duration)||seconds/unit>Number(dose.durationMax||dose.duration)));
+        return !s.countOnly&&((dose.repsPerSet&&reps!==dose.repsPerSet)||(repRange&&(reps<Number(repRange[1])||reps>Number(repRange[2])))||(targets&&i<targets.length&&reps!==targets[i])||(dose.duration&&seconds&&(seconds/unit<Number(dose.durationMin||dose.duration)||seconds/unit>Number(dose.durationMax||dose.duration))));
       });
       if(p.plannedSetDetails?.length)mismatched=sets.some(s=>{
         const old=e.acceptedSetDoses?.[s.id];
@@ -299,7 +360,7 @@
   const originalSetSession=setTrainingSession;setTrainingSession=function(...args){const result=originalSetSession(...args);appState.load();renderSessionCard();return result;};
   const originalFinish=finishTrainingSession;finishTrainingSession=finishWithSets;
   const originalLibrary=renderExerciseLibrary;renderExerciseLibrary=function(...args){const result=originalLibrary(...args);refresh();return result;};
-  window.TrainingEnhancements={refresh,filterLibrary,showGuide,guardIntent,openEditor,openPlan};
+  window.TrainingEnhancements={refresh,filterLibrary,showGuide,guardIntent,openEditor,openPlan,openDetailedPlan,togglePlanCheck:toggleQuickPlanCheck,completeDay:completeQuickDay};
   document.addEventListener('input',event=>{
     try{if(event.target.matches('#te-overlay [data-field]'))updateRow(event.target);if(event.target.id==='te-picker-search')$('te-picker-action').innerHTML=pickerOptions(event.target.value);}catch(e){notify('草稿保存失败：'+e.message);}
   });
@@ -321,7 +382,8 @@
       const cmd=b.dataset.te;
       if(cmd==='flip'){back=!back;refresh();}if(cmd==='plan-mode'){planActual=b.dataset.value==='actual';renderPlanMap();}
       if(cmd==='history-mode'){const on=b.dataset.value==='stats';$('te-statistics').hidden=!on;const parent=b.closest('.te-segment');parent.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));for(const child of $('history').children)if(child!==parent.closest('.card')&&child.id!=='te-statistics'&&child.id!=='te-saved-entries')child.hidden=on;}
-      if(cmd==='open-plan')openPlan(Number(b.dataset.day),b.dataset.text);
+      if(cmd==='open-plan')openPlan(Number(b.dataset.day),b.dataset.text,b.dataset.item);
+      if(cmd==='save-quick-groups')saveQuickGroups();
       if(cmd==='bound-action'){storeEditorDraft();const action=blockContext?.actions.find(a=>a.exerciseKey===b.dataset.key);if(action)openBoundPlanAction(action);}
       if(cmd==='add-exercise')openPicker(getTrainingSession()?.date||C.dayKey(new Date()));
       if(cmd==='day-add')openPicker(b.dataset.date);
@@ -332,7 +394,7 @@
       }
       if(cmd==='draft-entry'){const s=getTrainingSession(),e=s.setEntries.find(e=>e.id===b.dataset.id);openEditor(e,s.date,false);}
       if(cmd==='edit-entry'){const e=getDailyLogs()[b.dataset.date]?.exerciseEntries.find(e=>e.id===b.dataset.id);if(e)openEditor(e,b.dataset.date,true);}
-      if(cmd==='add-set'){editor.entry.sets.push({id:C.uid('set'),revisionId:C.uid('rev'),revision:1,status:'pending',phase:editor.entry.defaultPhase||'work',updatedAt:new Date().toISOString()});storeEditorDraft();renderEditor();}
+      if(cmd==='add-set'){editor.entry.sets.push({id:C.uid('set'),revisionId:C.uid('rev'),revision:1,status:'pending',phase:'work',updatedAt:new Date().toISOString()});storeEditorDraft();renderEditor();}
       if(cmd==='complete-set'){
         const s=editor.entry.sets.find(s=>s.id===b.dataset.id);if(s.status==='completed')return;
         const result=C.validateSet(s,editor.entry.mode,editor.entry.laterality);if(!result.ok)throw new Error(result.errors.join('；'));

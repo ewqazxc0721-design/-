@@ -18,7 +18,9 @@
     const s=copy(input||{}),errors=[];
     s.phase=s.phase==='warmup'?'warmup':'work';s.status=s.status==='completed'?'completed':'pending';
     for(const k of ['reps','durationSeconds','externalLoadKg','leftReps','rightReps','leftSeconds','rightSeconds'])s[k]=number(s[k]);
-    if(mode==='time'){
+    if(s.countOnly&&['reps','durationSeconds','leftReps','rightReps','leftSeconds','rightSeconds'].every(k=>s[k]===null)){
+      s.reps=null;s.durationSeconds=null;
+    }else if(mode==='time'){
       if(laterality==='unilateral'){
         if(s.leftSeconds===null||s.rightSeconds===null||s.leftSeconds<0||s.rightSeconds<0||s.leftSeconds+s.rightSeconds<=0)errors.push('请填写左右两侧保持秒数（未做的一侧填 0）');
         s.durationSeconds=s.leftSeconds===null||s.rightSeconds===null?null:s.leftSeconds+s.rightSeconds;
@@ -176,12 +178,61 @@
     const work=activeSets(entry).filter(s=>s.phase!=='warmup');
     return {groups:work.length,reps:work.reduce((n,s)=>n+(number(s.reps)||0),0),seconds:work.reduce((n,s)=>n+(number(s.durationSeconds)||0),0)};
   }
+  // A direct plan check confirms group counts only. Never invent reps, time or load.
+  function recordPlanGroups(input,itemId,specs,{complete=false,now=new Date().toISOString(),source='quick_groups'}={}){
+    const log=copy(input),p=list(log.planProgressItems).find(p=>p.itemId===itemId);
+    if(!p)throw new Error('找不到该动作的计划记录，请重新打开计划');
+    if(!list(specs).length)throw new Error('该计划没有可记录的动作');
+    log.exerciseEntries=list(log.exerciseEntries);log.schemaVersion=Math.max(3,Number(log.schemaVersion)||0);
+    p.simpleSetTargets=specs.map(s=>({exerciseKey:s.action.exerciseKey,groups:s.plannedGroups}));
+    p.setRecordManaged=true;p.setRecordBaseAmount=0;p.groupRecordUpdatedAt=now;p.updatedAt=now;
+    for(const spec of specs){
+      const a=spec.action;
+      if(!a?.exerciseKey||!Number.isInteger(spec.plannedGroups)||spec.plannedGroups<1)throw new Error('计划组数无效');
+      let entries=log.exerciseEntries.filter(e=>e.planItemId===itemId&&e.exerciseKey===a.exerciseKey);
+      const existing=entries.flatMap(e=>activeSets(e).filter(s=>s.phase!=='warmup'));
+      const count=complete?Math.max(spec.plannedGroups,existing.length):Number(spec.count);
+      if(!Number.isInteger(count)||count<0||count>200)throw new Error('组数请输入 0–200 的整数');
+      if(entries.some(e=>list(e.sets).some(s=>s.conflictVersions)))throw new Error('该动作存在同步冲突，请先在历史记录中处理');
+      if(!entries.length){
+        const id='plan_groups_'+log.date+'_'+encodeURIComponent(itemId)+'_'+encodeURIComponent(a.exerciseKey);
+        entries=[{id,exerciseKey:a.exerciseKey,displayNameSnapshot:a.displayName,mode:a.recordingMode||'reps',laterality:a.laterality||'bilateral',planItemId:itemId,planCheckKey:p.planCheckKey,planText:p.snapshotItemText,source,sets:[],createdAt:now}];
+        log.exerciseEntries.push(entries[0]);
+      }
+      const rows=entries.flatMap(e=>list(e.sets).filter(s=>s.phase!=='warmup').map(s=>({e,s}))),active=rows.filter(({s})=>s.status==='completed'&&!s.deletedAt);
+      // Reductions retain tombstones. Re-checking reuses these same rows and IDs.
+      for(const {s} of active.slice(count))Object.assign(s,editSet(s,{deletedAt:now},now));
+      let missing=count-Math.min(count,active.length);
+      for(const {s} of rows.filter(({s})=>s.deletedAt||s.status!=='completed')){
+        if(missing<=0)break;
+        Object.assign(s,editSet(s,{status:'completed',phase:'work',deletedAt:null},now));missing--;
+      }
+      const target=entries[0];
+      while(missing>0){
+        let slot=1;while(target.sets.some(s=>s.id===target.id+'_group_'+slot))slot++;
+        const id=target.id+'_group_'+slot;
+        target.sets.push({id,revisionId:id+'_initial',revision:1,status:'completed',phase:'work',countOnly:true,reps:null,durationSeconds:null,externalLoadKg:null,source,updatedAt:now});missing--;
+      }
+      for(const e of entries){
+        e.reconciliationState='accepted';e.replacedLegacyProgress=true;e.updatedAt=now;
+        e.linkedFactIds=[...new Set([...list(e.linkedFactIds),...list(log.aiCaptureRecords).filter(r=>r.structuredWrite?.itemId===itemId).map(r=>r.id),...list(log.records).filter(r=>r.exerciseKey===a.exerciseKey&&r.planItemId===itemId).flatMap(r=>[r.recordId,r.candidateId]).filter(Boolean)])];
+      }
+    }
+    rebuildSetProgress(log);
+    log.completedItems=list(log.allItems).filter((text,i)=>{const item=list(log.planProgressItems).find(x=>x.sourcePlanItemIndex===i);return item?.setRecordManaged?item.status==='completed':list(input.completedItems).includes(text);});
+    log.completedCount=log.completedItems.length;log.updatedAtIso=now;
+    return log;
+  }
   function rebuildSetProgress(log){
     for(const p of list(log.planProgressItems)){
       if(!p.setRecordManaged)continue;
       const entries=list(log.exerciseEntries).filter(e=>e.planItemId===p.itemId&&e.reconciliationState==='accepted');
       let amount=Number(p.setRecordBaseAmount)||0;
       for(const e of entries){const x=projection(e);amount+=p.unit==='组'?x.groups:p.unit==='秒'?x.seconds:p.unit==='分钟'?x.seconds/60:x.reps;}
+      if(list(p.simpleSetTargets).length){
+        const ratios=p.simpleSetTargets.map(target=>entries.filter(e=>e.exerciseKey===target.exerciseKey).reduce((n,e)=>n+projection(e).groups,0)/target.groups);
+        amount=(Number(p.targetAmount)||1)*Math.min(...ratios);
+      }
       p.completedAmount=Math.min(Number(p.targetAmount)||0,amount);
       p.status=p.completedAmount>=Number(p.targetAmount)&&Number(p.targetAmount)>0?'completed':'active';
       p.setRecordExtraAmount=Math.max(0,amount-(Number(p.targetAmount)||0));
@@ -205,5 +256,5 @@
       throw error;
     }
   }
-  return {REGIONS,list,copy,uid,number,dayKey,range,validateSet,editSet,mergeSets,mergeEntries,activeSets,migrateLogs,observations,stats,projection,rebuildSetProgress,persistBackup,persistTransaction};
+  return {REGIONS,list,copy,uid,number,dayKey,range,validateSet,editSet,mergeSets,mergeEntries,activeSets,migrateLogs,observations,stats,projection,recordPlanGroups,rebuildSetProgress,persistBackup,persistTransaction};
 });

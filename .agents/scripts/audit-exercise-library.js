@@ -4,6 +4,10 @@ function audit(){
  const data=JSON.parse(fs.readFileSync(path.join(root,'训练动作库/actions.json'),'utf8'));
  const regions=JSON.parse(fs.readFileSync(path.join(root,'训练动作库/muscle-regions.json'),'utf8')).regions;
  const raw=JSON.parse(fs.readFileSync(path.join(root,'训练动作库/upstream-opengym.json'),'utf8'));
+ const approved=['2026-11-10','2026-11-10-batch-2'].flatMap(batch=>{
+  const receiptPath=`media-review/${batch}/approval-receipt.json`,absolute=path.join(root,receiptPath);
+  return fs.existsSync(absolute)?JSON.parse(fs.readFileSync(absolute,'utf8')).samples.map(s=>({...s,receiptPath})):[];
+ });
  const keys=new Set(),errors=[],aliases=new Map();
  for(const a of data.actions){
   if(keys.has(a.exerciseKey))errors.push('重复键 '+a.exerciseKey);keys.add(a.exerciseKey);
@@ -14,7 +18,11 @@ function audit(){
   if(a.exerciseKey.startsWith('opengym-')){
    const id=a.provenance.upstreamId,source=raw.exercises[id];
    if(!source||source.name!==a.englishName||a.provenance.commit!==raw.commit)errors.push('上游身份不匹配 '+a.exerciseKey);
-   if(a.media)errors.push('不应导入上游媒体 '+a.exerciseKey);
+   if(a.media)for(const media of [a.media,...(a.media.variants||[])]){
+    const approval=approved.find(s=>s.sampleId===media.reviewSampleId&&s.exerciseKey===a.exerciseKey&&s.path===media.path&&s.decision==='approve'&&s.receiptPath===media.approvalReceipt);
+    if(!approval||media.approvalStatus!=='approved'||!fs.existsSync(path.join(root,media.path)))errors.push('新增媒体缺少对应审核 '+a.exerciseKey);
+    else if(require('node:crypto').createHash('sha256').update(fs.readFileSync(path.join(root,media.path))).digest('hex')!==approval.sourceSha256)errors.push('审核后媒体被修改 '+a.exerciseKey);
+   }
   }
   for(const alias of a.aliases||[]){const l=aliases.get(alias)||[];l.push(a.exerciseKey);aliases.set(alias,l);}
   if(JSON.stringify(a).includes('\uFFFD'))errors.push('无效编码 '+a.exerciseKey);

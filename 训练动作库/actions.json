@@ -4553,8 +4553,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_0025_20261110_v1.gif",
+        "label": "杠铃平板卧推 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-0025",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -4613,8 +4621,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/0289.gif",
+        "label": "哑铃平板卧推",
+        "note": "项目已有哑铃平板卧推动作图解，已由用户审核通过。",
+        "sourceLabel": "用户审核通过的项目已有素材",
+        "reviewSampleId": "existing-bench",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -4673,8 +4689,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_0314_20261110_v1.gif",
+        "label": "上斜哑铃卧推 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-0314",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -4734,8 +4758,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_0375_20261110_v1.gif",
+        "label": "哑铃仰卧上拉 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-0375",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -4793,8 +4825,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_0493_20261110_v1.gif",
+        "label": "手抬高俯卧撑 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-0493",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -4852,8 +4892,29 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_kneeling_pushup_20261110_v2.gif",
+        "label": "跪姿俯卧撑 · AI 肌群高亮",
+        "note": "AI 生成动作示意。深红突出胸肌，浅红标示肱三头肌与肩前束；颜色仅表示肌群，不表示发力强度。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 样片",
+        "reviewSampleId": "ai-knee-v2",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10/approval-receipt.json",
+        "variantLabel": "AI 肌群高亮",
+        "variants": [
+          {
+            "path": "gifs/3211.gif",
+            "label": "跪姿俯卧撑 · 原素材",
+            "note": "项目已有跪姿俯卧撑动作图解，已由用户审核通过。",
+            "sourceLabel": "用户审核通过的项目已有素材",
+            "reviewSampleId": "existing-knee",
+            "approvalStatus": "approved",
+            "approvalReceipt": "media-review/2026-11-10/approval-receipt.json",
+            "variantLabel": "原素材"
+          }
+        ]
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -4911,8 +4972,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_3294_20261110_v2.gif",
+        "label": "弓箭手俯卧撑 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-3294",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -4969,8 +5038,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_4075_20261110_v1.gif",
+        "label": "弹力带夹胸 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-4075",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -5029,8 +5106,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_1430_20261110_v1.gif",
+        "label": "双杠臂屈伸 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-1430",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -5087,8 +5172,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_1162_20261110_v1.gif",
+        "label": "站姿杠铃肩上推举 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-1162",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -5145,8 +5238,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_0426_20261110_v1.gif",
+        "label": "站姿哑铃肩推 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-0426",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -5204,8 +5305,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_0404_20261110_v2.gif",
+        "label": "坐姿对握哑铃肩推 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-0404",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -5263,8 +5372,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_0396_20261110_v1.gif",
+        "label": "坐姿哑铃侧平举 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-0396",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -5321,8 +5438,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_0921_20261110_v2.gif",
+        "label": "站姿弹力带肩外旋 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-0921",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -5379,8 +5504,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_0924_20261110_v2.gif",
+        "label": "站姿弹力带肩内旋 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-0924",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -5438,8 +5571,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_1017_20261110_v1.gif",
+        "label": "弹力带Y字上举 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-1017",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -5500,8 +5641,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_0032_20261110_v1.gif",
+        "label": "杠铃硬拉 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-0032",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -5561,8 +5710,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_3593_20261110_v1.gif",
+        "label": "杠铃深蹲 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-3593",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -5620,8 +5777,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_1060_20261110_v1.gif",
+        "label": "杠铃臀推 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-1060",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -5680,8 +5845,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_1581_20261110_v1.gif",
+        "label": "徒手后撤弓步蹲 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-1581",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -5740,8 +5913,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_3928_20261110_v1.gif",
+        "label": "徒手单腿硬拉 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-3928",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -5798,8 +5979,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_4031_20261110_v1.gif",
+        "label": "弹力带髋外展 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-4031",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -5856,8 +6045,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_4029_20261110_v2.gif",
+        "label": "弹力带髋内收 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-4029",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -5914,8 +6111,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_0911_20261110_v1.gif",
+        "label": "俯卧弹力带腿弯举 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-0911",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -5974,8 +6179,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_1004_20261110_v1.gif",
+        "label": "弹力带深蹲 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-1004",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -6032,8 +6245,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_6607_20261110_v1.gif",
+        "label": "弹力带侧向行走 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-6607",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -6092,8 +6313,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_1513_20261110_v1.gif",
+        "label": "弹力带早安式 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-1513",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -6152,8 +6381,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_0909_20261110_v1.gif",
+        "label": "弹力带弓步蹲 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-0909",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -6213,8 +6450,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_4442_20261110_v1.gif",
+        "label": "扶持保加利亚分腿蹲 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-4442",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -6271,8 +6516,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_6560_20261110_v2.gif",
+        "label": "90/90坐姿髋部拉伸 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-6560",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -6328,8 +6581,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_1379_20261110_v2.gif",
+        "label": "坐姿哑铃提踵 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-1379",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -6386,8 +6647,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_1178_20261110_v1.gif",
+        "label": "站姿单腿哑铃提踵 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-1178",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -6444,8 +6713,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_1246_20261110_v1.gif",
+        "label": "中空保持 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-1246",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -6502,8 +6779,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_5649_20261110_v1.gif",
+        "label": "中空摇摆 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-5649",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -6560,8 +6845,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_0979_20261110_v1.gif",
+        "label": "弹力带帕洛夫推举 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-0979",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -6620,8 +6913,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_6211_20261110_v3.gif",
+        "label": "自行车卷腹 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-6211",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -6679,8 +6980,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_4170_20261110_v2.gif",
+        "label": "熊式平板支撑 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-4170",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -6738,8 +7047,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_0133_20261110_v1.gif",
+        "label": "屈膝侧平板支撑 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-0133",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -6798,8 +7115,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_0867_20261110_v1.gif",
+        "label": "反向平板支撑 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-0867",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -6858,8 +7183,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_1326_20261110_v2.gif",
+        "label": "反握引体向上 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-1326",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -6917,8 +7250,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_0253_20261110_v1.gif",
+        "label": "窄距对握引体向上 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-0253",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -6978,8 +7319,16 @@
           "出现疼痛或姿势失控时停止，不依赖反弹或身体甩动完成。"
         ]
       },
-      "media": null,
-      "mediaMatch": "none",
+      "media": {
+        "path": "gifs/ai_4718_20261110_v2.gif",
+        "label": "弹力带辅助反握引体向上 · 肌群高亮",
+        "note": "AI 生成动作示意。深红为主要肌群，浅红为辅助肌群；颜色不表示发力强度，播放速度不代表训练节奏。动作要点以文字说明为准。",
+        "sourceLabel": "用户审核通过的 AI 动图",
+        "reviewSampleId": "remaining-4718",
+        "approvalStatus": "approved",
+        "approvalReceipt": "media-review/2026-11-10-batch-2/approval-receipt.json"
+      },
+      "mediaMatch": "exact",
       "status": "confirmed",
       "provenance": {
         "project": "openGym",
@@ -6993,5 +7342,6 @@
     }
   ],
   "revision": "2026-11-07",
-  "upstreamCommit": "8fb98b16861a2728652302a7e6e30c50548493a0"
+  "upstreamCommit": "8fb98b16861a2728652302a7e6e30c50548493a0",
+  "mediaRevision": "2026-11-10-approved-batch-2"
 }

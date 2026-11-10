@@ -1,0 +1,211 @@
+{
+  "base": "http://127.0.0.1:8765/",
+  "actions": 110,
+  "missing": 0,
+  "newApprovedAnimations": 40,
+  "checks": [
+    {
+      "exerciseKey": "opengym-0025",
+      "media": "gifs/ai_0025_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-0314",
+      "media": "gifs/ai_0314_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-0375",
+      "media": "gifs/ai_0375_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-0493",
+      "media": "gifs/ai_0493_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-3294",
+      "media": "gifs/ai_3294_20261110_v2.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-4075",
+      "media": "gifs/ai_4075_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-1430",
+      "media": "gifs/ai_1430_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-1162",
+      "media": "gifs/ai_1162_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-0426",
+      "media": "gifs/ai_0426_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-0404",
+      "media": "gifs/ai_0404_20261110_v2.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-0396",
+      "media": "gifs/ai_0396_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-0921",
+      "media": "gifs/ai_0921_20261110_v2.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-0924",
+      "media": "gifs/ai_0924_20261110_v2.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-1017",
+      "media": "gifs/ai_1017_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-0032",
+      "media": "gifs/ai_0032_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-3593",
+      "media": "gifs/ai_3593_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-1060",
+      "media": "gifs/ai_1060_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-1581",
+      "media": "gifs/ai_1581_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-3928",
+      "media": "gifs/ai_3928_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-4031",
+      "media": "gifs/ai_4031_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-4029",
+      "media": "gifs/ai_4029_20261110_v2.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-0911",
+      "media": "gifs/ai_0911_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-1004",
+      "media": "gifs/ai_1004_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-6607",
+      "media": "gifs/ai_6607_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-1513",
+      "media": "gifs/ai_1513_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-0909",
+      "media": "gifs/ai_0909_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-4442",
+      "media": "gifs/ai_4442_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-6560",
+      "media": "gifs/ai_6560_20261110_v2.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-1379",
+      "media": "gifs/ai_1379_20261110_v2.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-1178",
+      "media": "gifs/ai_1178_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-1246",
+      "media": "gifs/ai_1246_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-5649",
+      "media": "gifs/ai_5649_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-0979",
+      "media": "gifs/ai_0979_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-6211",
+      "media": "gifs/ai_6211_20261110_v3.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-4170",
+      "media": "gifs/ai_4170_20261110_v2.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-0133",
+      "media": "gifs/ai_0133_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-0867",
+      "media": "gifs/ai_0867_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-1326",
+      "media": "gifs/ai_1326_20261110_v2.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-0253",
+      "media": "gifs/ai_0253_20261110_v1.gif",
+      "decoded": true
+    },
+    {
+      "exerciseKey": "opengym-4718",
+      "media": "gifs/ai_4718_20261110_v2.gif",
+      "decoded": true
+    }
+  ],
+  "initialAnimationRequests": 0,
+  "requests": 80,
+  "mutatedUserData": false
+}

@@ -1,0 +1,61 @@
+{
+  "checks": [
+    {
+      "name": "check records the planned three groups immediately",
+      "passed": true
+    },
+    {
+      "name": "check saves directly without a draft or dialog",
+      "passed": true
+    },
+    {
+      "name": "check records work sets without invented reps or duration",
+      "passed": true
+    },
+    {
+      "name": "unchecking removes the same groups from statistics",
+      "passed": true
+    },
+    {
+      "name": "checking again restores three groups without duplicates",
+      "passed": true
+    },
+    {
+      "name": "record opens only the bound exercise group count",
+      "passed": true
+    },
+    {
+      "name": "saving two groups updates facts and unchecks an incomplete plan",
+      "passed": true
+    },
+    {
+      "name": "checking after a partial record tops up only the missing group",
+      "passed": true
+    },
+    {
+      "name": "timed exercise records groups without inventing seconds",
+      "passed": true
+    },
+    {
+      "name": "compound plan records each action and its own planned groups",
+      "passed": true
+    },
+    {
+      "name": "compound group editor stays within the selected block",
+      "passed": true
+    },
+    {
+      "name": "saving unchanged counts is idempotent",
+      "passed": true
+    },
+    {
+      "name": "all quick records use the selected plan calendar date",
+      "passed": true
+    },
+    {
+      "name": "statistics card reads the same checked groups",
+      "passed": true
+    }
+  ],
+  "isolated": true
+}

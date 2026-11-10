@@ -463,6 +463,58 @@
       "manualChecks": [
         "组合训练框仅记录本框动作；肌肉选择文字可见；星期下拉切换；本周模块触摸拖动并刷新；320至430px布局。"
       ]
+    },
+    {
+      "id": "exercise-media-performance-review",
+      "name": "动作动图加载优化及独立素材审核",
+      "status": "covered",
+      "changeRisk": "压缩不能改动画时长或丢失动作帧，缓存升级不能删除已下载动图，未审核图片不能自动接入。",
+      "coverage": [
+        {
+          "testFile": ".agents/tests/exercise-media.test.js",
+          "tests": [
+            "media rendering stages the poster without eagerly fetching animations",
+            "reduced motion and data saving require deliberate animation playback",
+            "optimized manifest preserves originals and only selects smaller animated files",
+            "unapproved candidates remain separate from production exercise associations",
+            "approved alternative images are selected without eagerly loading both animations",
+            "cached animations are reused without a background network request",
+            "core cache upgrades migrate and retain previously downloaded exercise media",
+            "cache quota failure still displays the successfully downloaded animation"
+          ]
+        }
+      ],
+      "manualChecks": [
+        "核对新样片姿势与循环，确认前不建立关联；首帧、暂停、减少动态效果、原图回退和缓存升级。"
+      ]
+    },
+    {
+      "id": "simple-plan-set-records",
+      "name": "计划组数直接记录与勾选同步统计",
+      "status": "covered",
+      "changeRisk": "勾选与组数必须一次保存，撤回及刷新不能重复累计，组合动作需按各自计划计数。",
+      "coverage": [
+        {
+          "testFile": ".agents/tests/simple-set-records.test.js",
+          "tests": [
+            "checking a plan immediately records its prescribed work groups in statistics",
+            "repeated completion and saving unchanged counts never duplicate groups",
+            "unchecking retracts groups and rechecking restores the same identities",
+            "editing count updates plan progress and completion tops up only missing groups",
+            "compound completion uses each action target instead of summing toward the first action",
+            "completion reuses existing detailed sets without changing their recorded quantities",
+            "timed unilateral group checks do not fabricate duration or side quantities",
+            "legacy projections are replaced when the user records the same planned groups",
+            "invalid group counts leave all original facts untouched",
+            "stale cloud copies cannot resurrect cancelled automatic groups",
+            "two separate plan rows for the same action retain independent group counts",
+            "cloud reconciliation keeps explicit cancelled groups over an older legacy checkbox"
+          ]
+        }
+      ],
+      "manualChecks": [
+        "点击组数仅修改该动作；勾选、取消、再次勾选、整日完成、刷新及手机端统计一致。"
+      ]
     }
   ]
 }

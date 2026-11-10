@@ -1,0 +1,38 @@
+{
+  "date": "2026-11-10",
+  "source": "local_review_page",
+  "receivedAt": "2026-11-10T02:18:28.722604+00:00",
+  "decisions": {
+    "ai-knee-v2": "approve",
+    "ai-knee": "reject",
+    "existing-knee": "approve",
+    "existing-bench": "approve"
+  },
+  "samples": [
+    {
+      "sampleId": "ai-knee-v2",
+      "exerciseKey": "opengym-3211",
+      "path": "gifs/ai_kneeling_pushup_20261110_v2.gif",
+      "sourceSha256": "ca110ffa8b72c8fbbcf12f93cc3dd3b9f022f1567183813cd34402c5fb0bc6cd",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "existing-knee",
+      "exerciseKey": "opengym-3211",
+      "path": "gifs/3211.gif",
+      "sourceSha256": "176b782802a14b66410b43a36b7e60d474666586aa8b736c65950b13956f779b",
+      "decision": "approve",
+      "kind": "existing-local"
+    },
+    {
+      "sampleId": "existing-bench",
+      "exerciseKey": "opengym-0289",
+      "path": "gifs/0289.gif",
+      "sourceSha256": "942c32030a628a4d8ca364f634f9f32970ff05a72d9ddc3ec99e273a6e265288",
+      "decision": "approve",
+      "kind": "existing-local"
+    }
+  ],
+  "published": false
+}

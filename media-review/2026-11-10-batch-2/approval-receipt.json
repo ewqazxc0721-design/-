@@ -1,0 +1,411 @@
+{
+  "date": "2026-11-10",
+  "source": "user_chat",
+  "reviewId": "2026-11-10-batch-2",
+  "receivedAt": "2026-11-10T09:33:12.938Z",
+  "decisions": {
+    "remaining-0025": "approve",
+    "remaining-0314": "approve",
+    "remaining-0375": "approve",
+    "remaining-0493": "approve",
+    "remaining-3294": "approve",
+    "remaining-4075": "approve",
+    "remaining-1430": "approve",
+    "remaining-1162": "approve",
+    "remaining-0426": "approve",
+    "remaining-0404": "approve",
+    "remaining-0396": "approve",
+    "remaining-0921": "approve",
+    "remaining-0924": "approve",
+    "remaining-1017": "approve",
+    "remaining-0032": "approve",
+    "remaining-3593": "approve",
+    "remaining-1060": "approve",
+    "remaining-1581": "approve",
+    "remaining-3928": "approve",
+    "remaining-4031": "approve",
+    "remaining-4029": "approve",
+    "remaining-0911": "approve",
+    "remaining-1004": "approve",
+    "remaining-6607": "approve",
+    "remaining-1513": "approve",
+    "remaining-0909": "approve",
+    "remaining-4442": "approve",
+    "remaining-6560": "approve",
+    "remaining-1379": "approve",
+    "remaining-1178": "approve",
+    "remaining-1246": "approve",
+    "remaining-5649": "approve",
+    "remaining-0979": "approve",
+    "remaining-6211": "approve",
+    "remaining-4170": "approve",
+    "remaining-0133": "approve",
+    "remaining-0867": "approve",
+    "remaining-1326": "approve",
+    "remaining-0253": "approve",
+    "remaining-4718": "approve"
+  },
+  "samples": [
+    {
+      "sampleId": "remaining-0025",
+      "exerciseKey": "opengym-0025",
+      "path": "gifs/ai_0025_20261110_v1.gif",
+      "sourceSha256": "b9719f64b9ed81523174417eabb416c7be00d763204339f31f0b7bbfcdbdf931",
+      "reviewSha256": "d71bfbf08de3c6f861e895b92305e72df4e3c3ec50fdb3f2ec1134d0474d7a60",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-0314",
+      "exerciseKey": "opengym-0314",
+      "path": "gifs/ai_0314_20261110_v1.gif",
+      "sourceSha256": "477eabdbf67554e44245a3b87f3134a4587f5a82a5c2706065e8e06b63aaa2a9",
+      "reviewSha256": "9e41f0ca9a178c0a1996d0bda3feed48d209b324bf8b2e0e77950e47a120d959",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-0375",
+      "exerciseKey": "opengym-0375",
+      "path": "gifs/ai_0375_20261110_v1.gif",
+      "sourceSha256": "a76dac30cba2943e5ba687222cbe9ea403946b4ee1cb37f2506f59048bff53e6",
+      "reviewSha256": "674b713825bb11af197f8ee8b889fa73bbd2be3706f5441895a24e1593f781c4",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-0493",
+      "exerciseKey": "opengym-0493",
+      "path": "gifs/ai_0493_20261110_v1.gif",
+      "sourceSha256": "73e1c86f36b50112f4c0528bd3069dccf5ec420d8425b052c4da8fe0ea85884e",
+      "reviewSha256": "95e3deb16c1efdf8645b929bb70d76458070b527e5db0a2147809d9a1f2c90eb",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-3294",
+      "exerciseKey": "opengym-3294",
+      "path": "gifs/ai_3294_20261110_v2.gif",
+      "sourceSha256": "a8f3e17c94ae4f3a9d242d7fff108e92c5e80c471972d579bd113eb0c7012f19",
+      "reviewSha256": "93b05f907aed1b59c6f4d23336fbcaf254d0dc0f3133184fd787318750c4de0d",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-4075",
+      "exerciseKey": "opengym-4075",
+      "path": "gifs/ai_4075_20261110_v1.gif",
+      "sourceSha256": "dc0e48064b112c1517593150beefd35d348d2ab6593c082b9ab2e114e3709880",
+      "reviewSha256": "11ea8d31400db958e8ebc31ada92f77b3a1dea1f312288bab54178e2959e4889",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-1430",
+      "exerciseKey": "opengym-1430",
+      "path": "gifs/ai_1430_20261110_v1.gif",
+      "sourceSha256": "99b264d22b85be41cc0c28cbad42faadd875ba3da7d27a03ee0eed4a7ec434b3",
+      "reviewSha256": "6a1a981530a08ad5a7e09d3a6980f07ab708eea8b4789b0554c18d4608221e6f",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-1162",
+      "exerciseKey": "opengym-1162",
+      "path": "gifs/ai_1162_20261110_v1.gif",
+      "sourceSha256": "d7d1a5bb34880178442f71718c56c79336d338f15a70a72cb8247c7b1695f174",
+      "reviewSha256": "ab03d092d4345a729a030575448989b39ab52048374c7e25b9bcf8558e3b666a",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-0426",
+      "exerciseKey": "opengym-0426",
+      "path": "gifs/ai_0426_20261110_v1.gif",
+      "sourceSha256": "3f4f958a590ad25775dbe150d8aa3818a3b40b93523d80874e71ad28d1e97a94",
+      "reviewSha256": "3c672d19e6b6b233aaa140f0c2d68a8b8a94d24b6a190f94abdf1ca06253b861",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-0404",
+      "exerciseKey": "opengym-0404",
+      "path": "gifs/ai_0404_20261110_v2.gif",
+      "sourceSha256": "2b7ab0272805ac41fe612e628bf24f6af4fa2cea5565cf7b2015c653183b1bab",
+      "reviewSha256": "2828b2c1c44064db161c99a71a281f500f4f1d34dfded6396668001416e81af4",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-0396",
+      "exerciseKey": "opengym-0396",
+      "path": "gifs/ai_0396_20261110_v1.gif",
+      "sourceSha256": "9d11ce651b2e9ab6eecdd8d36aa80bfd360030b94d573c260c8fef25179c5372",
+      "reviewSha256": "dd828f97f060eb48cf52086dc91ec9864c2b223f458e2f8d2731ceebf8b65024",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-0921",
+      "exerciseKey": "opengym-0921",
+      "path": "gifs/ai_0921_20261110_v2.gif",
+      "sourceSha256": "a3c5bd1b8bea8e158370c2939878c7a525927c614df6b0d40a1aed77a072cb34",
+      "reviewSha256": "56869f6f551184280a6fdecd5022ccfd7f40145770f630af282a7d3e8a4af7e3",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-0924",
+      "exerciseKey": "opengym-0924",
+      "path": "gifs/ai_0924_20261110_v2.gif",
+      "sourceSha256": "bd26974559ed44ddcd90f0cf6bec11123c9afb3636c298ea29c558bb84323019",
+      "reviewSha256": "2c9fcfcfcfc66064de67a6a5b0cd307d2fc507ff05fb7f1169285d25f9511357",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-1017",
+      "exerciseKey": "opengym-1017",
+      "path": "gifs/ai_1017_20261110_v1.gif",
+      "sourceSha256": "e42bccbdf672c721ddf51a8297203b438552fd174d6a348341fecc0bc6db51e6",
+      "reviewSha256": "cc6f17da2c95a864554e84def17ec4ba922fdb2430aee6fff593a187e5512e6c",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-0032",
+      "exerciseKey": "opengym-0032",
+      "path": "gifs/ai_0032_20261110_v1.gif",
+      "sourceSha256": "7e2fb2785da2a159b2c3d68baa0f04fb62a3445c63a3e4f79c683957c558ee04",
+      "reviewSha256": "c2b474a6bd1a33c2f9dba4af24420dc4121c176ffbd6fdc65b2a76b7e61c27d2",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-3593",
+      "exerciseKey": "opengym-3593",
+      "path": "gifs/ai_3593_20261110_v1.gif",
+      "sourceSha256": "a71ea72ebd94f2971377e01d8d71f98fa9ee86a33396c000af2de751351c97bd",
+      "reviewSha256": "b6cc3023e444191e03ae79e71240cc1e486957b9258b253b258774db9cceee92",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-1060",
+      "exerciseKey": "opengym-1060",
+      "path": "gifs/ai_1060_20261110_v1.gif",
+      "sourceSha256": "1e2e65523f22c60f7ba20e629905876a0c74c09e9236f5ce8d62314008439f4c",
+      "reviewSha256": "23052cabc246cd90e8647a048c2a64549df8cdf5aa063a8861e27823d3c59804",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-1581",
+      "exerciseKey": "opengym-1581",
+      "path": "gifs/ai_1581_20261110_v1.gif",
+      "sourceSha256": "4456c712a99a3c1cc5f40316608511e54388b236ae63d7ef9d8bcbb8f98e5172",
+      "reviewSha256": "399160862dd8510e4bec7d40c19ee855a2a63a77fb161dfd17fc29736e3ce976",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-3928",
+      "exerciseKey": "opengym-3928",
+      "path": "gifs/ai_3928_20261110_v1.gif",
+      "sourceSha256": "0988d02e64940f3080f4ec5212da378999aface724b26f03516a10a91271a714",
+      "reviewSha256": "c60e6b150acd246c721886fabb005e2a1c46950133ab2c4bc5f0ac9976b4a9be",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-4031",
+      "exerciseKey": "opengym-4031",
+      "path": "gifs/ai_4031_20261110_v1.gif",
+      "sourceSha256": "448f5ff3b7e270c0953210befe38fb135366778a90bc57f06abad06ace8cdc8a",
+      "reviewSha256": "06af6e51bfef3fbbf8fd57153cbdff63ee3330aa248515e224ee659350f097e0",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-4029",
+      "exerciseKey": "opengym-4029",
+      "path": "gifs/ai_4029_20261110_v2.gif",
+      "sourceSha256": "ab7ef003a54adaf943bb421e603a47133fea23e6dfa9303b38d22631850c789d",
+      "reviewSha256": "fe6b2ba554c02edbfb85a31fe77f57fb5e582c3bf6d39dddab3422613d934997",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-0911",
+      "exerciseKey": "opengym-0911",
+      "path": "gifs/ai_0911_20261110_v1.gif",
+      "sourceSha256": "696236aa052b4ff1491249ffa147827bc868c5a89405c253fab969bcb91a6b8f",
+      "reviewSha256": "049d8423b482b6c948b7efc56489220a5c8b1dd0e2a2d52e453b93300cc4f6d5",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-1004",
+      "exerciseKey": "opengym-1004",
+      "path": "gifs/ai_1004_20261110_v1.gif",
+      "sourceSha256": "7378fe1833fdc20cbf389f7083bed36608be6a22ed5410a2b4913464965e62eb",
+      "reviewSha256": "e31e291964bce684225656457ae774abd30e41637aabccc24503d323cec85869",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-6607",
+      "exerciseKey": "opengym-6607",
+      "path": "gifs/ai_6607_20261110_v1.gif",
+      "sourceSha256": "36e032baf9c7f041b2abc41dd20237762ba3254316e8d7c5bea548559fc4518c",
+      "reviewSha256": "f0c2762af212e89bbc2ecf3874e6a983e091d2a46c80a753d3c419a3055ef73c",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-1513",
+      "exerciseKey": "opengym-1513",
+      "path": "gifs/ai_1513_20261110_v1.gif",
+      "sourceSha256": "3e28a0b2a796bd50b119d6458277bc94713454d19bb2a25758d97cfb8f378191",
+      "reviewSha256": "a4c8998804d89e0d16ee15b678776119ea5ca87b7129a49ced7f6675e52d6ae2",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-0909",
+      "exerciseKey": "opengym-0909",
+      "path": "gifs/ai_0909_20261110_v1.gif",
+      "sourceSha256": "5a2c8efb8c9eb25644bff837dae78216df087708b1412b4e771145e08097b481",
+      "reviewSha256": "ad73613eda0caec4c4948a51af159b4f7d2679ac7d87301931be34847e3da74e",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-4442",
+      "exerciseKey": "opengym-4442",
+      "path": "gifs/ai_4442_20261110_v1.gif",
+      "sourceSha256": "03a99034fa5f0ceae3d9675d4be0e645b863c84f180d19adaae59958ba825649",
+      "reviewSha256": "a70d0d3585d419d898bb083232ed9bf64e744230247800cc6f7922390633b212",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-6560",
+      "exerciseKey": "opengym-6560",
+      "path": "gifs/ai_6560_20261110_v2.gif",
+      "sourceSha256": "865cbcf1ac809013e88e1cfaf6444b59ed1a276e3b3b1af8ca9d0b096fc249aa",
+      "reviewSha256": "6e827d5e0980da3c9bf5d345ccdee67639f924cdcbfa9df1b1367e5fb884087a",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-1379",
+      "exerciseKey": "opengym-1379",
+      "path": "gifs/ai_1379_20261110_v2.gif",
+      "sourceSha256": "557ff586995d82e3000117705477b15915880e0e4850898e930dddcee75a62ee",
+      "reviewSha256": "fece77fbcf7ec7da226853d8a84529923fa4b61231b9edfd89d60dc2cbad5a2c",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-1178",
+      "exerciseKey": "opengym-1178",
+      "path": "gifs/ai_1178_20261110_v1.gif",
+      "sourceSha256": "9fb9d7c8ae1de15c4f3951fac8b2d6c4969811f982259fc876d806ca60a5e455",
+      "reviewSha256": "ac03b04e9c1ae140714d8d4911a16c714160e293829a3e5736edf2000a951fac",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-1246",
+      "exerciseKey": "opengym-1246",
+      "path": "gifs/ai_1246_20261110_v1.gif",
+      "sourceSha256": "7ecbbc0297db7f2576d19257cf188b87556dad4c6c708d99f494721784407b71",
+      "reviewSha256": "f4a0f26a4baa9523c02e1c29da8d2a083e99639ac6e2cea74363c6ecc98d3228",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-5649",
+      "exerciseKey": "opengym-5649",
+      "path": "gifs/ai_5649_20261110_v1.gif",
+      "sourceSha256": "2e4dbe653579e5d4e590594767a592cc38dfbcb1d57eac496a1ddf516ce6850d",
+      "reviewSha256": "76b4806aab3e60967bc7c6317463afda29be22367460b117fd601e8ca34dcdf4",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-0979",
+      "exerciseKey": "opengym-0979",
+      "path": "gifs/ai_0979_20261110_v1.gif",
+      "sourceSha256": "429b192a810c860be65895e201e39c9552bd0694582ca239322fdf671fe922b1",
+      "reviewSha256": "be033f44f01586cad639d0c22e3e42767e57b9bbd486def393b155c1088c9b94",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-6211",
+      "exerciseKey": "opengym-6211",
+      "path": "gifs/ai_6211_20261110_v3.gif",
+      "sourceSha256": "2f9e65738146cf8fb255123b72ad45dbbb41a571ed0ffbe9a537240dfff059b3",
+      "reviewSha256": "23bb5d0d1cfe1d1143f4afc7e96acbdffb15973313fe60adf5deeaa573148889",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-4170",
+      "exerciseKey": "opengym-4170",
+      "path": "gifs/ai_4170_20261110_v2.gif",
+      "sourceSha256": "ab552207659599f660cac5c38af501799352857724ec9d4136ae35610dae6c14",
+      "reviewSha256": "0eec06a43afcef3074afd85909bf066780d3e0c4b01e37dbe53a02eadb0e928e",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-0133",
+      "exerciseKey": "opengym-0133",
+      "path": "gifs/ai_0133_20261110_v1.gif",
+      "sourceSha256": "0bcc0be8c495b337b7aadb9604a1dc82b5120415cbcf7d9545854175b18ecc76",
+      "reviewSha256": "dd1f41ed8a30674ab41da6abf5347bdb3756a2b4d3f7fb1cdfa8bd96ccc73549",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-0867",
+      "exerciseKey": "opengym-0867",
+      "path": "gifs/ai_0867_20261110_v1.gif",
+      "sourceSha256": "31433ffc0751ead744f3190a61f4bf1a89cfedf458fe4f3ea28271931181efe7",
+      "reviewSha256": "84fe58fb788dbc33ee1926a615b947be6e7918509f0d11c00f4bd0b8c581975d",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-1326",
+      "exerciseKey": "opengym-1326",
+      "path": "gifs/ai_1326_20261110_v2.gif",
+      "sourceSha256": "2acb9e902a584f7981651408aa2d01bbef7e25c4f8c3f1d158a9970cd3aec266",
+      "reviewSha256": "c1817ce5fa775266bee2da1ce3183f948557cbddc7ef5f4a357715f046f9bd2b",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-0253",
+      "exerciseKey": "opengym-0253",
+      "path": "gifs/ai_0253_20261110_v1.gif",
+      "sourceSha256": "18806c53b7fe132ebbe2468d001c4b9ff94fd511354beb2f81de60c07106b0d4",
+      "reviewSha256": "8956967932678aee494e8edd290db5b57ebe910f1b187ca08b5369a3f133067c",
+      "decision": "approve",
+      "kind": "ai-generated"
+    },
+    {
+      "sampleId": "remaining-4718",
+      "exerciseKey": "opengym-4718",
+      "path": "gifs/ai_4718_20261110_v2.gif",
+      "sourceSha256": "b61100b766dc15c0792a377bda3916e95060e131ae36dadc8f9e6692783778fc",
+      "reviewSha256": "8bda10ae89b2d2fdb30d33ad1122b1536d5d2fe49de8be554208c1d3bf4eb24c",
+      "decision": "approve",
+      "kind": "ai-generated"
+    }
+  ],
+  "published": false
+}

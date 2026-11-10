@@ -12,9 +12,11 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="format-detection" content="telephone=no" />
 
-  <link rel="stylesheet" href="./training-enhancements.css" />
-  <script src="./training-core.js"></script>
-  <script src="./training-ui.js" defer></script>
+  <link rel="stylesheet" href="./training-enhancements.css?v=20261110-sets1" />
+  <script src="./training-core.js?v=20261110-sets1"></script>
+  <script src="./training-ui.js?v=20261110-sets1" defer></script>
+  <script src="./exercise-media.js?v=20261110-media2" defer></script>
+  <link rel="stylesheet" href="./exercise-media.css?v=20261110-media2" />
   <script src="./plan-editor-ui.js" defer></script>
   <link rel="stylesheet" href="./plan-editor.css" />
   <link rel="manifest" href="./manifest.webmanifest" />
@@ -5291,7 +5293,7 @@
   </div>
 
   <script>
-    const APP_VERSION = "v2026.11.08-weekly-modules-fix";
+    const APP_VERSION = "v2026.11.10-exercise-media-library";
     const PLAN_TEMPLATE_KEY = "gain-plan-template";
     const TEMP_DAILY_PLAN_OVERRIDES_KEY = "gain-temp-daily-plan-overrides";
     const DAILY_LOGS_KEY = "gain-daily-logs";
@@ -6366,7 +6368,12 @@
           label: action?.media?.label || action?.label || fallback.media?.label || sourceName,
           note: action?.media?.note || action?.note || fallback.media?.note || "",
           sourceUrl,
-          sourceLabel
+          sourceLabel,
+          variantLabel:action?.media?.variantLabel || fallback.media?.variantLabel || "",
+          reviewSampleId:action?.media?.reviewSampleId || fallback.media?.reviewSampleId || "",
+          approvalStatus:action?.media?.approvalStatus || fallback.media?.approvalStatus || "",
+          approvalReceipt:action?.media?.approvalReceipt || fallback.media?.approvalReceipt || "",
+          variants:(Array.isArray(action?.media?.variants)?action.media.variants:(fallback.media?.variants||[])).filter(v=>v?.path&&v.approvalStatus==="approved").map(v=>({...v}))
         } : null
       };
       if(sourceUrl || sourceLabel){
@@ -8433,6 +8440,10 @@
         asArray(list, []).forEach((item, index) => {
           const key = getCloudPlanProgressIdentity(item, index);
           const existing = map.get(key);
+          if(item?.groupRecordUpdatedAt || existing?.groupRecordUpdatedAt){
+            if(String(item?.groupRecordUpdatedAt||"") >= String(existing?.groupRecordUpdatedAt||""))map.set(key,cloneAppStateValue(item));
+            return;
+          }
           if(!existing || getCloudPlanProgressScore(item) >= getCloudPlanProgressScore(existing)){
             map.set(key, cloneAppStateValue(item));
           }
@@ -18811,6 +18822,7 @@
       if(!path){
         return `<div class="softbox" style="margin-top:14px;">${escapeHtml(options.emptyText || "当前这个动作没有匹配到本地 GIF，先显示文字图解和注意事项。")}</div>`;
       }
+      if(window.ExerciseMedia) return window.ExerciseMedia.render(media,options);
       const label = media?.label || options.fallbackLabel || "动作图解";
       const note = media?.note || options.defaultNote || "本地 GIF 动作轨迹演示。";
       const sourceLink = media?.sourceUrl
@@ -20471,6 +20483,7 @@
     }
 
     function togglePlanCheck(key){
+      if(window.TrainingEnhancements?.togglePlanCheck)return window.TrainingEnhancements.togglePlanCheck(key);
       const beforeDone = !!getPlanChecks()[key];
       const applied = trainingPlan.applyAction(getTrainingPlanStateFromStorage(), {
         type:"togglePlanCheck",
@@ -20490,6 +20503,7 @@
     }
 
     function completeDay(dayIndex){
+      if(window.TrainingEnhancements?.completeDay)return window.TrainingEnhancements.completeDay(dayIndex);
       const applied = trainingPlan.applyAction(getTrainingPlanStateFromStorage(), {
         type:"completeDay",
         dayIndex,

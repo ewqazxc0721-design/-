@@ -1,5 +1,5 @@
 // Destructive to TEST data only. Run in the isolated browse profile at localhost:8765.
-(async()=>{
+return await (async()=>{
   if(location.hostname!=='127.0.0.1'||location.port!=='8765')throw new Error('This verification is restricted to the isolated localhost test server.');
   appState.load();
   const results=[];const check=(name,condition,details)=>{results.push({name,passed:!!condition,...(!condition?{details}: {})});if(!condition)throw new Error(name+': '+JSON.stringify(details));};
@@ -11,7 +11,7 @@
   setPlanTemplate(template,true);domainPersistence.setJson('gain-daily-logs',{});setTrainingSession(null);setActivePlanDay(index);ensureDailyLogSnapshot(date);
   const click=selector=>{const node=document.querySelector(selector);if(!node)throw new Error('missing '+selector);node.click();};
   const fill=(selector,value)=>{const input=document.querySelector(selector);input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));};
-  TrainingEnhancements.openPlan(index,template.days[index].items[0]);
+  TrainingEnhancements.openDetailedPlan(index,template.days[index].items[0]);
   for(const reps of [12,10,8]){click('#te-overlay [data-te="add-set"]');const sets=document.querySelectorAll('#te-overlay .te-set');const node=sets[sets.length-1];const input=node.querySelector('[data-field="reps"]');input.value=reps;input.dispatchEvent(new Event('input',{bubbles:true}));node.querySelector('[data-te="complete-set"]').click();}
   check('draft omitted from official stats',TrainingCore.stats(getDailyLogs(),getExerciseLibrary()).groups===0);
   click('#te-overlay [data-te="finish"]');
