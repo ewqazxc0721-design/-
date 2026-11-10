@@ -29,6 +29,10 @@
 .pe-dragging{opacity:.5}.pe-drop-target{outline:2px solid #137b62;outline-offset:2px}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 #planEditDaySelect{max-width:100%;text-overflow:ellipsis}
+#planContainer .day-row{display:grid;grid-template-columns:minmax(0,1fr) 36px;gap:6px 9px;align-items:center;min-height:0;padding:10px 12px}
+#planContainer .day-row .day-item{grid-column:1/-1;min-width:0;width:auto;max-width:none;line-height:1.5;font-size:14px;word-break:normal;overflow-wrap:anywhere}
+#planContainer .day-row>.te-record-open{grid-column:1;grid-row:2;justify-self:start;max-width:none;min-height:36px;padding:8px 12px;margin:0;white-space:nowrap;font-size:12px}
+#planContainer .day-row>.check-btn{grid-column:2;grid-row:2;justify-self:end;flex-shrink:0;margin:0}
 #te-plan-map .te-muscle-list button,#te-statistics .te-muscle-list button{isolation:isolate;position:relative;min-width:0;line-height:1.5;box-shadow:none;transform:none}
 #te-plan-map .te-muscle-list button::before,#te-plan-map .te-muscle-list button::after,#te-statistics .te-muscle-list button::before,#te-statistics .te-muscle-list button::after{content:none!important;display:none!important}
 #te-plan-map .te-muscle-list button span,#te-statistics .te-muscle-list button span{position:relative;z-index:1;white-space:nowrap;min-width:0}
@@ -38,10 +42,6 @@
 .te-block-actions button[aria-pressed=true]{box-shadow:inset 0 0 0 2px #137b62;color:#125b49}
 @media(max-width:600px){
  #plan .collapsible-card-head{align-items:center;gap:8px}#plan .collapsible-card-head h2{font-size:19px;min-width:0;line-height:1.35}#plan .collapsible-card-head button{flex-shrink:0;white-space:nowrap;padding:10px 15px;min-width:62px}
- #planContainer .day-row{display:grid;grid-template-columns:minmax(0,1fr) 40px;gap:9px;align-items:center;padding:13px}
- #planContainer .day-row .day-item{grid-column:1/-1;min-width:0;width:auto;max-width:none;line-height:1.65;font-size:14px;word-break:normal;overflow-wrap:anywhere}
- #planContainer .day-row .te-record-open{grid-column:1;justify-self:start;max-width:none;min-height:36px;padding:8px 12px;margin:0;white-space:nowrap;font-size:12px}
- #planContainer .day-row .check-btn{grid-column:2;justify-self:end;flex-shrink:0}
  #dayTabs .day-tab{flex-shrink:0;white-space:nowrap;min-width:58px}#dayTabs .day-tab-label{white-space:nowrap}
  .pe-week-row{grid-template-columns:28px 43px minmax(0,1fr);gap:7px;padding:9px}.pe-week-actions{grid-column:3;justify-content:flex-end}.pe-week-module select{font-size:12px;min-height:43px}.pe-week-day b{white-space:nowrap;font-size:13px}
  #te-plan-map .te-map-layout,#te-statistics .te-map-layout{grid-template-columns:minmax(90px,.72fr) minmax(170px,1.28fr);gap:8px}

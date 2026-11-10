@@ -1,0 +1,33 @@
+{
+  "date": "2026-11-10",
+  "baselineFailureCount": 20,
+  "finalFailureCount": 20,
+  "newFailures": [],
+  "existingFailures": [
+    "DailyLog v2 snapshots separate training days from note-only recovery days",
+    "JSON-mode nested guard and record fields are normalized before applyRecordProtocol",
+    "active training session chat records quantified completion against the selected plan day and auto-checks that page",
+    "active training session records one completed set with planned reps from the matched item",
+    "applyRecordProtocol keeps ambiguous exercise-library aliases pending",
+    "applyRecordProtocol marks high-confidence evidenced plan progress as written without mutating logs in issue 2",
+    "chat scenario: today's completed plan exercise is written with aiCapture",
+    "completed plan progress caps at target and later volume becomes extra training",
+    "exercise library can read every mapped media action through a stable exercise key",
+    "exercise library covers every real exercise found in weekly training JSON files",
+    "quantified completion can auto-complete a matching item, and undo only rolls back that automatic check",
+    "record candidates update plan progress through activeTrainingReference without legacy aiCaptureRecords",
+    "recovery-day capture updates visible plan progress and surplus extras",
+    "role chat displays only reply while hidden candidates commit through record protocol",
+    "role chat local fallback can check every exercisable weekly JSON plan item",
+    "role chat preserves deterministic fallback when engine has no write or pending decision",
+    "safety feedback is recorded but does not auto-complete a matching plan item",
+    "training calendar detail shows completed and unfinished amounts for every planned action",
+    "training capture updates plan progress first and writes extra events only after target is met",
+    "undo rolls back structured plan progress and revokes linked extra events"
+  ],
+  "fixedBaselineFailures": [],
+  "featureTestsPassed": 52,
+  "browserFlowChecksPassed": 38,
+  "reloadOrderVerified": true,
+  "coverageAndGeneratedCopyChecksPassed": true
+}

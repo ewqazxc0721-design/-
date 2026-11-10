@@ -1,14 +1,14 @@
-const CACHE_NAME = "gain-tracker-pwa-v33-exercise-media-library-20261110";
+const CACHE_NAME = "gain-tracker-pwa-v34-compact-plan-editor-20261110";
 const MEDIA_CACHE_NAME = "gain-exercise-media-v1";
 const CORE_ASSETS = [
   "./index.html",
   "./training-core.js?v=20261110-sets1",
-  "./training-ui.js?v=20261110-sets1",
+  "./training-ui.js?v=20261110-plan2",
   "./exercise-media.js?v=20261110-media2",
   "./exercise-media.css?v=20261110-media2",
   "./训练动作库/media-manifest.json",
-  "./plan-editor-ui.js",
-  "./plan-editor.css",
+  "./plan-editor-ui.js?v=20261110-plan2",
+  "./plan-editor.css?v=20261110-plan2",
   "./training-enhancements.css?v=20261110-sets1",
   "./训练动作库/muscle-regions.json",
   "./训练动作库/actions.json",

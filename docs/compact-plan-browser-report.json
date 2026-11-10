@@ -1,0 +1,78 @@
+{
+  "isolated": true,
+  "iosSimulation": true,
+  "checks": [
+    {
+      "name": "standard path: all seven weekdays update immediately",
+      "passed": true
+    },
+    {
+      "name": "standard: pending draft survives switching and saves only selected day across reload",
+      "passed": true
+    },
+    {
+      "name": "standard: day tabs and weekly schedule edit synchronize editor",
+      "passed": true
+    },
+    {
+      "name": "standard 320px: compact cards and aligned controls",
+      "passed": true
+    },
+    {
+      "name": "standard 375px: compact cards and aligned controls",
+      "passed": true
+    },
+    {
+      "name": "standard 390px: compact cards and aligned controls",
+      "passed": true
+    },
+    {
+      "name": "standard 430px: compact cards and aligned controls",
+      "passed": true
+    },
+    {
+      "name": "standard 768px: compact cards and aligned controls",
+      "passed": true
+    },
+    {
+      "name": "standard 1280px: compact cards and aligned controls",
+      "passed": true
+    },
+    {
+      "name": "iOS fast path: all seven weekdays update immediately",
+      "passed": true
+    },
+    {
+      "name": "iOS: pending draft survives switching and saves only selected day across reload",
+      "passed": true
+    },
+    {
+      "name": "iOS: day tabs and weekly schedule edit synchronize editor",
+      "passed": true
+    },
+    {
+      "name": "iOS 320px: compact cards and aligned controls",
+      "passed": true
+    },
+    {
+      "name": "iOS 375px: compact cards and aligned controls",
+      "passed": true
+    },
+    {
+      "name": "iOS 390px: compact cards and aligned controls",
+      "passed": true
+    },
+    {
+      "name": "iOS 430px: compact cards and aligned controls",
+      "passed": true
+    },
+    {
+      "name": "iOS 768px: compact cards and aligned controls",
+      "passed": true
+    },
+    {
+      "name": "iOS 1280px: compact cards and aligned controls",
+      "passed": true
+    }
+  ]
+}

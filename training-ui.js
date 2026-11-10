@@ -84,7 +84,7 @@
       if(row.querySelector('.te-record-open'))return;
       const b=document.createElement('button');b.type='button';b.className='te-record-open';b.textContent='记录组数';b.dataset.te='open-plan';b.dataset.day=row.dataset.guideOpen;b.dataset.text=row.dataset.guideItem;
       b.dataset.item=row.querySelector('[data-check]')?.dataset.check||'';
-      row.querySelector('.day-item').append(b);
+      row.insertBefore(b,row.querySelector('.check-btn'));
     });
   }
   function renderStats(){
@@ -360,7 +360,7 @@
   const originalSetSession=setTrainingSession;setTrainingSession=function(...args){const result=originalSetSession(...args);appState.load();renderSessionCard();return result;};
   const originalFinish=finishTrainingSession;finishTrainingSession=finishWithSets;
   const originalLibrary=renderExerciseLibrary;renderExerciseLibrary=function(...args){const result=originalLibrary(...args);refresh();return result;};
-  window.TrainingEnhancements={refresh,filterLibrary,showGuide,guardIntent,openEditor,openPlan,openDetailedPlan,togglePlanCheck:toggleQuickPlanCheck,completeDay:completeQuickDay};
+  window.TrainingEnhancements={refresh,refreshPlan:renderPlanMap,filterLibrary,showGuide,guardIntent,openEditor,openPlan,openDetailedPlan,togglePlanCheck:toggleQuickPlanCheck,completeDay:completeQuickDay};
   document.addEventListener('input',event=>{
     try{if(event.target.matches('#te-overlay [data-field]'))updateRow(event.target);if(event.target.id==='te-picker-search')$('te-picker-action').innerHTML=pickerOptions(event.target.value);}catch(e){notify('草稿保存失败：'+e.message);}
   });
