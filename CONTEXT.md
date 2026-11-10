@@ -49,6 +49,7 @@ _Avoid_: hidden AI decision, temporary auto-check
 - AI may suggest candidates, but **Plan Reconciliation** decides whether a **Training Fact** completes, partially progresses, or exceeds a **Plan Item**.
 - If a user reports more volume than the matching **Plan Item** requires, the planned portion completes the **Plan Item** and the surplus becomes **Extra Training**.
 - If the user gives no quantity but uses an explicit completion phrase, the app should ask for missing dose detail instead of silently checking the item unless product rules explicitly allow that shortcut.
+- Direct plan checkboxes are an explicit product shortcut: checking records the prescribed number of work sets for that plan row immediately, with no inferred reps, time or load. The row's group-count editor saves directly to the same facts. Unchecking retracts those row-linked sets; repeated saving updates rather than adds. Compound rows track each action's prescribed sets. Historical checkmarks are not silently backfilled.
 - A **Dose Mismatch** should ask the user whether to revise the plan before checking the **Plan Item**.
 - After a confirmed **Plan Dose Revision**, the app updates the planned dose, checks the planned portion as complete, and records surplus volume as **Extra Training**.
 - A **Plan Dose Revision** applies to the target day's plan snapshot by default; the reusable weekly plan template changes only when the user explicitly asks future plans to change.

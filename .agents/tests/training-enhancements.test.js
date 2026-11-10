@@ -110,6 +110,7 @@ test('shell normalization and reload retain new catalogue fields and all 110 sta
  const {api}=shell(),loaded=api.injectLibrary(library);assert.equal(loaded.length,110);
  const a=api.normalizeExerciseLibraryAction(library.find(a=>a.exerciseKey==='opengym-0025'));assert.equal(a.provenance.upstreamId,'0025');assert.equal(a.instructions.length,4);assert.equal(a.primaryMuscles[0],'chest');
  assert.equal(loaded.find(a=>a.exerciseKey==='scapular-pull').aliases.includes('沉肩悬垂'),false);
+ const knee=loaded.find(a=>a.exerciseKey==='opengym-3211');assert.equal(knee.media.reviewSampleId,'ai-knee-v2');assert.equal(knee.media.variants[0].reviewSampleId,'existing-knee');
 });
 test('daily shell preserves entries and managed metadata instead of reviving old checks',()=>{
  const {api}=shell(),e=entry(),previous={schemaVersion:3,exerciseEntries:[e],planProgressItems:[]};const result=api.buildDailyLogShell('2026-05-11',previous);assert.equal(result.schemaVersion,3);assert.equal(result.exerciseEntries[0].id,'e1');

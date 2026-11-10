@@ -1,0 +1,75 @@
+{
+  "date": "2026-11-10",
+  "approved": true,
+  "userDirection": {
+    "decision": "use_approved_samples_only",
+    "style": "match_existing_grayscale_anatomical_assets",
+    "muscleHighlight": true,
+    "productionImportApproved": true,
+    "message": "继续完善 A 的 AI 风格，暂不入库；AI 动作最好和现有素材一致，可以高亮训练肌肉群。"
+  },
+  "samples": [
+    {
+      "id": "ai-knee-v2",
+      "label": "A2",
+      "ai": true,
+      "exerciseKey": "opengym-3211",
+      "name": "跪姿俯卧撑 · 解剖风格与肌群高亮",
+      "gif": "kneeling-pushup-ai-v2.gif",
+      "webp": "kneeling-pushup-ai-v2.webp",
+      "poster": "kneeling-pushup-ai-v2-poster.webp",
+      "source": "内置 image_gen 参考现有图解生成关键帧，往返合成循环；已通过审核并接入本地。",
+      "status": "approved",
+      "note": "已审核通过并接入本地动作库，尚未发布线上。肌群高亮版与原素材版可在动作详情中切换。",
+      "bytes": 830181,
+      "reviewDecision": "approve"
+    },
+    {
+      "id": "ai-knee",
+      "exerciseKey": "opengym-3211",
+      "name": "跪姿俯卧撑 · AI 样片",
+      "gif": "kneeling-pushup-ai-draft.gif",
+      "webp": "kneeling-pushup-ai-draft.webp",
+      "source": "AI 分帧生成后合成循环，使用下降帧的往返序列",
+      "status": "rejected",
+      "note": "用户选择不采用，保留审核记录，未接入动作库。",
+      "bytes": 756606,
+      "label": "A1",
+      "reviewDecision": "reject"
+    },
+    {
+      "id": "existing-knee",
+      "exerciseKey": "opengym-3211",
+      "name": "跪姿俯卧撑 · 现有素材对照",
+      "gif": "kneeling-pushup-existing.gif",
+      "source": "项目已有 gifs/3211.gif，未新增外部下载",
+      "status": "approved",
+      "note": "已审核通过并接入本地动作库，尚未发布线上。肌群高亮版与原素材版可在动作详情中切换。",
+      "bytes": 188893,
+      "label": "B",
+      "reviewDecision": "approve"
+    },
+    {
+      "id": "existing-bench",
+      "exerciseKey": "opengym-0289",
+      "name": "哑铃平板卧推 · 现有素材候选",
+      "gif": "dumbbell-bench-existing.gif",
+      "source": "项目已有 gifs/0289.gif，未新增外部下载",
+      "status": "approved",
+      "note": "已审核通过并接入本地动作库，尚未发布线上。",
+      "bytes": 336894,
+      "label": "C",
+      "reviewDecision": "approve"
+    }
+  ],
+  "approvalState": "approved_with_rejections",
+  "decisionReceivedAt": "2026-11-10T02:18:28.722604+00:00",
+  "approvedSampleIds": [
+    "ai-knee-v2",
+    "existing-knee",
+    "existing-bench"
+  ],
+  "rejectedSampleIds": [
+    "ai-knee"
+  ]
+}

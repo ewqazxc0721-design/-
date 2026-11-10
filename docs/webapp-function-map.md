@@ -339,3 +339,21 @@ If that test fails, update the feature map or add the missing regression coverag
 - `training-ui.js`: plan block recording resolves only actions belonging to the clicked block; muscle selection preserves the button and places highlights behind text.
 - `plan-editor.css`: responsive training rows, module controls, muscle labels, dialogs and editor fields; obsolete daily AI adjustment entry removed from the source HTML.
 - `.agents/tests/weekly-plan-ui.test.js`, browser flow and native touch scripts; see `docs/weekly-ui-validation.md`.
+
+### exercise-media-performance-review
+
+- `exercise-media.js` / `exercise-media.css`: poster-first detail media, visibility-based playback, motion/data preferences, pause and original-file fallback.
+- `训练动作库/media-manifest.json` and `gifs/optimized/`: smaller versions of existing assets with content-derived names and original files retained.
+- `sw.js`: exercise cache survives core upgrades and does not re-fetch cache hits; cache quota errors do not block downloaded media.
+- Returning to a tab resumes only intersecting media; a quota-limited upgrade retains and can read the original media cache while offline.
+- `media-review/2026-11-10/`: decisions and an immutable approval receipt distinguish approved samples from rejected/unreviewed candidates. Only approved, hash-matching samples may be associated with actions; approved alternatives are loaded one at a time.
+- `.agents/tests/exercise-media.test.js`, `.agents/scripts/verify-exercise-media.py` and browser verification; see `docs/exercise-media-review.md`.
+- The second batch of 40 AI animations has explicit user-chat approval and a receipt binding exercise/revision/GIF/WebP/poster hashes; all 110 actions now have a media association. Raw generation sheets and browser opinions stay outside the production release.
+
+### simple-plan-set-records
+
+- Clicking a plan row's group button opens only that row's group counts and saves directly; no session, per-set completion or phase selector is required.
+- Checking a plan row fills missing prescribed work groups; unchecking retracts row-linked groups with deletion tombstones. Repeated saves reuse the same entries and set IDs.
+- Compound rows preserve separate exercise identities and group targets. Stats and muscle distribution read these same saved facts, without inventing repetitions, duration or load.
+- Older checkmarks are not silently backfilled. A newer explicit group edit survives merging an older legacy completed snapshot.
+- `.agents/tests/simple-set-records.test.js`, `.agents/scripts/verify-quick-sets-browser.js`; validation in `docs/simple-set-records-validation.md`.

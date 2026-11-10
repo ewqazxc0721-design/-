@@ -1,0 +1,58 @@
+{
+  "checks": [
+    {
+      "name": "all 40 reviewed candidates have controls",
+      "passed": true
+    },
+    {
+      "name": "all muscle filter options use Chinese labels",
+      "passed": true
+    },
+    {
+      "name": "initial page does not download any animation",
+      "passed": true
+    },
+    {
+      "name": "playing a candidate only downloads its own animation",
+      "passed": true
+    },
+    {
+      "name": "pause restores static posters",
+      "passed": true
+    },
+    {
+      "name": "search selects the matching exercise",
+      "passed": true
+    },
+    {
+      "name": "changed choices are synchronized with exact fingerprints",
+      "passed": true
+    },
+    {
+      "name": "choices survive reload",
+      "passed": true
+    },
+    {
+      "name": "muscle filter narrows the gallery",
+      "passed": true
+    },
+    {
+      "name": "bulk adopt requires explicit click and submits all 40 choices",
+      "passed": true
+    },
+    {
+      "name": "320px gallery has no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "390px gallery has no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "430px gallery has no horizontal overflow",
+      "passed": true
+    }
+  ],
+  "approvalRequestsMocked": true,
+  "productionChanged": false
+}

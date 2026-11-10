@@ -1,0 +1,2184 @@
+{
+  "date": "2026-11-10",
+  "reviewId": "2026-11-10-batch-2",
+  "status": "approved",
+  "productionChanged": true,
+  "samples": [
+    {
+      "id": "remaining-0025",
+      "exerciseKey": "opengym-0025",
+      "name": "杠铃平板卧推",
+      "englishName": "barbell bench press",
+      "primaryMuscles": [
+        "chest"
+      ],
+      "secondaryMuscles": [
+        "triceps",
+        "deltoids"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "Flat BARBELL bench press, supine on a flat padded bench. Fixed feet, buttocks and upper back. Bar starts above chest with straight arms, lowers smoothly to lower chest, elbows bend, forearms near vertical, then reversal supplies ascent. Same rigid bar, symmetrical plates and grip throughout.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "full",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-0025.gif",
+      "webp": "remaining-0025.webp",
+      "poster": "remaining-0025-poster.webp",
+      "sheet": "remaining-0025-sheet.png",
+      "promptFile": "remaining-0025-prompt.txt",
+      "sourceSha256": "a8a46a4c1f0e5ce584ac303375f954032d09727728adc8e091b45af6cab36073",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 8,
+        "durationMs": 2320,
+        "bytes": 633707
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 8,
+        "durationMs": 2320,
+        "bytes": 78628
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "b9719f64b9ed81523174417eabb416c7be00d763204339f31f0b7bbfcdbdf931",
+      "webpSha256": "91ee72d83a8199fb1693ae54110d8af49b21ed6279248bf5eeafe00bbc2c601b",
+      "posterSha256": "f95f01f6dfb6353d53dc963e6bfa0eba6e7e1ce3638cfadcbb920c7669cf5da3",
+      "reviewSha256": "d71bfbf08de3c6f861e895b92305e72df4e3c3ec50fdb3f2ec1134d0474d7a60"
+    },
+    {
+      "id": "remaining-0314",
+      "exerciseKey": "opengym-0314",
+      "name": "上斜哑铃卧推",
+      "englishName": "dumbbell incline bench press",
+      "primaryMuscles": [
+        "chest"
+      ],
+      "secondaryMuscles": [
+        "triceps",
+        "deltoids"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "INCLINE dumbbell bench press on a 30 degree bench. Fixed bench, feet and buttocks. Start dumbbells above upper chest, then bend elbows to lower weights to upper-chest sides. Never change incline or turn this into a flat bench press.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-0314.gif",
+      "webp": "remaining-0314.webp",
+      "poster": "remaining-0314-poster.webp",
+      "sheet": "remaining-0314-sheet.png",
+      "promptFile": "remaining-0314-prompt.txt",
+      "sourceSha256": "8c5a81f6c387df6e1af3b8e89d3c56b860c82b205e02ee0dd0e36da02b172feb",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 1045826
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 130654
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "477eabdbf67554e44245a3b87f3134a4587f5a82a5c2706065e8e06b63aaa2a9",
+      "webpSha256": "04083af8680aecf0b66bbeeda073de8effe6f0bd51a898ca38b95d37801920ed",
+      "posterSha256": "ca4426e9139b62eedbbb1cf5d0d67f240f7df293daa6f8a344d75fb4d11ad880",
+      "reviewSha256": "9e41f0ca9a178c0a1996d0bda3feed48d209b324bf8b2e0e77950e47a120d959"
+    },
+    {
+      "id": "remaining-0375",
+      "exerciseKey": "opengym-0375",
+      "name": "哑铃仰卧上拉",
+      "englishName": "dumbbell pullover",
+      "primaryMuscles": [
+        "chest",
+        "upper-back"
+      ],
+      "secondaryMuscles": [
+        "triceps"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "Dumbbell PULLOVER. Lie fully supported on a flat bench, feet planted. Both hands cup ONE dumbbell above chest; fixed slight elbow bend. Rotate both upper arms together to lower that dumbbell behind head to comfortable shoulder range. No elbow-extension skullcrusher motion.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-0375.gif",
+      "webp": "remaining-0375.webp",
+      "poster": "remaining-0375-poster.webp",
+      "sheet": "remaining-0375-sheet.png",
+      "promptFile": "remaining-0375-prompt.txt",
+      "sourceSha256": "3a25781ac125b350d0f4b8dd8e01d8ac60853dd1ba736792bf27944839d43a75",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 1023125
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 134940
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "a76dac30cba2943e5ba687222cbe9ea403946b4ee1cb37f2506f59048bff53e6",
+      "webpSha256": "69fe6b4c512e554592c6403bcfc6018e7b0a179b02d6ab393332ec826ca72370",
+      "posterSha256": "167da1a0743d6a7ca7e8ba003ccc304d40174bc5fffbd6df5a44c6851128c71c",
+      "reviewSha256": "674b713825bb11af197f8ee8b889fa73bbd2be3706f5441895a24e1593f781c4"
+    },
+    {
+      "id": "remaining-0493",
+      "exerciseKey": "opengym-0493",
+      "name": "手抬高俯卧撑",
+      "englishName": "incline push-up",
+      "primaryMuscles": [
+        "chest"
+      ],
+      "secondaryMuscles": [
+        "triceps",
+        "deltoids"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "Hands-elevated push-up with both palms planted on a stable bench edge, feet on floor. Whole head-to-heel line rigid; lower chest toward bench edge by bending elbows back. Knees NEVER touch floor. Bench and all hand/toe contact points fixed.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-0493.gif",
+      "webp": "remaining-0493.webp",
+      "poster": "remaining-0493-poster.webp",
+      "sheet": "remaining-0493-sheet.png",
+      "promptFile": "remaining-0493-prompt.txt",
+      "sourceSha256": "9510c96fb131c53e1dd87082d00d7741626d59db6705f33668e9e4a053c5ce89",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 994826
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 124852
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "73e1c86f36b50112f4c0528bd3069dccf5ec420d8425b052c4da8fe0ea85884e",
+      "webpSha256": "4705083c6585f0326c546d82967e81a16a07a9f7b62d1cbe966708ac64058898",
+      "posterSha256": "ba551525be2f5b8e9a294bb7d3d3d710b8c034b75f32b5f4f45cd58b018b776f",
+      "reviewSha256": "95e3deb16c1efdf8645b929bb70d76458070b527e5db0a2147809d9a1f2c90eb"
+    },
+    {
+      "id": "remaining-3294",
+      "exerciseKey": "opengym-3294",
+      "name": "弓箭手俯卧撑",
+      "englishName": "archer push up",
+      "primaryMuscles": [
+        "chest"
+      ],
+      "secondaryMuscles": [
+        "triceps",
+        "deltoids"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "motionSpec": "ARCHER push-up, wide hands, body straight, feet planted. Show ONE side only: shift and lower chest toward left hand while left elbow bends and right elbow remains straight; reverse to centered start. Do not slide hands or become a normal narrow push-up.",
+      "status": "approved",
+      "revision": 2,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-3294-v2.gif",
+      "webp": "remaining-3294-v2.webp",
+      "poster": "remaining-3294-v2-poster.webp",
+      "sheet": "remaining-3294-v2-sheet.png",
+      "promptFile": "remaining-3294-v2-prompt.txt",
+      "sourceSha256": "4a3b7b2805c59ed623674b81c25cb303276842f9868e05e5b3e5a87f0cf316ac",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 939552
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 106268
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "a8f3e17c94ae4f3a9d242d7fff108e92c5e80c471972d579bd113eb0c7012f19",
+      "webpSha256": "3bf207950cb9a598c99e369d71dbd2f9518ba8bee0d0ffb4e3d57c22b72d59c5",
+      "posterSha256": "19b2f1e85564b8fa0b0a84e26e351e53d1ce9060addbb4d3d23b6c52c7b1a27c",
+      "reviewSha256": "93b05f907aed1b59c6f4d23336fbcaf254d0dc0f3133184fd787318750c4de0d"
+    },
+    {
+      "id": "remaining-4075",
+      "exerciseKey": "opengym-4075",
+      "name": "弹力带夹胸",
+      "englishName": "band chest fly",
+      "primaryMuscles": [
+        "chest"
+      ],
+      "secondaryMuscles": [
+        "deltoids"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "Standing resistance-band CHEST FLY. Bands fixed to a sturdy post behind shoulder height, one handle each hand. Start arms open to sides with slight fixed elbow bend; sweep hands together in front of chest. Torso and feet stationary. Band paths stay connected to the same anchors.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-4075.gif",
+      "webp": "remaining-4075.webp",
+      "poster": "remaining-4075-poster.webp",
+      "sheet": "remaining-4075-sheet.png",
+      "promptFile": "remaining-4075-prompt.txt",
+      "sourceSha256": "65afd1352667fa95ff3708f32f6121f1ba090ae72a5f9637b5f941e9096879f6",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 1007919
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 112924
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "dc0e48064b112c1517593150beefd35d348d2ab6593c082b9ab2e114e3709880",
+      "webpSha256": "fea6f5830b743b071c78535a77d27cd792897da5a108c1bca30dbacce9cdb955",
+      "posterSha256": "3bcac11094e44e808d6e2b02f8c99be5ca5b2d4e121f8744bd2208355771999d",
+      "reviewSha256": "11ea8d31400db958e8ebc31ada92f77b3a1dea1f312288bab54178e2959e4889"
+    },
+    {
+      "id": "remaining-1430",
+      "exerciseKey": "opengym-1430",
+      "name": "双杠臂屈伸",
+      "englishName": "chest dip (on dip-pull-up cage)",
+      "primaryMuscles": [
+        "chest",
+        "triceps"
+      ],
+      "secondaryMuscles": [
+        "deltoids"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "PARALLEL BAR DIPS. Hands grip TWO fixed parallel dip bars, shoulders down, legs slightly bent. Start supported with arms extended, lower by bending elbows until upper arms near parallel to floor, then reverse. Keep hands gripping bars, feet off ground, no bench dips.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "full",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-1430.gif",
+      "webp": "remaining-1430.webp",
+      "poster": "remaining-1430-poster.webp",
+      "sheet": "remaining-1430-sheet.png",
+      "promptFile": "remaining-1430-prompt.txt",
+      "sourceSha256": "5459bb6fcfe5129b83f95489d5f8906c4022037ff86349bface679f3d999161a",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 8,
+        "durationMs": 2320,
+        "bytes": 569637
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 8,
+        "durationMs": 2320,
+        "bytes": 64036
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "99b264d22b85be41cc0c28cbad42faadd875ba3da7d27a03ee0eed4a7ec434b3",
+      "webpSha256": "a51326e71f2b64103a591cdb695fb7f5a1b3fed851d24ce50080771452b02534",
+      "posterSha256": "ad51a24690097d5250a30ac8c18d9a7d0706f23690820a29fdc233eb1a1f461f",
+      "reviewSha256": "6a1a981530a08ad5a7e09d3a6980f07ab708eea8b4789b0554c18d4608221e6f"
+    },
+    {
+      "id": "remaining-1162",
+      "exerciseKey": "opengym-1162",
+      "name": "站姿杠铃肩上推举",
+      "englishName": "barbell standing military press",
+      "primaryMuscles": [
+        "deltoids"
+      ],
+      "secondaryMuscles": [
+        "triceps"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "Standing BARBELL overhead press. Feet fixed, knees straight but soft, torso braced. Start bar at upper chest, press bar vertically overhead while extending elbows. Avoid back arch, leg drive or behind-neck press. Same bar and plates throughout.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-1162.gif",
+      "webp": "remaining-1162.webp",
+      "poster": "remaining-1162-poster.webp",
+      "sheet": "remaining-1162-sheet.png",
+      "promptFile": "remaining-1162-prompt.txt",
+      "sourceSha256": "c71054c9c3c3f88e83ac7f77c621fb35fee0c3747c690dab3f29728facc3fba7",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 938147
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 91078
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "d7d1a5bb34880178442f71718c56c79336d338f15a70a72cb8247c7b1695f174",
+      "webpSha256": "cbe14a0f8957bc4f56a7bd0462879882c485b778a19a130920a5303e0a32b286",
+      "posterSha256": "f15f584f9f8fe408adda670a02bf2d56873676e10efee727900d0e46301910a7",
+      "reviewSha256": "ab03d092d4345a729a030575448989b39ab52048374c7e25b9bcf8558e3b666a"
+    },
+    {
+      "id": "remaining-0426",
+      "exerciseKey": "opengym-0426",
+      "name": "站姿哑铃肩推",
+      "englishName": "dumbbell standing overhead press",
+      "primaryMuscles": [
+        "deltoids"
+      ],
+      "secondaryMuscles": [
+        "triceps"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "Standing DUMBBELL overhead press. Stable feet and braced torso, one dumbbell each hand. Start at shoulder level then press overhead with controlled elbow extension. Do not sit, lean back, use leg drive or turn it into lateral raises.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-0426.gif",
+      "webp": "remaining-0426.webp",
+      "poster": "remaining-0426-poster.webp",
+      "sheet": "remaining-0426-sheet.png",
+      "promptFile": "remaining-0426-prompt.txt",
+      "sourceSha256": "4655abdf3ef3e31d1738c82c6b156e4f2112abd3fe292e4da46cd5230896b46a",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 902602
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 92208
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "3f4f958a590ad25775dbe150d8aa3818a3b40b93523d80874e71ad28d1e97a94",
+      "webpSha256": "8670686007346986a9830841e96014eeca4884125ec00b54c90e51090a5f49a3",
+      "posterSha256": "c498fc7929a8eb6c8702c28912272db590aba7759a6b22381a08a2cb6bd9a0c9",
+      "reviewSha256": "3c672d19e6b6b233aaa140f0c2d68a8b8a94d24b6a190f94abdf1ca06253b861"
+    },
+    {
+      "id": "remaining-0404",
+      "exerciseKey": "opengym-0404",
+      "name": "坐姿对握哑铃肩推",
+      "englishName": "dumbbell seated shoulder press (parallel grip)",
+      "primaryMuscles": [
+        "deltoids"
+      ],
+      "secondaryMuscles": [
+        "triceps"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "Seated NEUTRAL-GRIP dumbbell shoulder press with back supported on an upright 85-degree bench. Palms face EACH OTHER throughout. Weights start at shoulders and travel overhead. Fixed bench, feet and hips; no alternating arms or pronated-grip change.",
+      "status": "approved",
+      "revision": 2,
+      "cycleMode": "half",
+      "frameIndices": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-0404-v2.gif",
+      "webp": "remaining-0404-v2.webp",
+      "poster": "remaining-0404-v2-poster.webp",
+      "sheet": "remaining-0404-v2-sheet.png",
+      "promptFile": "remaining-0404-v2-prompt.txt",
+      "sourceSha256": "148aa3ac36a1f4a2cbb2a919341441f28551cf4017ad91c3501e5cd5c909f632",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 10,
+        "durationMs": 2760,
+        "bytes": 736023
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 10,
+        "durationMs": 2760,
+        "bytes": 81214
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "2b7ab0272805ac41fe612e628bf24f6af4fa2cea5565cf7b2015c653183b1bab",
+      "webpSha256": "5444ba3b30b235e302b932df0579edd2628d315a3555ff41984ebcd1221a0cd4",
+      "posterSha256": "a736229e95a11aad3f7ebb2499e8795fb04960fe7b6fa2f597e8905d498dbeab",
+      "reviewSha256": "2828b2c1c44064db161c99a71a281f500f4f1d34dfded6396668001416e81af4"
+    },
+    {
+      "id": "remaining-0396",
+      "exerciseKey": "opengym-0396",
+      "name": "坐姿哑铃侧平举",
+      "englishName": "dumbbell seated lateral raise",
+      "primaryMuscles": [
+        "deltoids"
+      ],
+      "secondaryMuscles": [
+        "trapezius"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "SEATED dumbbell LATERAL RAISE. Sit upright at bench end, feet planted. Start weights by thighs and raise arms out to sides only to shoulder height, elbows slightly bent and angle held. No overhead press, front raise, torso rocking or shrug.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-0396.gif",
+      "webp": "remaining-0396.webp",
+      "poster": "remaining-0396-poster.webp",
+      "sheet": "remaining-0396-sheet.png",
+      "promptFile": "remaining-0396-prompt.txt",
+      "sourceSha256": "8964b5c1b2825e2fa2cc230c7d900e6937c3ff7b1d0b848566f6e3c0ebb0ac92",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 1129596
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 141662
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "9d11ce651b2e9ab6eecdd8d36aa80bfd360030b94d573c260c8fef25179c5372",
+      "webpSha256": "252dc1abae569ef6a935bce2fc754e77ce52f5a48866b9c97b3f53dbb96afdba",
+      "posterSha256": "50ef5e59c107140a1f57c242990ea50dff20986a38dc6b6d0870ab10a848b5f6",
+      "reviewSha256": "dd828f97f060eb48cf52086dc91ec9864c2b223f458e2f8d2731ceebf8b65024"
+    },
+    {
+      "id": "remaining-0921",
+      "exerciseKey": "opengym-0921",
+      "name": "站姿弹力带肩外旋",
+      "englishName": "band standing external shoulder rotation",
+      "primaryMuscles": [
+        "deltoids"
+      ],
+      "secondaryMuscles": [
+        "upper-back"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "Standing band shoulder EXTERNAL rotation, demonstrate right arm only. Right elbow bent 90 degrees and glued to rib cage. Band anchored to a sturdy post on the LEFT at elbow height. Right forearm rotates outward away from abdomen while upper arm stays vertical and elbow fixed. Highlight posterior rotator cuff, not biceps. Show visible connected band and no wide shoulder abduction.",
+      "status": "approved",
+      "revision": 2,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-0921-v2.gif",
+      "webp": "remaining-0921-v2.webp",
+      "poster": "remaining-0921-v2-poster.webp",
+      "sheet": "remaining-0921-v2-sheet.png",
+      "promptFile": "remaining-0921-v2-prompt.txt",
+      "sourceSha256": "7b17793940a5ea9ce405b390fb8f5beaa95b760a271e0a2b1c87a6d23208fd20",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 992220
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 99530
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "a3c5bd1b8bea8e158370c2939878c7a525927c614df6b0d40a1aed77a072cb34",
+      "webpSha256": "ea363aead8442d3905a0f8033c602d102e5d9591068f41137707ed412d876668",
+      "posterSha256": "586717cb50e510037e5ca9b5769ca1c237102da85d42dad7d66b0b171cbb269e",
+      "reviewSha256": "56869f6f551184280a6fdecd5022ccfd7f40145770f630af282a7d3e8a4af7e3"
+    },
+    {
+      "id": "remaining-0924",
+      "exerciseKey": "opengym-0924",
+      "name": "站姿弹力带肩内旋",
+      "englishName": "band standing internal shoulder rotation",
+      "primaryMuscles": [
+        "deltoids"
+      ],
+      "secondaryMuscles": [
+        "chest"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "Standing band shoulder INTERNAL rotation, demonstrate right arm only. Right elbow bent 90 degrees and glued to right ribs. Band anchored to sturdy post on RIGHT at elbow height. Start forearm pointing outward to right and rotate it across abdomen. Upper arm stationary, wrist straight. This is the opposite direction to external rotation.",
+      "status": "approved",
+      "revision": 2,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-0924-v2.gif",
+      "webp": "remaining-0924-v2.webp",
+      "poster": "remaining-0924-v2-poster.webp",
+      "sheet": "remaining-0924-v2-sheet.png",
+      "promptFile": "remaining-0924-v2-prompt.txt",
+      "sourceSha256": "6b0f1d1412b65b741a46dc7ab3e9ec6622c3ed83839f8075e4d7cbab13705d65",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 1087109
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 126490
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "bd26974559ed44ddcd90f0cf6bec11123c9afb3636c298ea29c558bb84323019",
+      "webpSha256": "cc8c9baa0b6f4288d1369804c533af9ccd4df3343b2a6a34e36cbe5a3aa37bac",
+      "posterSha256": "0ae9710001bf6f5efb2b90fa9dfa2439e927dd99b52b0db91d9603d130f93c3f",
+      "reviewSha256": "2c9fcfcfcfc66064de67a6a5b0cd307d2fc507ff05fb7f1169285d25f9511357"
+    },
+    {
+      "id": "remaining-1017",
+      "exerciseKey": "opengym-1017",
+      "name": "弹力带Y字上举",
+      "englishName": "band y-raise",
+      "primaryMuscles": [
+        "deltoids"
+      ],
+      "secondaryMuscles": [
+        "trapezius",
+        "upper-back"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "Standing band Y RAISE. Stand on middle of resistance band with both feet, grip two ends, elbows almost straight. Raise both arms forward and outward into a Y overhead within comfortable range. Band stays under feet and attached to hands. Avoid shoulder press elbow flexion or neck shrug.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-1017.gif",
+      "webp": "remaining-1017.webp",
+      "poster": "remaining-1017-poster.webp",
+      "sheet": "remaining-1017-sheet.png",
+      "promptFile": "remaining-1017-prompt.txt",
+      "sourceSha256": "f80e7a938db5983ec5c73af5df05ac9dafedab2f7713f95ed17cfd5f3951c73b",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 979658
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 109014
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "e42bccbdf672c721ddf51a8297203b438552fd174d6a348341fecc0bc6db51e6",
+      "webpSha256": "ff764d79a5b2c2baf8c556959b6853d84d6663c1efc2332bd7a72f20329381e6",
+      "posterSha256": "a1e532fcb3e613ef3c1f69b160481f00ae6b31cfae12515a451b4cdc1188ffc6",
+      "reviewSha256": "cc6f17da2c95a864554e84def17ec4ba922fdb2430aee6fff593a187e5512e6c"
+    },
+    {
+      "id": "remaining-0032",
+      "exerciseKey": "opengym-0032",
+      "name": "杠铃硬拉",
+      "englishName": "barbell deadlift",
+      "primaryMuscles": [
+        "gluteal",
+        "hamstring"
+      ],
+      "secondaryMuscles": [
+        "lower-back",
+        "quadriceps",
+        "forearm"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "Conventional BARBELL DEADLIFT, side three-quarter view. Bar starts on floor above mid-foot, grip just outside legs, hips hinged, knees bent, spine neutral. Extend hips and knees together to stand tall with bar close to shins/thighs, arms ALWAYS straight. No rounding spine or leaning back at lockout.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-0032.gif",
+      "webp": "remaining-0032.webp",
+      "poster": "remaining-0032-poster.webp",
+      "sheet": "remaining-0032-sheet.png",
+      "promptFile": "remaining-0032-prompt.txt",
+      "sourceSha256": "5f6a41a85cc900700df3622eb15476821e61630027abcaca00604687d246772f",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 970780
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 114072
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "7e2fb2785da2a159b2c3d68baa0f04fb62a3445c63a3e4f79c683957c558ee04",
+      "webpSha256": "febbc032bc75d78c70f498113d120ea8bbae2b5dde43a9f16280439702f0e1a7",
+      "posterSha256": "465d31f2659a5c1b3929df2417b60c6c77ce574059d26994f5359edcf085ab2f",
+      "reviewSha256": "c2b474a6bd1a33c2f9dba4af24420dc4121c176ffbd6fdc65b2a76b7e61c27d2"
+    },
+    {
+      "id": "remaining-3593",
+      "exerciseKey": "opengym-3593",
+      "name": "杠铃深蹲",
+      "englishName": "barbell squat",
+      "primaryMuscles": [
+        "quadriceps",
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "hamstring",
+        "abs"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "BARBELL BACK SQUAT, three-quarter side view. Bar rests on upper back/trapezius BELOW neck, stable symmetrical plates. Feet shoulder-width fixed, heels down. Descend by flexing hips and knees until thighs roughly parallel, knees track toes, torso braced. No front squat, overhead squat or bar contacting cervical spine.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-3593.gif",
+      "webp": "remaining-3593.webp",
+      "poster": "remaining-3593-poster.webp",
+      "sheet": "remaining-3593-sheet.png",
+      "promptFile": "remaining-3593-prompt.txt",
+      "sourceSha256": "33eb5a1409753ea46654793c1200935d977200110459a9fdfcab97df6351eda2",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 944950
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 110740
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "a71ea72ebd94f2971377e01d8d71f98fa9ee86a33396c000af2de751351c97bd",
+      "webpSha256": "075199f6f3debe6996acaffe081c221337120d590846556c72b27a3419a190d8",
+      "posterSha256": "784207b7ffff419ad04deee6758c67dce50bc6f6d6a1a858a35de6c19043be37",
+      "reviewSha256": "b6cc3023e444191e03ae79e71240cc1e486957b9258b253b258774db9cceee92"
+    },
+    {
+      "id": "remaining-1060",
+      "exerciseKey": "opengym-1060",
+      "name": "杠铃臀推",
+      "englishName": "barbell hip thrust",
+      "primaryMuscles": [
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "hamstring"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "BARBELL HIP THRUST. Upper back supported on a stable low bench, feet planted shoulder-width. Padded bar lies across HIP CREASE, held by both hands. Raise hips until torso nearly horizontal, knees about 90 degrees at top, neutral spine. Upper-back/feet anchors fixed; no barbell resting on abdomen or lumbar overextension.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-1060.gif",
+      "webp": "remaining-1060.webp",
+      "poster": "remaining-1060-poster.webp",
+      "sheet": "remaining-1060-sheet.png",
+      "promptFile": "remaining-1060-prompt.txt",
+      "sourceSha256": "649017ee33608488abe8cc144df3228367b7d01431017de559485967dd70b12a",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 1128536
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 144902
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "1e2e65523f22c60f7ba20e629905876a0c74c09e9236f5ce8d62314008439f4c",
+      "webpSha256": "7d5ab383d07c7b993dfe6c0f80eed10ea8bda5dc2f8683fbac71af05fd74a953",
+      "posterSha256": "23c8d27a3edcddb0b32da52b94057bab624e6c2744742d11ab8488918308c860",
+      "reviewSha256": "23052cabc246cd90e8647a048c2a64549df8cdf5aa063a8861e27823d3c59804"
+    },
+    {
+      "id": "remaining-1581",
+      "exerciseKey": "opengym-1581",
+      "name": "徒手后撤弓步蹲",
+      "englishName": "bodyweight rear lunge",
+      "primaryMuscles": [
+        "quadriceps",
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "hamstring"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "motionSpec": "Bodyweight REVERSE LUNGE, one side demonstrated. Start standing feet together. Step right leg BACK, lower until both knees near 90 degrees with left/front foot flat. Back knee near but not striking floor. Reverse returns to standing. No forward step or jumping.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "full",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-1581.gif",
+      "webp": "remaining-1581.webp",
+      "poster": "remaining-1581-poster.webp",
+      "sheet": "remaining-1581-sheet.png",
+      "promptFile": "remaining-1581-prompt.txt",
+      "sourceSha256": "ac95887e37896a4b9132197d540bf7bee5ec88fdecc8652812050b4098b7ccd6",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 8,
+        "durationMs": 2320,
+        "bytes": 501560
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 8,
+        "durationMs": 2320,
+        "bytes": 47612
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "4456c712a99a3c1cc5f40316608511e54388b236ae63d7ef9d8bcbb8f98e5172",
+      "webpSha256": "988ee529bb26860ff0338de4598216842c32592c2053e54df41aa1922a86ada3",
+      "posterSha256": "5fc73e3aa6b6931faaa5e3c92c7827ff34534dca302a06c69cbce5e6daaf6d01",
+      "reviewSha256": "399160862dd8510e4bec7d40c19ee855a2a63a77fb161dfd17fc29736e3ce976"
+    },
+    {
+      "id": "remaining-3928",
+      "exerciseKey": "opengym-3928",
+      "name": "徒手单腿硬拉",
+      "englishName": "bodyweight single leg deadlift",
+      "primaryMuscles": [
+        "hamstring",
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "lower-back"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "motionSpec": "Bodyweight SINGLE-LEG ROMANIAN DEADLIFT, one side. Left foot fixed on floor, left knee slightly bent; hinge at hip while right leg extends straight behind as counterbalance. Torso and lifted leg move together toward a T, neutral spine, pelvis level, return by exact reversal. Do not squat, bend spine or rotate hip open.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-3928.gif",
+      "webp": "remaining-3928.webp",
+      "poster": "remaining-3928-poster.webp",
+      "sheet": "remaining-3928-sheet.png",
+      "promptFile": "remaining-3928-prompt.txt",
+      "sourceSha256": "61d9fdb081b4085fb868475aeaf0bd57a72d71f0791221a254bc4a159ed2e94f",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 892605
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 81086
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "0988d02e64940f3080f4ec5212da378999aface724b26f03516a10a91271a714",
+      "webpSha256": "f507b1d51b826187ea2dc5ba3e2bdbe72a74facdf3cfec2c19408a25ca2d11a9",
+      "posterSha256": "b2d14f6100ab47fa03863d0ce56f58e9b6acea5cfb2e65b875cbae142dc07f0f",
+      "reviewSha256": "c60e6b150acd246c721886fabb005e2a1c46950133ab2c4bc5f0ac9976b4a9be"
+    },
+    {
+      "id": "remaining-4031",
+      "exerciseKey": "opengym-4031",
+      "name": "弹力带髋外展",
+      "englishName": "band hip abduction",
+      "primaryMuscles": [
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "abs"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "motionSpec": "Standing band HIP ABDUCTION, one side. Loop band around ankles, fixed support hand on stable post. Stand on left leg, move straight right leg SIDEWAYS away from left against band, pelvis level and trunk stationary. No forward kick, bent-knee fire hydrant or hip rotation.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-4031.gif",
+      "webp": "remaining-4031.webp",
+      "poster": "remaining-4031-poster.webp",
+      "sheet": "remaining-4031-sheet.png",
+      "promptFile": "remaining-4031-prompt.txt",
+      "sourceSha256": "321e985d97be6edba0b9c9049e8762a12d6c8b379bb31c0ba89b8746a4b9cf25",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 958519
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 97970
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "448f5ff3b7e270c0953210befe38fb135366778a90bc57f06abad06ace8cdc8a",
+      "webpSha256": "c210e92c20d31fe71a28c20f0baebb3bd04e51c3fec46a8de39ea3cda0bbea55",
+      "posterSha256": "d2dd8ba81e61ec718d9d5e1007c4add010885fc4575b1ad3b8dd9c67f67cef50",
+      "reviewSha256": "06af6e51bfef3fbbf8fd57153cbdff63ee3330aa248515e224ee659350f097e0"
+    },
+    {
+      "id": "remaining-4029",
+      "exerciseKey": "opengym-4029",
+      "name": "弹力带髋内收",
+      "englishName": "band hip adduction",
+      "primaryMuscles": [
+        "adductors"
+      ],
+      "secondaryMuscles": [
+        "abs"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "motionSpec": "Standing band HIP ADDUCTION, one side. Band attached to right ankle and fixed to low sturdy anchor on RIGHT. Left leg supports body and hand lightly holds post. Right leg sweeps inward across front of supporting leg against band. Pelvis upright, knee nearly straight. Opposite direction to abduction.",
+      "status": "approved",
+      "revision": 2,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-4029-v2.gif",
+      "webp": "remaining-4029-v2.webp",
+      "poster": "remaining-4029-v2-poster.webp",
+      "sheet": "remaining-4029-v2-sheet.png",
+      "promptFile": "remaining-4029-v2-prompt.txt",
+      "sourceSha256": "6d63e5f8006ba485becae3a01bd054f907cb1bd1b5673913a5eeae801133ffc2",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 1048004
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 104166
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "ab7ef003a54adaf943bb421e603a47133fea23e6dfa9303b38d22631850c789d",
+      "webpSha256": "e7dec40f3022915ba1014ea0e20d9556af7e86a4d0c39913da13f95404440ce9",
+      "posterSha256": "09336c8d320945d8d95e3fd8a65b603d21f868121b71a9fc12e34c6647ffeded",
+      "reviewSha256": "fe6b2ba554c02edbfb85a31fe77f57fb5e582c3bf6d39dddab3422613d934997"
+    },
+    {
+      "id": "remaining-0911",
+      "exerciseKey": "opengym-0911",
+      "name": "俯卧弹力带腿弯举",
+      "englishName": "band lying leg curl",
+      "primaryMuscles": [
+        "hamstring"
+      ],
+      "secondaryMuscles": [
+        "calves"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "PRONE resistance-band LEG CURL. Lie face down, hips and thighs remain on floor or flat bench. Band loops at ankles and is securely anchored low behind feet. Bend knees to bring heels toward buttocks while thighs stay down, then reverse. Show stable band anchor and no hip extension or seated hamstring curl.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-0911.gif",
+      "webp": "remaining-0911.webp",
+      "poster": "remaining-0911-poster.webp",
+      "sheet": "remaining-0911-sheet.png",
+      "promptFile": "remaining-0911-prompt.txt",
+      "sourceSha256": "add860e4fd9ccb63988491e67e777892bc6702b5c406e10b9c4b20a0336c5e30",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 946214
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 96544
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "696236aa052b4ff1491249ffa147827bc868c5a89405c253fab969bcb91a6b8f",
+      "webpSha256": "3e4f9634bc4fe624abcc52d9a678a737a4a48e37f3463c4024c0603d3aba003b",
+      "posterSha256": "51203934d8be49518a0087b4ffd900926a9f5a6889015f1ce31b05065628f018",
+      "reviewSha256": "049d8423b482b6c948b7efc56489220a5c8b1dd0e2a2d52e453b93300cc4f6d5"
+    },
+    {
+      "id": "remaining-1004",
+      "exerciseKey": "opengym-1004",
+      "name": "弹力带深蹲",
+      "englishName": "band squat",
+      "primaryMuscles": [
+        "quadriceps",
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "abs"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "Resistance-band SQUAT. Both feet stand on middle of band; hands hold the two ends at shoulders, band follows outside legs. Feet and band floor contact fixed. Lower hips into squat with heels planted, knees following toes, spine neutral. No barbell, jumping or band moving to knees.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-1004.gif",
+      "webp": "remaining-1004.webp",
+      "poster": "remaining-1004-poster.webp",
+      "sheet": "remaining-1004-sheet.png",
+      "promptFile": "remaining-1004-prompt.txt",
+      "sourceSha256": "db7b732216ddbe6438fc8139387b8de2c4f1b0dde52d6f6c1ae5d5fed68e3721",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 934688
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 102112
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "7378fe1833fdc20cbf389f7083bed36608be6a22ed5410a2b4913464965e62eb",
+      "webpSha256": "553575e1e8aa394963e0554bada8da850459871efb04c6641e0fa067bde2189a",
+      "posterSha256": "941f26025964050d196e9535756e4d3a522bc10a673277b62bb71f6f3022ad49",
+      "reviewSha256": "e31e291964bce684225656457ae774abd30e41637aabccc24503d323cec85869"
+    },
+    {
+      "id": "remaining-6607",
+      "exerciseKey": "opengym-6607",
+      "name": "弹力带侧向行走",
+      "englishName": "band lateral walk",
+      "primaryMuscles": [
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "quadriceps"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "Resistance-band LATERAL WALK, loop band around ankles, shallow athletic squat. Start feet hip-width; right foot takes a small side step, then left foot follows while always keeping band tension. Show ONE step sequence that reverses cleanly for loop. Torso stable, toes forward, no crossing feet.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-6607.gif",
+      "webp": "remaining-6607.webp",
+      "poster": "remaining-6607-poster.webp",
+      "sheet": "remaining-6607-sheet.png",
+      "promptFile": "remaining-6607-prompt.txt",
+      "sourceSha256": "25dbe96912d8506be989e3f6602ffed2d6b2dab652f78c568994c3e3ddfcdc68",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 956229
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 104518
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "36e032baf9c7f041b2abc41dd20237762ba3254316e8d7c5bea548559fc4518c",
+      "webpSha256": "e9556340e59527c25c31e7a8df92ce715c9c45e368c77227d9c7befb4337069b",
+      "posterSha256": "2561ae4dfae060ce03d6c6568b1d34ad41004c81b275c992e35adfe6843ff2d0",
+      "reviewSha256": "f0c2762af212e89bbc2ecf3874e6a983e091d2a46c80a753d3c419a3055ef73c"
+    },
+    {
+      "id": "remaining-1513",
+      "exerciseKey": "opengym-1513",
+      "name": "弹力带早安式",
+      "englishName": "band good morning",
+      "primaryMuscles": [
+        "hamstring",
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "lower-back"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "Resistance-band GOOD MORNING. Stand on middle of band with feet; band passes safely across upper back/shoulders, NOT neck. Soft knees, hands steady band. Hinge hips backward, torso inclines with neutral spine; knees barely change. Reverse to stand. Distinguish hip hinge from squat.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "full",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-1513.gif",
+      "webp": "remaining-1513.webp",
+      "poster": "remaining-1513-poster.webp",
+      "sheet": "remaining-1513-sheet.png",
+      "promptFile": "remaining-1513-prompt.txt",
+      "sourceSha256": "63dc3ea37fb4ebb53d972f58dece833518f9996774ef3b1efdeb3ae208a939de",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 8,
+        "durationMs": 2320,
+        "bytes": 529168
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 8,
+        "durationMs": 2320,
+        "bytes": 48350
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "3e28a0b2a796bd50b119d6458277bc94713454d19bb2a25758d97cfb8f378191",
+      "webpSha256": "d6f638cdd777f4ca5dda6927c9d8fb0dc472264763ebf3ff4361037c5ba3f3b0",
+      "posterSha256": "db64433c7dca9aa1a33c3f9ed002149bbe8754d19a89fc8bdf871ee323f35a39",
+      "reviewSha256": "a4c8998804d89e0d16ee15b678776119ea5ca87b7129a49ced7f6675e52d6ae2"
+    },
+    {
+      "id": "remaining-0909",
+      "exerciseKey": "opengym-0909",
+      "name": "弹力带弓步蹲",
+      "englishName": "band lunges",
+      "primaryMuscles": [
+        "quadriceps",
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "hamstring"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "motionSpec": "Resistance-band SPLIT SQUAT/LUNGE. Staggered stance, band under front foot and ends held at shoulders. Both feet stay in place while both knees bend to lower body, front knee tracks toes, then reverse. Band attached correctly throughout, no walking lunge or bench rear foot.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "full",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-0909.gif",
+      "webp": "remaining-0909.webp",
+      "poster": "remaining-0909-poster.webp",
+      "sheet": "remaining-0909-sheet.png",
+      "promptFile": "remaining-0909-prompt.txt",
+      "sourceSha256": "48732e2c36b1c2f3bae94681c36075c2af00ab4239706017813db6b146381fa5",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 8,
+        "durationMs": 2320,
+        "bytes": 536017
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 8,
+        "durationMs": 2320,
+        "bytes": 57012
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "5a2c8efb8c9eb25644bff837dae78216df087708b1412b4e771145e08097b481",
+      "webpSha256": "836e3fc54c9ee5f76b038ddc1d361dc4ced123383407204582d7b0041bc93781",
+      "posterSha256": "652930ea2e83e90157985c2ad5b64e1d932cd2f490dbf35a15cdae3e1aedad97",
+      "reviewSha256": "ad73613eda0caec4c4948a51af159b4f7d2679ac7d87301931be34847e3da74e"
+    },
+    {
+      "id": "remaining-4442",
+      "exerciseKey": "opengym-4442",
+      "name": "扶持保加利亚分腿蹲",
+      "englishName": "assisted bulgarian split squat",
+      "primaryMuscles": [
+        "quadriceps",
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "hamstring"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "motionSpec": "ASSISTED Bulgarian split squat. Right rear foot rests on stable bench behind, left/front foot planted. One hand lightly holds a vertical sturdy support for balance. Lower by bending front knee and hip, torso controlled; rear foot and support hand fixed. NO dumbbells. Show the assistance support explicitly.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-4442.gif",
+      "webp": "remaining-4442.webp",
+      "poster": "remaining-4442-poster.webp",
+      "sheet": "remaining-4442-sheet.png",
+      "promptFile": "remaining-4442-prompt.txt",
+      "sourceSha256": "b5d37e68804fb809604c4e119909ac690b65e580ebf409b62cf8cce2d78294b3",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 1068659
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 122754
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "03a99034fa5f0ceae3d9675d4be0e645b863c84f180d19adaae59958ba825649",
+      "webpSha256": "ad0e8837252c48641352cb3b45fc7649e7c8526f54e4e42577232e47710e4789",
+      "posterSha256": "9230a9c3571eb2c0fc0ee83ea850a852ddbd6e9e3fb768dc779a6216689b9136",
+      "reviewSha256": "a70d0d3585d419d898bb083232ed9bf64e744230247800cc6f7922390633b212"
+    },
+    {
+      "id": "remaining-6560",
+      "exerciseKey": "opengym-6560",
+      "name": "90/90坐姿髋部拉伸",
+      "englishName": "90 to 90 stretch",
+      "primaryMuscles": [
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "adductors"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "motionSpec": "90/90 SEATED HIP STRETCH. Sit on floor with front shin across body and other shin extending to side/back, BOTH knees bent about 90 degrees. Upright neutral torso with hands lightly supporting. Hold leg arrangement; only a gentle small forward hinge over front hip, then reverse. No forced knee twisting, butterfly stretch or cross-legged pose.",
+      "status": "approved",
+      "revision": 2,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-6560-v2.gif",
+      "webp": "remaining-6560-v2.webp",
+      "poster": "remaining-6560-v2-poster.webp",
+      "sheet": "remaining-6560-v2-sheet.png",
+      "promptFile": "remaining-6560-v2-prompt.txt",
+      "sourceSha256": "88cd33f5944e5478b5024ce4bfcf38e8a3f4356e949e910c1f4a079584d4ec7e",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 1095495
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 115480
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "865cbcf1ac809013e88e1cfaf6444b59ed1a276e3b3b1af8ca9d0b096fc249aa",
+      "webpSha256": "8a313e6f39df48ae7f3eae786bc8fc9a5a9904a9e80f77f1a06bedd35fbb672a",
+      "posterSha256": "373ab5c646af827272b638a388decaeeb452989605da2fd24e41a7debbd10103",
+      "reviewSha256": "6e827d5e0980da3c9bf5d345ccdee67639f924cdcbfa9df1b1367e5fb884087a"
+    },
+    {
+      "id": "remaining-1379",
+      "exerciseKey": "opengym-1379",
+      "name": "坐姿哑铃提踵",
+      "englishName": "dumbbell seated calf raise",
+      "primaryMuscles": [
+        "calves"
+      ],
+      "secondaryMuscles": [],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "SEATED dumbbell CALF RAISE. Sit on bench, feet on low stable block or flat floor, knees 90 degrees. One dumbbell rests on each thigh just above knees, held by hands. Raise heels while balls of feet stay fixed, then reverse down. Only ankles move, no standing or knee extension.",
+      "status": "approved",
+      "revision": 2,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-1379-v2.gif",
+      "webp": "remaining-1379-v2.webp",
+      "poster": "remaining-1379-v2-poster.webp",
+      "sheet": "remaining-1379-v2-sheet.png",
+      "promptFile": "remaining-1379-v2-prompt.txt",
+      "sourceSha256": "0a2f4afebc8dc426f5315bed2834c18fdaf10dcce30d090e0dcfd6d8db7356de",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 1096412
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 127326
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "557ff586995d82e3000117705477b15915880e0e4850898e930dddcee75a62ee",
+      "webpSha256": "79afbde7b93db13f6f627657f1e0f64fa87843ca1da52fe2bfcd8b019bb59175",
+      "posterSha256": "b216eb1cfabb88b7cea344653b191e728c8c5d73e1ab4cca08ce27a03f521f33",
+      "reviewSha256": "fece77fbcf7ec7da226853d8a84529923fa4b61231b9edfd89d60dc2cbad5a2c"
+    },
+    {
+      "id": "remaining-1178",
+      "exerciseKey": "opengym-1178",
+      "name": "站姿单腿哑铃提踵",
+      "englishName": "dumbbell standing single leg calf raise",
+      "primaryMuscles": [
+        "calves"
+      ],
+      "secondaryMuscles": [
+        "forearm"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "motionSpec": "STANDING single-leg dumbbell CALF RAISE. Stand on right forefoot at stable low step, left leg bent off ground, one dumbbell in right hand and left hand supports sturdy rail. Raise and lower right heel only; knee nearly straight. Right forefoot and support hand remain fixed.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-1178.gif",
+      "webp": "remaining-1178.webp",
+      "poster": "remaining-1178-poster.webp",
+      "sheet": "remaining-1178-sheet.png",
+      "promptFile": "remaining-1178-prompt.txt",
+      "sourceSha256": "c016b14b44366c5daf47c89709c173762687dceaddc1e24efbe753e1f5d87804",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 975532
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 93842
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "9fb9d7c8ae1de15c4f3951fac8b2d6c4969811f982259fc876d806ca60a5e455",
+      "webpSha256": "ffee74eaf70941b2cb978548335a06782feaa44553ca12abfaa421d4833813d0",
+      "posterSha256": "783909ae599dd76804f39c902f55dd02f898280f2447aaea477eb66080c6eff8",
+      "reviewSha256": "ac03b04e9c1ae140714d8d4911a16c714160e293829a3e5736edf2000a951fac"
+    },
+    {
+      "id": "remaining-1246",
+      "exerciseKey": "opengym-1246",
+      "name": "中空保持",
+      "englishName": "hollow hold",
+      "primaryMuscles": [
+        "abs"
+      ],
+      "secondaryMuscles": [
+        "hip-flexors"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "motionSpec": "HOLLOW-BODY ISOMETRIC HOLD. Lie on back, lower back gently pressed to floor, shoulder blades raised, arms overhead, legs straight hovering low within controlled range. Hold SAME shape in all frames. Only subtle rib-cage breathing, NO crunching, leg raises or rocking. Show a static hold, not repeated movement.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "hold",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-1246.gif",
+      "webp": "remaining-1246.webp",
+      "poster": "remaining-1246-poster.webp",
+      "sheet": "remaining-1246-sheet.png",
+      "promptFile": "remaining-1246-prompt.txt",
+      "sourceSha256": "857ec4a4daeac3e16a381f67caa0c1fb25e9a2fe9665b3f48ba6950a97f8d99f",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 8,
+        "durationMs": 3400,
+        "bytes": 483473
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 8,
+        "durationMs": 3400,
+        "bytes": 42386
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "7ecbbc0297db7f2576d19257cf188b87556dad4c6c708d99f494721784407b71",
+      "webpSha256": "a8edde59c7b1a32bf7a20ef3fbceacb42b8691e5d42f99a989c546873bce1221",
+      "posterSha256": "4e96e29dad170f742cc5f9840b0945be54c3031286892c3ffc999eed9d7d6a36",
+      "reviewSha256": "f4a0f26a4baa9523c02e1c29da8d2a083e99639ac6e2cea74363c6ecc98d3228"
+    },
+    {
+      "id": "remaining-5649",
+      "exerciseKey": "opengym-5649",
+      "name": "中空摇摆",
+      "englishName": "hollow rock",
+      "primaryMuscles": [
+        "abs"
+      ],
+      "secondaryMuscles": [
+        "hip-flexors"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "HOLLOW-BODY ROCK. Maintain rigid hollow-body curve, arms overhead and legs together straight; gently rock the entire curved body forward/back around upper/lower back contact. Keep shoulder/hip/knee geometry fixed. Small controlled rocking, NOT sit-ups or repeated hip flexion.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "full",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-5649.gif",
+      "webp": "remaining-5649.webp",
+      "poster": "remaining-5649-poster.webp",
+      "sheet": "remaining-5649-sheet.png",
+      "promptFile": "remaining-5649-prompt.txt",
+      "sourceSha256": "ed6f713bd444f346cd3146b02ca0ccf8d2fbd5007b2841dcbd901d99fe954166",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 8,
+        "durationMs": 2320,
+        "bytes": 513214
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 8,
+        "durationMs": 2320,
+        "bytes": 51090
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "2e4dbe653579e5d4e590594767a592cc38dfbcb1d57eac496a1ddf516ce6850d",
+      "webpSha256": "77744e26b78db9e67fa4de623c637050285e581e0db09a56affd8c70a7181373",
+      "posterSha256": "1bea27e5eaf3cff9ad8f69f71d72010caa69381911e60d76278651c77f8596ea",
+      "reviewSha256": "76b4806aab3e60967bc7c6317463afda29be22367460b117fd601e8ca34dcdf4"
+    },
+    {
+      "id": "remaining-0979",
+      "exerciseKey": "opengym-0979",
+      "name": "弹力带帕洛夫推举",
+      "englishName": "band horizontal pallof press",
+      "primaryMuscles": [
+        "obliques"
+      ],
+      "secondaryMuscles": [
+        "abs"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "motionSpec": "Standing band PALLOF PRESS, side three-quarter view. Band anchored securely to LEFT at chest height. Both hands hold one handle at sternum; press hands straight forward and back while resisting sideways band pull. Feet, pelvis and trunk do NOT rotate; elbows extend horizontally. No chest fly or shoulder press.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-0979.gif",
+      "webp": "remaining-0979.webp",
+      "poster": "remaining-0979-poster.webp",
+      "sheet": "remaining-0979-sheet.png",
+      "promptFile": "remaining-0979-prompt.txt",
+      "sourceSha256": "0586c824b6f44eb526086f9a001c58f779e217aed5c1c61c448e5fddb4b4d609",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 1049143
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 115852
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "429b192a810c860be65895e201e39c9552bd0694582ca239322fdf671fe922b1",
+      "webpSha256": "b0d31566da71834f35646c0c7b3a856d37c2e4e1d84bd945050b76638788d168",
+      "posterSha256": "b49d53e50229851029fd28caf58c178e9534c1e5578b30654f04bb818140e114",
+      "reviewSha256": "be033f44f01586cad639d0c22e3e42767e57b9bbd486def393b155c1088c9b94"
+    },
+    {
+      "id": "remaining-6211",
+      "exerciseKey": "opengym-6211",
+      "name": "自行车卷腹",
+      "englishName": "bicycle crunch",
+      "primaryMuscles": [
+        "abs",
+        "obliques"
+      ],
+      "secondaryMuscles": [
+        "hip-flexors"
+      ],
+      "recordingMode": "reps",
+      "laterality": "unilateral",
+      "motionSpec": "BICYCLE CRUNCH, lying supine. Hands lightly beside head, elbows wide, shoulder blades lifted. Show one controlled side: left shoulder rotates toward bent right knee as left leg extends, then reverse to neutral. Do not pull neck, touch elbow through knee, or twist pelvis wildly. Keep lower-back support and clear opposite-limb pairing.",
+      "status": "approved",
+      "revision": 3,
+      "cycleMode": "full",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-6211-v3.gif",
+      "webp": "remaining-6211-v3.webp",
+      "poster": "remaining-6211-v3-poster.webp",
+      "sheet": "remaining-6211-v3-sheet.png",
+      "promptFile": "remaining-6211-v3-prompt.txt",
+      "sourceSha256": "f4ac53b50d189ccb6b3f4504e20498e075aa8fc4facf81257e267f2617221911",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 8,
+        "durationMs": 2320,
+        "bytes": 600978
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 8,
+        "durationMs": 2320,
+        "bytes": 66524
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "2f9e65738146cf8fb255123b72ad45dbbb41a571ed0ffbe9a537240dfff059b3",
+      "webpSha256": "3f74381aefcc3e8ab9c8259fb28c1e9dcfea912a249ffca9673fc92312217a8a",
+      "posterSha256": "305dc5da6b1ae6c91b4bcb6a44e2b118b3104b3a48fe9e25d19fe03039ebb852",
+      "reviewSha256": "23bb5d0d1cfe1d1143f4afc7e96acbdffb15973313fe60adf5deeaa573148889"
+    },
+    {
+      "id": "remaining-4170",
+      "exerciseKey": "opengym-4170",
+      "name": "熊式平板支撑",
+      "englishName": "bear plank",
+      "primaryMuscles": [
+        "abs"
+      ],
+      "secondaryMuscles": [
+        "deltoids",
+        "quadriceps"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "motionSpec": "BEAR PLANK ISOMETRIC HOLD. Hands under shoulders and toes on floor, knees bent 90 degrees and hovering just a few cm above floor, back level and neck neutral. Same stable tabletop shape in every frame; subtle breathing only. Knees must NOT touch floor or straighten into full plank. No crawling.",
+      "status": "approved",
+      "revision": 2,
+      "cycleMode": "hold",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-4170-v2.gif",
+      "webp": "remaining-4170-v2.webp",
+      "poster": "remaining-4170-v2-poster.webp",
+      "sheet": "remaining-4170-v2-sheet.png",
+      "promptFile": "remaining-4170-v2-prompt.txt",
+      "sourceSha256": "97ed0c8bfd38eb0a1d0937975f733c099149500e1b2ce507ac2e862e210ccc79",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 8,
+        "durationMs": 3400,
+        "bytes": 625967
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 8,
+        "durationMs": 3400,
+        "bytes": 71340
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "ab552207659599f660cac5c38af501799352857724ec9d4136ae35610dae6c14",
+      "webpSha256": "73910ace05024c2d2b69c9c682dbd49ab7110763d6312538b3896a983900f121",
+      "posterSha256": "908e670665a6f59cf2bac6125ddf9d84ebb21e7978a753fad4f237ee696681f9",
+      "reviewSha256": "0eec06a43afcef3074afd85909bf066780d3e0c4b01e37dbe53a02eadb0e928e"
+    },
+    {
+      "id": "remaining-0133",
+      "exerciseKey": "opengym-0133",
+      "name": "屈膝侧平板支撑",
+      "englishName": "bent knee side plank",
+      "primaryMuscles": [
+        "obliques"
+      ],
+      "secondaryMuscles": [
+        "abs",
+        "deltoids"
+      ],
+      "recordingMode": "time",
+      "laterality": "unilateral",
+      "motionSpec": "BENT-KNEE SIDE PLANK ISOMETRIC HOLD. Side-lying, support on forearm with elbow under shoulder and lower bent knee on floor; both knees bent roughly 90 degrees behind body. Lift hips to align shoulder-hip-knee, top hand on hip. Hold that shape with subtle breathing only. Do not show straight-legged side plank or repeated hip dips.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "hold",
+      "frameIndices": [
+        2,
+        3,
+        2
+      ],
+      "ai": true,
+      "gif": "remaining-0133.gif",
+      "webp": "remaining-0133.webp",
+      "poster": "remaining-0133-poster.webp",
+      "sheet": "remaining-0133-sheet.png",
+      "promptFile": "remaining-0133-prompt.txt",
+      "sourceSha256": "de2c9b7744b7fe2d016a43741571585297a99c118a409b8726b2dbf28fcbb126",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 3,
+        "durationMs": 1400,
+        "bytes": 216493
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 3,
+        "durationMs": 1400,
+        "bytes": 24146
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "0bcc0be8c495b337b7aadb9604a1dc82b5120415cbcf7d9545854175b18ecc76",
+      "webpSha256": "45b3e8e8e14ca70bc746645e6434908d19ff25d2cefbdd4b3a0082f9227d2edb",
+      "posterSha256": "27192c0b3a91a3a6d41c00537c53df21c951e02b98dc5af3135ee787f3cb5471",
+      "reviewSha256": "dd1f41ed8a30674ab41da6abf5347bdb3756a2b4d3f7fb1cdfa8bd96ccc73549"
+    },
+    {
+      "id": "remaining-0867",
+      "exerciseKey": "opengym-0867",
+      "name": "反向平板支撑",
+      "englishName": "reverse plank",
+      "primaryMuscles": [
+        "gluteal"
+      ],
+      "secondaryMuscles": [
+        "hamstring",
+        "lower-back",
+        "deltoids"
+      ],
+      "recordingMode": "time",
+      "laterality": "bilateral",
+      "motionSpec": "REVERSE PLANK ISOMETRIC HOLD. Face upward, palms behind body on floor and heels planted, legs straight. Lift hips to form straight shoulder-hip-heel line; arms vertical and shoulders stable. Hold fixed pose with subtle breathing, no repeated hip thrust, tabletop bent knees or neck hyperextension.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "hold",
+      "frameIndices": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        6,
+        5,
+        4
+      ],
+      "ai": true,
+      "gif": "remaining-0867.gif",
+      "webp": "remaining-0867.webp",
+      "poster": "remaining-0867-poster.webp",
+      "sheet": "remaining-0867-sheet.png",
+      "promptFile": "remaining-0867-prompt.txt",
+      "sourceSha256": "d590e21775c751e9d6267c85742908b2717dd78902690c950045c3450e5d78a1",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 8,
+        "durationMs": 3400,
+        "bytes": 551798
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 8,
+        "durationMs": 3400,
+        "bytes": 59452
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "31433ffc0751ead744f3190a61f4bf1a89cfedf458fe4f3ea28271931181efe7",
+      "webpSha256": "5e2dbd19867bb5e23937e7ff98fceaad5aadf44a4f0e78424af53587dfe8efe8",
+      "posterSha256": "062dfcb25ddfd78d63ccf38df422d433a00049265097ea2f9f36a0ee055619e4",
+      "reviewSha256": "84fe58fb788dbc33ee1926a615b947be6e7918509f0d11c00f4bd0b8c581975d"
+    },
+    {
+      "id": "remaining-1326",
+      "exerciseKey": "opengym-1326",
+      "name": "反握引体向上",
+      "englishName": "chin-up",
+      "primaryMuscles": [
+        "upper-back",
+        "biceps"
+      ],
+      "secondaryMuscles": [
+        "forearm"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "CHIN-UP, SUPINATED grip: palms face TOWARD the exerciser. Both hands shoulder-width gripping fixed overhead bar. Start hanging with extended arms; pull by bending elbows down/back until chin clears bar, then exact reverse. No kipping, rocking, leg drive or pronated grip.",
+      "status": "approved",
+      "revision": 2,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-1326-v2.gif",
+      "webp": "remaining-1326-v2.webp",
+      "poster": "remaining-1326-v2-poster.webp",
+      "sheet": "remaining-1326-v2-sheet.png",
+      "promptFile": "remaining-1326-v2-prompt.txt",
+      "sourceSha256": "45d3236e3f01eba7d254b2c6f49f1edb954d9b2839cd395ac69752ce879a8a26",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 1110011
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 117588
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "2acb9e902a584f7981651408aa2d01bbef7e25c4f8c3f1d158a9970cd3aec266",
+      "webpSha256": "8721af46dc19f45b05f2b95cd754c274425d19153149420ae6974099a0336ef8",
+      "posterSha256": "d41d4671f5be35450557c7ca0417c3c88f17dc5bf7614de5717f7eda6da3b8f0",
+      "reviewSha256": "c1817ce5fa775266bee2da1ce3183f948557cbddc7ef5f4a357715f046f9bd2b"
+    },
+    {
+      "id": "remaining-0253",
+      "exerciseKey": "opengym-0253",
+      "name": "窄距对握引体向上",
+      "englishName": "chin-ups (narrow parallel grip)",
+      "primaryMuscles": [
+        "upper-back"
+      ],
+      "secondaryMuscles": [
+        "biceps",
+        "forearm"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "CLOSE NEUTRAL-GRIP pull-up using TWO parallel handles, palms face EACH OTHER. Hands stay fixed on the handles. Start controlled hang, pull chest upward and elbows down/back to chin above handles. Distinguish from a straight bar chin-up or wide pronated pull-up.",
+      "status": "approved",
+      "revision": 1,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        4,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-0253.gif",
+      "webp": "remaining-0253.webp",
+      "poster": "remaining-0253-poster.webp",
+      "sheet": "remaining-0253-sheet.png",
+      "promptFile": "remaining-0253-prompt.txt",
+      "sourceSha256": "fc6fa979e51f8e1351e10810c7a3db3bf88a061dfbcc98d6fb476c845d1561ed",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 8,
+        "durationMs": 2320,
+        "bytes": 527984
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 8,
+        "durationMs": 2320,
+        "bytes": 47766
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "18806c53b7fe132ebbe2468d001c4b9ff94fd511354beb2f81de60c07106b0d4",
+      "webpSha256": "4cd944cdf11087b25c37390a03ff8f3c7af862813075bf421595cd5b7ffc22de",
+      "posterSha256": "7dc0ca99e136d60546f3b1de7363aacaa5de0f26ec15f9cf72ff5921f2c1cfa4",
+      "reviewSha256": "8956967932678aee494e8edd290db5b57ebe910f1b187ca08b5369a3f133067c"
+    },
+    {
+      "id": "remaining-4718",
+      "exerciseKey": "opengym-4718",
+      "name": "弹力带辅助反握引体向上",
+      "englishName": "band assisted chin up",
+      "primaryMuscles": [
+        "upper-back",
+        "biceps"
+      ],
+      "secondaryMuscles": [
+        "forearm"
+      ],
+      "recordingMode": "reps",
+      "laterality": "bilateral",
+      "motionSpec": "BAND-ASSISTED CHIN-UP, SUPINATED grip palms toward exerciser. Fixed overhead bar, loop resistance band securely around bar with one foot or knee in lower loop. Show elastic assistance continuously connected. Pull up from controlled hang to chin clearing bar. No helper, machine, jumping or band vanishing.",
+      "status": "approved",
+      "revision": 2,
+      "cycleMode": "half",
+      "frameIndices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "ai": true,
+      "gif": "remaining-4718-v2.gif",
+      "webp": "remaining-4718-v2.webp",
+      "poster": "remaining-4718-v2-poster.webp",
+      "sheet": "remaining-4718-v2-sheet.png",
+      "promptFile": "remaining-4718-v2-prompt.txt",
+      "sourceSha256": "e5d2aad4ee810c464e9f75dfaeaa286a44cda78ab64714b428b530fbd0cdd18d",
+      "gifInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 1103129
+      },
+      "webpInfo": {
+        "width": 360,
+        "height": 360,
+        "frames": 14,
+        "durationMs": 3640,
+        "bytes": 113138
+      },
+      "note": "AI 生成动作示意；深红为主要肌群，浅红为辅助肌群。单侧动作展示一侧；保持类动画仅提示稳定与呼吸，动图不代表训练速度。已通过用户审核并接入动作库，待线上发布。",
+      "gifSha256": "b61100b766dc15c0792a377bda3916e95060e131ae36dadc8f9e6692783778fc",
+      "webpSha256": "7c85352504aecddaf6c10158a2f6accf08e537aa5ae203d754a9ebac9d1f446c",
+      "posterSha256": "04dc9f91fd82ac8374e8dfe0ed65242fefe4ef272002d1815b415cea1a1a1260",
+      "reviewSha256": "8bda10ae89b2d2fdb30d33ad1122b1536d5d2fe49de8be554208c1d3bf4eb24c"
+    }
+  ],
+  "published": false,
+  "approvalSource": "user_chat"
+}
